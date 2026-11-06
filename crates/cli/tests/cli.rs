@@ -283,3 +283,30 @@ fn missing_plus_clean_file_exits_2() {
     let o = run(&[&a, "/nonexistent/x.sh"], "");
     assert_eq!(o.code, 2);
 }
+
+fn tmpdir(name: &str) -> std::path::PathBuf {
+    let d = std::env::temp_dir().join(format!("shellcheck-rust-cli-{}-{}", std::process::id(), name));
+    std::fs::create_dir_all(&d).unwrap();
+    d
+}
+
+#[test]
+fn editorconfig_directive_is_applied() {
+    let d = tmpdir("ec-ok");
+    std::fs::write(d.join(".editorconfig"), "root = true\n[*.sh]\nshellcheck.disable = SC2148\n").unwrap();
+    let f = d.join("a.sh");
+    std::fs::write(&f, WARN).unwrap();
+    assert_eq!(run(&[f.to_str().unwrap()], "").code, 0);
+    assert_eq!(run(&["--norc", f.to_str().unwrap()], "").code, 1);
+}
+
+#[test]
+fn editorconfig_error_exits_4() {
+    let d = tmpdir("ec-bad");
+    std::fs::write(d.join(".editorconfig"), "root = maybe\n").unwrap();
+    let f = d.join("a.sh");
+    std::fs::write(&f, WARN).unwrap();
+    let o = run(&["-f", "gcc", f.to_str().unwrap()], "");
+    assert_eq!(o.code, 4);
+    assert!(o.stdout.contains("Expected '=' after directive key. [SC1134]") || o.stdout.contains("[SC1134]"), "{}", o.stdout);
+}

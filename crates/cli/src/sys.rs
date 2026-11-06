@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of ShellCheck shellcheck.hs `ioInterface`, `inputFile`, `decodeString` (e11f964)
 //
-// DIVERGENCE: EditorConfig support (`getEditorConfig`, ShellCheck/EditorConfig.hs)
-// is not ported; `get_config` only resolves .shellcheckrc / --rcfile.
+// EditorConfig lookup lives in shellcheck_checker::editorconfig; this file
+// supplies its filesystem (`EditorConfigFs`) and merges the results.
 // DIVERGENCE: caches live in `Mutex`es instead of `IORef`s so the interface is
 // `Sync`.
 
@@ -11,6 +11,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
+use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
 use shellcheck_core::interface::{ErrorMessage, SystemInterface};
 
 use crate::options::Options;
@@ -221,6 +222,26 @@ impl IoInterface {
     }
 }
 
+impl EditorConfigFs for IoInterface {
+    fn normalize(&self, path: &str) -> String {
+        normalize(path)
+    }
+
+    fn read_config(&self, file: &str) -> Option<(String, String)> {
+        Self::read_config(file)
+    }
+
+    /// `getXdgDirectory XdgConfig "editorconfig.ini"`
+    fn global_editor_config_path(&self) -> Option<String> {
+        let home = std::env::var("HOME").ok().filter(|h| !h.is_empty());
+        let xdg = std::env::var("XDG_CONFIG_HOME")
+            .ok()
+            .filter(|h| !h.is_empty())
+            .or_else(|| home.map(|h| format!("{}/.config", h)))?;
+        Some(format!("{}/editorconfig.ini", xdg))
+    }
+}
+
 impl SystemInterface for IoInterface {
     fn read_file(&self, rc_suggests_external: Option<bool>, file: &str) -> Result<String, ErrorMessage> {
         if let Some(x) = self.cache.lock().unwrap().get(file) {
@@ -295,7 +316,9 @@ impl SystemInterface for IoInterface {
     }
 
     fn get_config(&self, filename: &str) -> Option<(String, String)> {
-        self.get_rc_config(filename)
+        let rc_result = self.get_rc_config(filename);
+        let ec_result = get_editor_config(self, filename);
+        merge_configs(rc_result, ec_result)
     }
 }
 
@@ -336,33 +359,44 @@ mod tests {
     #[test]
     fn find_source_search_order() {
         let d = tmp();
-        let s = |p: &str| d.join(p).to_string_lossy().into_owned();
-        write(&d.join("lib.sh"), "");
-        write(&d.join("p1/lib.sh"), "");
+        let ds = d.to_string_lossy().into_owned();
+        let s = |p: &str| format!("{}/{}", ds, p);
+        // The same name in both -P dirs, so the order is observable.
+        write(&d.join("p1/dup.sh"), "");
+        write(&d.join("p2/dup.sh"), "");
         write(&d.join("p2/only2.sh"), "");
         write(&d.join("ann/only3.sh"), "");
+        write(&d.join("ann/dup.sh"), "");
         let cur = s("main.sh");
         let sys = iface(true, &[&s("p1"), &s("p2")], None, &[]);
-        let ann = vec![s("ann")];
-        // Not in the cwd, so the -P paths are searched in order.
-        assert_eq!(sys.find_source(&cur, None, &[], "lib.sh"), s("p1/lib.sh"));
+        // -P order: p1 before p2, then annotation paths.
+        assert_eq!(sys.find_source(&cur, None, &[], "dup.sh"), s("p1/dup.sh"));
+        let sys_rev = iface(true, &[&s("p2"), &s("p1")], None, &[]);
+        assert_eq!(sys_rev.find_source(&cur, None, &[], "dup.sh"), s("p2/dup.sh"));
         assert_eq!(sys.find_source(&cur, None, &[], "only2.sh"), s("p2/only2.sh"));
-        assert_eq!(sys.find_source(&cur, None, &[], "missing.sh"), "missing.sh");
-        // A file in the cwd wins over the -P paths.
-        assert_eq!(sys.find_source(&cur, None, &[], "Cargo.toml"), "Cargo.toml");
-        // Annotation paths come after the -P flags.
+        let ann = vec![s("ann")];
+        assert_eq!(sys.find_source(&cur, None, &ann, "dup.sh"), s("p1/dup.sh"));
         assert_eq!(sys.find_source(&cur, None, &ann, "only3.sh"), s("ann/only3.sh"));
+        assert_eq!(sys.find_source(&cur, None, &[], "missing.sh"), "missing.sh");
+        // cwd precedence: a name that exists relative to the cwd (the crate dir
+        // under `cargo test`) wins over every search path.
+        write(&d.join("p1/Cargo.toml"), "");
+        assert!(Path::new("Cargo.toml").is_file());
+        assert_eq!(sys.find_source(&cur, None, &[], "Cargo.toml"), "Cargo.toml");
         // SCRIPTDIR expands to the directory of the current script.
-        let sd = vec!["SCRIPTDIR/p1".to_string()];
+        let sd = vec!["SCRIPTDIR/p2".to_string()];
         let sys2 = iface(true, &[], None, &[]);
-        assert_eq!(sys2.find_source(&cur, None, &sd, "lib.sh"), format!("{}/p1/lib.sh", d.to_string_lossy()));
-        assert_eq!(
-            sys2.find_source(&cur, None, &[], "SCRIPTDIR/lib.sh"),
-            format!("{}/lib.sh", d.to_string_lossy())
-        );
-        // Absolute path found as-is; missing absolute path falls back to itself.
-        assert_eq!(sys2.find_source(&cur, None, &[], &s("lib.sh")), s("lib.sh"));
+        assert_eq!(sys2.find_source(&cur, None, &sd, "dup.sh"), s("p2/dup.sh"));
+        assert_eq!(sys2.find_source(&cur, None, &[], "SCRIPTDIR/p1/dup.sh"), s("p1/dup.sh"));
+        // Absolute path: found as-is; a missing one falls back to itself.
+        assert_eq!(sys2.find_source(&cur, None, &[], &s("p2/dup.sh")), s("p2/dup.sh"));
         assert_eq!(sys2.find_source(&cur, None, &[], "/nonexistent/zz.sh"), "/nonexistent/zz.sh");
+        // An absolute name is also searched with its leading slash dropped, under
+        // each search path (splitDrive).
+        assert_eq!(
+            sys.find_source(&cur, None, &[], "/dup.sh"),
+            s("p1/dup.sh")
+        );
     }
 
     #[test]
