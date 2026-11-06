@@ -11,7 +11,7 @@ use std::io::Write;
 use std::process::exit;
 
 use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
-use shellcheck_checker::check_script;
+use shellcheck_checker::{check_script_owned, optional_checks};
 use shellcheck_core::interface::{
     CheckSpec, ColorOption, Severity, SystemInterface,
 };
@@ -239,7 +239,7 @@ fn process_file(
         script: contents,
         ..options.check_spec.clone()
     };
-    let result = check_script(sys, &spec);
+    let result = check_script_owned(sys, spec);
     format.on_result(&result, sys, out);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
     // means shellcheck cannot apply the requested configuration.
@@ -403,9 +403,8 @@ fn print_version() {
 }
 
 fn print_optional() {
-    let mut list = shellcheck_analyzer::api::analytics_optional_checks();
-    list.extend(shellcheck_analyzer::api::commands_optional_checks());
-    // DIVERGENCE: ControlFlow's optional checks arrive with Phase 3.
+    // sortOn cdName ShellCheck.Analyzer.optionalChecks
+    let mut list = optional_checks();
     list.sort_by(|a, b| a.name.cmp(&b.name));
     for item in list {
         println!("name:    {}", item.name);

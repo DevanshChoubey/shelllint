@@ -441,3 +441,14 @@ fn rcfile_may_be_a_fifo() {
          t.sh:1:6: warning: x is referenced but not assigned. [SC2154]\n"
     );
 }
+
+// --list-optional is `sortOn cdName ShellCheck.Analyzer.optionalChecks`,
+// with shellcheck_checker::optional_checks as the one source of truth.
+#[test]
+fn list_optional_is_checker_optional_checks() {
+    let o = run(&["--list-optional"], "");
+    let mut names: Vec<String> = shellcheck_checker::optional_checks().into_iter().map(|c| c.name).collect();
+    names.sort();
+    let listed: Vec<&str> = o.stdout.lines().filter_map(|l| l.strip_prefix("name:    ")).collect();
+    assert_eq!(listed, names);
+}
