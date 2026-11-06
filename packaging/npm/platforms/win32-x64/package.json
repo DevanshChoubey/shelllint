@@ -1,0 +1,13 @@
+{
+  "name": "@shellcheck-rust/win32-x64",
+  "version": "0.0.1",
+  "description": "shellcheck-rust prebuilt binary for win32-x64 (used via the shellcheck-rust package)",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/shellcheck-rust.git"
+  },
+  "os": ["win32"],
+  "cpu": ["x64"],
+  "files": ["bin/"]
+}

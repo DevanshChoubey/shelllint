@@ -1,0 +1,31 @@
+# pre-commit hooks for shellcheck-rust. Consume from another repo with:
+#
+#   repos:
+#     - repo: https://github.com/OWNER/shellcheck-rust
+#       rev: v0.0.1
+#       hooks:
+#         - id: shellcheck-rust          # builds from source (needs a Rust toolchain)
+#         # or
+#         - id: shellcheck-rust-docker   # pulls the static image (needs Docker)
+#
+# Both hooks run with the repo's default settings; add `args: [...]` in the
+# consumer config to pass flags such as `--severity=warning`.
+
+- id: shellcheck-rust
+  name: shellcheck-rust
+  description: Lint shell scripts with shellcheck-rust (a Rust port of ShellCheck).
+  entry: shellcheck-rust
+  language: rust
+  types: [shell]
+  require_serial: true
+  args: [--format=gcc]
+
+- id: shellcheck-rust-docker
+  name: shellcheck-rust (docker)
+  description: Lint shell scripts with the static shellcheck-rust image; no local Rust toolchain needed.
+  # Image is built from the repo Dockerfile and published by the release job.
+  entry: ghcr.io/OWNER/shellcheck-rust:0.0.1
+  language: docker_image
+  types: [shell]
+  require_serial: true
+  args: [--format=gcc]
