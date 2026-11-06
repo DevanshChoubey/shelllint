@@ -271,7 +271,7 @@ pub struct CfgResult {
     pub cf_graph: CfGraph,
     /// `cfIdToRange`, indexed by token id (`NO_RANGE` when absent).
     id_to_range: Vec<(Node, Node)>,
-    /// `cfIdToNodes`, computed on demand from the token stack recorded per
+    /// `cfIdToNodes`, built on first use from the token stack recorded per
     /// original node (see `cf_id_to_nodes`).
     assoc: build::Association,
     /// `cfPostDominators`: the immediate post-dominator of each node
@@ -291,8 +291,8 @@ impl CfgResult {
     }
 
     /// `M.lookup id cfIdToNodes`: all nodes belonging to an Id, recursively.
-    // DIVERGENCE: Haskell builds this map lazily and no check forces it; we
-    // compute one entry on demand (O(nodes * depth)) instead of storing it.
+    // Like Haskell's, the map is built lazily: on the first call, in one
+    // pass over every node's token stack; later calls are lookups.
     pub fn cf_id_to_nodes(&self, id: Id) -> Option<BTreeSet<Node>> {
         self.assoc.nodes_for(id)
     }
