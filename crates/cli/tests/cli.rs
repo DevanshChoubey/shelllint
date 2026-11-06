@@ -36,7 +36,8 @@ fn run(args: &[&str], stdin: &str) -> Out {
 }
 
 const CLEAN: &str = "#!/bin/sh\ntrue\n";
-const WARN: &str = "#!/bin/sh\necho $1\n";
+// Only the pilot checks exist so far; SC2148 (no shebang) is one of them.
+const WARN: &str = "echo hi\n";
 
 fn tmpfile(name: &str, contents: &str) -> String {
     let dir = std::env::temp_dir().join(format!("shellcheck-rust-cli-{}", std::process::id()));
@@ -139,7 +140,6 @@ fn exit_codes() {
 }
 
 #[test]
-#[ignore = "needs Task 15"]
 fn exit_code_warning_is_1() {
     assert_eq!(run(&["-"], WARN).code, 1);
 }
@@ -181,11 +181,10 @@ fn stdin_dash() {
 }
 
 #[test]
-#[ignore = "needs Task 15"]
 fn stdin_dash_reports_findings() {
     let o = run(&["-f", "gcc", "-"], WARN);
     assert_eq!(o.code, 1);
-    assert!(o.stdout.starts_with("-:2:6: note: Double quote to prevent globbing"), "{}", o.stdout);
+    assert!(o.stdout.starts_with("-:1:1: error: Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive. [SC2148]"), "{}", o.stdout);
 }
 
 #[test]
@@ -210,10 +209,10 @@ fn include_exclude() {
 }
 
 #[test]
-#[ignore = "needs Task 15"]
 fn include_exclude_behaviour() {
-    assert_eq!(run(&["-e", "SC2086,SC2034", "-"], WARN).code, 0);
-    assert_eq!(run(&["-i", "SC2086", "-"], WARN).code, 1);
+    assert_eq!(run(&["-e", "SC2148,SC2034", "-"], WARN).code, 0);
+    assert_eq!(run(&["-i", "SC2148", "-"], WARN).code, 1);
+    assert_eq!(run(&["-i", "SC2086", "-"], WARN).code, 0);
     assert_eq!(run(&["-i", "SC2034", "-"], WARN).code, 0);
 }
 

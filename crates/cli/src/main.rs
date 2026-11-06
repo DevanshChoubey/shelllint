@@ -11,8 +11,9 @@ use std::io::Write;
 use std::process::exit;
 
 use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
+use shellcheck_checker::check_script;
 use shellcheck_core::interface::{
-    CheckResult, CheckSpec, ColorOption, Severity, SystemInterface,
+    CheckSpec, ColorOption, Severity, SystemInterface,
 };
 use shellcheck_formatter::{Formatter, by_name, tty::WIKI_LINK};
 
@@ -213,12 +214,6 @@ fn process_file(
     }
 }
 
-/// TEMP: Task 15 (`shellcheck_checker::check_script`) has not merged yet.
-/// Replace this body with a call to it.
-fn check_script(_sys: &dyn SystemInterface, spec: &CheckSpec) -> CheckResult {
-    CheckResult { filename: spec.filename.clone(), comments: vec![] }
-}
-
 fn parse_enum<T: Copy>(name: &str, value: &str, list: &[(&str, T)]) -> Result<T, Status> {
     match list.iter().find(|(k, _)| *k == value) {
         Some((_, v)) => Ok(*v),
@@ -384,4 +379,3 @@ fn print_optional() {
         println!();
     }
 }
-
