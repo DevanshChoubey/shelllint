@@ -44,8 +44,13 @@ fn check_pipe_to_nowhere(p: &Params<'_>, t: Id, c: &mut Comments) {
 }
 
 fn check_pipe(ast: &Ast, input: PipeType, stage: Id, output: PipeType, c: &mut Comments) {
-    let has_consumers = has_additional_consumers(ast, stage);
-    let has_producers = has_additional_producers(ast, stage);
+    // Haskell's `let` bindings are lazy: each subtree scan runs only if a
+    // guard reaches it. Scanning eagerly at every stage is quadratic in the
+    // nesting depth (e.g. deeply nested `$(...)`).
+    let has_consumers = std::cell::OnceCell::new();
+    let has_consumers = || *has_consumers.get_or_init(|| has_additional_consumers(ast, stage));
+    let has_producers = std::cell::OnceCell::new();
+    let has_producers = || *has_producers.get_or_init(|| has_additional_producers(ast, stage));
 
     (|| {
         let cmd = get_command(ast, stage)?;
@@ -53,7 +58,7 @@ fn check_pipe(ast: &Ast, input: PipeType, stage: Id, output: PipeType, c: &mut C
         if !NON_READING_COMMANDS.contains(&name.as_str()) {
             return None;
         }
-        if !(!has_consumers && input != PipeType::NoPipe) {
+        if !(!has_consumers() && input != PipeType::NoPipe) {
             return None;
         }
         if command_specific_exception(ast, &name, cmd) {
@@ -90,7 +95,7 @@ fn check_pipe(ast: &Ast, input: PipeType, stage: Id, output: PipeType, c: &mut C
         }
 
         let input_warning = |c: &mut Comments| {
-            if input != PipeType::NoPipe && !has_consumers {
+            if input != PipeType::NoPipe && !has_consumers() {
                 if let Some(&over) = fd_map.get(&0).and_then(|l| l.first()) {
                     c.err(
                         get_op_id(ast, over),
@@ -105,7 +110,7 @@ fn check_pipe(ast: &Ast, input: PipeType, stage: Id, output: PipeType, c: &mut C
         // way more common, and  `foo > out 2> err |& foo` can still write
         // to stderr if the files fail to open
         let output_warning = |c: &mut Comments| {
-            if output == PipeType::StdoutPipe && !has_producers {
+            if output == PipeType::StdoutPipe && !has_producers() {
                 if let Some(&over) = fd_map.get(&1).and_then(|l| l.first()) {
                     c.err(
                         get_op_id(ast, over),
