@@ -402,3 +402,16 @@ fn stdin_is_read_only_once() {
     assert_eq!(o.code, 1);
     assert_eq!(o.stdout.matches("[SC2154]").count(), 2, "{}", o.stdout);
 }
+
+// An internal error (here regex-tdfa rejecting an EditorConfig glob, a
+// Haskell `error`) prints `<prog>: <message>` and exits 1, not 101.
+#[test]
+fn internal_error_exits_1() {
+    let d = tmpdir("ec-regex");
+    std::fs::write(d.join(".editorconfig"), "root=true\n[[z-a].sh]\nshellcheck.disable=SC2086\n").unwrap();
+    std::fs::write(d.join("a.sh"), "#!/bin/sh\ntrue\n").unwrap();
+    let o = run_in(&d, &["-f", "gcc", "a.sh"]);
+    assert_eq!(o.code, 1, "{}", o.stderr);
+    assert!(o.stderr.starts_with("shellcheck-rust: "), "{}", o.stderr);
+    assert!(!o.stderr.contains("panicked") && !o.stderr.contains("RUST_BACKTRACE"), "{}", o.stderr);
+}

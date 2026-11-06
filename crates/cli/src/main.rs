@@ -72,6 +72,31 @@ fn get_env_args() -> Vec<String> {
 }
 
 fn main() {
+    // Haskell's `error` (an uncaught ErrorCall) prints `<prog>: <message>`
+    // and exits 1. A Rust panic would exit 101 with a backtrace hint, so the
+    // hook prints the message the same way and `main` exits 1 once the
+    // unwinding (which flushes buffered stdout) reaches it.
+    // DIVERGENCE: the message text is the port's own, not GHC's (there is
+    // no `CallStack (from HasCallStack)` trailer).
+    std::panic::set_hook(Box::new(|info| {
+        let payload = info.payload();
+        let msg = payload
+            .downcast_ref::<&str>()
+            .map(|s| s.to_string())
+            .or_else(|| payload.downcast_ref::<String>().cloned())
+            .unwrap_or_else(|| "internal error".to_string());
+        eprintln!("{}: {}", prog_name(), msg);
+    }));
+    match std::panic::catch_unwind(run_main) {
+        Ok(code) => exit(code),
+        Err(_) => {
+            let _ = std::io::stdout().flush();
+            exit(1)
+        }
+    }
+}
+
+fn run_main() -> i32 {
     // DIVERGENCE: non-UTF-8 arguments are converted lossily (U+FFFD).
     let params: Vec<String> = std::env::args_os()
         .skip(1)
@@ -82,7 +107,7 @@ fn main() {
     let status = match parse_arguments(&args).and_then(|(flags, files)| process(&flags, &files)) {
         Ok(s) | Err(s) => s,
     };
-    exit(status_to_code(status));
+    status_to_code(status)
 }
 
 /// The program name, as GHC's `getProgName` gives it (the basename of argv[0]).
