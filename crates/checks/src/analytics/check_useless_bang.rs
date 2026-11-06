@@ -75,14 +75,7 @@ fn is_function_body(params: &Params<'_>, t: Id) -> bool {
     matches!(path.get(1), Some(&p) if matches!(params.ast.get(p), Token::T_Function(..)))
 }
 
+/// `dropLast t = [x | (x, _) <- zip t (tail t)]`: all but the last element.
 fn drop_last(t: &[Id]) -> Vec<Id> {
-    match t {
-        [] => vec![],
-        [_] => vec![],
-        [x, rest @ ..] => {
-            let mut v = vec![*x];
-            v.extend(drop_last(rest));
-            v
-        }
-    }
+    t[..t.len().saturating_sub(1)].to_vec()
 }
