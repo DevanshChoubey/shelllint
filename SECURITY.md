@@ -31,7 +31,7 @@ Please **do not open a public issue.**
 
 - Preferred: use GitHub's private vulnerability reporting.
   (Repository **Security** tab, then **Report a vulnerability**.)
-- Or email: <!-- CONTACT: add a security contact email before going public -->[SECURITY CONTACT EMAIL]
+- Or email: devanshc13@gmail.com
 
 Please include the input that triggers the problem, the exact command line,
 the version (`shellcheck-rust --version`) and the platform.
