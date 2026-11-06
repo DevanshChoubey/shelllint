@@ -414,6 +414,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "shellcheck-mcp"
+version = "0.0.1"
+dependencies = [
+ "serde_json",
+ "shellcheck-analyzer",
+ "shellcheck-checker",
+ "shellcheck-checks",
+ "shellcheck-core",
+ "shellcheck-formatter",
+]
+
+[[package]]
 name = "shellcheck-parser"
 version = "0.0.1"
 dependencies = [
