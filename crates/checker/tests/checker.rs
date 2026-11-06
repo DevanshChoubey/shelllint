@@ -139,7 +139,6 @@ fn prop_editor_config_applies_known_shell() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_editor_config_applies_disable() {
     assert_eq!(check_with_editor_config("[foo]\nshellcheck.disable=SC2086\n", "foo", "#!/bin/sh\necho $1"), none());
 }
@@ -157,7 +156,6 @@ fn prop_editor_config_comment_value_is_reported() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_editor_config_non_matching_section_ignored() {
     assert_eq!(check_with_editor_config("[bar]\nshellcheck.disable=SC2086\n", "foo", "#!/bin/sh\necho $1"), vec![2086]);
 }
@@ -178,25 +176,21 @@ fn prop_comment_disables_parse_issue2() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_finds_analysis_issue() {
     assert_eq!(check("echo $1"), vec![2086]);
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_comment_disables_analysis_issue1() {
     assert_eq!(check("#shellcheck disable=SC2086\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_comment_disables_analysis_issue2() {
     assert_eq!(check("#shellcheck disable=SC2086\n#lol\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_option_disables_issue1() {
     assert_eq!(
         get_errors(
@@ -249,7 +243,6 @@ fn prop_can_parse_dev_null() {
 }
 
 #[test]
-#[ignore = "needs checkUnassignedReferences' (2154)"]
 fn prop_fails_when_not_sourcing() {
     assert_eq!(check("source lol; echo \"$bar\""), vec![1091, 2154]);
 }
@@ -261,25 +254,21 @@ fn prop_fails_when_not_sourcing_parse_part() {
 }
 
 #[test]
-#[ignore = "needs checkUnassignedReferences' (2154)"]
 fn prop_works_when_sourcing() {
     assert_eq!(check_with_includes(&[("lib", "bar=1")], "source lib; echo \"$bar\""), none());
 }
 
 #[test]
-#[ignore = "needs checkUnassignedReferences' (2154)"]
 fn prop_works_when_sourcing_with_dash_dash() {
     assert_eq!(check_with_includes(&[("lib", "bar=1")], "source -- lib; echo \"$bar\""), none());
 }
 
 #[test]
-#[ignore = "needs checkUnassignedReferences' (2154)"]
 fn prop_works_when_sourcing_with_dash_p() {
     assert_eq!(check_with_includes(&[("lib", "bar=1")], "source -p \"$MYPATH\" lib; echo \"$bar\""), none());
 }
 
 #[test]
-#[ignore = "needs checkUnassignedReferences' (2154)"]
 fn prop_works_when_dotting() {
     assert_eq!(check_with_includes(&[("lib", "bar=1")], ". lib; echo \"$bar\""), none());
 }
@@ -291,7 +280,6 @@ fn prop_no_infinite_sourcing() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_can_source_bad_syntax() {
     assert_eq!(check_with_includes(&[("lib", "for f; do")], "source lib; echo $1"), vec![1094, 2086]);
 }
@@ -336,7 +324,6 @@ fn prop_can_redirect_with_spaces() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_recursive_analysis() {
     assert_eq!(check_recursive(&[("lib", "echo $1")], "source lib"), vec![2086]);
 }
@@ -347,7 +334,6 @@ fn prop_recursive_parsing() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_non_recursive_analysis() {
     assert_eq!(check_with_includes(&[("lib", "echo $1")], "source lib"), none());
 }
@@ -358,7 +344,6 @@ fn prop_non_recursive_parsing() {
 }
 
 #[test]
-#[ignore = "needs checkUnassignedReferences' (2154)"]
 fn prop_source_directive_doesnt_follow_file() {
     assert_eq!(
         check_with_includes(&[("foo", "source bar"), ("bar", "baz=3")], "#shellcheck source=foo\n. \"$1\"; echo \"$baz\""),
@@ -367,61 +352,51 @@ fn prop_source_directive_doesnt_follow_file() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation_base() {
     assert_eq!(check("#!/bin/sh\necho $1"), vec![2086]);
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation1() {
     assert_eq!(check("#!/bin/sh\n# shellcheck disable=2086\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation2() {
     assert_eq!(check("#!/bin/sh\n# shellcheck disable=2086\ntrue\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation3() {
     assert_eq!(check("#!/bin/sh\n#unrelated\n# shellcheck disable=2086\ntrue\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation4() {
     assert_eq!(check("#!/bin/sh\n# shellcheck disable=2086\n#unrelated\ntrue\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation5() {
     assert_eq!(check("#!/bin/sh\n\n\n\n#shellcheck disable=2086\ntrue\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation6() {
     assert_eq!(check("#shellcheck shell=sh\n#unrelated\n#shellcheck disable=2086\ntrue\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_filewide_annotation7() {
     assert_eq!(check("#!/bin/sh\n# shellcheck disable=2086\n#unrelated\ntrue\necho $1"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086), checkReturnAgainstZero (2181)"]
 fn prop_filewide_annotation_base2() {
     assert_eq!(check("true\n[ $? == 0 ] && echo $1"), vec![2086, 2181]);
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086), checkReturnAgainstZero (2181)"]
 fn prop_filewide_annotation8() {
     assert_eq!(
         check("# Disable $? warning\n#shellcheck disable=SC2181\n# Disable quoting warning\n#shellcheck disable=2086\ntrue\n[ $? == 0 ] && echo $1"),
@@ -431,43 +406,36 @@ fn prop_filewide_annotation8() {
 
 // #1181: -x disabled posix warning for 'source'
 #[test]
-#[ignore = "needs checkBashisms (3046)"]
 fn prop_source_part_of_original_script() {
     assert!(check_with_includes(&[("./saywhat.sh", "echo foo")], "#!/bin/sh\nsource ./saywhat.sh").contains(&3046));
 }
 
 #[test]
-#[ignore = "needs checkRedirectedNowhere (2188)"]
 fn prop_spin_bug1413() {
     assert_eq!(check("fun() {\n# shellcheck disable=SC2188\n> /dev/null\n}\n"), none());
 }
 
 #[test]
-#[ignore = "needs ShellSupport checkForDecimals (2079)"]
 fn prop_deduces_type_from_extension() {
     assert_eq!(check_with_spec(&[], CheckSpec { filename: "file.ksh".into(), ..spec("(( 3.14 ))") }), none());
 }
 
 #[test]
-#[ignore = "needs ShellSupport checkForDecimals (2079)"]
 fn prop_deduces_type_from_extension2() {
     assert_eq!(check_with_spec(&[], CheckSpec { filename: "file.bash".into(), ..spec("(( 3.14 ))") }), vec![2079]);
 }
 
 #[test]
-#[ignore = "needs ShellSupport checkForDecimals (2079)"]
 fn prop_deduces_type_from_envrc_extension() {
     assert_eq!(check_with_spec(&[], CheckSpec { filename: ".envrc".into(), ..spec("(( 3.14 ))") }), vec![2079]);
 }
 
 #[test]
-#[ignore = "needs checkShebang (2148)"]
 fn prop_can_disable_shebang_warning() {
     assert_eq!(check_with_spec(&[], CheckSpec { filename: "file.sh".into(), ..spec("#shellcheck disable=SC2148\nfoo") }), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086), checkBackticks (2006)"]
 fn prop_can_disable_all_warnings() {
     assert_eq!(
         check_with_spec(
@@ -487,13 +455,11 @@ fn prop_can_disable_parse_errors() {
 }
 
 #[test]
-#[ignore = "needs checkShebang (2148)"]
 fn prop_sh_extension_doesnt_matter() {
     assert_eq!(check_with_spec(&[], CheckSpec { filename: "file.sh".into(), ..spec("echo 'hello world'") }), vec![2148]);
 }
 
 #[test]
-#[ignore = "needs ShellSupport checkForDecimals (2079)"]
 fn prop_sourced_file_uses_original_shell_extension() {
     assert_eq!(
         check_with_spec(
@@ -505,7 +471,6 @@ fn prop_sourced_file_uses_original_shell_extension() {
 }
 
 #[test]
-#[ignore = "needs checkNullaryExpansionTest (2244)"]
 fn prop_can_enable_optionals_with_spec() {
     assert_eq!(
         check_with_spec(
@@ -521,41 +486,35 @@ fn prop_can_enable_optionals_with_spec() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_option_includes1() {
     // expect 2086, but not included, so nothing reported
     assert_eq!(check_option_includes(Some(vec![2080]), "#!/bin/sh\n var='a b'\n echo $var"), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_option_includes2() {
     // expect 2086, included, so it is reported
     assert_eq!(check_option_includes(Some(vec![2086]), "#!/bin/sh\n var='a b'\n echo $var"), vec![2086]);
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_option_includes3() {
     // expect 2086, no inclusions provided, so it is reported
     assert_eq!(check_option_includes(None, "#!/bin/sh\n var='a b'\n echo $var"), vec![2086]);
 }
 
 #[test]
-#[ignore = "needs checkUnassignedReferences' (2154)"]
 fn prop_option_includes4() {
     // expect 2086 & 2154, only 2154 included, so only that's reported
     assert_eq!(check_option_includes(Some(vec![2154]), "#!/bin/sh\n var='a b'\n echo $var\n echo $bar"), vec![2154]);
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_reads_rc_file() {
     assert_eq!(check_with_rc("disable=2086", CheckSpec { ignore_rc: false, ..spec("#!/bin/sh\necho $1") }), none());
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_can_use_no_rc() {
     assert_eq!(check_with_rc("disable=2086", CheckSpec { ignore_rc: true, ..spec("#!/bin/sh\necho $1") }), vec![2086]);
 }
@@ -571,14 +530,12 @@ fn prop_no_rc_wont_look_at_file() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_no_rc_wont_look_at_file_full() {
     let sys = TestSys { config: Some(None), ..TestSys::new(mocked_system_interface(vec![])) };
     assert_eq!(get_errors(&sys, CheckSpec { ignore_rc: true, ..spec("#!/bin/sh\necho $1") }), vec![2086]);
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_broken_rc_gets_warning() {
     assert_eq!(check_with_rc("rofl", CheckSpec { ignore_rc: false, ..spec("#!/bin/sh\necho $1") }), vec![1134, 2086]);
 }
@@ -590,7 +547,6 @@ fn prop_broken_rc_gets_warning_parse_part() {
 }
 
 #[test]
-#[ignore = "needs checkNullaryExpansionTest (2244)"]
 fn prop_can_enable_optionals_with_rc() {
     assert_eq!(check_with_rc("enable=avoid-nullary-conditions", spec("#!/bin/sh\n[ \"$1\" ]")), vec![2244]);
 }
@@ -604,7 +560,6 @@ fn unexpected(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_source_path_redirects_name() {
     fn f(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
         match (a, d) {
@@ -619,7 +574,6 @@ fn prop_source_path_redirects_name() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_source_path_adds_annotation() {
     fn f(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
         match (a, c, d) {
@@ -638,7 +592,6 @@ fn prop_source_path_adds_annotation() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_source_path_works_with_spaces() {
     fn f(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
         match (a, c, d) {
@@ -657,7 +610,6 @@ fn prop_source_path_works_with_spaces() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_source_path_redirects_directive() {
     fn f(a: &str, _b: Option<bool>, _c: &[String], d: &str) -> String {
         match (a, d) {
@@ -705,7 +657,6 @@ fn prop_source_path_resolution_parse_part() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_rc_can_allow_external_sources() {
     fn f(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
         match (a, b, d) {
@@ -725,7 +676,6 @@ fn prop_rc_can_allow_external_sources() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_rc_can_deny_external_sources() {
     fn f(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
         match (a, b, d) {
@@ -745,7 +695,6 @@ fn prop_rc_can_deny_external_sources() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_rc_can_leave_external_sources_unspecified() {
     fn f(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
         match (a, b, d) {
@@ -789,7 +738,6 @@ fn prop_rc_external_sources_parse_part() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086), checkBackticks (2006)"]
 fn prop_file_can_disable_external_sources() {
     fn f(a: &str, b: Option<bool>, c: &[String], d: &str) -> String {
         match (a, b, d) {
@@ -848,7 +796,6 @@ fn prop_file_cannot_enable_external_sources2() {
 }
 
 #[test]
-#[ignore = "needs checkSpacefulnessCfg' (2086)"]
 fn prop_rc_can_suppress_early_problems1() {
     assert_eq!(check_with_rc("disable=1071", spec("#!/bin/zsh\necho $1")), none());
 }
@@ -881,19 +828,16 @@ fn prop_here_docs_will_have_parsed_indices() {
 }
 
 #[test]
-#[ignore = "needs checkCommandIsUnreachable (2317, CFG: Phase 3); passes vacuously without it"]
 fn prop_rc_can_suppress_dfa() {
     assert_eq!(check_with_rc("extended-analysis=false", spec("#!/bin/sh\nexit; foo;")), none());
 }
 
 #[test]
-#[ignore = "needs checkCommandIsUnreachable (2317, CFG: Phase 3); passes vacuously without it"]
 fn prop_file_can_suppress_dfa() {
     assert_eq!(check_with_rc("", spec("#!/bin/sh\n# shellcheck extended-analysis=false\nexit; foo;")), none());
 }
 
 #[test]
-#[ignore = "needs checkCommandIsUnreachable (2317, CFG: Phase 3); passes vacuously without it"]
 fn prop_file_wins_when_suppressing_dfa1() {
     assert_eq!(
         check_with_rc("extended-analysis=true", spec("#!/bin/sh\n# shellcheck extended-analysis=false\nexit; foo;")),
@@ -902,7 +846,6 @@ fn prop_file_wins_when_suppressing_dfa1() {
 }
 
 #[test]
-#[ignore = "needs checkCommandIsUnreachable (2317, CFG: Phase 3)"]
 fn prop_file_wins_when_suppressing_dfa2() {
     assert_eq!(
         check_with_rc("extended-analysis=false", spec("#!/bin/sh\n# shellcheck extended-analysis=true\nexit; foo;")),
@@ -911,7 +854,6 @@ fn prop_file_wins_when_suppressing_dfa2() {
 }
 
 #[test]
-#[ignore = "needs checkCommandIsUnreachable (2317, CFG: Phase 3)"]
 fn prop_flag_wins_when_suppressing_dfa1() {
     assert_eq!(
         check_with_rc(
@@ -923,7 +865,6 @@ fn prop_flag_wins_when_suppressing_dfa1() {
 }
 
 #[test]
-#[ignore = "needs checkCommandIsUnreachable (2317, CFG: Phase 3); passes vacuously without it"]
 fn prop_flag_wins_when_suppressing_dfa2() {
     assert_eq!(
         check_with_rc(
@@ -966,7 +907,6 @@ fn empty_file_no_comments() {
 }
 
 #[test]
-#[ignore = "needs checkShebang (2148)"]
 fn empty_file_oracle_codes() {
     // oracle: empty.sh 1:1 2148
     assert_eq!(check_script_codes("", None), vec![2148]);
@@ -1081,7 +1021,6 @@ fn min_severity_filters() {
 }
 
 #[test]
-#[ignore = "needs Commands checkTr (Task 14 pilot)"]
 fn same_position_order() {
     // oracle: tr.sh 2:4-2:10 2020 (info), then 2:4-2:10 2021 (info)
     assert_eq!(

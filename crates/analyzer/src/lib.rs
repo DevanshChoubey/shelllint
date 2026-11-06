@@ -6,4 +6,6 @@ pub use shellcheck_core::astlib;
 
 pub mod analyzerlib;
 pub mod api;
+pub mod cfg;
+pub mod cfg_analysis;
 pub mod testing;
