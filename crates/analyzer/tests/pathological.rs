@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Performance regression tests for the analyzer (CFG build, the cfIdToNodes
-// lookup); no Haskell counterpart.
+// lookup, `builtin X` dispatch); no Haskell counterpart.
 //
 // Each test re-runs itself in a child process (this test binary, `--exact
 // <name>`, with `SC_ANALYZER_PATHOLOGICAL_CHILD` set) whose address space is
@@ -14,10 +14,11 @@ use std::process::{Command, Stdio};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use shellcheck_analyzer::analyzerlib::p_script;
+use shellcheck_analyzer::analyzerlib::{Comments, Params, default_spec, make_parameters, p_script, run_checker};
+use shellcheck_analyzer::api::{CommandName, NodeFn, get_checker};
 use shellcheck_analyzer::cfg::{CfgParameters, build_graph};
 use shellcheck_analyzer::cfg_analysis::analyze_control_flow;
-use shellcheck_core::ast::Id;
+use shellcheck_core::ast::{Id, Token};
 
 const CHILD_ENV: &str = "SC_ANALYZER_PATHOLOGICAL_CHILD";
 const TIME_LIMIT: Duration = Duration::from_secs(10);
@@ -114,4 +115,65 @@ fn cfg_id_to_nodes_for_every_token() {
         // The root owns every node.
         assert!(a.token_to_nodes(root).is_some_and(|ns| ns.len() > 8000));
     });
+}
+
+fn count_args(p: &Params<'_>, t: Id, c: &mut Comments) {
+    // The rewritten command must be `echo ...`, not `builtin echo ...`.
+    let Token::T_SimpleCommand(_, words) = p.ast.get(t) else { panic!("not a command") };
+    assert_eq!(words.len(), 7);
+    let _ = c;
+}
+
+/// 4000 `builtin echo` commands: each one used to copy the whole arena and
+/// the variable flow (27 s through the CLI before the fix).
+#[test]
+fn builtin_dispatch_does_not_copy_the_script() {
+    check("builtin_dispatch_does_not_copy_the_script", || {
+        let mut script = String::from("#!/bin/bash\n");
+        for i in 0..4000 {
+            script.push_str(&format!("builtin echo \"a{i}\" b c d e f\n"));
+        }
+        let (pr, root) = parse(&script);
+        let params = make_parameters(&default_spec(&pr), &pr.ast, root);
+        let list: Vec<(CommandName, NodeFn)> = vec![(CommandName::Exactly("echo"), count_args)];
+        let checker = get_checker(&list);
+        for _ in 0..3 {
+            let _ = run_checker(&params, &checker);
+        }
+    });
+}
+
+/// Word counts of every simple command, as the check sees the arena.
+fn record_word_counts(p: &Params<'_>, t: Id, c: &mut Comments) {
+    let mut counts: Vec<String> = vec![];
+    p.ast.analyze(
+        p.root,
+        &mut |i| {
+            if let Token::T_SimpleCommand(_, w) = p.ast.get(i) {
+                counts.push(format!("{}{}", if i == t { "*" } else { "" }, w.len()));
+            }
+        },
+        &mut |_| {},
+    );
+    c.0.push(shellcheck_core::interface::TokenComment {
+        id: t,
+        comment: shellcheck_core::interface::Comment {
+            severity: shellcheck_core::interface::Severity::InfoC,
+            code: 0,
+            message: counts.join(" "),
+        },
+        fix: None,
+    });
+}
+
+/// Only the command being checked is rewritten; the reused copy is put
+/// back between commands, so every other command keeps its `builtin`.
+#[test]
+fn builtin_dispatch_rewrites_only_the_checked_command() {
+    let (pr, root) = parse("#!/bin/bash\nbuiltin echo a\nbuiltin echo b c\necho d\n");
+    let params = make_parameters(&default_spec(&pr), &pr.ast, root);
+    let list: Vec<(CommandName, NodeFn)> = vec![(CommandName::Exactly("echo"), record_word_counts)];
+    let checker = get_checker(&list);
+    let got: Vec<String> = run_checker(&params, &checker).into_iter().map(|c| c.comment.message).collect();
+    assert_eq!(got, vec!["*2 4 2", "3 *3 2", "3 4 *2"]);
 }
