@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck shellcheck.hs (e11f964)
 
-// Linked only so the linkme-registered checks end up in the binary.
-use shellcheck_checks as _;
-
 mod fix;
 mod options;
 mod sys;
