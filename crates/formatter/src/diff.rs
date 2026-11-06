@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of ShellCheck src/ShellCheck/Formatter/Diff.hs (e11f964)
 //
-// DIVERGENCE: Haskell reads the files named by fixes through
-// `siReadFile sys (Just True)`. The Rust `Formatter` trait only hands over the
-// contents of the file that produced the result, so this formatter uses that
-// for `CheckResult::filename` and falls back to a configurable reader (the
-// filesystem by default) for any other file, e.g. one pulled in with `-x`.
-//
 // DIVERGENCE: `Data.Algorithm.Diff.getDiff` is replaced by a line-based LCS
 // that takes a common-prefix-first greedy diagonal and prefers deletions
 // before insertions. This yields the same script as Haskell for all cases
@@ -19,7 +13,7 @@
 use std::collections::BTreeMap;
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, Fix, FormatterOptions};
+use shellcheck_core::interface::{CheckResult, Fix, FormatterOptions, SystemInterface};
 
 use crate::fixer::{apply_fix, merge_fixes};
 use crate::*;
@@ -57,32 +51,18 @@ pub struct DiffDoc<T> {
     pub regions: Vec<DiffRegion<T>>,
 }
 
-type FileReader = Box<dyn Fn(&str) -> Result<String, String>>;
-
 pub struct DiffFormatter {
     found_issues: bool,
     reported_issues: bool,
     color: bool,
-    reader: FileReader,
 }
 
 pub fn format(options: FormatterOptions) -> DiffFormatter {
-    format_with_reader(options, Box::new(default_reader))
-}
-
-pub fn format_with_reader(options: FormatterOptions, reader: FileReader) -> DiffFormatter {
     DiffFormatter {
         found_issues: false,
         reported_issues: false,
         color: should_output_color(options.color_option),
-        reader,
     }
-}
-
-fn default_reader(path: &str) -> Result<String, String> {
-    std::fs::read(path)
-        .map(|b| String::from_utf8_lossy(&b).into_owned())
-        .map_err(|e| format!("{}: {}", path, e))
 }
 
 fn ansi(n: i32) -> String {
@@ -117,7 +97,7 @@ impl Formatter for DiffFormatter {
         print_err(self.color, &format!("{}: {}", file, msg));
     }
 
-    fn on_result(&mut self, result: &CheckResult, source: &str, out: &mut dyn Write) {
+    fn on_result(&mut self, result: &CheckResult, sys: &dyn SystemInterface, out: &mut dyn Write) {
         let comments = &result.comments;
         if !comments.is_empty() {
             self.found_issues = true;
@@ -125,12 +105,7 @@ impl Formatter for DiffFormatter {
         let suggested: Vec<Fix> = comments.iter().filter_map(|c| c.fix.clone()).collect();
         let fixmap = build_fix_map(&suggested);
         for (name, fix) in fixmap {
-            let contents = if name == result.filename {
-                Ok(source.to_string())
-            } else {
-                (self.reader)(&name)
-            };
-            match contents {
+            match sys.read_file(Some(true), &name) {
                 Ok(contents) => {
                     let doc = make_diff(&name, &contents, &fix);
                     // putStrLn: formatDoc output plus one more newline

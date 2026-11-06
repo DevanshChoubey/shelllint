@@ -8,7 +8,9 @@
 
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, Fix, InsertionPoint, PositionedComment, Replacement};
+use shellcheck_core::interface::{
+    CheckResult, Fix, InsertionPoint, PositionedComment, Replacement, SystemInterface,
+};
 
 use crate::*;
 
@@ -102,7 +104,7 @@ impl Formatter for Json {
     }
 
     // As in the Haskell, every group prepends *all* of the result's comments.
-    fn on_result(&mut self, cr: &CheckResult, _source: &str, _out: &mut dyn Write) {
+    fn on_result(&mut self, cr: &CheckResult, _sys: &dyn SystemInterface, _out: &mut dyn Write) {
         for _group in group_with(&cr.comments, |c| source_file(c).to_string()) {
             let mut new = cr.comments.clone();
             new.append(&mut self.list);

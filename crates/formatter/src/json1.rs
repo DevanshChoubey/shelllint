@@ -6,7 +6,7 @@
 
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, PositionedComment};
+use shellcheck_core::interface::{CheckResult, PositionedComment, SystemInterface};
 
 use crate::json::comments_json;
 use crate::*;
@@ -26,9 +26,10 @@ impl Formatter for Json1 {
         eprintln!("{}: {}", file, msg);
     }
 
-    fn on_result(&mut self, cr: &CheckResult, source: &str, _out: &mut dyn Write) {
+    fn on_result(&mut self, cr: &CheckResult, sys: &dyn SystemInterface, _out: &mut dyn Write) {
         for group in group_with(&cr.comments, |c| source_file(c).to_string()) {
-            let mut new = make_non_virtual(group, source);
+            let contents = read_or_empty(sys, source_file(&group[0]));
+            let mut new = make_non_virtual(group, &contents);
             new.append(&mut self.list);
             self.list = new;
         }

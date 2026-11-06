@@ -74,9 +74,10 @@ fn run(fmt: &str, script: &str, color: ColorOption) -> (String, bool) {
     opts.color_option = color;
     let mut f = by_name(fmt, opts).unwrap();
     let (cr, src) = result_for(script);
+    let sys = mocked_system_interface(vec![(cr.filename.clone(), src)]);
     let mut out: Vec<u8> = vec![];
     f.header(&mut out);
-    f.on_result(&cr, &src, &mut out);
+    f.on_result(&cr, &sys, &mut out);
     f.footer(&mut out);
     (String::from_utf8(out).unwrap(), f.exit_requested())
 }
@@ -138,7 +139,7 @@ fn json_escaping_matches_aeson() {
         }],
     };
     let mut out = vec![];
-    f.on_result(&cr, "", &mut out);
+    f.on_result(&cr, &mocked_system_interface(vec![]), &mut out);
     f.footer(&mut out);
     let s = String::from_utf8(out).unwrap();
     assert!(s.contains("\"file\":\"x\\\"\\\\\\u0001\u{7f}\\u0008\\u000c\u{e9}\u{20ac}\u{1f600}.sh\""), "{s}");

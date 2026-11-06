@@ -31,6 +31,22 @@ fn run_with(args: &[&str], stdin: &str, env: &[(&str, &str)]) -> Out {
     }
 }
 
+/// Run with `dir` as the working directory and no stdin.
+fn run_in(dir: &std::path::Path, args: &[&str]) -> Out {
+    let o = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"))
+        .args(args)
+        .current_dir(dir)
+        .env_remove("SHELLCHECK_OPTS")
+        .stdin(Stdio::null())
+        .output()
+        .unwrap();
+    Out {
+        code: o.status.code().unwrap_or(-1),
+        stdout: String::from_utf8_lossy(&o.stdout).into_owned(),
+        stderr: String::from_utf8_lossy(&o.stderr).into_owned(),
+    }
+}
+
 fn run(args: &[&str], stdin: &str) -> Out {
     run_with(args, stdin, &[])
 }
@@ -310,3 +326,40 @@ fn editorconfig_error_exits_4() {
     assert_eq!(o.code, 4);
     assert!(o.stdout.contains("Expected '=' after directive key. [SC1134]") || o.stdout.contains("[SC1134]"), "{}", o.stdout);
 }
+
+// Each file group is rendered against its own file's contents
+// (`siReadFile sys (Just True) (sourceFile group)` in TTY/GCC/JSON1/
+// CheckStyle/Diff.hs), not the checked file's. Expected texts are the
+// oracle's.
+#[test]
+fn sourced_file_groups_use_their_own_contents() {
+    let d = tmpdir("groups-tty");
+    std::fs::write(d.join("main.sh"), "#!/bin/sh\n. ./lib.sh\necho \"$y\"\n").unwrap();
+    std::fs::write(d.join("lib.sh"), "#!/bin/sh\nfoo=1\necho $bar\n").unwrap();
+    let o = run_in(&d, &["--norc", "-Cnever", "-x", "-a", "main.sh"]);
+    assert_eq!(o.stdout, TTY_GROUPS);
+
+    let d = tmpdir("groups-tab");
+    std::fs::write(d.join("main.sh"), "#!/bin/sh\n. ./lib.sh\n").unwrap();
+    std::fs::write(d.join("lib.sh"), "#!/bin/sh\n\t\techo $bar\n").unwrap();
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "gcc", "main.sh"]);
+    assert_eq!(
+        o.stdout,
+        "./lib.sh:2:8: warning: bar is referenced but not assigned. [SC2154]\n\
+         ./lib.sh:2:8: note: Double quote to prevent globbing and word splitting. [SC2086]\n"
+    );
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "json1", "main.sh"]);
+    assert!(o.stdout.contains("\"line\":2,\"endLine\":2,\"column\":8,\"endColumn\":12"), "{}", o.stdout);
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "checkstyle", "main.sh"]);
+    assert!(o.stdout.contains("<error line='2' column='8' severity='warning'"), "{}", o.stdout);
+
+    // diff reads lib.sh through the SystemInterface, so Latin-1 bytes decode.
+    std::fs::write(d.join("lib.sh"), b"#!/bin/sh\n# \xe9\necho $bar\n").unwrap();
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "diff", "main.sh"]);
+    assert_eq!(
+        o.stdout,
+        "--- a/./lib.sh\n+++ b/./lib.sh\n@@ -1,3 +1,3 @@\n #!/bin/sh\n # \u{e9}\n-echo $bar\n+echo \"$bar\"\n\n"
+    );
+}
+
+const TTY_GROUPS: &str = "\nIn ./lib.sh line 2:\nfoo=1\n^-^ SC2034 (warning): foo appears unused. Verify use (or export if used externally).\n\n\nIn ./lib.sh line 3:\necho $bar\n     ^--^ SC2154 (warning): bar is referenced but not assigned.\n     ^--^ SC2086 (info): Double quote to prevent globbing and word splitting.\n\nDid you mean:\necho \"$bar\"\n\n\nIn main.sh line 3:\necho \"$y\"\n      ^-- SC2154 (warning): y is referenced but not assigned.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC2034 -- foo appears unused. Verify use (o...\n  https://www.shellcheck.net/wiki/SC2154 -- bar is referenced but not assigned.\n  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ...\n";

@@ -3,7 +3,7 @@
 
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, FormatterOptions};
+use shellcheck_core::interface::{CheckResult, FormatterOptions, SystemInterface};
 
 use crate::Formatter;
 
@@ -24,7 +24,7 @@ impl Formatter for Quiet {
         self.failed = true;
     }
 
-    fn on_result(&mut self, result: &CheckResult, _source: &str, _out: &mut dyn Write) {
+    fn on_result(&mut self, result: &CheckResult, _sys: &dyn SystemInterface, _out: &mut dyn Write) {
         if !result.comments.is_empty() {
             self.failed = true;
         }

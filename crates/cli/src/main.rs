@@ -191,11 +191,11 @@ fn process_file(
     };
     let spec = CheckSpec {
         filename: filename.to_string(),
-        script: contents.clone(),
+        script: contents,
         ..options.check_spec.clone()
     };
     let result = check_script(sys, &spec);
-    format.on_result(&result, &contents, out);
+    format.on_result(&result, sys, out);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
     // means shellcheck cannot apply the requested configuration.
     if result.comments.iter().any(|pc| {
