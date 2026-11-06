@@ -148,21 +148,30 @@ pub fn oversimplify(ast: &Ast, token: Id) -> Vec<String> {
 pub fn get_flags_until(ast: &Ast, stop_condition: &dyn Fn(&str) -> bool, t: Id) -> Vec<(Id, String)> {
     match ast.get(t) {
         Token::T_SimpleCommand(_, words) if !words.is_empty() => {
-            let token_and_text: Vec<(Id, String)> = words[1..]
-                .iter()
-                .map(|&x| (x, oversimplify(ast, x).concat()))
-                .collect();
-            let split = token_and_text
-                .iter()
-                .position(|(_, s)| stop_condition(s))
-                .unwrap_or(token_and_text.len());
-            let (flag_args, rest) = token_and_text.split_at(split);
-            let mut out: Vec<(Id, String)> = flag_args.iter().flat_map(|(x, s)| flag(*x, s)).collect();
-            out.extend(rest.iter().map(|(t, _)| (*t, String::new())));
-            out
+            get_flags_until_words(ast, stop_condition, &words[1..])
         }
         _ => panic!("{}", please_report("getFlags on non-command")),
     }
+}
+
+/// `getFlagsUntil` on the arguments of a command (its words after the
+/// command name), for callers that hold a word list rather than a
+/// `T_SimpleCommand` token (e.g. AnalyzerLib's synthetic `builtin` command).
+pub fn get_flags_until_words(
+    ast: &Ast,
+    stop_condition: &dyn Fn(&str) -> bool,
+    args: &[Id],
+) -> Vec<(Id, String)> {
+    let token_and_text: Vec<(Id, String)> =
+        args.iter().map(|&x| (x, oversimplify(ast, x).concat())).collect();
+    let split = token_and_text
+        .iter()
+        .position(|(_, s)| stop_condition(s))
+        .unwrap_or(token_and_text.len());
+    let (flag_args, rest) = token_and_text.split_at(split);
+    let mut out: Vec<(Id, String)> = flag_args.iter().flat_map(|(x, s)| flag(*x, s)).collect();
+    out.extend(rest.iter().map(|(t, _)| (*t, String::new())));
+    out
 }
 
 fn flag(x: Id, s: &str) -> Vec<(Id, String)> {
