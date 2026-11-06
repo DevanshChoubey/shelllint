@@ -27,7 +27,7 @@ fn check(p: &Params<'_>, toks: &[Id], c: &mut Comments) {
     let ast = p.ast;
     if let [a, b, ..] = toks {
         if let (Token::T_SingleQuoted(_), Token::T_Literal(s)) = (ast.get(*a), ast.get(*b)) {
-            if !s.is_empty() && s.chars().all(|ch| ch.is_alphanumeric()) {
+            if !s.is_empty() && s.chars().all(shellcheck_core::unicode::is_alpha_num) {
                 c.info(
                     *b,
                     2026,
@@ -100,4 +100,23 @@ fn warn_about_literal(id: Id, c: &mut Comments) {
         2140,
         "Word is of the form \"A\"B\"C\" (B indicated). Did you mean \"ABC\" or \"A\\\"B\\\"C\"?",
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use shellcheck_analyzer::testing::run_check;
+
+    fn fires(script: &str) -> bool {
+        let codes = run_check("Analytics.hs", "checkInexplicablyUnquoted", "node", script).unwrap();
+        codes.contains(&2026)
+    }
+
+    #[test]
+    fn alnum_uses_general_category() {
+        assert!(fires("echo 'foo'bar"));
+        assert!(fires("echo 'foo'Жx٣"));
+        // U+093E (Mc) is Alphabetic but not `isAlphaNum`.
+        assert!(!fires("echo 'foo'नाम"));
+        assert!(!fires("echo 'foo'Ⓐ"));
+    }
 }

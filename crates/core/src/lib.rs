@@ -8,3 +8,5 @@ pub mod data;
 pub mod interface;
 pub mod prelude;
 pub mod regex;
+pub mod unicode;
+mod unicode_tables;
