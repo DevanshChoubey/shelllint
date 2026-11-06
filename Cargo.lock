@@ -116,6 +116,10 @@ dependencies = [
 [[package]]
 name = "shellcheck-analyzer"
 version = "0.0.1"
+dependencies = [
+ "regex",
+ "shellcheck-core",
+]
 
 [[package]]
 name = "shellcheck-checker"
