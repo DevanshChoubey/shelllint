@@ -83,6 +83,27 @@ shellcheck-rust --list-optional
   `enable=...` and the other directives work as in ShellCheck.
 - Run `shellcheck-rust --help` to see every flag.
 
+### `--fix` (extension)
+
+`--fix` is not in upstream ShellCheck. It applies every auto-fix to the files
+in place and then prints what is left in the chosen `-f` format (nothing with
+`-f quiet`). It exits 0 if no issues remain and 1 if some do.
+
+```bash
+shellcheck-rust --fix deploy.sh lib/*.sh
+shellcheck-rust --fix --dry-run deploy.sh   # print the diff (same as -f diff), change nothing
+```
+
+- It uses the same fix merging and application as `-f diff`, so one round is
+  the same as `-f diff | patch -p1`. If some fixes overlap, the merge drops
+  them, so `--fix` repeats until nothing changes. A second run is a no-op.
+- Each file is written atomically: a temp file in the same directory is
+  renamed over it. Permissions, CRLF line endings and a missing final newline
+  are kept, as `patch` keeps them. Files with no fixes are not rewritten.
+- A sourced file (with `-x`/`-a`) is fixed only if it is also given on the
+  command line. Otherwise it is skipped with a note.
+- Standard input (`-`) and non-UTF-8 files are skipped with an error (exit 2).
+
 To use it as a drop-in replacement, symlink it as `shellcheck`:
 
 ```bash
@@ -162,7 +183,8 @@ grep -rn 'DIVERGENCE:' crates/
 Other known differences:
 
 - The binary is called `shellcheck-rust`. `--version` reports both its own
-  version and the upstream version it ports.
+  version and the upstream version it ports, and links to this project.
+- `--fix` and `--dry-run` are extensions (see [`--fix`](#--fix-extension)).
 - Positions, messages and fixes are not yet checked against the oracle in full
   (see [Compatibility](#compatibility)).
 
