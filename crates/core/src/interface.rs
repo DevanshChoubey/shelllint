@@ -5,8 +5,9 @@ use crate::ast::Id;
 
 /// `SystemInterface m`. The default methods are `newSystemInterface`.
 // DIVERGENCE: Haskell's record is parametrised over a monad; here it is a
-// synchronous trait.
-pub trait SystemInterface {
+// synchronous trait. It requires `Sync` so the checker can hand
+// `&dyn SystemInterface` to the big-stack thread it parses on.
+pub trait SystemInterface: Sync {
     /// Given:
     ///   What annotations say about including external files (if anything)
     ///   A resolved filename from siFindSource
