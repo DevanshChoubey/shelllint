@@ -3,10 +3,12 @@
 // parse state, ids and spans, here-doc bookkeeping, parse notes and problems,
 // the context stack, and the convenience combinators.
 //
-// DIVERGENCE: Haskell lists that are only ever prepended to (`parseNotes`,
-// `parseProblems`, `pendingHereDocs`) are stored oldest-first, so backtracking
-// can truncate them; the Haskell order is the reverse. `contextStack` keeps
-// the Haskell order (index 0 is the innermost context).
+// DIVERGENCE: Haskell lists that are only ever prepended to and rolled back
+// in bulk (`parseNotes`, `parseProblems`) are stored oldest-first in a Vec, so
+// backtracking can truncate them; the Haskell order is the reverse.
+// `contextStack` and `pendingHereDocs` are shared cons lists (`PList`) in the
+// Haskell order (innermost / newest first), so snapshots of them are O(1) as
+// in Haskell.
 //
 // DIVERGENCE: `positionMap` lives in the `Ast` arena (`Ast::span`), with the
 // file of each end kept alongside in `UserState`; `lastId` is derived from the
@@ -18,6 +20,7 @@
 // unknown error) leaves the carried error unchanged.
 
 use std::collections::BTreeMap;
+use std::rc::Rc;
 
 use shellcheck_core::ast::{Annotation, Ast, Dashed, Id, Quoted, Token};
 use shellcheck_core::interface::{Code, Severity, Shell, SystemInterface};
@@ -43,9 +46,128 @@ impl ParseNote {
     }
 }
 
+/// An immutable Haskell-style list whose clones share structure, so copying
+/// one (a snapshot, `Ms.get`) is O(1). Iteration is head (newest) first.
+pub struct PList<T>(Option<Rc<PNode<T>>>);
+
+struct PNode<T> {
+    head: T,
+    tail: PList<T>,
+}
+
+impl<T> PList<T> {
+    pub const fn new() -> Self {
+        PList(None)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_none()
+    }
+
+    /// O(n); for tests and diagnostics.
+    pub fn len(&self) -> usize {
+        self.iter().count()
+    }
+
+    /// `x : list`
+    pub fn push(&mut self, head: T) {
+        let tail = std::mem::take(self);
+        self.0 = Some(Rc::new(PNode { head, tail }));
+    }
+
+    /// Drop the head; `tail` (no-op on an empty list).
+    pub fn drop_head(&mut self) {
+        if let Some(rc) = self.0.take() {
+            match Rc::try_unwrap(rc) {
+                Ok(mut node) => *self = std::mem::take(&mut node.tail),
+                Err(rc) => *self = rc.tail.clone(),
+            }
+        }
+    }
+
+    pub fn iter(&self) -> PListIter<'_, T> {
+        PListIter(self.0.as_deref())
+    }
+
+    /// Are these the same list object (an O(1) equality shortcut)?
+    pub fn ptr_eq(&self, other: &Self) -> bool {
+        match (&self.0, &other.0) {
+            (None, None) => true,
+            (Some(a), Some(b)) => Rc::ptr_eq(a, b),
+            _ => false,
+        }
+    }
+}
+
+impl<T> Default for PList<T> {
+    fn default() -> Self {
+        PList(None)
+    }
+}
+
+impl<T> Clone for PList<T> {
+    fn clone(&self) -> Self {
+        PList(self.0.clone())
+    }
+}
+
+impl<T> Drop for PList<T> {
+    // Iterative, so a long unshared list does not recurse once per node.
+    fn drop(&mut self) {
+        let mut cur = self.0.take();
+        while let Some(rc) = cur {
+            match Rc::try_unwrap(rc) {
+                Ok(mut node) => cur = node.tail.0.take(),
+                Err(_) => break,
+            }
+        }
+    }
+}
+
+impl<T: PartialEq> PartialEq for PList<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ptr_eq(other) || self.iter().eq(other.iter())
+    }
+}
+
+impl<T: Eq> Eq for PList<T> {}
+
+impl<T: std::fmt::Debug> std::fmt::Debug for PList<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+
+impl<T> FromIterator<T> for PList<T> {
+    /// The first item becomes the head.
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let items: Vec<T> = iter.into_iter().collect();
+        let mut list = PList::new();
+        for x in items.into_iter().rev() {
+            list.push(x);
+        }
+        list
+    }
+}
+
+pub struct PListIter<'a, T>(Option<&'a PNode<T>>);
+
+impl<'a, T> Iterator for PListIter<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<&'a T> {
+        let node = self.0?;
+        self.0 = node.tail.0.as_deref();
+        Some(&node.head)
+    }
+}
+
+/// `contextStack`: innermost first, shared on copy.
+pub type ContextStack = PList<Context>;
+
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Context {
-    ContextName(SourcePos, String),
+    // DIVERGENCE: the name is always a literal, so it is not allocated.
+    ContextName(SourcePos, &'static str),
     ContextAnnotation(Vec<Annotation>),
     ContextSource(String),
 }
@@ -53,7 +175,7 @@ pub enum Context {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum HereDocContext {
     /// on linefeed, read this T_HereDoc
-    HereDocPending(Id, Dashed, Quoted, String, Vec<Context>),
+    HereDocPending(Id, Dashed, Quoted, String, ContextStack),
 }
 
 /// `data UserState`: everything that rolls back on backtracking.
@@ -67,18 +189,18 @@ pub struct UserState {
     pub parse_notes: Vec<ParseNote>,
     /// `Map.insert` log, oldest first; later entries win.
     pub here_doc_map: Vec<(Id, Vec<Id>)>,
-    /// Oldest first (the order `popPendingHereDocs` returns).
-    pub pending_here_docs: Vec<HereDocContext>,
+    /// Newest first, as in Haskell; shared on copy.
+    pub pending_here_docs: PList<HereDocContext>,
 }
 
-/// What a checkpoint needs to restore a `UserState`. Everything but the
-/// pending here-docs (usually empty) is a length to truncate back to.
+/// What a checkpoint needs to restore a `UserState`: lengths to truncate back
+/// to, plus the (shared, O(1)) pending here-doc list.
 #[derive(Clone, Debug)]
 pub struct UserSnapshot {
     ast_len: u32,
     parse_notes_len: usize,
     here_doc_map_len: usize,
-    pending_here_docs: Vec<HereDocContext>,
+    pending_here_docs: PList<HereDocContext>,
 }
 
 impl UserSnapshot {
@@ -102,7 +224,7 @@ impl UserState {
         self.span_files.truncate(s.ast_len as usize);
         self.parse_notes.truncate(s.parse_notes_len);
         self.here_doc_map.truncate(s.here_doc_map_len);
-        if self.pending_here_docs != s.pending_here_docs {
+        if !self.pending_here_docs.ptr_eq(&s.pending_here_docs) {
             self.pending_here_docs = s.pending_here_docs.clone();
         }
     }
@@ -129,10 +251,33 @@ pub struct IncompleteInterval(pub SourcePos);
 /// Store potential parse problems outside of parsec
 #[derive(Clone, Debug, Default)]
 pub struct SystemState {
-    /// Innermost first, as in Haskell.
-    pub context_stack: Vec<Context>,
+    /// Innermost first, as in Haskell; shared on copy.
+    pub context_stack: ContextStack,
     /// Oldest first.
     pub parse_problems: Vec<ParseNote>,
+}
+
+/// An O(1) copy of a `SystemState` that can restore it, given that the code
+/// run in between only appends to `parse_problems` (all parse-problem writes
+/// go through `add_parse_problem`, and every other restore returns to a
+/// later or equal length).
+pub struct SystemSnapshot {
+    context_stack: ContextStack,
+    parse_problems_len: usize,
+}
+
+impl SystemState {
+    /// `Ms.get`
+    pub fn save(&self) -> SystemSnapshot {
+        SystemSnapshot { context_stack: self.context_stack.clone(), parse_problems_len: self.parse_problems.len() }
+    }
+
+    /// `Ms.put` of a state saved earlier.
+    pub fn restore(&mut self, s: &SystemSnapshot) {
+        debug_assert!(self.parse_problems.len() >= s.parse_problems_len);
+        self.parse_problems.truncate(s.parse_problems_len);
+        self.context_stack = s.context_stack.clone();
+    }
 }
 
 /// `initialSystemState`
@@ -247,7 +392,10 @@ impl<'a> P<'a> {
 
     /// Returns the pending here-docs oldest first (Haskell: `reverse`).
     pub fn pop_pending_here_docs(&mut self) -> Vec<HereDocContext> {
-        std::mem::take(&mut self.user.pending_here_docs)
+        let pending = std::mem::take(&mut self.user.pending_here_docs);
+        let mut docs: Vec<HereDocContext> = pending.iter().cloned().collect();
+        docs.reverse();
+        docs
     }
 
     // DIVERGENCE: `getMap` is not ported; spans are read with `get_span_for_id`.
@@ -265,9 +413,9 @@ impl<'a> P<'a> {
     }
 
     pub fn ignore_problems_of<T>(&mut self, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
-        let system_state = self.sys.clone();
+        let system_state = self.sys.save();
         let r = p(self)?;
-        self.sys = system_state;
+        self.sys.restore(&system_state);
         Ok(r)
     }
 
@@ -326,25 +474,22 @@ impl<'a> P<'a> {
         self.parse_problem_at(pos, level, code, msg);
     }
 
-    pub fn set_current_contexts(&mut self, c: Vec<Context>) {
+    pub fn set_current_contexts(&mut self, c: ContextStack) {
         self.sys.context_stack = c;
     }
 
-    /// Innermost first.
-    pub fn get_current_contexts(&self) -> Vec<Context> {
+    /// Innermost first; O(1) (shared).
+    pub fn get_current_contexts(&self) -> ContextStack {
         self.sys.context_stack.clone()
     }
 
-    pub fn pop_context(&mut self) -> Option<Context> {
-        if self.sys.context_stack.is_empty() {
-            None
-        } else {
-            Some(self.sys.context_stack.remove(0))
-        }
+    // DIVERGENCE: `popContext` returns the popped item, which no caller uses.
+    pub fn pop_context(&mut self) {
+        self.sys.context_stack.drop_head();
     }
 
     pub fn push_context(&mut self, c: Context) {
-        self.sys.context_stack.insert(0, c);
+        self.sys.context_stack.push(c);
     }
 
     pub fn parse_problem_at_with_end(&mut self, start: SourcePos, end: SourcePos, level: Severity, code: Code, msg: &str) {
@@ -563,7 +708,7 @@ impl<'a> P<'a> {
         )
     }
 
-    pub fn swap_context<T>(&mut self, contexts: Vec<Context>, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
+    pub fn swap_context<T>(&mut self, contexts: ContextStack, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         self.parsec_bracket(
             |q| {
                 let old = q.get_current_contexts();
@@ -592,12 +737,53 @@ impl<'a> P<'a> {
         )
     }
 
-    pub fn called<T>(&mut self, s: &str, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
+    pub fn called<T>(&mut self, s: &'static str, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         let pos = self.get_position();
-        self.with_context(Context::ContextName(pos, s.to_string()), p)
+        self.with_context(Context::ContextName(pos, s), p)
     }
 
     pub fn with_annotations<T>(&mut self, anns: Vec<Annotation>, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         if anns.is_empty() { p(self) } else { self.with_context(Context::ContextAnnotation(anns), p) }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn plist_is_a_shared_cons_list() {
+        let mut a: PList<u32> = [1, 2, 3].into_iter().collect();
+        assert_eq!(a.iter().copied().collect::<Vec<_>>(), vec![1, 2, 3]);
+        let b = a.clone();
+        assert!(a.ptr_eq(&b));
+        a.push(0);
+        a.drop_head();
+        a.drop_head();
+        assert_eq!(a.iter().copied().collect::<Vec<_>>(), vec![2, 3]);
+        assert_eq!(b.iter().copied().collect::<Vec<_>>(), vec![1, 2, 3]);
+        assert_eq!(b.len(), 3);
+        let mut e: PList<u32> = PList::new();
+        e.drop_head();
+        assert!(e.is_empty());
+        // A long unshared list drops without recursing per node.
+        let mut long = PList::new();
+        for i in 0..1_000_000u32 {
+            long.push(i);
+        }
+        drop(long);
+    }
+
+    #[test]
+    fn system_snapshot_restores_problems_and_contexts() {
+        let pos = SourcePos { file: FileId(0), line: 1, column: 1 };
+        let mut sys = SystemState::default();
+        sys.parse_problems.push(ParseNote::new(pos, pos, Severity::ErrorC, 1, "a"));
+        let saved = sys.save();
+        sys.context_stack.push(Context::ContextName(pos, "x"));
+        sys.parse_problems.push(ParseNote::new(pos, pos, Severity::ErrorC, 2, "b"));
+        sys.restore(&saved);
+        assert_eq!(sys.parse_problems.len(), 1);
+        assert!(sys.context_stack.is_empty());
     }
 }

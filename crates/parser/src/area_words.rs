@@ -364,20 +364,20 @@ impl<'a> P<'a> {
         also_on_success: bool,
         parser: impl FnOnce(&mut Self) -> PR<T>,
     ) -> PR<T> {
-        let mut context = self.sys.clone();
+        let mut context = self.sys.save();
         self.alt_with(
             &mut context,
             // success
             |p, c| {
                 let res = p.try_(parser)?;
                 if also_on_success {
-                    p.sys = c.clone();
+                    p.sys.restore(c);
                 }
                 Ok(res)
             },
             // failure
             |p, c| {
-                p.sys = c.clone();
+                p.sys.restore(c);
                 p.fail("")
             },
         )

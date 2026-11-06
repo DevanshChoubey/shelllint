@@ -20,7 +20,7 @@ use shellcheck_core::prelude::please_report;
 use crate::ParseResult;
 use crate::engine::{Input, P, PR, ParseError, SourcePos};
 use crate::state::{
-    Context, Environment, ParseNote, UserState, code_for_parse_note, context_item_disables_code, initial_user_state,
+    Context, ContextStack, Environment, ParseNote, UserState, code_for_parse_note, context_item_disables_code, initial_user_state,
 };
 
 // annotations imports
@@ -862,7 +862,7 @@ pub(crate) fn parse_shell(env: Environment<'_>, name: &str, contents: &str) -> P
         out
     }
     // A final pass for ignoring parse errors after failed parsing
-    fn is_ignored(stack: &[Context], note: &ParseNote) -> bool {
+    fn is_ignored(stack: &ContextStack, note: &ParseNote) -> bool {
         stack.iter().any(|c| context_item_disables_code(false, code_for_parse_note(note), c))
     }
 
@@ -900,7 +900,7 @@ pub(crate) fn parse_shell(env: Environment<'_>, name: &str, contents: &str) -> P
     }
 }
 
-pub(crate) fn notes_for_context(list: &[Context]) -> Vec<ParseNote> {
+pub(crate) fn notes_for_context(list: &ContextStack) -> Vec<ParseNote> {
     let first = |(pos, str): (SourcePos, &str)| {
         ParseNote::new(pos, pos, ErrorC, 1073, &format!("Couldn't parse this {str}. Fix to allow more checks."))
     };
@@ -910,7 +910,7 @@ pub(crate) fn notes_for_context(list: &[Context]) -> Vec<ParseNote> {
     let names: Vec<(SourcePos, &str)> = list
         .iter()
         .filter_map(|c| match c {
-            Context::ContextName(pos, str) => Some((*pos, str.as_str())),
+            Context::ContextName(pos, str) => Some((*pos, *str)),
             _ => None,
         })
         .collect();
@@ -1150,12 +1150,14 @@ mod tests {
     fn notes_for_context_uses_first_two_names() {
         let mut p = P::new(test_environment(), "-", "");
         let (a, b, c) = (pos(&mut p, 1, 1), pos(&mut p, 2, 1), pos(&mut p, 3, 1));
-        let ctx = vec![
-            Context::ContextName(a, "if expression".to_string()),
+        let ctx: ContextStack = [
+            Context::ContextName(a, "if expression"),
             Context::ContextSource("x".to_string()),
-            Context::ContextName(b, "function".to_string()),
-            Context::ContextName(c, "case item".to_string()),
-        ];
+            Context::ContextName(b, "function"),
+            Context::ContextName(c, "case item"),
+        ]
+        .into_iter()
+        .collect();
         let notes = notes_for_context(&ctx);
         assert_eq!(notes.len(), 2);
         assert_eq!((notes[0].code, notes[0].severity, notes[0].start), (1073, ErrorC, a));
