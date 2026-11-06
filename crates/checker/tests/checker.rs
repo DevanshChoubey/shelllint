@@ -1559,3 +1559,65 @@ fn glob_classes_with_regex_set_syntax_do_not_panic() {
     // A section header with such a class goes through the whole parse.
     assert_eq!(parse_editor_config("[foo[[].sh]\nshellcheck.shell=sh\n", "foo[.sh"), "\nshell=sh\n");
 }
+
+// ---- fix round 2 (oracle review 2) ------------------------------------------
+
+/// (code, line, column, end line, end column) of each comment for
+/// `shellcheck -f json1 --norc -o all` on `script`.
+fn oracle_positions(script: &str) -> Vec<(Code, i64, i64, i64, i64)> {
+    positioned(&mocked_system_interface(vec![]), oracle_spec("t.sh", script))
+        .into_iter()
+        .map(|(c, l, col, el, ec, _)| (c, l, col, el, ec))
+        .collect()
+}
+
+#[test]
+fn shebang_words_do_not_split_on_unicode_line_separators() {
+    // U+0085, U+2028 and U+2029 are White_Space in Rust but not isSpace in
+    // GHC, so `words` keeps them inside a word.
+    // oracle: a.sh 1:1 1008, 2:4-2:5 2078 (the shell is not recognised)
+    for sep in ["\u{85}", "\u{2028}", "\u{2029}"] {
+        let r = oracle_positions(&format!("#!/usr/bin/env{sep}sh\n[[ a ]]\n"));
+        assert_eq!(r, vec![(1008, 1, 1, 1, 1), (2078, 2, 4, 2, 5)], "{sep:?}");
+        let r = oracle_positions(&format!("#!/usr/bin/env -S{sep}bash\n[[ a ]]\n"));
+        assert_eq!(r, vec![(1008, 1, 1, 1, 1), (2078, 2, 4, 2, 5)], "{sep:?}");
+        // oracle: b.sh no comments (one parameter, so no SC2096)
+        assert_eq!(oracle_positions(&format!("#!/bin/bash -e{sep}-u\necho\n")), vec![], "{sep:?}");
+        // oracle: c.sh 1:1 1008 (no SC2246: the first word is not a directory)
+        assert_eq!(oracle_positions(&format!("#!/bin/{sep}bash\necho\n")), vec![(1008, 1, 1, 1, 1)], "{sep:?}");
+    }
+    // oracle: e.sh no comments
+    assert_eq!(oracle_positions("#!/bin/bash \u{85}/x\necho\n"), vec![]);
+}
+
+#[test]
+fn printf_format_width_d_is_a_literal_d_as_in_regex_tdfa() {
+    // Haskell's "\\d" in the printf format regex is a literal 'd' in
+    // regex-tdfa, not a digit class.
+    // oracle: only 5:8-5:15 2183 ('%d.*f' counts 'd' as the width)
+    let script = "#!/bin/bash\nprintf '%5.*f\\n' 2\nprintf '%5*d\\n' 3\nprintf '%1.*f' 1\nprintf '%d.*f' 1\n\
+                  printf '%*.*f' 1 2 3\nprintf '%dd' 1\n";
+    assert_eq!(oracle_positions(script), vec![(2183, 5, 8, 5, 15)]);
+}
+
+#[test]
+fn negated_regex_classes_do_not_match_newline() {
+    // regex-tdfa's multiline mode keeps '\n' out of `[^...]`.
+    // SC2016 "`[^`]+`": oracle no comments for a backtick span across lines.
+    assert_eq!(oracle_positions("#!/bin/sh\necho 'Run `make\ninstall` first'\n"), vec![]);
+    assert_eq!(oracle_positions("#!/bin/sh\necho 'Run `make install` first'\n"), vec![(2016, 2, 6, 2, 32)]);
+    // SC2022 "[^a-zA-Z1-9]\\*": the '\n' before '*' does not count as a
+    // non-letter, so 'a*' is the suspicious part.
+    // SC3057 ":[^-=?+]": "${x:\n}" is not string indexing.
+    // SC3041 "-[^-]": "-\n" is not a set flag.
+    // oracle: 2:6-3:5 2022, 4:7-5:2 2154
+    assert_eq!(
+        oracle_positions("#!/bin/sh\ngrep \"x\n*a*\" f\necho \"${x:\n}\"\nset \"-\n\"\n"),
+        vec![(2022, 2, 6, 3, 5), (2154, 4, 7, 5, 2)]
+    );
+    // oracle (dash): 2:7-3:2 2154, 3:5-3:11 3057 (only the real `${x:1}`)
+    assert_eq!(
+        oracle_positions("#!/bin/dash\necho \"${x:\n}\" \"${x:1}\"\nset \"-\n\" -e\n"),
+        vec![(2154, 2, 7, 3, 2), (3057, 3, 5, 3, 11)]
+    );
+}

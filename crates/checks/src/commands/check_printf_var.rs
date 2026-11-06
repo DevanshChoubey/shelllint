@@ -158,7 +158,9 @@ static RE: LazyLock<Regex> = LazyLock::new(|| {
     // constructed based on specifications in "man printf"
     // flags, field width, precision, length modifier, format character, rest
     // DIVERGENCE: `(\n|.)*` is written as `(?s:.*)` (same language, leftmost-first safe).
-    mk_regex(r"^#?-?\+? ?0?(\*|\d*)\.?(\d*|\*)(hh|h|l|ll|q|L|j|z|Z|t)?([diouxXfFeEgGaAcsbqQSC])((?s:.*))")
+    // regex-tdfa has no `\d` class: Haskell's `\\d` matches a literal 'd', so
+    // the width and precision groups are `(\*|d*)` and `(d*|\*)` (bug-compatible).
+    mk_regex(r"^#?-?\+? ?0?(\*|d*)\.?(d*|\*)(hh|h|l|ll|q|L|j|z|Z|t)?([diouxXfFeEgGaAcsbqQSC])((?s:.*))")
 });
 
 /// Returns the characters to emit before continuing, and the remaining input to

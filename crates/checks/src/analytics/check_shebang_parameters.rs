@@ -9,6 +9,7 @@ use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::interface::{Severity, TokenComment};
 use shellcheck_core::regex::{matches, mk_regex};
+use shellcheck_core::unicode::words;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -26,8 +27,7 @@ fn check_shebang_parameters(p: &Params<'_>, t: Id) -> Vec<TokenComment> {
         Token::T_Annotation(_, t) => check_shebang_parameters(p, *t),
         Token::T_Script(sb_id, _) => match p.ast.get(*sb_id) {
             Token::T_Literal(sb) => {
-                // Haskell `words` splits on `isSpace`, as `split_whitespace` does.
-                let is_multi_word = sb.split_whitespace().count() > 2 && !matches(sb, &RE);
+                let is_multi_word = words(sb).len() > 2 && !matches(sb, &RE);
                 if is_multi_word {
                     vec![make_comment(
                         Severity::ErrorC,

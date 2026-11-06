@@ -271,7 +271,10 @@ pub fn check_script_codes(script: &str, shell: Option<Shell>) -> Vec<Code> {
 /// Like the Haskell, overlong forms are accepted.
 // DIVERGENCE: the Haskell decodes UTF-16 surrogate code points (U+D800 to
 // U+DFFF) to a `Char`; Rust's `char` cannot hold them, so they become
-// U+FFFD, still one character (columns match the oracle's).
+// U+FFFD, still one character (columns match the oracle's). Only message
+// text that echoes such a character differs (the oracle prints it as a lone
+// surrogate, e.g. SC1042 close-match text). A faithful fix would need a
+// non-`str` text type through parser and checks, so it is not attempted.
 pub fn decode_string(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len());
     let mut i = 0;
