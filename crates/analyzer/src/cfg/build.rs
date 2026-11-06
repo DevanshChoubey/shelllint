@@ -10,7 +10,8 @@
 // same order `tell` emits them. The `[(Id, Node)]` association list is not
 // materialised (see `Association`).
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::cell::OnceCell;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -67,8 +68,9 @@ const NO_CELL: u32 = u32::MAX;
 /// The `[(Id, Node)]` association of `CFW`: every node created while a
 /// token was on the `cfTokenStack` belongs to that token.
 // DIVERGENCE: instead of one `(Id, Node)` pair per stack element per node,
-// each node records the top of an immutable linked token stack, and the
-// pairs are rebuilt on demand by `nodes_for`.
+// each node records the top of an immutable linked token stack. The
+// `cfIdToNodes` map is built from these stacks in one pass, the first time
+// `nodes_for` is called (Haskell's map is lazy, too).
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Association {
     /// `(token, rest of the stack)`
@@ -77,24 +79,33 @@ pub(crate) struct Association {
     node_cell: Vec<u32>,
     /// `remapHelper recursiveRemapping` per original node.
     remap: Vec<Node>,
+    /// `cfIdToNodes`, built on first use; each list is sorted and
+    /// deduplicated (a compact `S.Set Node`).
+    id_to_nodes: OnceCell<HashMap<Id, Vec<Node>>>,
 }
 
 impl Association {
     /// `M.lookup id $ M.fromListWith S.union $ map (\(id, n) -> (id, S.singleton n)) association`
     pub(crate) fn nodes_for(&self, id: Id) -> Option<BTreeSet<Node>> {
-        let mut out = BTreeSet::new();
+        self.id_to_nodes.get_or_init(|| self.build_index()).get(&id).map(|ns| ns.iter().copied().collect())
+    }
+
+    fn build_index(&self) -> HashMap<Id, Vec<Node>> {
+        let mut out: HashMap<Id, Vec<Node>> = HashMap::new();
         for (n, &top) in self.node_cell.iter().enumerate() {
+            let node = self.remap[n];
             let mut c = top;
             while c != NO_CELL {
                 let (t, rest) = self.cells[c as usize];
-                if t == id {
-                    out.insert(self.remap[n]);
-                    break;
-                }
+                out.entry(t).or_default().push(node);
                 c = rest;
             }
         }
-        if out.is_empty() { None } else { Some(out) }
+        for ns in out.values_mut() {
+            ns.sort_unstable();
+            ns.dedup();
+        }
+        out
     }
 }
 
@@ -1347,18 +1358,20 @@ fn structural_collapse(
         let (k, v) = if a < b { (b, a) } else { (a, b) };
         remapping.insert(k, v);
     }
-    let recursive_lookup = |mut node: Node| {
-        while let Some(&x) = remapping.get(&node) {
-            // DIVERGENCE: Haskell loops forever on a structural self loop
-            // (which the builder never creates); stop instead.
-            if x == node {
-                break;
-            }
-            node = x;
-        }
-        node
-    };
-    let recursive: BTreeMap<Node, Node> = remapping.keys().map(|&c| (c, recursive_lookup(c))).collect();
+    // `recursiveRemapping = M.mapWithKey (\c _ -> recursiveLookup remapping c) remapping`
+    //
+    // DIVERGENCE (performance only): every key maps to a smaller node, so
+    // walking the keys in ascending order lets each lookup reuse the result
+    // for its target instead of following the chain again. Following every
+    // chain afresh is quadratic in the chain length (one simple command with
+    // 20000 words); Haskell avoids that only because the values are lazy.
+    // Haskell loops forever on a structural self loop (which the builder
+    // never creates); a self loop maps to itself here.
+    let mut recursive: BTreeMap<Node, Node> = BTreeMap::new();
+    for (&c, &x) in &remapping {
+        let target = if x == c { c } else { recursive.get(&x).copied().unwrap_or(x) };
+        recursive.insert(c, target);
+    }
     (edges_to_collapse, recursive)
 }
 

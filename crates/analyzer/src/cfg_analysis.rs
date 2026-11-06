@@ -211,10 +211,20 @@ impl VariableProperties {
     }
     /// `S.toAscList`: the member sets, in Haskell `Set` order.
     pub fn sets(self) -> Vec<PropSet> {
-        let mut v: Vec<PropSet> =
-            (0..16u8).filter(|b| self.0 & (1 << b) != 0).map(PropSet::from_bits).collect();
-        v.sort();
-        v
+        let ranked = self.ranked();
+        (0..16u8).filter(|r| ranked & (1 << r) != 0).map(PropSet::from_rank).collect()
+    }
+    /// The member sets as a bit set over `PropSet::rank` (bit r = the set
+    /// at rank r), so that ascending bits are Haskell `Set` order.
+    fn ranked(self) -> u16 {
+        let mut out = 0u16;
+        let mut bits = self.0;
+        while bits != 0 {
+            let b = bits.trailing_zeros() as u8;
+            out |= 1 << PropSet::from_bits(b).rank();
+            bits &= bits - 1;
+        }
+        out
     }
     pub fn contains(self, s: PropSet) -> bool {
         self.0 & (1 << s.bits()) != 0
@@ -222,14 +232,20 @@ impl VariableProperties {
     pub fn is_empty(self) -> bool {
         self.0 == 0
     }
+    /// The `PropSet`s (as bits of `self.0`) that contain `prop`.
+    fn having(prop: CFVariableProp) -> u16 {
+        // Bit pattern b contains prop number i iff bit i of b is set.
+        const HAVING: [u16; 4] = [0xAAAA, 0xCCCC, 0xF0F0, 0xFF00];
+        HAVING[prop as usize]
+    }
     /// `any (S.member prop)`: some execution path has the property.
     pub fn any_has(self, prop: CFVariableProp) -> bool {
-        self.sets().into_iter().any(|s| s.contains(prop))
+        self.0 & Self::having(prop) != 0
     }
     /// `all (S.member prop)`: every execution path has the property
     /// (vacuously true for the empty set).
     pub fn all_have(self, prop: CFVariableProp) -> bool {
-        self.sets().into_iter().all(|s| s.contains(prop))
+        self.0 & !Self::having(prop) == 0
     }
     /// `S.union`
     pub fn union(self, other: Self) -> Self {
@@ -248,8 +264,27 @@ impl VariableProperties {
 }
 
 impl Ord for VariableProperties {
+    /// Lexicographic on the ascending lists of member sets (`self.sets()`),
+    /// without building them: the lists agree up to the least set `d` in
+    /// only one of them. The list holding `d` is smaller if the other one
+    /// continues past `d` (with a set greater than `d`), and greater if the
+    /// other one ends there.
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.sets().cmp(&other.sets())
+        use std::cmp::Ordering::*;
+        let (a, b) = (self.ranked(), other.ranked());
+        let diff = a ^ b;
+        if diff == 0 {
+            return Equal;
+        }
+        let d = diff.trailing_zeros();
+        let above = |x: u16| d < 15 && x >> (d + 1) != 0;
+        if a & (1 << d) != 0 {
+            if above(b) { Less } else { Greater }
+        } else if above(a) {
+            Greater
+        } else {
+            Less
+        }
     }
 }
 impl PartialOrd for VariableProperties {
@@ -303,4 +338,36 @@ pub fn variable_may_be_declared_integer(state: &ProgramState, var: &str) -> Opti
 pub fn variable_may_be_assigned_integer(state: &ProgramState, var: &str) -> Option<bool> {
     let value = state.variable_in_scope(var)?;
     Some(value.variable_value.numerical_status >= NumericalStatus::NumericalStatusMaybe)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn variable_properties_order_and_queries() {
+        // A deterministic sample of the 2^16 values, plus the small ones.
+        let mut xs: Vec<u16> = (0..256).collect();
+        let mut seed = 0x2545_f491u32;
+        for _ in 0..600 {
+            seed ^= seed << 13;
+            seed ^= seed >> 17;
+            seed ^= seed << 5;
+            xs.push(seed as u16);
+        }
+        for &a in &xs {
+            let va = VariableProperties(a);
+            let mut naive: Vec<PropSet> = (0..16u8).filter(|b| a & (1 << b) != 0).map(PropSet::from_bits).collect();
+            naive.sort();
+            assert_eq!(va.sets(), naive);
+            for prop in CFVariableProp::ALL {
+                assert_eq!(va.any_has(prop), naive.iter().any(|s| s.contains(prop)));
+                assert_eq!(va.all_have(prop), naive.iter().all(|s| s.contains(prop)));
+            }
+            for &b in &xs {
+                let vb = VariableProperties(b);
+                assert_eq!(va.cmp(&vb), va.sets().cmp(&vb.sets()), "{a:#x} {b:#x}");
+            }
+        }
+    }
 }

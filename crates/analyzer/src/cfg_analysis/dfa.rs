@@ -865,6 +865,15 @@ impl<'g> Ctx<'g> {
         // result starts as `a` and only keys whose merged value differs from
         // `a`'s are inserted, so it shares structure with `a`. The reader is
         // called for the same keys in the same order.
+        //
+        // Known cost: like Haskell's walk, this is O(|a| + |b|) per join even
+        // when the two maps share almost everything, so many variables plus
+        // many joins (an if-chain that assigns a new variable per branch) is
+        // quadratic overall; `pmap_eq` in `process` is the same. Walking
+        // only the keys written since a common ancestor would not be
+        // faithful: the reader records a StateDependency for every key that
+        // is in only one map, and those dependencies decide which cached
+        // function results are reused.
         let mut out = a.storage.clone();
         let mut i1 = a.storage.iter().peekable();
         let mut i2 = b.storage.iter().peekable();

@@ -109,7 +109,7 @@ pub struct Params<'a> {
     /// Whether this script has 'shopt -s execfail' anywhere.
     pub has_execfail: bool,
     /// A linear (bad) analysis of data flow
-    pub variable_flow: Vec<StackData>,
+    pub variable_flow: VariableFlow,
     /// The shell type, such as Bash or Ksh
     pub shell_type: Shell,
     /// True if shell type was forced via flags
@@ -119,6 +119,55 @@ pub struct Params<'a> {
     // `Scratch::params`) does not copy the analysis. Use
     // `params.cfg_analysis.as_deref()` for Haskell's `cfgAnalysis params`.
     pub cfg_analysis: Option<std::rc::Rc<CfgAnalysis>>,
+    /// Not in Haskell: a reusable copy of `ast` for `checkCommand`'s
+    /// synthetic `builtin X` commands (see `api::check_command`). Cloning
+    /// `Params` gives the clone an empty one.
+    pub builtin_scratch: BuiltinScratch,
+}
+
+/// `variableFlow :: [StackData]`
+// DIVERGENCE (performance only): shared behind an `Rc`, so cloning `Params`
+// does not copy it. It derefs to the `Vec` and iterates like one.
+#[derive(Clone, Debug, Default)]
+pub struct VariableFlow(std::rc::Rc<Vec<StackData>>);
+
+impl From<Vec<StackData>> for VariableFlow {
+    fn from(v: Vec<StackData>) -> Self {
+        VariableFlow(std::rc::Rc::new(v))
+    }
+}
+
+impl std::ops::Deref for VariableFlow {
+    type Target = Vec<StackData>;
+    fn deref(&self) -> &Vec<StackData> {
+        &self.0
+    }
+}
+
+impl<'b> IntoIterator for &'b VariableFlow {
+    type Item = &'b StackData;
+    type IntoIter = std::slice::Iter<'b, StackData>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
+    }
+}
+
+/// A lazily made copy of `Params::ast`, reused by every `builtin X`
+/// command of the script instead of copying the arena per command.
+#[derive(Default)]
+pub struct BuiltinScratch(pub(crate) RefCell<Option<Ast>>);
+
+impl Clone for BuiltinScratch {
+    /// A clone may point at a different `ast`, so it starts empty.
+    fn clone(&self) -> Self {
+        BuiltinScratch::default()
+    }
+}
+
+impl std::fmt::Debug for BuiltinScratch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("BuiltinScratch")
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -342,10 +391,11 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             _ => false,
         },
         shell_type_specified: spec.shell_type.is_some() || spec.fallback_shell.is_some(),
-        variable_flow: vec![],
+        variable_flow: VariableFlow::default(),
         cfg_analysis: None,
+        builtin_scratch: BuiltinScratch::default(),
     };
-    params.variable_flow = get_variable_flow(&params, root);
+    params.variable_flow = get_variable_flow(&params, root).into();
     // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`
     let cf_params = CfgParameters { cf_lastpipe: params.has_lastpipe, cf_pipefail: params.has_pipefail };
     params.cfg_analysis = if extended_analysis {

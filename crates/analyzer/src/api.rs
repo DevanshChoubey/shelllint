@@ -249,15 +249,32 @@ fn check_command(map: &CommandMap, p: &Params<'_>, t: Id, c: &mut Comments) {
         let selected_builtin = only_literal_string(p.ast, rest[0]);
         let Some(fs) = map.exactly.get(selected_builtin.as_str()) else { return };
         // DIVERGENCE: `t' = T_SimpleCommand id cmdPrefix rest` is a synthetic
-        // token with the same id. The arena is cloned with `t` replaced, and
-        // the checks run against that copy (only when one would run). The
-        // copy keeps the recorded parents, so `parent(rest[i])` is `t`, which
-        // in the copy is the rewritten command; in Haskell `parentMap` maps
-        // rest[i] to the original `builtin ...` token.
-        let mut ast = p.ast.clone();
-        ast.set(t, Token::T_SimpleCommand(cmd_prefix.clone(), rest.to_vec()));
-        let p2 = Params { ast: &ast, ..p.clone() };
-        run_all(Some(fs), &p2, t, c);
+        // token with the same id. The checks run against a copy of the arena
+        // with `t` replaced (only when one would run). The copy is made once
+        // per script (`Params::builtin_scratch`); `t` is put back afterwards,
+        // so every other token in it is the original. The copy keeps the
+        // recorded parents, so `parent(rest[i])` is `t`, which in the copy is
+        // the rewritten command; in Haskell `parentMap` maps rest[i] to the
+        // original `builtin ...` token.
+        let cell = &p.builtin_scratch.0;
+        {
+            let mut scratch = cell.borrow_mut();
+            if scratch.as_ref().is_none_or(|a| a.len() != p.ast.len()) {
+                *scratch = Some(p.ast.clone());
+            }
+            if let Some(a) = scratch.as_mut() {
+                a.set(t, Token::T_SimpleCommand(cmd_prefix.clone(), rest.to_vec()));
+            }
+        }
+        {
+            let scratch = cell.borrow();
+            let Some(ast) = scratch.as_ref() else { unreachable!() };
+            let p2 = Params { ast, ..p.clone() };
+            run_all(Some(fs), &p2, t, c);
+        }
+        if let Some(a) = cell.borrow_mut().as_mut() {
+            a.set(t, p.ast.get(t).clone());
+        }
     } else {
         run_all(map.exactly.get(name.as_str()), p, t, c);
         run_all(map.basename.get(name.as_str()), p, t, c);
