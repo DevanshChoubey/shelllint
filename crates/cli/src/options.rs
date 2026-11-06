@@ -40,7 +40,6 @@ pub const FORMAT_NAMES: [&str; 7] = [
     "checkstyle", "diff", "gcc", "json", "json1", "quiet", "tty",
 ];
 
-
 #[derive(Clone, Copy)]
 pub enum ArgDescr {
     /// `NoArg $ Flag name value`
