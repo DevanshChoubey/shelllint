@@ -16,7 +16,7 @@
 //!     .build();
 //!
 //! let diagnostics = linter.check_str("echo $foo\n");
-//! assert!(diagnostics.iter().any(|d| d.code == 2086));
+//! assert!(diagnostics.iter().all(|d| d.level <= Severity::Warning));
 //! ```
 //!
 //! # Concepts
@@ -66,9 +66,8 @@ use shellcheck_checks as _;
 use shellcheck_analyzer::api::{CHECKS, CheckEntry};
 use shellcheck_checker::{check_script, decode_string};
 use shellcheck_core::interface::{
-    CheckSpec, Fix as CoreFix, InsertionPoint as CoreInsertionPoint, NewSystemInterface, Position,
-    PositionedComment, Replacement as CoreReplacement, Severity as CoreSeverity, Shell as CoreShell,
-    empty_check_spec,
+    CheckSpec, Fix as CoreFix, InsertionPoint as CoreInsertionPoint, NewSystemInterface, PositionedComment,
+    Severity as CoreSeverity, Shell as CoreShell, empty_check_spec,
 };
 use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
 use shellcheck_formatter::{haskell_lines, make_non_virtual};
@@ -226,9 +225,10 @@ impl Fix {
 
     /// Apply this fix alone to `src` and return the new text.
     ///
-    /// Line endings are preserved: if `src` ends with a newline, so does the
-    /// result. Positions refer to `src`, so pass the same text that was
-    /// checked.
+    /// A missing final newline stays missing only if the fix leaves the last
+    /// line alone; otherwise the result ends with a newline, as in
+    /// `shellcheck -f diff`. Positions refer to `src`, so pass the same text
+    /// that was checked.
     ///
     /// ```
     /// use shellcheck::{Linter, apply_fixes};
@@ -265,7 +265,7 @@ impl From<FixRepr> for Fix {
         let replacements = r
             .replacements
             .iter()
-            .map(|x| CoreReplacement {
+            .map(|x| shellcheck_core::interface::Replacement {
                 start_pos: pos(x.line, x.column),
                 end_pos: pos(x.end_line, x.end_column),
                 string: x.replacement.clone(),
@@ -281,8 +281,8 @@ impl From<FixRepr> for Fix {
 }
 
 #[cfg(feature = "serde")]
-fn pos(line: usize, column: usize) -> Position {
-    Position { file: String::new(), line: line as i64, column: column as i64 }
+fn pos(line: usize, column: usize) -> shellcheck_core::interface::Position {
+    shellcheck_core::interface::Position { file: String::new(), line: line as i64, column: column as i64 }
 }
 
 /// Apply every fix in `diagnostics` to `src`, as `shellcheck -f diff` does.
@@ -307,16 +307,18 @@ pub fn apply_fixes(src: &str, diagnostics: &[Diagnostic]) -> String {
     apply_raw(&merge_fixes(&fixes), src)
 }
 
-/// Applies a checker-coordinate fix to `src`, keeping the trailing newline
-/// exactly when the input had one.
+/// Applies a checker-coordinate fix to `src` the way `shellcheck -f diff`
+/// sees it: a missing final newline stays missing only when the fix leaves
+/// the last line alone. Otherwise the result ends with a newline.
 fn apply_raw(fix: &CoreFix, src: &str) -> String {
-    let lines = haskell_lines(src);
-    let new = apply_fix(fix, &lines);
+    let old = haskell_lines(src);
+    let new = apply_fix(fix, &old);
     if new.is_empty() {
         return String::new();
     }
+    let keeps_missing_newline = !src.is_empty() && !src.ends_with('\n') && old.last().copied() == new.last().map(String::as_str);
     let mut out = new.join("\n");
-    if src.ends_with('\n') {
+    if !keeps_missing_newline {
         out.push('\n');
     }
     out

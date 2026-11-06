@@ -58,20 +58,32 @@ fn severity_drops_less_serious_diagnostics() {
 
 #[test]
 fn diagnostics_have_positions_and_fixes() {
-    let diags = Linter::builder().shell(Shell::Sh).build().check_str("#!/bin/sh\nrm $file\n");
+    let src = "#!/bin/sh\nrm $file\n";
+    let diags = Linter::builder().shell(Shell::Sh).build().check_str(src);
     let d = diags.iter().find(|d| d.code == 2086).expect("SC2086");
     assert_eq!((d.line, d.column), (2, 4));
     assert_eq!(d.end_line, 2);
     let fix = d.fix.as_ref().expect("SC2086 has a fix");
-    assert_eq!(fix.apply("rm $file\n"), "rm \"$file\"\n");
+    // Positions refer to the whole checked script, so apply to that script.
+    assert_eq!(fix.apply(src), "#!/bin/sh\nrm \"$file\"\n");
 }
 
 #[test]
-fn fix_keeps_missing_trailing_newline() {
+fn fix_on_last_line_adds_newline_like_diff() {
+    // Changing the last line gives a newline, as `-f diff` does.
     let src = "rm $file";
     let diags = Linter::builder().shell(Shell::Sh).build().check_str(src);
     let fix = diags.iter().find_map(|d| d.fix.as_ref()).expect("a fix");
-    assert_eq!(fix.apply(src), "rm \"$file\"");
+    assert_eq!(fix.apply(src), "rm \"$file\"\n");
+}
+
+#[test]
+fn untouched_last_line_keeps_missing_newline() {
+    // The fix is on line 1, so line 2 (no newline) is unchanged.
+    let src = "rm $file\necho done";
+    let diags = Linter::builder().shell(Shell::Sh).build().check_str(src);
+    let fix = diags.iter().find_map(|d| d.fix.as_ref()).expect("a fix");
+    assert_eq!(fix.apply(src), "rm \"$file\"\necho done");
 }
 
 #[test]

@@ -45,20 +45,23 @@ fn apply_diff(src: &str, diff: &str) -> String {
                 }
                 continue;
             }
-            let (tag, text) = body.split_at(1);
+            let mut chars = body.chars();
+            // The formatter ends its output with a blank line, which is not a hunk line.
+            let Some(tag) = chars.next() else { continue };
+            let text = chars.as_str();
             match tag {
-                " " => {
+                ' ' => {
                     out.push((text.to_string(), old_nl(cursor)));
                     cursor += 1;
                 }
-                "-" => cursor += 1,
-                "+" => {
+                '-' => cursor += 1,
+                '+' => {
                     if let Some(last) = out.last_mut() {
                         last.1 = true;
                     }
                     out.push((text.to_string(), true));
                 }
-                other => panic!("unexpected diff line tag {other:?}"),
+                other => panic!("unexpected diff line tag {other:?} in {body:?}"),
             }
         }
     }
