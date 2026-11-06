@@ -1,0 +1,10 @@
+[package]
+name = "shellcheck-rs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "A Rust port of ShellCheck (work in progress)"
+
+[[bin]]
+name = "shellcheck-rs"
+path = "src/main.rs"

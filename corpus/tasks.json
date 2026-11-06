@@ -1,0 +1,7383 @@
+{
+ "source_commit": "e11f964",
+ "tasks": [
+  {
+   "id": "T001",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkEchoWc",
+     "registry": "node",
+     "source_lines": [
+      483,
+      494
+     ],
+     "lines": 12,
+     "codes": [
+      2000
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkEchoWc3"
+     ],
+     "n_tests": 1
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkPipedAssignment",
+     "registry": "node",
+     "source_lines": [
+      498,
+      501
+     ],
+     "lines": 4,
+     "codes": [
+      2036
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkPipedAssignment1",
+      "prop_checkPipedAssignment2",
+      "prop_checkPipedAssignment3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 16,
+   "n_tests": 4,
+   "codes": [
+    2000,
+    2036
+   ]
+  },
+  {
+   "id": "T002",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkAssignAteCommand",
+     "registry": "node",
+     "source_lines": [
+      509,
+      525
+     ],
+     "lines": 17,
+     "codes": [
+      2037,
+      2209
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkAssignAteCommand1",
+      "prop_checkAssignAteCommand2",
+      "prop_checkAssignAteCommand3",
+      "prop_checkAssignAteCommand4",
+      "prop_checkAssignAteCommand5",
+      "prop_checkAssignAteCommand6",
+      "prop_checkAssignAteCommand7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 7,
+   "codes": [
+    2037,
+    2209
+   ]
+  },
+  {
+   "id": "T003",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkArithmeticOpCommand",
+     "registry": "node",
+     "source_lines": [
+      529,
+      537
+     ],
+     "lines": 9,
+     "codes": [
+      2099
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkArithmeticOpCommand1",
+      "prop_checkArithmeticOpCommand2",
+      "prop_checkArithmeticOpCommand3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 9,
+   "n_tests": 3,
+   "codes": [
+    2099
+   ]
+  },
+  {
+   "id": "T004",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkWrongArithmeticAssignment",
+     "registry": "node",
+     "source_lines": [
+      540,
+      561
+     ],
+     "lines": 22,
+     "codes": [
+      2100
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkWrongArit",
+      "prop_checkWrongArit2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 22,
+   "n_tests": 2,
+   "codes": [
+    2100
+   ]
+  },
+  {
+   "id": "T005",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUuoc",
+     "registry": "optional-tree",
+     "source_lines": [
+      570,
+      578
+     ],
+     "lines": 9,
+     "codes": [
+      2002
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUuoc1",
+      "prop_checkUuoc2",
+      "prop_checkUuoc3",
+      "prop_checkUuoc3b",
+      "prop_checkUuoc3c",
+      "prop_checkUuoc4",
+      "prop_checkUuoc5",
+      "prop_checkUuoc6"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 9,
+   "n_tests": 8,
+   "codes": [
+    2002
+   ]
+  },
+  {
+   "id": "T006",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkPipePitfalls",
+     "registry": "node",
+     "source_lines": [
+      600,
+      656
+     ],
+     "lines": 57,
+     "codes": [
+      2009,
+      2010,
+      2011,
+      2012,
+      2038,
+      2126
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkPipePitfalls3",
+      "prop_checkPipePitfalls4",
+      "prop_checkPipePitfalls5",
+      "prop_checkPipePitfalls6",
+      "prop_checkPipePitfalls7",
+      "prop_checkPipePitfalls8",
+      "prop_checkPipePitfalls9",
+      "prop_checkPipePitfalls10",
+      "prop_checkPipePitfalls11",
+      "prop_checkPipePitfalls12",
+      "prop_checkPipePitfalls13",
+      "prop_checkPipePitfalls14",
+      "prop_checkPipePitfalls15",
+      "prop_checkPipePitfalls16",
+      "prop_checkPipePitfalls17",
+      "prop_checkPipePitfalls18",
+      "prop_checkPipePitfalls19",
+      "prop_checkPipePitfalls20",
+      "prop_checkPipePitfalls21",
+      "prop_checkPipePitfalls22",
+      "prop_checkPipePitfalls23"
+     ],
+     "n_tests": 21
+    }
+   ],
+   "haskell_lines": 57,
+   "n_tests": 21,
+   "codes": [
+    2009,
+    2010,
+    2011,
+    2012,
+    2038,
+    2126
+   ]
+  },
+  {
+   "id": "T007",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkShebangParameters",
+     "registry": "tree",
+     "source_lines": [
+      675,
+      681
+     ],
+     "lines": 7,
+     "codes": [
+      2096
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkShebangParameters1",
+      "prop_checkShebangParameters2",
+      "prop_checkShebangParameters3",
+      "prop_checkShebangParameters4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 7,
+   "n_tests": 4,
+   "codes": [
+    2096
+   ]
+  },
+  {
+   "id": "T008",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkShebang",
+     "registry": "tree",
+     "source_lines": [
+      700,
+      717
+     ],
+     "lines": 18,
+     "codes": [
+      2148,
+      2187,
+      2239,
+      2246
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkShebang1",
+      "prop_checkShebang2",
+      "prop_checkShebang3",
+      "prop_checkShebang4",
+      "prop_checkShebang5",
+      "prop_checkShebang6",
+      "prop_checkShebang7",
+      "prop_checkShebang8",
+      "prop_checkShebang9",
+      "prop_checkShebang10",
+      "prop_checkShebang11",
+      "prop_checkShebang12",
+      "prop_checkShebang13",
+      "prop_checkShebang14",
+      "prop_checkShebang15",
+      "prop_checkShebang16",
+      "prop_checkShebang17",
+      "prop_checkShebang18"
+     ],
+     "n_tests": 18
+    }
+   ],
+   "haskell_lines": 18,
+   "n_tests": 18,
+   "codes": [
+    2148,
+    2187,
+    2239,
+    2246
+   ]
+  },
+  {
+   "id": "T009",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkForInQuoted",
+     "registry": "node",
+     "source_lines": [
+      730,
+      751
+     ],
+     "lines": 22,
+     "codes": [
+      2041,
+      2042,
+      2043,
+      2066,
+      2258
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkForInQuoted",
+      "prop_checkForInQuoted2",
+      "prop_checkForInQuoted2a",
+      "prop_checkForInQuoted2b",
+      "prop_checkForInQuoted3",
+      "prop_checkForInQuoted4",
+      "prop_checkForInQuoted4a",
+      "prop_checkForInQuoted5",
+      "prop_checkForInQuoted6",
+      "prop_checkForInQuoted7",
+      "prop_checkForInQuoted8",
+      "prop_checkForInQuoted9"
+     ],
+     "n_tests": 12
+    }
+   ],
+   "haskell_lines": 22,
+   "n_tests": 12,
+   "codes": [
+    2041,
+    2042,
+    2043,
+    2066,
+    2258
+   ]
+  },
+  {
+   "id": "T010",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkForInCat",
+     "registry": "node",
+     "source_lines": [
+      757,
+      767
+     ],
+     "lines": 11,
+     "codes": [
+      2013
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkForInCat1",
+      "prop_checkForInCat1a",
+      "prop_checkForInCat2",
+      "prop_checkForInCat2a",
+      "prop_checkForInCat3"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 11,
+   "n_tests": 5,
+   "codes": [
+    2013
+   ]
+  },
+  {
+   "id": "T011",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkForInLs",
+     "registry": "node",
+     "source_lines": [
+      771,
+      786
+     ],
+     "lines": 16,
+     "codes": [
+      2044,
+      2045
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkForInLs",
+      "prop_checkForInLs2",
+      "prop_checkForInLs3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 16,
+   "n_tests": 3,
+   "codes": [
+    2044,
+    2045
+   ]
+  },
+  {
+   "id": "T012",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkFindExec",
+     "registry": "node",
+     "source_lines": [
+      793,
+      828
+     ],
+     "lines": 36,
+     "codes": [
+      2014,
+      2067
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFindExec1",
+      "prop_checkFindExec2",
+      "prop_checkFindExec3",
+      "prop_checkFindExec4",
+      "prop_checkFindExec5",
+      "prop_checkFindExec6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 36,
+   "n_tests": 6,
+   "codes": [
+    2014,
+    2067
+   ]
+  },
+  {
+   "id": "T013",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnquotedExpansions",
+     "registry": "node",
+     "source_lines": [
+      842,
+      857
+     ],
+     "lines": 16,
+     "codes": [
+      2046
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnquotedExpansions1",
+      "prop_checkUnquotedExpansions1a",
+      "prop_checkUnquotedExpansions2",
+      "prop_checkUnquotedExpansions3",
+      "prop_checkUnquotedExpansions3a",
+      "prop_checkUnquotedExpansions4",
+      "prop_checkUnquotedExpansions5",
+      "prop_checkUnquotedExpansions6",
+      "prop_checkUnquotedExpansions7",
+      "prop_checkUnquotedExpansions8",
+      "prop_checkUnquotedExpansions9",
+      "prop_checkUnquotedExpansions10",
+      "prop_checkUnquotedExpansions11"
+     ],
+     "n_tests": 13
+    }
+   ],
+   "haskell_lines": 16,
+   "n_tests": 13,
+   "codes": [
+    2046
+   ]
+  },
+  {
+   "id": "T014",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkRedirectToSame",
+     "registry": "node",
+     "source_lines": [
+      868,
+      920
+     ],
+     "lines": 53,
+     "codes": [
+      2094
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkRedirectToSame",
+      "prop_checkRedirectToSame2",
+      "prop_checkRedirectToSame3",
+      "prop_checkRedirectToSame4",
+      "prop_checkRedirectToSame5",
+      "prop_checkRedirectToSame6",
+      "prop_checkRedirectToSame7",
+      "prop_checkRedirectToSame8",
+      "prop_checkRedirectToSame9",
+      "prop_checkRedirectToSame10"
+     ],
+     "n_tests": 10
+    }
+   ],
+   "haskell_lines": 53,
+   "n_tests": 10,
+   "codes": [
+    2094
+   ]
+  },
+  {
+   "id": "T015",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkShorthandIf",
+     "registry": "node",
+     "source_lines": [
+      932,
+      943
+     ],
+     "lines": 12,
+     "codes": [
+      2015
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkShorthandIf",
+      "prop_checkShorthandIf2",
+      "prop_checkShorthandIf3",
+      "prop_checkShorthandIf4",
+      "prop_checkShorthandIf5",
+      "prop_checkShorthandIf6",
+      "prop_checkShorthandIf7",
+      "prop_checkShorthandIf8",
+      "prop_checkShorthandIf9",
+      "prop_checkShorthandIf10",
+      "prop_checkShorthandIf11"
+     ],
+     "n_tests": 11
+    }
+   ],
+   "haskell_lines": 12,
+   "n_tests": 11,
+   "codes": [
+    2015
+   ]
+  },
+  {
+   "id": "T016",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkDollarStar",
+     "registry": "node",
+     "source_lines": [
+      954,
+      964
+     ],
+     "lines": 11,
+     "codes": [
+      2048
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDollarStar",
+      "prop_checkDollarStar2",
+      "prop_checkDollarStar3",
+      "prop_checkDollarStar4",
+      "prop_checkDollarStar5",
+      "prop_checkDollarStar6",
+      "prop_checkDollarStar7",
+      "prop_checkDollarStar8",
+      "prop_checkDollarStar9",
+      "prop_checkDollarStar10"
+     ],
+     "n_tests": 10
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnquotedDollarAt",
+     "registry": "node",
+     "source_lines": [
+      976,
+      982
+     ],
+     "lines": 7,
+     "codes": [
+      2068
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnquotedDollarAt",
+      "prop_checkUnquotedDollarAt1",
+      "prop_checkUnquotedDollarAt2",
+      "prop_checkUnquotedDollarAt3",
+      "prop_checkUnquotedDollarAt4",
+      "prop_checkUnquotedDollarAt5",
+      "prop_checkUnquotedDollarAt6",
+      "prop_checkUnquotedDollarAt7",
+      "prop_checkUnquotedDollarAt8",
+      "prop_checkUnquotedDollarAt9",
+      "prop_checkUnquotedDollarAt10"
+     ],
+     "n_tests": 11
+    }
+   ],
+   "haskell_lines": 18,
+   "n_tests": 21,
+   "codes": [
+    2048,
+    2068
+   ]
+  },
+  {
+   "id": "T017",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkConcatenatedDollarAt",
+     "registry": "node",
+     "source_lines": [
+      988,
+      997
+     ],
+     "lines": 10,
+     "codes": [
+      2145
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkConcatenatedDollarAt1",
+      "prop_checkConcatenatedDollarAt2",
+      "prop_checkConcatenatedDollarAt3",
+      "prop_checkConcatenatedDollarAt4",
+      "prop_checkConcatenatedDollarAt5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 10,
+   "n_tests": 5,
+   "codes": [
+    2145
+   ]
+  },
+  {
+   "id": "T018",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkArrayAsString",
+     "registry": "node",
+     "source_lines": [
+      1005,
+      1015
+     ],
+     "lines": 11,
+     "codes": [
+      2124,
+      2125
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkArrayAsString1",
+      "prop_checkArrayAsString2",
+      "prop_checkArrayAsString3",
+      "prop_checkArrayAsString4",
+      "prop_checkArrayAsString5",
+      "prop_checkArrayAsString6",
+      "prop_checkArrayAsString7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 11,
+   "n_tests": 7,
+   "codes": [
+    2124,
+    2125
+   ]
+  },
+  {
+   "id": "T019",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkArrayWithoutIndex",
+     "registry": "tree",
+     "source_lines": [
+      1028,
+      1061
+     ],
+     "lines": 34,
+     "codes": [
+      2128,
+      2178,
+      2179
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkArrayWithoutIndex1",
+      "prop_checkArrayWithoutIndex2",
+      "prop_checkArrayWithoutIndex3",
+      "prop_checkArrayWithoutIndex4",
+      "prop_checkArrayWithoutIndex5",
+      "prop_checkArrayWithoutIndex6",
+      "prop_checkArrayWithoutIndex7",
+      "prop_checkArrayWithoutIndex8",
+      "prop_checkArrayWithoutIndex9",
+      "prop_checkArrayWithoutIndex10",
+      "prop_checkArrayWithoutIndex11",
+      "prop_checkArrayWithoutIndex12"
+     ],
+     "n_tests": 12
+    }
+   ],
+   "haskell_lines": 34,
+   "n_tests": 12,
+   "codes": [
+    2128,
+    2178,
+    2179
+   ]
+  },
+  {
+   "id": "T020",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkStderrRedirect",
+     "registry": "node",
+     "source_lines": [
+      1069,
+      1090
+     ],
+     "lines": 22,
+     "codes": [
+      2069
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkStderrRedirect",
+      "prop_checkStderrRedirect2",
+      "prop_checkStderrRedirect3",
+      "prop_checkStderrRedirect4",
+      "prop_checkStderrRedirect5",
+      "prop_checkStderrRedirect6",
+      "prop_checkStderrRedirect7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 22,
+   "n_tests": 7,
+   "codes": [
+    2069
+   ]
+  },
+  {
+   "id": "T021",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSingleQuotedVariables",
+     "registry": "node",
+     "source_lines": [
+      1137,
+      1232
+     ],
+     "lines": 96,
+     "codes": [
+      2016
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSingleQuotedVariables",
+      "prop_checkSingleQuotedVariables2",
+      "prop_checkSingleQuotedVariables3",
+      "prop_checkSingleQuotedVariables3a",
+      "prop_checkSingleQuotedVariables3b",
+      "prop_checkSingleQuotedVariables3c",
+      "prop_checkSingleQuotedVariables4",
+      "prop_checkSingleQuotedVariables5",
+      "prop_checkSingleQuotedVariables6",
+      "prop_checkSingleQuotedVariables6a",
+      "prop_checkSingleQuotedVariables6b",
+      "prop_checkSingleQuotedVariables6c",
+      "prop_checkSingleQuotedVariables6d",
+      "prop_checkSingleQuotedVariables7",
+      "prop_checkSingleQuotedVariables8",
+      "prop_checkSingleQuotedVariables9",
+      "prop_checkSingleQuotedVariables10",
+      "prop_checkSingleQuotedVariables11",
+      "prop_checkSingleQuotedVariables12",
+      "prop_checkSingleQuotedVariables13",
+      "prop_checkSingleQuotedVariables14",
+      "prop_checkSingleQuotedVariables15",
+      "prop_checkSingleQuotedVariables16",
+      "prop_checkSingleQuotedVariables17",
+      "prop_checkSingleQuotedVariables18",
+      "prop_checkSingleQuotedVariables19",
+      "prop_checkSingleQuotedVariables20",
+      "prop_checkSingleQuotedVariables21",
+      "prop_checkSingleQuotedVariables22",
+      "prop_checkSingleQuotedVariables23",
+      "prop_checkSingleQuotedVariables24",
+      "prop_checkSingleQuotedVariables25",
+      "prop_checkSingleQuotedVariables26",
+      "prop_checkSingleQuotedVariables27",
+      "prop_checkSingleQuotedVariables28",
+      "prop_checkSingleQuotedVariables29",
+      "prop_checkSingleQuotedVariables30",
+      "prop_checkSingleQuotedVariables31",
+      "prop_checkSingleQuotedVariables32",
+      "prop_checkSingleQuotedVariables33"
+     ],
+     "n_tests": 40
+    }
+   ],
+   "haskell_lines": 96,
+   "n_tests": 40,
+   "codes": [
+    2016
+   ]
+  },
+  {
+   "id": "T022",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnquotedN",
+     "registry": "node",
+     "source_lines": [
+      1238,
+      1242
+     ],
+     "lines": 5,
+     "codes": [
+      2070
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnquotedN",
+      "prop_checkUnquotedN2",
+      "prop_checkUnquotedN3",
+      "prop_checkUnquotedN4",
+      "prop_checkUnquotedN5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 5,
+   "n_tests": 5,
+   "codes": [
+    2070
+   ]
+  },
+  {
+   "id": "T023",
+   "module": "Analytics.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkNumberComparisons",
+     "registry": "node",
+     "source_lines": [
+      1268,
+      1386
+     ],
+     "lines": 119,
+     "codes": [
+      2071,
+      2072,
+      2073,
+      2122,
+      2170,
+      2309
+     ],
+     "codes_inferred": false,
+     "uses_cfg": true,
+     "tests": [
+      "prop_checkNumberComparisons1",
+      "prop_checkNumberComparisons2",
+      "prop_checkNumberComparisons3",
+      "prop_checkNumberComparisons4",
+      "prop_checkNumberComparisons5",
+      "prop_checkNumberComparisons6",
+      "prop_checkNumberComparisons7",
+      "prop_checkNumberComparisons8",
+      "prop_checkNumberComparisons9",
+      "prop_checkNumberComparisons11",
+      "prop_checkNumberComparisons12",
+      "prop_checkNumberComparisons13",
+      "prop_checkNumberComparisons14",
+      "prop_checkNumberComparisons15",
+      "prop_checkNumberComparisons16",
+      "prop_checkNumberComparisons17",
+      "prop_checkNumberComparisons18",
+      "prop_checkNumberComparisons19",
+      "prop_checkNumberComparisons20",
+      "prop_checkNumberComparisons21",
+      "prop_checkNumberComparisons22",
+      "prop_checkNumberComparisons23",
+      "prop_checkNumberComparisons24",
+      "prop_checkNumberComparisons25"
+     ],
+     "n_tests": 24
+    }
+   ],
+   "haskell_lines": 119,
+   "n_tests": 24,
+   "codes": [
+    2071,
+    2072,
+    2073,
+    2122,
+    2170,
+    2309
+   ]
+  },
+  {
+   "id": "T024",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSingleBracketOperators",
+     "registry": "node",
+     "source_lines": [
+      1388,
+      1392
+     ],
+     "lines": 5,
+     "codes": [
+      2074
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSingleBracketOperators1"
+     ],
+     "n_tests": 1
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkDoubleBracketOperators",
+     "registry": "node",
+     "source_lines": [
+      1395,
+      1399
+     ],
+     "lines": 5,
+     "codes": [
+      2075
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDoubleBracketOperators1",
+      "prop_checkDoubleBracketOperators3"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 10,
+   "n_tests": 3,
+   "codes": [
+    2074,
+    2075
+   ]
+  },
+  {
+   "id": "T025",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkConditionalAndOrs",
+     "registry": "node",
+     "source_lines": [
+      1405,
+      1422
+     ],
+     "lines": 18,
+     "codes": [
+      2107,
+      2108,
+      2109,
+      2110,
+      2166
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkConditionalAndOrs1",
+      "prop_checkConditionalAndOrs2",
+      "prop_checkConditionalAndOrs3",
+      "prop_checkConditionalAndOrs4",
+      "prop_checkConditionalAndOrs5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 18,
+   "n_tests": 5,
+   "codes": [
+    2107,
+    2108,
+    2109,
+    2110,
+    2166
+   ]
+  },
+  {
+   "id": "T026",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkQuotedCondRegex",
+     "registry": "node",
+     "source_lines": [
+      1429,
+      1445
+     ],
+     "lines": 17,
+     "codes": [
+      2076
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkQuotedCondRegex1",
+      "prop_checkQuotedCondRegex2",
+      "prop_checkQuotedCondRegex3",
+      "prop_checkQuotedCondRegex4",
+      "prop_checkQuotedCondRegex5",
+      "prop_checkQuotedCondRegex6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 6,
+   "codes": [
+    2076
+   ]
+  },
+  {
+   "id": "T027",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkGlobbedRegex",
+     "registry": "node",
+     "source_lines": [
+      1454,
+      1460
+     ],
+     "lines": 7,
+     "codes": [
+      2049
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkGlobbedRegex1",
+      "prop_checkGlobbedRegex2",
+      "prop_checkGlobbedRegex3",
+      "prop_checkGlobbedRegex4",
+      "prop_checkGlobbedRegex5",
+      "prop_checkGlobbedRegex6",
+      "prop_checkGlobbedRegex7",
+      "prop_checkGlobbedRegex8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 7,
+   "n_tests": 8,
+   "codes": [
+    2049
+   ]
+  },
+  {
+   "id": "T028",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkConstantIfs",
+     "registry": "node",
+     "source_lines": [
+      1474,
+      1488
+     ],
+     "lines": 15,
+     "codes": [
+      2050,
+      2193
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkConstantIfs1",
+      "prop_checkConstantIfs2a",
+      "prop_checkConstantIfs2b",
+      "prop_checkConstantIfs3",
+      "prop_checkConstantIfs4",
+      "prop_checkConstantIfs5",
+      "prop_checkConstantIfs6",
+      "prop_checkConstantIfs7",
+      "prop_checkConstantIfs8",
+      "prop_checkConstantIfs9",
+      "prop_checkConstantIfs10",
+      "prop_checkConstantIfs11",
+      "prop_checkConstantIfs12"
+     ],
+     "n_tests": 13
+    }
+   ],
+   "haskell_lines": 15,
+   "n_tests": 13,
+   "codes": [
+    2050,
+    2193
+   ]
+  },
+  {
+   "id": "T029",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkLiteralBreakingTest",
+     "registry": "node",
+     "source_lines": [
+      1498,
+      1520
+     ],
+     "lines": 23,
+     "codes": [
+      2077,
+      2157
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkLiteralBreakingTest",
+      "prop_checkLiteralBreakingTest2",
+      "prop_checkLiteralBreakingTest3",
+      "prop_checkLiteralBreakingTest4",
+      "prop_checkLiteralBreakingTest5",
+      "prop_checkLiteralBreakingTest6",
+      "prop_checkLiteralBreakingTest7",
+      "prop_checkLiteralBreakingTest8",
+      "prop_checkLiteralBreakingTest10"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 23,
+   "n_tests": 9,
+   "codes": [
+    2077,
+    2157
+   ]
+  },
+  {
+   "id": "T030",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkConstantNullary",
+     "registry": "node",
+     "source_lines": [
+      1528,
+      1539
+     ],
+     "lines": 12,
+     "codes": [
+      2078,
+      2158,
+      2159,
+      2160,
+      2161
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkConstantNullary",
+      "prop_checkConstantNullary2",
+      "prop_checkConstantNullary3",
+      "prop_checkConstantNullary4",
+      "prop_checkConstantNullary5",
+      "prop_checkConstantNullary6",
+      "prop_checkConstantNullary7"
+     ],
+     "n_tests": 7
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkDivBeforeMult",
+     "registry": "node",
+     "source_lines": [
+      1553,
+      1557
+     ],
+     "lines": 5,
+     "codes": [
+      2017
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDivBeforeMult",
+      "prop_checkDivBeforeMult2",
+      "prop_checkDivBeforeMult3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 10,
+   "codes": [
+    2017,
+    2078,
+    2158,
+    2159,
+    2160,
+    2161
+   ]
+  },
+  {
+   "id": "T031",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkArithmeticDeref",
+     "registry": "node",
+     "source_lines": [
+      1575,
+      1593
+     ],
+     "lines": 19,
+     "codes": [
+      2004
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkArithmeticDeref",
+      "prop_checkArithmeticDeref2",
+      "prop_checkArithmeticDeref3",
+      "prop_checkArithmeticDeref4",
+      "prop_checkArithmeticDeref5",
+      "prop_checkArithmeticDeref6",
+      "prop_checkArithmeticDeref7",
+      "prop_checkArithmeticDeref8",
+      "prop_checkArithmeticDeref9",
+      "prop_checkArithmeticDeref10",
+      "prop_checkArithmeticDeref11",
+      "prop_checkArithmeticDeref11b",
+      "prop_checkArithmeticDeref12",
+      "prop_checkArithmeticDeref13",
+      "prop_checkArithmeticDeref14",
+      "prop_checkArithmeticDeref15",
+      "prop_checkArithmeticDeref16"
+     ],
+     "n_tests": 17
+    }
+   ],
+   "haskell_lines": 19,
+   "n_tests": 17,
+   "codes": [
+    2004
+   ]
+  },
+  {
+   "id": "T032",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkArithmeticBadOctal",
+     "registry": "node",
+     "source_lines": [
+      1597,
+      1604
+     ],
+     "lines": 8,
+     "codes": [
+      2080
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkArithmeticBadOctal1",
+      "prop_checkArithmeticBadOctal2",
+      "prop_checkArithmeticBadOctal3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 8,
+   "n_tests": 3,
+   "codes": [
+    2080
+   ]
+  },
+  {
+   "id": "T033",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkComparisonAgainstGlob",
+     "registry": "node",
+     "source_lines": [
+      1612,
+      1628
+     ],
+     "lines": 17,
+     "codes": [
+      2053,
+      2081,
+      2330
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkComparisonAgainstGlob",
+      "prop_checkComparisonAgainstGlob2",
+      "prop_checkComparisonAgainstGlob3",
+      "prop_checkComparisonAgainstGlob4",
+      "prop_checkComparisonAgainstGlob5",
+      "prop_checkComparisonAgainstGlob6",
+      "prop_checkComparisonAgainstGlob7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 7,
+   "codes": [
+    2053,
+    2081,
+    2330
+   ]
+  },
+  {
+   "id": "T034",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkCaseAgainstGlob",
+     "registry": "node",
+     "source_lines": [
+      1632,
+      1643
+     ],
+     "lines": 12,
+     "codes": [
+      2254
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkCaseAgainstGlob1",
+      "prop_checkCaseAgainstGlob2",
+      "prop_checkCaseAgainstGlob3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 12,
+   "n_tests": 3,
+   "codes": [
+    2254
+   ]
+  },
+  {
+   "id": "T035",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkCommarrays",
+     "registry": "node",
+     "source_lines": [
+      1651,
+      1662
+     ],
+     "lines": 12,
+     "codes": [
+      2054
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkCommarrays1",
+      "prop_checkCommarrays2",
+      "prop_checkCommarrays3",
+      "prop_checkCommarrays4",
+      "prop_checkCommarrays5",
+      "prop_checkCommarrays6",
+      "prop_checkCommarrays7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 12,
+   "n_tests": 7,
+   "codes": [
+    2054
+   ]
+  },
+  {
+   "id": "T036",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkOrNeq",
+     "registry": "node",
+     "source_lines": [
+      1675,
+      1712
+     ],
+     "lines": 38,
+     "codes": [
+      2055,
+      2056,
+      2252
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkOrNeq1",
+      "prop_checkOrNeq2",
+      "prop_checkOrNeq3",
+      "prop_checkOrNeq4",
+      "prop_checkOrNeq5",
+      "prop_checkOrNeq6",
+      "prop_checkOrNeq7",
+      "prop_checkOrNeq8",
+      "prop_checkOrNeq9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 38,
+   "n_tests": 9,
+   "codes": [
+    2055,
+    2056,
+    2252
+   ]
+  },
+  {
+   "id": "T037",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkAndEq",
+     "registry": "node",
+     "source_lines": [
+      1733,
+      1770
+     ],
+     "lines": 38,
+     "codes": [
+      2333,
+      2334
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkAndEq1",
+      "prop_checkAndEq2",
+      "prop_checkAndEq3",
+      "prop_checkAndEq4",
+      "prop_checkAndEq5",
+      "prop_checkAndEq6",
+      "prop_checkAndEq7",
+      "prop_checkAndEq8",
+      "prop_checkAndEq9",
+      "prop_checkAndEq10",
+      "prop_checkAndEq11",
+      "prop_checkAndEq12",
+      "prop_checkAndEq13",
+      "prop_checkAndEq14"
+     ],
+     "n_tests": 14
+    }
+   ],
+   "haskell_lines": 38,
+   "n_tests": 14,
+   "codes": [
+    2333,
+    2334
+   ]
+  },
+  {
+   "id": "T038",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkValidCondOps",
+     "registry": "node",
+     "source_lines": [
+      1776,
+      1783
+     ],
+     "lines": 8,
+     "codes": [
+      2057,
+      2058
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkValidCondOps1",
+      "prop_checkValidCondOps2",
+      "prop_checkValidCondOps2a",
+      "prop_checkValidCondOps3",
+      "prop_checkValidCondOps4"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 8,
+   "n_tests": 5,
+   "codes": [
+    2057,
+    2058
+   ]
+  },
+  {
+   "id": "T039",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUuoeVar",
+     "registry": "node",
+     "source_lines": [
+      1793,
+      1818
+     ],
+     "lines": 26,
+     "codes": [
+      2116
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUuoeVar1",
+      "prop_checkUuoeVar2",
+      "prop_checkUuoeVar3",
+      "prop_checkUuoeVar4",
+      "prop_checkUuoeVar5",
+      "prop_checkUuoeVar6",
+      "prop_checkUuoeVar7",
+      "prop_checkUuoeVar8",
+      "prop_checkUuoeVar9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 26,
+   "n_tests": 9,
+   "codes": [
+    2116
+   ]
+  },
+  {
+   "id": "T040",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkTestRedirects",
+     "registry": "node",
+     "source_lines": [
+      1823,
+      1839
+     ],
+     "lines": 17,
+     "codes": [
+      2065
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTestRedirects1",
+      "prop_checkTestRedirects2",
+      "prop_checkTestRedirects3",
+      "prop_checkTestRedirects4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 4,
+   "codes": [
+    2065
+   ]
+  },
+  {
+   "id": "T041",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkPS1Assignments",
+     "registry": "node",
+     "source_lines": [
+      1850,
+      1862
+     ],
+     "lines": 13,
+     "codes": [
+      2025
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkPS11",
+      "prop_checkPS11a",
+      "prop_checkPSf2",
+      "prop_checkPS13",
+      "prop_checkPS14",
+      "prop_checkPS14a",
+      "prop_checkPS15",
+      "prop_checkPS16",
+      "prop_checkPS17",
+      "prop_checkPS18"
+     ],
+     "n_tests": 10
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkBackticks",
+     "registry": "node",
+     "source_lines": [
+      1866,
+      1872
+     ],
+     "lines": 7,
+     "codes": [
+      2006
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBackticks1",
+      "prop_checkBackticks2",
+      "prop_checkBackticks3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 13,
+   "codes": [
+    2006,
+    2025
+   ]
+  },
+  {
+   "id": "T042",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkBadParameterSubstitution",
+     "registry": "node",
+     "source_lines": [
+      1885,
+      1945
+     ],
+     "lines": 61,
+     "codes": [
+      2082,
+      2296,
+      2297,
+      2298,
+      2299,
+      2300,
+      2301
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBadParameterSubstitution1",
+      "prop_checkBadParameterSubstitution2",
+      "prop_checkBadParameterSubstitution3",
+      "prop_checkBadParameterSubstitution4",
+      "prop_checkBadParameterSubstitution5",
+      "prop_checkBadParameterSubstitution6",
+      "prop_checkBadParameterSubstitution7",
+      "prop_checkBadParameterSubstitution8",
+      "prop_checkBadParameterSubstitution9",
+      "prop_checkBadParameterSubstitution10",
+      "prop_checkBadParameterSubstitution11"
+     ],
+     "n_tests": 11
+    }
+   ],
+   "haskell_lines": 61,
+   "n_tests": 11,
+   "codes": [
+    2082,
+    2296,
+    2297,
+    2298,
+    2299,
+    2300,
+    2301
+   ]
+  },
+  {
+   "id": "T043",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkInexplicablyUnquoted",
+     "registry": "node",
+     "source_lines": [
+      1958,
+      2001
+     ],
+     "lines": 44,
+     "codes": [
+      2026,
+      2027,
+      2140
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkInexplicablyUnquoted1",
+      "prop_checkInexplicablyUnquoted2",
+      "prop_checkInexplicablyUnquoted3",
+      "prop_checkInexplicablyUnquoted4",
+      "prop_checkInexplicablyUnquoted5",
+      "prop_checkInexplicablyUnquoted6",
+      "prop_checkInexplicablyUnquoted7",
+      "prop_checkInexplicablyUnquoted8",
+      "prop_checkInexplicablyUnquoted9",
+      "prop_checkInexplicablyUnquoted10",
+      "prop_checkInexplicablyUnquoted11",
+      "prop_checkInexplicablyUnquoted12"
+     ],
+     "n_tests": 12
+    }
+   ],
+   "haskell_lines": 44,
+   "n_tests": 12,
+   "codes": [
+    2026,
+    2027,
+    2140
+   ]
+  },
+  {
+   "id": "T044",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkTildeInQuotes",
+     "registry": "node",
+     "source_lines": [
+      2007,
+      2016
+     ],
+     "lines": 10,
+     "codes": [
+      2088
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTildeInQuotes1",
+      "prop_checkTildeInQuotes2",
+      "prop_checkTildeInQuotes4",
+      "prop_checkTildeInQuotes5",
+      "prop_checkTildeInQuotes6"
+     ],
+     "n_tests": 5
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkLonelyDotDash",
+     "registry": "node",
+     "source_lines": [
+      2019,
+      2024
+     ],
+     "lines": 6,
+     "codes": [
+      2083
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkLonelyDotDash1",
+      "prop_checkLonelyDotDash2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 16,
+   "n_tests": 7,
+   "codes": [
+    2083,
+    2088
+   ]
+  },
+  {
+   "id": "T045",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSpuriousExec",
+     "registry": "node",
+     "source_lines": [
+      2038,
+      2074
+     ],
+     "lines": 37,
+     "codes": [
+      2093
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSpuriousExec1",
+      "prop_checkSpuriousExec2",
+      "prop_checkSpuriousExec3",
+      "prop_checkSpuriousExec4",
+      "prop_checkSpuriousExec5",
+      "prop_checkSpuriousExec6",
+      "prop_checkSpuriousExec7",
+      "prop_checkSpuriousExec8",
+      "prop_checkSpuriousExec9",
+      "prop_checkSpuriousExec10",
+      "prop_checkSpuriousExec11",
+      "prop_checkSpuriousExec12",
+      "prop_checkSpuriousExec13"
+     ],
+     "n_tests": 13
+    }
+   ],
+   "haskell_lines": 37,
+   "n_tests": 13,
+   "codes": [
+    2093
+   ]
+  },
+  {
+   "id": "T046",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSpuriousExpansion",
+     "registry": "node",
+     "source_lines": [
+      2078,
+      2090
+     ],
+     "lines": 13,
+     "codes": [
+      2084,
+      2091,
+      2092
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSpuriousExpansion1",
+      "prop_checkSpuriousExpansion3",
+      "prop_checkSpuriousExpansion4"
+     ],
+     "n_tests": 3
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkDollarBrackets",
+     "registry": "node",
+     "source_lines": [
+      2093,
+      2096
+     ],
+     "lines": 4,
+     "codes": [
+      2007
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDollarBrackets1",
+      "prop_checkDollarBrackets2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 5,
+   "codes": [
+    2007,
+    2084,
+    2091,
+    2092
+   ]
+  },
+  {
+   "id": "T047",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSshHereDoc",
+     "registry": "node",
+     "source_lines": [
+      2099,
+      2110
+     ],
+     "lines": 12,
+     "codes": [
+      2087
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSshHereDoc1",
+      "prop_checkSshHereDoc2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 12,
+   "n_tests": 2,
+   "codes": [
+    2087
+   ]
+  },
+  {
+   "id": "T048",
+   "module": "Analytics.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSpacefulnessCfg",
+     "registry": "node",
+     "source_lines": [
+      2298,
+      2298
+     ],
+     "lines": 1,
+     "codes": [
+      2086
+     ],
+     "codes_inferred": true,
+     "uses_cfg": true,
+     "tests": [
+      "prop_checkSpacefulnessCfg1",
+      "prop_checkSpacefulnessCfg2",
+      "prop_checkSpacefulnessCfg3",
+      "prop_checkSpacefulnessCfg4",
+      "prop_checkSpacefulnessCfg4a",
+      "prop_checkSpacefulnessCfg5",
+      "prop_checkSpacefulnessCfg6",
+      "prop_checkSpacefulnessCfg7",
+      "prop_checkSpacefulnessCfg8",
+      "prop_checkSpacefulnessCfg10",
+      "prop_checkSpacefulnessCfg11",
+      "prop_checkSpacefulnessCfg12",
+      "prop_checkSpacefulnessCfg13",
+      "prop_checkSpacefulnessCfg14",
+      "prop_checkSpacefulnessCfg15",
+      "prop_checkSpacefulnessCfg16",
+      "prop_checkSpacefulnessCfg17",
+      "prop_checkSpacefulnessCfg18",
+      "prop_checkSpacefulnessCfg19",
+      "prop_checkSpacefulnessCfg20",
+      "prop_checkSpacefulnessCfg21",
+      "prop_checkSpacefulnessCfg22",
+      "prop_checkSpacefulnessCfg23",
+      "prop_checkSpacefulnessCfg24",
+      "prop_checkSpacefulnessCfg25",
+      "prop_checkSpacefulnessCfg26",
+      "prop_checkSpacefulnessCfg27",
+      "prop_checkSpacefulnessCfg28",
+      "prop_checkSpacefulnessCfg29",
+      "prop_checkSpacefulnessCfg30",
+      "prop_checkSpacefulnessCfg31",
+      "prop_checkSpacefulnessCfg32",
+      "prop_checkSpacefulnessCfg33",
+      "prop_checkSpacefulnessCfg34",
+      "prop_checkSpacefulnessCfg35",
+      "prop_checkSpacefulnessCfg36",
+      "prop_checkSpacefulnessCfg37",
+      "prop_checkSpacefulnessCfg38",
+      "prop_checkSpacefulnessCfg39",
+      "prop_checkSpacefulnessCfg40",
+      "prop_checkSpacefulnessCfg41",
+      "prop_checkSpacefulnessCfg42",
+      "prop_checkSpacefulnessCfg43",
+      "prop_checkSpacefulnessCfg44",
+      "prop_checkSpacefulnessCfg45",
+      "prop_checkSpacefulnessCfg46",
+      "prop_checkSpacefulnessCfg47",
+      "prop_checkSpacefulnessCfg48",
+      "prop_checkSpacefulnessCfg49",
+      "prop_checkSpacefulnessCfg50",
+      "prop_checkSpacefulnessCfg51",
+      "prop_checkSpacefulnessCfg52",
+      "prop_checkSpacefulnessCfg53",
+      "prop_checkSpacefulnessCfg54",
+      "prop_checkSpacefulnessCfg55",
+      "prop_checkSpacefulnessCfg56",
+      "prop_checkSpacefulnessCfg57",
+      "prop_checkSpacefulnessCfg58",
+      "prop_checkSpacefulnessCfg59",
+      "prop_checkSpacefulnessCfg60",
+      "prop_checkSpacefulnessCfg61",
+      "prop_checkSpacefulnessCfg62",
+      "prop_checkSpacefulnessCfg63",
+      "prop_checkSpacefulnessCfg64",
+      "prop_checkSpacefulnessCfg65",
+      "prop_checkSpacefulnessCfg66"
+     ],
+     "n_tests": 66
+    }
+   ],
+   "haskell_lines": 1,
+   "n_tests": 66,
+   "codes": [
+    2086
+   ]
+  },
+  {
+   "id": "T049",
+   "module": "Analytics.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkVerboseSpacefulnessCfg",
+     "registry": "optional-tree",
+     "source_lines": [
+      2299,
+      2300
+     ],
+     "lines": 2,
+     "codes": [
+      2248,
+      2250,
+      2292
+     ],
+     "codes_inferred": true,
+     "uses_cfg": true,
+     "tests": [
+      "prop_checkSpacefulnessCfg37v"
+     ],
+     "n_tests": 1
+    }
+   ],
+   "haskell_lines": 2,
+   "n_tests": 1,
+   "codes": [
+    2248,
+    2250,
+    2292
+   ]
+  },
+  {
+   "id": "T050",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkVariableBraces",
+     "registry": "optional-tree",
+     "source_lines": [
+      2352,
+      2362
+     ],
+     "lines": 11,
+     "codes": [
+      2250
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_CheckVariableBraces1",
+      "prop_CheckVariableBraces2",
+      "prop_CheckVariableBraces3",
+      "prop_CheckVariableBraces4",
+      "prop_CheckVariableBraces5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 11,
+   "n_tests": 5,
+   "codes": [
+    2250
+   ]
+  },
+  {
+   "id": "T051",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkQuotesInLiterals",
+     "registry": "tree",
+     "source_lines": [
+      2374,
+      2429
+     ],
+     "lines": 56,
+     "codes": [
+      2089,
+      2090
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkQuotesInLiterals1",
+      "prop_checkQuotesInLiterals1a",
+      "prop_checkQuotesInLiterals2",
+      "prop_checkQuotesInLiterals3",
+      "prop_checkQuotesInLiterals4",
+      "prop_checkQuotesInLiterals5",
+      "prop_checkQuotesInLiterals6",
+      "prop_checkQuotesInLiterals6a",
+      "prop_checkQuotesInLiterals7",
+      "prop_checkQuotesInLiterals8",
+      "prop_checkQuotesInLiterals9"
+     ],
+     "n_tests": 11
+    }
+   ],
+   "haskell_lines": 56,
+   "n_tests": 11,
+   "codes": [
+    2089,
+    2090
+   ]
+  },
+  {
+   "id": "T052",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkFunctionsUsedExternally",
+     "registry": "tree",
+     "source_lines": [
+      2454,
+      2506
+     ],
+     "lines": 53,
+     "codes": [
+      2032,
+      2033
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFunctionsUsedExternally1",
+      "prop_checkFunctionsUsedExternally2",
+      "prop_checkFunctionsUsedExternally2b",
+      "prop_checkFunctionsUsedExternally2c",
+      "prop_checkFunctionsUsedExternally3",
+      "prop_checkFunctionsUsedExternally4",
+      "prop_checkFunctionsUsedExternally5",
+      "prop_checkFunctionsUsedExternally6",
+      "prop_checkFunctionsUsedExternally7",
+      "prop_checkFunctionsUsedExternally8",
+      "prop_checkFunctionsUsedExternally9",
+      "prop_checkFunctionsUsedExternally10"
+     ],
+     "n_tests": 12
+    }
+   ],
+   "haskell_lines": 53,
+   "n_tests": 12,
+   "codes": [
+    2032,
+    2033
+   ]
+  },
+  {
+   "id": "T053",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnusedAssignments",
+     "registry": "tree",
+     "source_lines": [
+      2567,
+      2589
+     ],
+     "lines": 23,
+     "codes": [
+      2034
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnused0",
+      "prop_checkUnused1",
+      "prop_checkUnused2",
+      "prop_checkUnused3",
+      "prop_checkUnused4",
+      "prop_checkUnused5",
+      "prop_checkUnused6",
+      "prop_checkUnused7",
+      "prop_checkUnused8",
+      "prop_checkUnused9",
+      "prop_checkUnused10",
+      "prop_checkUnused11",
+      "prop_checkUnused12",
+      "prop_checkUnused13",
+      "prop_checkUnused14",
+      "prop_checkUnused15",
+      "prop_checkUnused16",
+      "prop_checkUnused16b",
+      "prop_checkUnused17",
+      "prop_checkUnused18",
+      "prop_checkUnused19",
+      "prop_checkUnused20",
+      "prop_checkUnused21",
+      "prop_checkUnused22",
+      "prop_checkUnused23",
+      "prop_checkUnused24",
+      "prop_checkUnused25",
+      "prop_checkUnused26",
+      "prop_checkUnused27",
+      "prop_checkUnused28",
+      "prop_checkUnused29",
+      "prop_checkUnused30",
+      "prop_checkUnused31",
+      "prop_checkUnused32",
+      "prop_checkUnused33",
+      "prop_checkUnused34",
+      "prop_checkUnused35",
+      "prop_checkUnused36",
+      "prop_checkUnused37",
+      "prop_checkUnused38",
+      "prop_checkUnused39",
+      "prop_checkUnused40",
+      "prop_checkUnused41",
+      "prop_checkUnused42",
+      "prop_checkUnused43",
+      "prop_checkUnused44",
+      "prop_checkUnused45",
+      "prop_checkUnused46",
+      "prop_checkUnused47",
+      "prop_checkUnused48",
+      "prop_checkUnused49",
+      "prop_checkUnused50",
+      "prop_checkUnused51",
+      "prop_checkUnused52",
+      "prop_checkUnused53",
+      "prop_checkUnused54",
+      "prop_checkUnused55",
+      "prop_checkUnused56",
+      "prop_checkUnused57"
+     ],
+     "n_tests": 59
+    }
+   ],
+   "haskell_lines": 23,
+   "n_tests": 59,
+   "codes": [
+    2034
+   ]
+  },
+  {
+   "id": "T054",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnassignedReferences",
+     "registry": "tree",
+     "source_lines": [
+      2649,
+      2649
+     ],
+     "lines": 1,
+     "codes": [
+      2154
+     ],
+     "codes_inferred": true,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnassignedReferences1",
+      "prop_checkUnassignedReferences2",
+      "prop_checkUnassignedReferences3",
+      "prop_checkUnassignedReferences4",
+      "prop_checkUnassignedReferences5",
+      "prop_checkUnassignedReferences6",
+      "prop_checkUnassignedReferences7",
+      "prop_checkUnassignedReferences8",
+      "prop_checkUnassignedReferences9",
+      "prop_checkUnassignedReferences10",
+      "prop_checkUnassignedReferences11",
+      "prop_checkUnassignedReferences12",
+      "prop_checkUnassignedReferences13",
+      "prop_checkUnassignedReferences14",
+      "prop_checkUnassignedReferences15",
+      "prop_checkUnassignedReferences16",
+      "prop_checkUnassignedReferences17",
+      "prop_checkUnassignedReferences18",
+      "prop_checkUnassignedReferences19",
+      "prop_checkUnassignedReferences20",
+      "prop_checkUnassignedReferences21",
+      "prop_checkUnassignedReferences22",
+      "prop_checkUnassignedReferences23",
+      "prop_checkUnassignedReferences24",
+      "prop_checkUnassignedReferences25",
+      "prop_checkUnassignedReferences26",
+      "prop_checkUnassignedReferences27",
+      "prop_checkUnassignedReferences28",
+      "prop_checkUnassignedReferences29",
+      "prop_checkUnassignedReferences30",
+      "prop_checkUnassignedReferences31",
+      "prop_checkUnassignedReferences32",
+      "prop_checkUnassignedReferences33",
+      "prop_checkUnassignedReferences34",
+      "prop_checkUnassignedReferences35",
+      "prop_checkUnassignedReferences36",
+      "prop_checkUnassignedReferences37",
+      "prop_checkUnassignedReferences39",
+      "prop_checkUnassignedReferences40",
+      "prop_checkUnassignedReferences41",
+      "prop_checkUnassignedReferences42",
+      "prop_checkUnassignedReferences43",
+      "prop_checkUnassignedReferences_minusNPlain",
+      "prop_checkUnassignedReferences_minusZPlain",
+      "prop_checkUnassignedReferences_minusNBraced",
+      "prop_checkUnassignedReferences_minusZBraced",
+      "prop_checkUnassignedReferences_minusNDefault",
+      "prop_checkUnassignedReferences_minusZDefault",
+      "prop_checkUnassignedReferences50",
+      "prop_checkUnassignedReferences51",
+      "prop_checkUnassignedReferences52",
+      "prop_checkUnassignedReferences53",
+      "prop_checkUnassignedReferences54",
+      "prop_checkUnassignedReferences55",
+      "prop_checkUnassignedReferences56",
+      "prop_checkUnassignedReferences57",
+      "prop_checkUnassignedReferences58"
+     ],
+     "n_tests": 57
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkGlobsAsOptions",
+     "registry": "node",
+     "source_lines": [
+      2743,
+      2760
+     ],
+     "lines": 18,
+     "codes": [
+      2035
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkGlobsAsOptions1",
+      "prop_checkGlobsAsOptions2",
+      "prop_checkGlobsAsOptions3",
+      "prop_checkGlobsAsOptions4",
+      "prop_checkGlobsAsOptions5",
+      "prop_checkGlobsAsOptions6",
+      "prop_checkGlobsAsOptions7",
+      "prop_checkGlobsAsOptions8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 19,
+   "n_tests": 65,
+   "codes": [
+    2035,
+    2154
+   ]
+  },
+  {
+   "id": "T055",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkWhileReadPitfalls",
+     "registry": "node",
+     "source_lines": [
+      2777,
+      2846
+     ],
+     "lines": 70,
+     "codes": [
+      2095
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkWhileReadPitfalls1",
+      "prop_checkWhileReadPitfalls2",
+      "prop_checkWhileReadPitfalls3",
+      "prop_checkWhileReadPitfalls4",
+      "prop_checkWhileReadPitfalls5",
+      "prop_checkWhileReadPitfalls6",
+      "prop_checkWhileReadPitfalls7",
+      "prop_checkWhileReadPitfalls8",
+      "prop_checkWhileReadPitfalls9",
+      "prop_checkWhileReadPitfalls10",
+      "prop_checkWhileReadPitfalls11",
+      "prop_checkWhileReadPitfalls12",
+      "prop_checkWhileReadPitfalls13",
+      "prop_checkWhileReadPitfalls14",
+      "prop_checkWhileReadPitfalls15"
+     ],
+     "n_tests": 15
+    }
+   ],
+   "haskell_lines": 70,
+   "n_tests": 15,
+   "codes": [
+    2095
+   ]
+  },
+  {
+   "id": "T056",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkPrefixAssignmentReference",
+     "registry": "node",
+     "source_lines": [
+      2849,
+      2868
+     ],
+     "lines": 20,
+     "codes": [
+      2097,
+      2098
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkPrefixAssign1",
+      "prop_checkPrefixAssign2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 2,
+   "codes": [
+    2097,
+    2098
+   ]
+  },
+  {
+   "id": "T057",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkCharRangeGlob",
+     "registry": "node",
+     "source_lines": [
+      2878,
+      2912
+     ],
+     "lines": 35,
+     "codes": [
+      2101,
+      2102
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkCharRangeGlob1",
+      "prop_checkCharRangeGlob2",
+      "prop_checkCharRangeGlob3",
+      "prop_checkCharRangeGlob4",
+      "prop_checkCharRangeGlob5",
+      "prop_checkCharRangeGlob6",
+      "prop_checkCharRangeGlob7",
+      "prop_checkCharRangeGlob8",
+      "prop_checkCharRangeGlob9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 35,
+   "n_tests": 9,
+   "codes": [
+    2101,
+    2102
+   ]
+  },
+  {
+   "id": "T058",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkCdAndBack",
+     "registry": "node",
+     "source_lines": [
+      2921,
+      2944
+     ],
+     "lines": 24,
+     "codes": [
+      2103
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkCdAndBack1",
+      "prop_checkCdAndBack2",
+      "prop_checkCdAndBack3",
+      "prop_checkCdAndBack4",
+      "prop_checkCdAndBack5",
+      "prop_checkCdAndBack6",
+      "prop_checkCdAndBack7",
+      "prop_checkCdAndBack8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 24,
+   "n_tests": 8,
+   "codes": [
+    2103
+   ]
+  },
+  {
+   "id": "T059",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkLoopKeywordScope",
+     "registry": "node",
+     "source_lines": [
+      2952,
+      2971
+     ],
+     "lines": 20,
+     "codes": [
+      2104,
+      2105,
+      2106
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkLoopKeywordScope1",
+      "prop_checkLoopKeywordScope2",
+      "prop_checkLoopKeywordScope3",
+      "prop_checkLoopKeywordScope4",
+      "prop_checkLoopKeywordScope5",
+      "prop_checkLoopKeywordScope6",
+      "prop_checkLoopKeywordScope7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 7,
+   "codes": [
+    2104,
+    2105,
+    2106
+   ]
+  },
+  {
+   "id": "T060",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkFunctionDeclarations",
+     "registry": "node",
+     "source_lines": [
+      2975,
+      2995
+     ],
+     "lines": 21,
+     "codes": [
+      2111,
+      2112,
+      2113
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFunctionDeclarations1",
+      "prop_checkFunctionDeclarations2",
+      "prop_checkFunctionDeclarations3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 21,
+   "n_tests": 3,
+   "codes": [
+    2111,
+    2112,
+    2113
+   ]
+  },
+  {
+   "id": "T061",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkStderrPipe",
+     "registry": "node",
+     "source_lines": [
+      2998,
+      3006
+     ],
+     "lines": 9,
+     "codes": [
+      2118
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkStderrPipe1",
+      "prop_checkStderrPipe2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 9,
+   "n_tests": 2,
+   "codes": [
+    2118
+   ]
+  },
+  {
+   "id": "T062",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnpassedInFunctions",
+     "registry": "tree",
+     "source_lines": [
+      3025,
+      3107
+     ],
+     "lines": 83,
+     "codes": [
+      2119,
+      2120
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnpassedInFunctions1",
+      "prop_checkUnpassedInFunctions2",
+      "prop_checkUnpassedInFunctions3",
+      "prop_checkUnpassedInFunctions4",
+      "prop_checkUnpassedInFunctions5",
+      "prop_checkUnpassedInFunctions6",
+      "prop_checkUnpassedInFunctions7",
+      "prop_checkUnpassedInFunctions8",
+      "prop_checkUnpassedInFunctions9",
+      "prop_checkUnpassedInFunctions10",
+      "prop_checkUnpassedInFunctions11",
+      "prop_checkUnpassedInFunctions12",
+      "prop_checkUnpassedInFunctions13",
+      "prop_checkUnpassedInFunctions14",
+      "prop_checkUnpassedInFunctions15",
+      "prop_checkUnpassedInFunctions16",
+      "prop_checkUnpassedInFunctions17",
+      "prop_checkUnpassedInFunctions18"
+     ],
+     "n_tests": 18
+    }
+   ],
+   "haskell_lines": 83,
+   "n_tests": 18,
+   "codes": [
+    2119,
+    2120
+   ]
+  },
+  {
+   "id": "T063",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkOverridingPath",
+     "registry": "node",
+     "source_lines": [
+      3116,
+      3127
+     ],
+     "lines": 12,
+     "codes": [
+      2123
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkOverridingPath1",
+      "prop_checkOverridingPath2",
+      "prop_checkOverridingPath3",
+      "prop_checkOverridingPath4",
+      "prop_checkOverridingPath5",
+      "prop_checkOverridingPath6",
+      "prop_checkOverridingPath7",
+      "prop_checkOverridingPath8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 12,
+   "n_tests": 8,
+   "codes": [
+    2123
+   ]
+  },
+  {
+   "id": "T064",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkTildeInPath",
+     "registry": "node",
+     "source_lines": [
+      3131,
+      3144
+     ],
+     "lines": 14,
+     "codes": [
+      2147
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTildeInPath1",
+      "prop_checkTildeInPath2",
+      "prop_checkTildeInPath3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 14,
+   "n_tests": 3,
+   "codes": [
+    2147
+   ]
+  },
+  {
+   "id": "T065",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnsupported",
+     "registry": "node",
+     "source_lines": [
+      3149,
+      3158
+     ],
+     "lines": 10,
+     "codes": [
+      2127
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnsupported3",
+      "prop_checkUnsupported4",
+      "prop_checkUnsupported5",
+      "prop_checkUnsupported6"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 10,
+   "n_tests": 4,
+   "codes": [
+    2127
+   ]
+  },
+  {
+   "id": "T066",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkMultipleAppends",
+     "registry": "node",
+     "source_lines": [
+      3175,
+      3193
+     ],
+     "lines": 19,
+     "codes": [
+      2129
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkMultipleAppends1",
+      "prop_checkMultipleAppends2",
+      "prop_checkMultipleAppends3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 19,
+   "n_tests": 3,
+   "codes": [
+    2129
+   ]
+  },
+  {
+   "id": "T067",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSuspiciousIFS",
+     "registry": "node",
+     "source_lines": [
+      3197,
+      3215
+     ],
+     "lines": 19,
+     "codes": [
+      2141
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSuspiciousIFS1",
+      "prop_checkSuspiciousIFS2",
+      "prop_checkSuspiciousIFS3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 19,
+   "n_tests": 3,
+   "codes": [
+    2141
+   ]
+  },
+  {
+   "id": "T068",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkShouldUseGrepQ",
+     "registry": "node",
+     "source_lines": [
+      3222,
+      3251
+     ],
+     "lines": 30,
+     "codes": [
+      2143
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkGrepQ1",
+      "prop_checkGrepQ2",
+      "prop_checkGrepQ3",
+      "prop_checkGrepQ4",
+      "prop_checkGrepQ5",
+      "prop_checkGrepQ6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 30,
+   "n_tests": 6,
+   "codes": [
+    2143
+   ]
+  },
+  {
+   "id": "T069",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkTestArgumentSplitting",
+     "registry": "node",
+     "source_lines": [
+      3273,
+      3351
+     ],
+     "lines": 79,
+     "codes": [
+      2144,
+      2198,
+      2199,
+      2200,
+      2201,
+      2202,
+      2203,
+      2208,
+      2245,
+      2255
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTestArgumentSplitting1",
+      "prop_checkTestArgumentSplitting2",
+      "prop_checkTestArgumentSplitting3",
+      "prop_checkTestArgumentSplitting4",
+      "prop_checkTestArgumentSplitting5",
+      "prop_checkTestArgumentSplitting6",
+      "prop_checkTestArgumentSplitting7",
+      "prop_checkTestArgumentSplitting8",
+      "prop_checkTestArgumentSplitting9",
+      "prop_checkTestArgumentSplitting10",
+      "prop_checkTestArgumentSplitting11",
+      "prop_checkTestArgumentSplitting12",
+      "prop_checkTestArgumentSplitting13",
+      "prop_checkTestArgumentSplitting14",
+      "prop_checkTestArgumentSplitting15",
+      "prop_checkTestArgumentSplitting16",
+      "prop_checkTestArgumentSplitting17",
+      "prop_checkTestArgumentSplitting18",
+      "prop_checkTestArgumentSplitting19",
+      "prop_checkTestArgumentSplitting20",
+      "prop_checkTestArgumentSplitting21"
+     ],
+     "n_tests": 21
+    }
+   ],
+   "haskell_lines": 79,
+   "n_tests": 21,
+   "codes": [
+    2144,
+    2198,
+    2199,
+    2200,
+    2201,
+    2202,
+    2203,
+    2208,
+    2245,
+    2255
+   ]
+  },
+  {
+   "id": "T070",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkReadWithoutR",
+     "registry": "node",
+     "source_lines": [
+      3358,
+      3369
+     ],
+     "lines": 12,
+     "codes": [
+      2162
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkReadWithoutR1",
+      "prop_checkReadWithoutR2",
+      "prop_checkReadWithoutR3",
+      "prop_checkReadWithoutR4",
+      "prop_checkReadWithoutR5",
+      "prop_checkReadWithoutR6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 12,
+   "n_tests": 6,
+   "codes": [
+    2162
+   ]
+  },
+  {
+   "id": "T071",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkCpLegacyR",
+     "registry": "node",
+     "source_lines": [
+      3372,
+      3380
+     ],
+     "lines": 9,
+     "codes": [
+      2336
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkCpLegacyR1",
+      "prop_checkCpLegacyR2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 9,
+   "n_tests": 2,
+   "codes": [
+    2336
+   ]
+  },
+  {
+   "id": "T072",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUncheckedCdPushdPopd",
+     "registry": "tree",
+     "source_lines": [
+      3421,
+      3456
+     ],
+     "lines": 36,
+     "codes": [
+      2164
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUncheckedCd1",
+      "prop_checkUncheckedCd2",
+      "prop_checkUncheckedCd3",
+      "prop_checkUncheckedCd4",
+      "prop_checkUncheckedCd5",
+      "prop_checkUncheckedCd6",
+      "prop_checkUncheckedCd7",
+      "prop_checkUncheckedCd8",
+      "prop_checkUncheckedCd9",
+      "prop_checkUncheckedPushd1",
+      "prop_checkUncheckedPushd2",
+      "prop_checkUncheckedPushd3",
+      "prop_checkUncheckedPushd4",
+      "prop_checkUncheckedPushd5",
+      "prop_checkUncheckedPushd6",
+      "prop_checkUncheckedPushd7",
+      "prop_checkUncheckedPushd8",
+      "prop_checkUncheckedPushd9",
+      "prop_checkUncheckedPopd1",
+      "prop_checkUncheckedPopd2",
+      "prop_checkUncheckedPopd3",
+      "prop_checkUncheckedPopd4",
+      "prop_checkUncheckedPopd5",
+      "prop_checkUncheckedPopd6",
+      "prop_checkUncheckedPopd7",
+      "prop_checkUncheckedPopd8",
+      "prop_checkUncheckedPopd9",
+      "prop_checkUncheckedPopd10",
+      "prop_checkUncheckedPopd11",
+      "prop_checkUncheckedPopd12",
+      "prop_checkUncheckedPopd13",
+      "prop_checkUncheckedCdInFunction1",
+      "prop_checkUncheckedCdInFunction2",
+      "prop_checkUncheckedCdInFunction3",
+      "prop_checkUncheckedCdInFunction4",
+      "prop_checkUncheckedCdInFunction5",
+      "prop_checkUncheckedCdInFunction6",
+      "prop_checkUncheckedCdInFunction7",
+      "prop_checkUncheckedCdInFunction8"
+     ],
+     "n_tests": 39
+    }
+   ],
+   "haskell_lines": 36,
+   "n_tests": 39,
+   "codes": [
+    2164
+   ]
+  },
+  {
+   "id": "T073",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkLoopVariableReassignment",
+     "registry": "node",
+     "source_lines": [
+      3461,
+      3485
+     ],
+     "lines": 25,
+     "codes": [
+      2165,
+      2167
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkLoopVariableReassignment1",
+      "prop_checkLoopVariableReassignment2",
+      "prop_checkLoopVariableReassignment3",
+      "prop_checkLoopVariableReassignment4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 25,
+   "n_tests": 4,
+   "codes": [
+    2165,
+    2167
+   ]
+  },
+  {
+   "id": "T074",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkTrailingBracket",
+     "registry": "node",
+     "source_lines": [
+      3491,
+      3510
+     ],
+     "lines": 20,
+     "codes": [
+      2171
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTrailingBracket1",
+      "prop_checkTrailingBracket2",
+      "prop_checkTrailingBracket3",
+      "prop_checkTrailingBracket4",
+      "prop_checkTrailingBracket5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 5,
+   "codes": [
+    2171
+   ]
+  },
+  {
+   "id": "T075",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkReturnAgainstZero",
+     "registry": "node",
+     "source_lines": [
+      3533,
+      3599
+     ],
+     "lines": 67,
+     "codes": [
+      2181
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkReturnAgainstZero1",
+      "prop_checkReturnAgainstZero2",
+      "prop_checkReturnAgainstZero3",
+      "prop_checkReturnAgainstZero4",
+      "prop_checkReturnAgainstZero5",
+      "prop_checkReturnAgainstZero6",
+      "prop_checkReturnAgainstZero7",
+      "prop_checkReturnAgainstZero8",
+      "prop_checkReturnAgainstZero9",
+      "prop_checkReturnAgainstZero10",
+      "prop_checkReturnAgainstZero11",
+      "prop_checkReturnAgainstZero12",
+      "prop_checkReturnAgainstZero13",
+      "prop_checkReturnAgainstZero14",
+      "prop_checkReturnAgainstZero15",
+      "prop_checkReturnAgainstZero16",
+      "prop_checkReturnAgainstZero17",
+      "prop_checkReturnAgainstZero18",
+      "prop_checkReturnAgainstZero19",
+      "prop_checkReturnAgainstZero20",
+      "prop_checkReturnAgainstZero21",
+      "prop_checkReturnAgainstZero22"
+     ],
+     "n_tests": 22
+    }
+   ],
+   "haskell_lines": 67,
+   "n_tests": 22,
+   "codes": [
+    2181
+   ]
+  },
+  {
+   "id": "T076",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkRedirectedNowhere",
+     "registry": "node",
+     "source_lines": [
+      3608,
+      3632
+     ],
+     "lines": 25,
+     "codes": [
+      2188,
+      2189
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkRedirectedNowhere1",
+      "prop_checkRedirectedNowhere2",
+      "prop_checkRedirectedNowhere3",
+      "prop_checkRedirectedNowhere4",
+      "prop_checkRedirectedNowhere5",
+      "prop_checkRedirectedNowhere6",
+      "prop_checkRedirectedNowhere7",
+      "prop_checkRedirectedNowhere8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 25,
+   "n_tests": 8,
+   "codes": [
+    2188,
+    2189
+   ]
+  },
+  {
+   "id": "T077",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkArrayAssignmentIndices",
+     "registry": "tree",
+     "source_lines": [
+      3646,
+      3677
+     ],
+     "lines": 32,
+     "codes": [
+      2190,
+      2191,
+      2192
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkArrayAssignmentIndices1",
+      "prop_checkArrayAssignmentIndices2",
+      "prop_checkArrayAssignmentIndices3",
+      "prop_checkArrayAssignmentIndices4",
+      "prop_checkArrayAssignmentIndices5",
+      "prop_checkArrayAssignmentIndices6",
+      "prop_checkArrayAssignmentIndices7",
+      "prop_checkArrayAssignmentIndices8",
+      "prop_checkArrayAssignmentIndices9",
+      "prop_checkArrayAssignmentIndices10",
+      "prop_checkArrayAssignmentIndices11",
+      "prop_checkArrayAssignmentIndices12",
+      "prop_checkArrayAssignmentIndices13"
+     ],
+     "n_tests": 13
+    }
+   ],
+   "haskell_lines": 32,
+   "n_tests": 13,
+   "codes": [
+    2190,
+    2191,
+    2192
+   ]
+  },
+  {
+   "id": "T078",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnmatchableCases",
+     "registry": "node",
+     "source_lines": [
+      3687,
+      3729
+     ],
+     "lines": 43,
+     "codes": [
+      2194,
+      2195,
+      2221,
+      2222
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnmatchableCases1",
+      "prop_checkUnmatchableCases2",
+      "prop_checkUnmatchableCases3",
+      "prop_checkUnmatchableCases4",
+      "prop_checkUnmatchableCases5",
+      "prop_checkUnmatchableCases6",
+      "prop_checkUnmatchableCases7",
+      "prop_checkUnmatchableCases8",
+      "prop_checkUnmatchableCases9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 43,
+   "n_tests": 9,
+   "codes": [
+    2194,
+    2195,
+    2221,
+    2222
+   ]
+  },
+  {
+   "id": "T079",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSubshellAsTest",
+     "registry": "node",
+     "source_lines": [
+      3737,
+      3757
+     ],
+     "lines": 21,
+     "codes": [
+      2204,
+      2205
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSubshellAsTest1",
+      "prop_checkSubshellAsTest2",
+      "prop_checkSubshellAsTest3",
+      "prop_checkSubshellAsTest4",
+      "prop_checkSubshellAsTest5",
+      "prop_checkSubshellAsTest6",
+      "prop_checkSubshellAsTest7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 21,
+   "n_tests": 7,
+   "codes": [
+    2204,
+    2205
+   ]
+  },
+  {
+   "id": "T080",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSplittingInArrays",
+     "registry": "node",
+     "source_lines": [
+      3766,
+      3794
+     ],
+     "lines": 29,
+     "codes": [
+      2206,
+      2207
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSplittingInArrays1",
+      "prop_checkSplittingInArrays2",
+      "prop_checkSplittingInArrays3",
+      "prop_checkSplittingInArrays4",
+      "prop_checkSplittingInArrays5",
+      "prop_checkSplittingInArrays6",
+      "prop_checkSplittingInArrays7",
+      "prop_checkSplittingInArrays8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 29,
+   "n_tests": 8,
+   "codes": [
+    2206,
+    2207
+   ]
+  },
+  {
+   "id": "T081",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkRedirectionToNumber",
+     "registry": "node",
+     "source_lines": [
+      3799,
+      3805
+     ],
+     "lines": 7,
+     "codes": [
+      2210
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkRedirectionToNumber1",
+      "prop_checkRedirectionToNumber2",
+      "prop_checkRedirectionToNumber3",
+      "prop_checkRedirectionToNumber4"
+     ],
+     "n_tests": 4
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkGlobAsCommand",
+     "registry": "node",
+     "source_lines": [
+      3809,
+      3815
+     ],
+     "lines": 7,
+     "codes": [
+      2211
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkGlobAsCommand1",
+      "prop_checkGlobAsCommand2",
+      "prop_checkGlobAsCommand3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 14,
+   "n_tests": 7,
+   "codes": [
+    2210,
+    2211
+   ]
+  },
+  {
+   "id": "T082",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkFlagAsCommand",
+     "registry": "node",
+     "source_lines": [
+      3820,
+      3826
+     ],
+     "lines": 7,
+     "codes": [
+      2215
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFlagAsCommand1",
+      "prop_checkFlagAsCommand2",
+      "prop_checkFlagAsCommand3",
+      "prop_checkFlagAsCommand4"
+     ],
+     "n_tests": 4
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkEmptyCondition",
+     "registry": "node",
+     "source_lines": [
+      3829,
+      3832
+     ],
+     "lines": 4,
+     "codes": [
+      2212
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkEmptyCondition1",
+      "prop_checkEmptyCondition2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 11,
+   "n_tests": 6,
+   "codes": [
+    2212,
+    2215
+   ]
+  },
+  {
+   "id": "T083",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkPipeToNowhere",
+     "registry": "node",
+     "source_lines": [
+      3856,
+      4022
+     ],
+     "lines": 167,
+     "codes": [
+      2216,
+      2217,
+      2259,
+      2260,
+      2261
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkPipeToNowhere1",
+      "prop_checkPipeToNowhere2",
+      "prop_checkPipeToNowhere3",
+      "prop_checkPipeToNowhere4",
+      "prop_checkPipeToNowhere5",
+      "prop_checkPipeToNowhere6",
+      "prop_checkPipeToNowhere7",
+      "prop_checkPipeToNowhere9",
+      "prop_checkPipeToNowhere10",
+      "prop_checkPipeToNowhere11",
+      "prop_checkPipeToNowhere12",
+      "prop_checkPipeToNowhere13",
+      "prop_checkPipeToNowhere14",
+      "prop_checkPipeToNowhere15",
+      "prop_checkPipeToNowhere16",
+      "prop_checkPipeToNowhere17",
+      "prop_checkPipeToNowhere18",
+      "prop_checkPipeToNowhere19",
+      "prop_checkPipeToNowhere20",
+      "prop_checkPipeToNowhere21",
+      "prop_checkPipeToNowhere22"
+     ],
+     "n_tests": 21
+    }
+   ],
+   "haskell_lines": 167,
+   "n_tests": 21,
+   "codes": [
+    2216,
+    2217,
+    2259,
+    2260,
+    2261
+   ]
+  },
+  {
+   "id": "T084",
+   "module": "Analytics.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUseBeforeDefinition",
+     "registry": "tree",
+     "source_lines": [
+      4034,
+      4065
+     ],
+     "lines": 32,
+     "codes": [
+      2218
+     ],
+     "codes_inferred": false,
+     "uses_cfg": true,
+     "tests": [
+      "prop_checkUseBeforeDefinition1",
+      "prop_checkUseBeforeDefinition2",
+      "prop_checkUseBeforeDefinition3",
+      "prop_checkUseBeforeDefinition4",
+      "prop_checkUseBeforeDefinition5",
+      "prop_checkUseBeforeDefinition6",
+      "prop_checkUseBeforeDefinition7",
+      "prop_checkUseBeforeDefinition8",
+      "prop_checkUseBeforeDefinition9",
+      "prop_checkUseBeforeDefinition10",
+      "prop_checkUseBeforeDefinition11"
+     ],
+     "n_tests": 11
+    }
+   ],
+   "haskell_lines": 32,
+   "n_tests": 11,
+   "codes": [
+    2218
+   ]
+  },
+  {
+   "id": "T085",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkForLoopGlobVariables",
+     "registry": "node",
+     "source_lines": [
+      4069,
+      4080
+     ],
+     "lines": 12,
+     "codes": [
+      2231
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkForLoopGlobVariables1",
+      "prop_checkForLoopGlobVariables2",
+      "prop_checkForLoopGlobVariables3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 12,
+   "n_tests": 3,
+   "codes": [
+    2231
+   ]
+  },
+  {
+   "id": "T086",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSubshelledTests",
+     "registry": "node",
+     "source_lines": [
+      4090,
+      4167
+     ],
+     "lines": 78,
+     "codes": [
+      2233,
+      2234,
+      2235
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSubshelledTests1",
+      "prop_checkSubshelledTests2",
+      "prop_checkSubshelledTests3",
+      "prop_checkSubshelledTests4",
+      "prop_checkSubshelledTests5",
+      "prop_checkSubshelledTests6",
+      "prop_checkSubshelledTests7",
+      "prop_checkSubshelledTests8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 78,
+   "n_tests": 8,
+   "codes": [
+    2233,
+    2234,
+    2235
+   ]
+  },
+  {
+   "id": "T087",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnnecessarilyInvertedTest",
+     "registry": "optional-tree",
+     "source_lines": [
+      4183,
+      4239
+     ],
+     "lines": 57,
+     "codes": [
+      2236,
+      2237,
+      2335
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnnecessarilyInvertedTest1",
+      "prop_checkUnnecessarilyInvertedTest2",
+      "prop_checkUnnecessarilyInvertedTest3",
+      "prop_checkUnnecessarilyInvertedTest4",
+      "prop_checkUnnecessarilyInvertedTest5",
+      "prop_checkUnnecessarilyInvertedTest6",
+      "prop_checkUnnecessarilyInvertedTest7",
+      "prop_checkUnnecessarilyInvertedTest8",
+      "prop_checkUnnecessarilyInvertedTest9",
+      "prop_checkUnnecessarilyInvertedTest10",
+      "prop_checkUnnecessarilyInvertedTest11",
+      "prop_checkUnnecessarilyInvertedTest12",
+      "prop_checkUnnecessarilyInvertedTest13",
+      "prop_checkUnnecessarilyInvertedTest14",
+      "prop_checkUnnecessarilyInvertedTest15"
+     ],
+     "n_tests": 15
+    }
+   ],
+   "haskell_lines": 57,
+   "n_tests": 15,
+   "codes": [
+    2236,
+    2237,
+    2335
+   ]
+  },
+  {
+   "id": "T088",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkRedirectionToCommand",
+     "registry": "node",
+     "source_lines": [
+      4243,
+      4249
+     ],
+     "lines": 7,
+     "codes": [
+      2238
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkRedirectionToCommand1",
+      "prop_checkRedirectionToCommand2",
+      "prop_checkRedirectionToCommand3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 7,
+   "n_tests": 3,
+   "codes": [
+    2238
+   ]
+  },
+  {
+   "id": "T089",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkNullaryExpansionTest",
+     "registry": "optional-tree",
+     "source_lines": [
+      4256,
+      4272
+     ],
+     "lines": 17,
+     "codes": [
+      2243,
+      2244
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkNullaryExpansionTest1",
+      "prop_checkNullaryExpansionTest2",
+      "prop_checkNullaryExpansionTest3",
+      "prop_checkNullaryExpansionTest4",
+      "prop_checkNullaryExpansionTest5",
+      "prop_checkNullaryExpansionTest6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 6,
+   "codes": [
+    2243,
+    2244
+   ]
+  },
+  {
+   "id": "T090",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkDollarQuoteParen",
+     "registry": "node",
+     "source_lines": [
+      4277,
+      4284
+     ],
+     "lines": 8,
+     "codes": [
+      2247
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDollarQuoteParen1",
+      "prop_checkDollarQuoteParen2",
+      "prop_checkDollarQuoteParen3",
+      "prop_checkDollarQuoteParen4"
+     ],
+     "n_tests": 4
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "checkTranslatedStringVariable",
+     "registry": "node",
+     "source_lines": [
+      4290,
+      4298
+     ],
+     "lines": 9,
+     "codes": [
+      2256
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTranslatedStringVariable1",
+      "prop_checkTranslatedStringVariable2",
+      "prop_checkTranslatedStringVariable3",
+      "prop_checkTranslatedStringVariable4",
+      "prop_checkTranslatedStringVariable5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 9,
+   "codes": [
+    2247,
+    2256
+   ]
+  },
+  {
+   "id": "T091",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkDefaultCase",
+     "registry": "optional-tree",
+     "source_lines": [
+      4303,
+      4315
+     ],
+     "lines": 13,
+     "codes": [
+      2249
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDefaultCase1",
+      "prop_checkDefaultCase2",
+      "prop_checkDefaultCase3",
+      "prop_checkDefaultCase4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 13,
+   "n_tests": 4,
+   "codes": [
+    2249
+   ]
+  },
+  {
+   "id": "T092",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUselessBang",
+     "registry": "node",
+     "source_lines": [
+      4326,
+      4363
+     ],
+     "lines": 38,
+     "codes": [
+      2251
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUselessBang1",
+      "prop_checkUselessBang2",
+      "prop_checkUselessBang3",
+      "prop_checkUselessBang4",
+      "prop_checkUselessBang5",
+      "prop_checkUselessBang6",
+      "prop_checkUselessBang7",
+      "prop_checkUselessBang8",
+      "prop_checkUselessBang9",
+      "prop_checkUselessBang10"
+     ],
+     "n_tests": 10
+    }
+   ],
+   "haskell_lines": 38,
+   "n_tests": 10,
+   "codes": [
+    2251
+   ]
+  },
+  {
+   "id": "T093",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkModifiedArithmeticInRedirection",
+     "registry": "node",
+     "source_lines": [
+      4371,
+      4399
+     ],
+     "lines": 29,
+     "codes": [
+      2257
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkModifiedArithmeticInRedirection1",
+      "prop_checkModifiedArithmeticInRedirection2",
+      "prop_checkModifiedArithmeticInRedirection3",
+      "prop_checkModifiedArithmeticInRedirection4",
+      "prop_checkModifiedArithmeticInRedirection5",
+      "prop_checkModifiedArithmeticInRedirection6",
+      "prop_checkModifiedArithmeticInRedirection7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 29,
+   "n_tests": 7,
+   "codes": [
+    2257
+   ]
+  },
+  {
+   "id": "T094",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkAliasUsedInSameParsingUnit",
+     "registry": "tree",
+     "source_lines": [
+      4406,
+      4449
+     ],
+     "lines": 44,
+     "codes": [
+      2262,
+      2263
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkAliasUsedInSameParsingUnit1",
+      "prop_checkAliasUsedInSameParsingUnit2",
+      "prop_checkAliasUsedInSameParsingUnit3",
+      "prop_checkAliasUsedInSameParsingUnit4",
+      "prop_checkAliasUsedInSameParsingUnit5",
+      "prop_checkAliasUsedInSameParsingUnit6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 44,
+   "n_tests": 6,
+   "codes": [
+    2262,
+    2263
+   ]
+  },
+  {
+   "id": "T095",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkBlatantRecursion",
+     "registry": "node",
+     "source_lines": [
+      4481,
+      4509
+     ],
+     "lines": 29,
+     "codes": [
+      2264
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBlatantRecursion1",
+      "prop_checkBlatantRecursion2",
+      "prop_checkBlatantRecursion3",
+      "prop_checkBlatantRecursion4",
+      "prop_checkBlatantRecursion5",
+      "prop_checkBlatantRecursion6",
+      "prop_checkBlatantRecursion7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 29,
+   "n_tests": 7,
+   "codes": [
+    2264
+   ]
+  },
+  {
+   "id": "T096",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkBadTestAndOr",
+     "registry": "node",
+     "source_lines": [
+      4513,
+      4545
+     ],
+     "lines": 33,
+     "codes": [
+      2265,
+      2266
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBadTestAndOr1",
+      "prop_checkBadTestAndOr2",
+      "prop_checkBadTestAndOr3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 33,
+   "n_tests": 3,
+   "codes": [
+    2265,
+    2266
+   ]
+  },
+  {
+   "id": "T097",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkComparisonWithLeadingX",
+     "registry": "node",
+     "source_lines": [
+      4553,
+      4584
+     ],
+     "lines": 32,
+     "codes": [
+      2268
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkComparisonWithLeadingX1",
+      "prop_checkComparisonWithLeadingX2",
+      "prop_checkComparisonWithLeadingX3",
+      "prop_checkComparisonWithLeadingX4",
+      "prop_checkComparisonWithLeadingX5",
+      "prop_checkComparisonWithLeadingX6",
+      "prop_checkComparisonWithLeadingX7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 32,
+   "n_tests": 7,
+   "codes": [
+    2268
+   ]
+  },
+  {
+   "id": "T098",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkAssignToSelf",
+     "registry": "node",
+     "source_lines": [
+      4589,
+      4605
+     ],
+     "lines": 17,
+     "codes": [
+      2269
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkAssignToSelf1",
+      "prop_checkAssignToSelf2",
+      "prop_checkAssignToSelf3",
+      "prop_checkAssignToSelf4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 4,
+   "codes": [
+    2269
+   ]
+  },
+  {
+   "id": "T099",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkEqualsInCommand",
+     "registry": "node",
+     "source_lines": [
+      4637,
+      4785
+     ],
+     "lines": 149,
+     "codes": [
+      2270,
+      2271,
+      2272,
+      2273,
+      2274,
+      2275,
+      2276,
+      2277,
+      2278,
+      2279,
+      2280,
+      2281,
+      2282
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkEqualsInCommand1a",
+      "prop_checkEqualsInCommand2a",
+      "prop_checkEqualsInCommand3a",
+      "prop_checkEqualsInCommand4a",
+      "prop_checkEqualsInCommand1b",
+      "prop_checkEqualsInCommand2b",
+      "prop_checkEqualsInCommand1c",
+      "prop_checkEqualsInCommand2c",
+      "prop_checkEqualsInCommand3c",
+      "prop_checkEqualsInCommand4c",
+      "prop_checkEqualsInCommand1d",
+      "prop_checkEqualsInCommand2d",
+      "prop_checkEqualsInCommand3d",
+      "prop_checkEqualsInCommand1e",
+      "prop_checkEqualsInCommand2e",
+      "prop_checkEqualsInCommand3e",
+      "prop_checkEqualsInCommand4e",
+      "prop_checkEqualsInCommand5e",
+      "prop_checkEqualsInCommand1f",
+      "prop_checkEqualsInCommand2f",
+      "prop_checkEqualsInCommand3f",
+      "prop_checkEqualsInCommand4f",
+      "prop_checkEqualsInCommand5f",
+      "prop_checkEqualsInCommand1g"
+     ],
+     "n_tests": 24
+    }
+   ],
+   "haskell_lines": 149,
+   "n_tests": 24,
+   "codes": [
+    2270,
+    2271,
+    2272,
+    2273,
+    2274,
+    2275,
+    2276,
+    2277,
+    2278,
+    2279,
+    2280,
+    2281,
+    2282
+   ]
+  },
+  {
+   "id": "T100",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSecondArgIsComparison",
+     "registry": "node",
+     "source_lines": [
+      4796,
+      4820
+     ],
+     "lines": 25,
+     "codes": [
+      2283,
+      2284,
+      2285
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSecondArgIsComparison1",
+      "prop_checkSecondArgIsComparison2",
+      "prop_checkSecondArgIsComparison3",
+      "prop_checkSecondArgIsComparison4",
+      "prop_checkSecondArgIsComparison5",
+      "prop_checkSecondArgIsComparison6",
+      "prop_checkSecondArgIsComparison7",
+      "prop_checkSecondArgIsComparison8",
+      "prop_checkSecondArgIsComparison9",
+      "prop_checkSecondArgIsComparison10"
+     ],
+     "n_tests": 10
+    }
+   ],
+   "haskell_lines": 25,
+   "n_tests": 10,
+   "codes": [
+    2283,
+    2284,
+    2285
+   ]
+  },
+  {
+   "id": "T101",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkCommandWithTrailingSymbol",
+     "registry": "node",
+     "source_lines": [
+      4831,
+      4857
+     ],
+     "lines": 27,
+     "codes": [
+      2286,
+      2287,
+      2288,
+      2289
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkCommandWithTrailingSymbol1",
+      "prop_checkCommandWithTrailingSymbol2",
+      "prop_checkCommandWithTrailingSymbol3",
+      "prop_checkCommandWithTrailingSymbol4",
+      "prop_checkCommandWithTrailingSymbol5",
+      "prop_checkCommandWithTrailingSymbol6",
+      "prop_checkCommandWithTrailingSymbol7",
+      "prop_checkCommandWithTrailingSymbol8",
+      "prop_checkCommandWithTrailingSymbol9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 27,
+   "n_tests": 9,
+   "codes": [
+    2286,
+    2287,
+    2288,
+    2289
+   ]
+  },
+  {
+   "id": "T102",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkRequireDoubleBracket",
+     "registry": "optional-tree",
+     "source_lines": [
+      4864,
+      4895
+     ],
+     "lines": 32,
+     "codes": [
+      2292
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkRequireDoubleBracket1",
+      "prop_checkRequireDoubleBracket2",
+      "prop_checkRequireDoubleBracket3",
+      "prop_checkRequireDoubleBracket4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 32,
+   "n_tests": 4,
+   "codes": [
+    2292
+   ]
+  },
+  {
+   "id": "T103",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkRequireDoubleEquals",
+     "registry": "optional-tree",
+     "source_lines": [
+      4901,
+      4911
+     ],
+     "lines": 11,
+     "codes": [
+      2338
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkRequireDoubleEquals1",
+      "prop_checkRequireDoubleEquals2",
+      "prop_checkRequireDoubleEquals3",
+      "prop_checkRequireDoubleEquals4",
+      "prop_checkRequireDoubleEquals5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 11,
+   "n_tests": 5,
+   "codes": [
+    2338
+   ]
+  },
+  {
+   "id": "T104",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnquotedParameterExpansionPattern",
+     "registry": "node",
+     "source_lines": [
+      4917,
+      4937
+     ],
+     "lines": 21,
+     "codes": [
+      2295
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnquotedParameterExpansionPattern1",
+      "prop_checkUnquotedParameterExpansionPattern2",
+      "prop_checkUnquotedParameterExpansionPattern3",
+      "prop_checkUnquotedParameterExpansionPattern4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 21,
+   "n_tests": 4,
+   "codes": [
+    2295
+   ]
+  },
+  {
+   "id": "T105",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkArrayValueUsedAsIndex",
+     "registry": "tree",
+     "source_lines": [
+      4947,
+      5021
+     ],
+     "lines": 75,
+     "codes": [
+      2302,
+      2303
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkArrayValueUsedAsIndex1",
+      "prop_checkArrayValueUsedAsIndex2",
+      "prop_checkArrayValueUsedAsIndex3",
+      "prop_checkArrayValueUsedAsIndex4",
+      "prop_checkArrayValueUsedAsIndex5",
+      "prop_checkArrayValueUsedAsIndex7",
+      "prop_checkArrayValueUsedAsIndex8",
+      "prop_checkArrayValueUsedAsIndex9"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 75,
+   "n_tests": 8,
+   "codes": [
+    2302,
+    2303
+   ]
+  },
+  {
+   "id": "T106",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkSetESuppressed",
+     "registry": "optional-tree",
+     "source_lines": [
+      5041,
+      5082
+     ],
+     "lines": 42,
+     "codes": [
+      2310,
+      2311
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSetESuppressed1",
+      "prop_checkSetESuppressed2",
+      "prop_checkSetESuppressed3",
+      "prop_checkSetESuppressed4",
+      "prop_checkSetESuppressed5",
+      "prop_checkSetESuppressed6",
+      "prop_checkSetESuppressed7",
+      "prop_checkSetESuppressed8",
+      "prop_checkSetESuppressed9",
+      "prop_checkSetESuppressed10",
+      "prop_checkSetESuppressed11",
+      "prop_checkSetESuppressed12",
+      "prop_checkSetESuppressed13",
+      "prop_checkSetESuppressed14",
+      "prop_checkSetESuppressed15",
+      "prop_checkSetESuppressed16",
+      "prop_checkSetESuppressed17",
+      "prop_checkSetESuppressed18",
+      "prop_checkSetESuppressed19"
+     ],
+     "n_tests": 19
+    }
+   ],
+   "haskell_lines": 42,
+   "n_tests": 19,
+   "codes": [
+    2310,
+    2311
+   ]
+  },
+  {
+   "id": "T107",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkExtraMaskedReturns",
+     "registry": "optional-tree",
+     "source_lines": [
+      5125,
+      5201
+     ],
+     "lines": 77,
+     "codes": [
+      2312
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkExtraMaskedReturns1",
+      "prop_checkExtraMaskedReturns2",
+      "prop_checkExtraMaskedReturns3",
+      "prop_checkExtraMaskedReturns4",
+      "prop_checkExtraMaskedReturns5",
+      "prop_checkExtraMaskedReturns6",
+      "prop_checkExtraMaskedReturns7",
+      "prop_checkExtraMaskedReturns8",
+      "prop_checkExtraMaskedReturns9",
+      "prop_checkExtraMaskedReturns10",
+      "prop_checkExtraMaskedReturns11",
+      "prop_checkExtraMaskedReturns12",
+      "prop_checkExtraMaskedReturns13",
+      "prop_checkExtraMaskedReturns14",
+      "prop_checkExtraMaskedReturns15",
+      "prop_checkExtraMaskedReturns16",
+      "prop_checkExtraMaskedReturns17",
+      "prop_checkExtraMaskedReturns18",
+      "prop_checkExtraMaskedReturns19",
+      "prop_checkExtraMaskedReturns20",
+      "prop_checkExtraMaskedReturns21",
+      "prop_checkExtraMaskedReturns22",
+      "prop_checkExtraMaskedReturns23",
+      "prop_checkExtraMaskedReturns24",
+      "prop_checkExtraMaskedReturns25",
+      "prop_checkExtraMaskedReturns26",
+      "prop_checkExtraMaskedReturns27",
+      "prop_checkExtraMaskedReturns28",
+      "prop_checkExtraMaskedReturns29",
+      "prop_checkExtraMaskedReturns30",
+      "prop_checkExtraMaskedReturns31",
+      "prop_checkExtraMaskedReturns32",
+      "prop_checkExtraMaskedReturns33",
+      "prop_checkExtraMaskedReturns34",
+      "prop_checkExtraMaskedReturns35",
+      "prop_checkExtraMaskedReturns36",
+      "prop_checkExtraMaskedReturns37",
+      "prop_checkExtraMaskedReturns38",
+      "prop_checkExtraMaskedReturns39",
+      "prop_checkExtraMaskedReturns40",
+      "prop_checkExtraMaskedReturns41"
+     ],
+     "n_tests": 41
+    }
+   ],
+   "haskell_lines": 77,
+   "n_tests": 41,
+   "codes": [
+    2312
+   ]
+  },
+  {
+   "id": "T108",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkBatsTestDoesNotUseNegation",
+     "registry": "node",
+     "source_lines": [
+      5216,
+      5240
+     ],
+     "lines": 25,
+     "codes": [
+      2314,
+      2315
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBatsTestDoesNotUseNegation1",
+      "prop_checkBatsTestDoesNotUseNegation2",
+      "prop_checkBatsTestDoesNotUseNegation3",
+      "prop_checkBatsTestDoesNotUseNegation4",
+      "prop_checkBatsTestDoesNotUseNegation5",
+      "prop_checkBatsTestDoesNotUseNegation6",
+      "prop_checkBatsTestDoesNotUseNegation7",
+      "prop_checkBatsTestDoesNotUseNegation8",
+      "prop_checkBatsTestDoesNotUseNegation9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 25,
+   "n_tests": 9,
+   "codes": [
+    2314,
+    2315
+   ]
+  },
+  {
+   "id": "T109",
+   "module": "Analytics.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkCommandIsUnreachable",
+     "registry": "node",
+     "source_lines": [
+      5246,
+      5272
+     ],
+     "lines": 27,
+     "codes": [
+      2317,
+      2329
+     ],
+     "codes_inferred": false,
+     "uses_cfg": true,
+     "tests": [
+      "prop_checkCommandIsUnreachable1",
+      "prop_checkCommandIsUnreachable2",
+      "prop_checkCommandIsUnreachable3",
+      "prop_checkCommandIsUnreachable4",
+      "prop_checkCommandIsUnreachable5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 27,
+   "n_tests": 5,
+   "codes": [
+    2317,
+    2329
+   ]
+  },
+  {
+   "id": "T110",
+   "module": "Analytics.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkOverwrittenExitCode",
+     "registry": "node",
+     "source_lines": [
+      5281,
+      5317
+     ],
+     "lines": 37,
+     "codes": [
+      2319,
+      2320
+     ],
+     "codes_inferred": false,
+     "uses_cfg": true,
+     "tests": [
+      "prop_checkOverwrittenExitCode1",
+      "prop_checkOverwrittenExitCode2",
+      "prop_checkOverwrittenExitCode3",
+      "prop_checkOverwrittenExitCode4",
+      "prop_checkOverwrittenExitCode5",
+      "prop_checkOverwrittenExitCode6",
+      "prop_checkOverwrittenExitCode7",
+      "prop_checkOverwrittenExitCode8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 37,
+   "n_tests": 8,
+   "codes": [
+    2319,
+    2320
+   ]
+  },
+  {
+   "id": "T111",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnnecessaryArithmeticExpansionIndex",
+     "registry": "node",
+     "source_lines": [
+      5322,
+      5335
+     ],
+     "lines": 14,
+     "codes": [
+      2321
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnnecessaryArithmeticExpansionIndex1",
+      "prop_checkUnnecessaryArithmeticExpansionIndex2",
+      "prop_checkUnnecessaryArithmeticExpansionIndex3",
+      "prop_checkUnnecessaryArithmeticExpansionIndex4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 14,
+   "n_tests": 4,
+   "codes": [
+    2321
+   ]
+  },
+  {
+   "id": "T112",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnnecessaryParens",
+     "registry": "node",
+     "source_lines": [
+      5344,
+      5366
+     ],
+     "lines": 23,
+     "codes": [
+      2322,
+      2323
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnnecessaryParens1",
+      "prop_checkUnnecessaryParens2",
+      "prop_checkUnnecessaryParens3",
+      "prop_checkUnnecessaryParens4",
+      "prop_checkUnnecessaryParens5",
+      "prop_checkUnnecessaryParens6",
+      "prop_checkUnnecessaryParens7",
+      "prop_checkUnnecessaryParens8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 23,
+   "n_tests": 8,
+   "codes": [
+    2322,
+    2323
+   ]
+  },
+  {
+   "id": "T113",
+   "module": "Analytics.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkPlusEqualsNumber",
+     "registry": "node",
+     "source_lines": [
+      5376,
+      5406
+     ],
+     "lines": 31,
+     "codes": [
+      2324
+     ],
+     "codes_inferred": false,
+     "uses_cfg": true,
+     "tests": [
+      "prop_checkPlusEqualsNumber1",
+      "prop_checkPlusEqualsNumber2",
+      "prop_checkPlusEqualsNumber3",
+      "prop_checkPlusEqualsNumber4",
+      "prop_checkPlusEqualsNumber5",
+      "prop_checkPlusEqualsNumber6",
+      "prop_checkPlusEqualsNumber7",
+      "prop_checkPlusEqualsNumber8",
+      "prop_checkPlusEqualsNumber9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 31,
+   "n_tests": 9,
+   "codes": [
+    2324
+   ]
+  },
+  {
+   "id": "T114",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkExpansionWithRedirection",
+     "registry": "node",
+     "source_lines": [
+      5415,
+      5442
+     ],
+     "lines": 28,
+     "codes": [
+      2327,
+      2328
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkExpansionWithRedirection1",
+      "prop_checkExpansionWithRedirection2",
+      "prop_checkExpansionWithRedirection3",
+      "prop_checkExpansionWithRedirection4",
+      "prop_checkExpansionWithRedirection5",
+      "prop_checkExpansionWithRedirection6",
+      "prop_checkExpansionWithRedirection7",
+      "prop_checkExpansionWithRedirection8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 28,
+   "n_tests": 8,
+   "codes": [
+    2327,
+    2328
+   ]
+  },
+  {
+   "id": "T115",
+   "module": "Analytics.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Analytics.hs",
+     "check": "checkUnaryTestA",
+     "registry": "node",
+     "source_lines": [
+      5446,
+      5452
+     ],
+     "lines": 7,
+     "codes": [
+      2331
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnaryTestA1",
+      "prop_checkUnaryTestA2",
+      "prop_checkUnaryTestA3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 7,
+   "n_tests": 3,
+   "codes": [
+    2331
+   ]
+  },
+  {
+   "id": "T116",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkTr",
+     "registry": "command",
+     "source_lines": [
+      236,
+      255
+     ],
+     "lines": 20,
+     "codes": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2060
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTr1",
+      "prop_checkTr2",
+      "prop_checkTr2a",
+      "prop_checkTr3",
+      "prop_checkTr3a",
+      "prop_checkTr3b",
+      "prop_checkTr4",
+      "prop_checkTr5",
+      "prop_checkTr6",
+      "prop_checkTr8",
+      "prop_checkTr9",
+      "prop_checkTr10",
+      "prop_checkTr11",
+      "prop_checkTr12"
+     ],
+     "n_tests": 14
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 14,
+   "codes": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2060
+   ]
+  },
+  {
+   "id": "T117",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkFindNameGlob",
+     "registry": "command",
+     "source_lines": [
+      259,
+      268
+     ],
+     "lines": 10,
+     "codes": [
+      2061
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFindNameGlob1",
+      "prop_checkFindNameGlob2",
+      "prop_checkFindNameGlob3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 10,
+   "n_tests": 3,
+   "codes": [
+    2061
+   ]
+  },
+  {
+   "id": "T118",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkExpr",
+     "registry": "command",
+     "source_lines": [
+      284,
+      337
+     ],
+     "lines": 54,
+     "codes": [
+      2003,
+      2304,
+      2305,
+      2306,
+      2307,
+      2308
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkExpr",
+      "prop_checkExpr2",
+      "prop_checkExpr3",
+      "prop_checkExpr4",
+      "prop_checkExpr5",
+      "prop_checkExpr6",
+      "prop_checkExpr7",
+      "prop_checkExpr8",
+      "prop_checkExpr9",
+      "prop_checkExpr10",
+      "prop_checkExpr11",
+      "prop_checkExpr12",
+      "prop_checkExpr13",
+      "prop_checkExpr14"
+     ],
+     "n_tests": 14
+    }
+   ],
+   "haskell_lines": 54,
+   "n_tests": 14,
+   "codes": [
+    2003,
+    2304,
+    2305,
+    2306,
+    2307,
+    2308
+   ]
+  },
+  {
+   "id": "T119",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkGrepRe",
+     "registry": "command",
+     "source_lines": [
+      362,
+      406
+     ],
+     "lines": 45,
+     "codes": [
+      2022,
+      2062,
+      2063
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkGrepRe1",
+      "prop_checkGrepRe2",
+      "prop_checkGrepRe3",
+      "prop_checkGrepRe4",
+      "prop_checkGrepRe5",
+      "prop_checkGrepRe6",
+      "prop_checkGrepRe7",
+      "prop_checkGrepRe8",
+      "prop_checkGrepRe9",
+      "prop_checkGrepRe10",
+      "prop_checkGrepRe11",
+      "prop_checkGrepRe12",
+      "prop_checkGrepRe13",
+      "prop_checkGrepRe14",
+      "prop_checkGrepRe15",
+      "prop_checkGrepRe16",
+      "prop_checkGrepRe17",
+      "prop_checkGrepRe18",
+      "prop_checkGrepRe19",
+      "prop_checkGrepRe20",
+      "prop_checkGrepRe21",
+      "prop_checkGrepRe22",
+      "prop_checkGrepRe23"
+     ],
+     "n_tests": 23
+    }
+   ],
+   "haskell_lines": 45,
+   "n_tests": 23,
+   "codes": [
+    2022,
+    2062,
+    2063
+   ]
+  },
+  {
+   "id": "T120",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkGrepSendsPipefail",
+     "registry": "command",
+     "source_lines": [
+      426,
+      427
+     ],
+     "lines": 2,
+     "codes": [
+      2337
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkGrepSendsPipefail1",
+      "prop_checkGrepSendsPipefail2",
+      "prop_checkGrepSendsPipefail3",
+      "prop_checkGrepSendsPipefail4",
+      "prop_checkGrepSendsPipefail5",
+      "prop_checkGrepSendsPipefail6",
+      "prop_checkGrepSendsPipefail7",
+      "prop_checkGrepSendsPipefailN1",
+      "prop_checkGrepSendsPipefailN2",
+      "prop_checkGrepSendsPipefailN3",
+      "prop_checkGrepSendsPipefailN4",
+      "prop_checkGrepSendsPipefailN5",
+      "prop_checkGrepSendsPipefailN6",
+      "prop_checkGrepSendsPipefailN7",
+      "prop_checkGrepSendsPipefailN8",
+      "prop_checkGrepSendsPipefailN9",
+      "prop_checkGrepSendsPipefailN10"
+     ],
+     "n_tests": 17
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkEgrepSendsPipefail",
+     "registry": "command",
+     "source_lines": [
+      429,
+      430
+     ],
+     "lines": 2,
+     "codes": [
+      2337
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkEgrepSendsPipefail1"
+     ],
+     "n_tests": 1
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkFgrepSendsPipefail",
+     "registry": "command",
+     "source_lines": [
+      432,
+      434
+     ],
+     "lines": 3,
+     "codes": [
+      2337
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFgrepSendsPipefail1"
+     ],
+     "n_tests": 1
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkTrapQuotes",
+     "registry": "command",
+     "source_lines": [
+      470,
+      482
+     ],
+     "lines": 13,
+     "codes": [
+      2064
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTrapQuotes1",
+      "prop_checkTrapQuotes1a",
+      "prop_checkTrapQuotes2",
+      "prop_checkTrapQuotes3"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 23,
+   "codes": [
+    2064,
+    2337
+   ]
+  },
+  {
+   "id": "T121",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkReturn",
+     "registry": "command",
+     "source_lines": [
+      490,
+      493
+     ],
+     "lines": 4,
+     "codes": [
+      2151,
+      2152
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkReturn1",
+      "prop_checkReturn2",
+      "prop_checkReturn3",
+      "prop_checkReturn4",
+      "prop_checkReturn5",
+      "prop_checkReturn6",
+      "prop_checkReturn7"
+     ],
+     "n_tests": 7
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkExit",
+     "registry": "command",
+     "source_lines": [
+      501,
+      504
+     ],
+     "lines": 4,
+     "codes": [
+      2241,
+      2242
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkExit1",
+      "prop_checkExit2",
+      "prop_checkExit3",
+      "prop_checkExit4",
+      "prop_checkExit5",
+      "prop_checkExit6",
+      "prop_checkExit7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 8,
+   "n_tests": 14,
+   "codes": [
+    2151,
+    2152,
+    2241,
+    2242
+   ]
+  },
+  {
+   "id": "T122",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkFindExecWithSingleArgument",
+     "registry": "command",
+     "source_lines": [
+      528,
+      542
+     ],
+     "lines": 15,
+     "codes": [
+      2150
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFindExecWithSingleArgument1",
+      "prop_checkFindExecWithSingleArgument2",
+      "prop_checkFindExecWithSingleArgument3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 15,
+   "n_tests": 3,
+   "codes": [
+    2150
+   ]
+  },
+  {
+   "id": "T123",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkUnusedEchoEscapes",
+     "registry": "command",
+     "source_lines": [
+      555,
+      568
+     ],
+     "lines": 14,
+     "codes": [
+      2028
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnusedEchoEscapes1",
+      "prop_checkUnusedEchoEscapes2",
+      "prop_checkUnusedEchoEscapes3",
+      "prop_checkUnusedEchoEscapes4",
+      "prop_checkUnusedEchoEscapes5",
+      "prop_checkUnusedEchoEscapes6",
+      "prop_checkUnusedEchoEscapes7",
+      "prop_checkUnusedEchoEscapes8",
+      "prop_checkUnusedEchoEscapes9",
+      "prop_checkUnusedEchoEscapes10",
+      "prop_checkUnusedEchoEscapes11",
+      "prop_checkUnusedEchoEscapes12"
+     ],
+     "n_tests": 12
+    }
+   ],
+   "haskell_lines": 14,
+   "n_tests": 12,
+   "codes": [
+    2028
+   ]
+  },
+  {
+   "id": "T124",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkInjectableFindSh",
+     "registry": "command",
+     "source_lines": [
+      572,
+      593
+     ],
+     "lines": 22,
+     "codes": [
+      2156
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkInjectableFindSh1",
+      "prop_checkInjectableFindSh2",
+      "prop_checkInjectableFindSh3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 22,
+   "n_tests": 3,
+   "codes": [
+    2156
+   ]
+  },
+  {
+   "id": "T125",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkFindActionPrecedence",
+     "registry": "command",
+     "source_lines": [
+      597,
+      612
+     ],
+     "lines": 16,
+     "codes": [
+      2146
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFindActionPrecedence1",
+      "prop_checkFindActionPrecedence2",
+      "prop_checkFindActionPrecedence3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 16,
+   "n_tests": 3,
+   "codes": [
+    2146
+   ]
+  },
+  {
+   "id": "T126",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkMkdirDashPM",
+     "registry": "command",
+     "source_lines": [
+      635,
+      649
+     ],
+     "lines": 15,
+     "codes": [
+      2174
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkMkdirDashPM0",
+      "prop_checkMkdirDashPM1",
+      "prop_checkMkdirDashPM2",
+      "prop_checkMkdirDashPM3",
+      "prop_checkMkdirDashPM4",
+      "prop_checkMkdirDashPM5",
+      "prop_checkMkdirDashPM6",
+      "prop_checkMkdirDashPM7",
+      "prop_checkMkdirDashPM8",
+      "prop_checkMkdirDashPM9",
+      "prop_checkMkdirDashPM10",
+      "prop_checkMkdirDashPM11",
+      "prop_checkMkdirDashPM12",
+      "prop_checkMkdirDashPM13",
+      "prop_checkMkdirDashPM14",
+      "prop_checkMkdirDashPM15",
+      "prop_checkMkdirDashPM16",
+      "prop_checkMkdirDashPM17",
+      "prop_checkMkdirDashPM18",
+      "prop_checkMkdirDashPM19",
+      "prop_checkMkdirDashPM20",
+      "prop_checkMkdirDashPM21"
+     ],
+     "n_tests": 22
+    }
+   ],
+   "haskell_lines": 15,
+   "n_tests": 22,
+   "codes": [
+    2174
+   ]
+  },
+  {
+   "id": "T127",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkNonportableSignals",
+     "registry": "command",
+     "source_lines": [
+      657,
+      684
+     ],
+     "lines": 28,
+     "codes": [
+      2172,
+      2173
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkNonportableSignals1",
+      "prop_checkNonportableSignals2",
+      "prop_checkNonportableSignals3",
+      "prop_checkNonportableSignals4",
+      "prop_checkNonportableSignals5",
+      "prop_checkNonportableSignals6",
+      "prop_checkNonportableSignals7"
+     ],
+     "n_tests": 7
+    }
+   ],
+   "haskell_lines": 28,
+   "n_tests": 7,
+   "codes": [
+    2172,
+    2173
+   ]
+  },
+  {
+   "id": "T128",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkInteractiveSu",
+     "registry": "command",
+     "source_lines": [
+      689,
+      703
+     ],
+     "lines": 15,
+     "codes": [
+      2117
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkInteractiveSu1",
+      "prop_checkInteractiveSu2",
+      "prop_checkInteractiveSu3",
+      "prop_checkInteractiveSu4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 15,
+   "n_tests": 4,
+   "codes": [
+    2117
+   ]
+  },
+  {
+   "id": "T129",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkSshCommandString",
+     "registry": "command",
+     "source_lines": [
+      708,
+      721
+     ],
+     "lines": 14,
+     "codes": [
+      2029
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSshCmdStr1",
+      "prop_checkSshCmdStr2",
+      "prop_checkSshCmdStr3",
+      "prop_checkSshCmdStr4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 14,
+   "n_tests": 4,
+   "codes": [
+    2029
+   ]
+  },
+  {
+   "id": "T130",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkPrintfVar",
+     "registry": "command",
+     "source_lines": [
+      746,
+      785
+     ],
+     "lines": 40,
+     "codes": [
+      2059,
+      2182,
+      2183
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkPrintfVar1",
+      "prop_checkPrintfVar2",
+      "prop_checkPrintfVar3",
+      "prop_checkPrintfVar4",
+      "prop_checkPrintfVar5",
+      "prop_checkPrintfVar6",
+      "prop_checkPrintfVar7",
+      "prop_checkPrintfVar8",
+      "prop_checkPrintfVar9",
+      "prop_checkPrintfVar10",
+      "prop_checkPrintfVar11",
+      "prop_checkPrintfVar12",
+      "prop_checkPrintfVar13",
+      "prop_checkPrintfVar14",
+      "prop_checkPrintfVar15",
+      "prop_checkPrintfVar16",
+      "prop_checkPrintfVar17",
+      "prop_checkPrintfVar18",
+      "prop_checkPrintfVar19",
+      "prop_checkPrintfVar20",
+      "prop_checkPrintfVar21",
+      "prop_checkPrintfVar22",
+      "prop_checkPrintfVar23"
+     ],
+     "n_tests": 23
+    }
+   ],
+   "haskell_lines": 40,
+   "n_tests": 23,
+   "codes": [
+    2059,
+    2182,
+    2183
+   ]
+  },
+  {
+   "id": "T131",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkUuoeCmd",
+     "registry": "command",
+     "source_lines": [
+      835,
+      840
+     ],
+     "lines": 6,
+     "codes": [
+      2005
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUuoeCmd1",
+      "prop_checkUuoeCmd2",
+      "prop_checkUuoeCmd3",
+      "prop_checkUuoeCmd4",
+      "prop_checkUuoeCmd5",
+      "prop_checkUuoeCmd6"
+     ],
+     "n_tests": 6
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkSetAssignment",
+     "registry": "command",
+     "source_lines": [
+      847,
+      860
+     ],
+     "lines": 14,
+     "codes": [
+      2121
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSetAssignment1",
+      "prop_checkSetAssignment2",
+      "prop_checkSetAssignment3",
+      "prop_checkSetAssignment4",
+      "prop_checkSetAssignment5",
+      "prop_checkSetAssignment6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 12,
+   "codes": [
+    2005,
+    2121
+   ]
+  },
+  {
+   "id": "T132",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkExportedExpansions",
+     "registry": "command",
+     "source_lines": [
+      865,
+      871
+     ],
+     "lines": 7,
+     "codes": [
+      2163
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkExportedExpansions1",
+      "prop_checkExportedExpansions2",
+      "prop_checkExportedExpansions3",
+      "prop_checkExportedExpansions4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 7,
+   "n_tests": 4,
+   "codes": [
+    2163
+   ]
+  },
+  {
+   "id": "T133",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkReadExpansions",
+     "registry": "command",
+     "source_lines": [
+      881,
+      909
+     ],
+     "lines": 29,
+     "codes": [
+      2229,
+      2313
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkReadExpansions1",
+      "prop_checkReadExpansions2",
+      "prop_checkReadExpansions3",
+      "prop_checkReadExpansions4",
+      "prop_checkReadExpansions5",
+      "prop_checkReadExpansions6",
+      "prop_checkReadExpansions7",
+      "prop_checkReadExpansions8",
+      "prop_checkReadExpansions9"
+     ],
+     "n_tests": 9
+    }
+   ],
+   "haskell_lines": 29,
+   "n_tests": 9,
+   "codes": [
+    2229,
+    2313
+   ]
+  },
+  {
+   "id": "T134",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkAliasesUsesArgs",
+     "registry": "command",
+     "source_lines": [
+      922,
+      932
+     ],
+     "lines": 11,
+     "codes": [
+      2142
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkAliasesUsesArgs1",
+      "prop_checkAliasesUsesArgs2",
+      "prop_checkAliasesUsesArgs3"
+     ],
+     "n_tests": 3
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkAliasesExpandEarly",
+     "registry": "command",
+     "source_lines": [
+      936,
+      944
+     ],
+     "lines": 9,
+     "codes": [
+      2139
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkAliasesExpandEarly1",
+      "prop_checkAliasesExpandEarly2",
+      "prop_checkAliasesExpandEarly3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 6,
+   "codes": [
+    2139,
+    2142
+   ]
+  },
+  {
+   "id": "T135",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkUnsetGlobs",
+     "registry": "command",
+     "source_lines": [
+      950,
+      956
+     ],
+     "lines": 7,
+     "codes": [
+      2184
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnsetGlobs1",
+      "prop_checkUnsetGlobs2",
+      "prop_checkUnsetGlobs3",
+      "prop_checkUnsetGlobs4",
+      "prop_checkUnsetGlobs5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 7,
+   "n_tests": 5,
+   "codes": [
+    2184
+   ]
+  },
+  {
+   "id": "T136",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkFindWithoutPath",
+     "registry": "command",
+     "source_lines": [
+      965,
+      982
+     ],
+     "lines": 18,
+     "codes": [
+      2185
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFindWithoutPath1",
+      "prop_checkFindWithoutPath2",
+      "prop_checkFindWithoutPath3",
+      "prop_checkFindWithoutPath4",
+      "prop_checkFindWithoutPath5",
+      "prop_checkFindWithoutPath6",
+      "prop_checkFindWithoutPath7",
+      "prop_checkFindWithoutPath8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 18,
+   "n_tests": 8,
+   "codes": [
+    2185
+   ]
+  },
+  {
+   "id": "T137",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkTimeParameters",
+     "registry": "command",
+     "source_lines": [
+      987,
+      996
+     ],
+     "lines": 10,
+     "codes": [
+      2023
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTimeParameters1",
+      "prop_checkTimeParameters2",
+      "prop_checkTimeParameters3",
+      "prop_checkTimeParameters4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 10,
+   "n_tests": 4,
+   "codes": [
+    2023
+   ]
+  },
+  {
+   "id": "T138",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkTimedCommand",
+     "registry": "command",
+     "source_lines": [
+      1000,
+      1022
+     ],
+     "lines": 23,
+     "codes": [
+      2176,
+      2177
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkTimedCommand1",
+      "prop_checkTimedCommand2",
+      "prop_checkTimedCommand3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 23,
+   "n_tests": 3,
+   "codes": [
+    2176,
+    2177
+   ]
+  },
+  {
+   "id": "T139",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkLocalScope",
+     "registry": "command",
+     "source_lines": [
+      1025,
+      1030
+     ],
+     "lines": 6,
+     "codes": [
+      2168
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkLocalScope1",
+      "prop_checkLocalScope2"
+     ],
+     "n_tests": 2
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkMultipleDeclaring",
+     "registry": "command",
+     "source_lines": [
+      1038,
+      1046
+     ],
+     "lines": 9,
+     "codes": [
+      2316
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [],
+     "n_tests": 0
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkDeprecatedTempfile",
+     "registry": "command",
+     "source_lines": [
+      1049,
+      1051
+     ],
+     "lines": 3,
+     "codes": [
+      2186
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDeprecatedTempfile1",
+      "prop_checkDeprecatedTempfile2"
+     ],
+     "n_tests": 2
+    }
+   ],
+   "haskell_lines": 18,
+   "n_tests": 4,
+   "codes": [
+    2168,
+    2186,
+    2316
+   ]
+  },
+  {
+   "id": "T140",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkDeprecatedEgrep",
+     "registry": "command",
+     "source_lines": [
+      1053,
+      1055
+     ],
+     "lines": 3,
+     "codes": [
+      2196
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDeprecatedEgrep"
+     ],
+     "n_tests": 1
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkDeprecatedFgrep",
+     "registry": "command",
+     "source_lines": [
+      1057,
+      1059
+     ],
+     "lines": 3,
+     "codes": [
+      2197
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkDeprecatedFgrep"
+     ],
+     "n_tests": 1
+    }
+   ],
+   "haskell_lines": 6,
+   "n_tests": 2,
+   "codes": [
+    2196,
+    2197
+   ]
+  },
+  {
+   "id": "T141",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkWhileGetoptsCase",
+     "registry": "command",
+     "source_lines": [
+      1068,
+      1142
+     ],
+     "lines": 75,
+     "codes": [
+      2213,
+      2214,
+      2220
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkWhileGetoptsCase1",
+      "prop_checkWhileGetoptsCase2",
+      "prop_checkWhileGetoptsCase3",
+      "prop_checkWhileGetoptsCase4",
+      "prop_checkWhileGetoptsCase5",
+      "prop_checkWhileGetoptsCase6",
+      "prop_checkWhileGetoptsCase7",
+      "prop_checkWhileGetoptsCase8"
+     ],
+     "n_tests": 8
+    }
+   ],
+   "haskell_lines": 75,
+   "n_tests": 8,
+   "codes": [
+    2213,
+    2214,
+    2220
+   ]
+  },
+  {
+   "id": "T142",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkCatastrophicRm",
+     "registry": "command",
+     "source_lines": [
+      1157,
+      1206
+     ],
+     "lines": 50,
+     "codes": [
+      2114,
+      2115
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkCatastrophicRm1",
+      "prop_checkCatastrophicRm2",
+      "prop_checkCatastrophicRm3",
+      "prop_checkCatastrophicRm4",
+      "prop_checkCatastrophicRm5",
+      "prop_checkCatastrophicRm6",
+      "prop_checkCatastrophicRm8",
+      "prop_checkCatastrophicRm10",
+      "prop_checkCatastrophicRm11",
+      "prop_checkCatastrophicRm12",
+      "prop_checkCatastrophicRm13",
+      "prop_checkCatastrophicRmA",
+      "prop_checkCatastrophicRmB",
+      "prop_checkCatastrophicRmC"
+     ],
+     "n_tests": 14
+    }
+   ],
+   "haskell_lines": 50,
+   "n_tests": 14,
+   "codes": [
+    2114,
+    2115
+   ]
+  },
+  {
+   "id": "T143",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkLetUsage",
+     "registry": "command",
+     "source_lines": [
+      1209,
+      1214
+     ],
+     "lines": 6,
+     "codes": [
+      2219
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkLetUsage1",
+      "prop_checkLetUsage2"
+     ],
+     "n_tests": 2
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkMvArguments",
+     "registry": "command",
+     "source_lines": [
+      1236,
+      1239
+     ],
+     "lines": 4,
+     "codes": [
+      2224
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkMvArguments1",
+      "prop_checkMvArguments2",
+      "prop_checkMvArguments3",
+      "prop_checkMvArguments4",
+      "prop_checkMvArguments5",
+      "prop_checkMvArguments6",
+      "prop_checkMvArguments7",
+      "prop_checkMvArguments8",
+      "prop_checkMvArguments9"
+     ],
+     "n_tests": 9
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkCpArguments",
+     "registry": "command",
+     "source_lines": [
+      1240,
+      1243
+     ],
+     "lines": 4,
+     "codes": [
+      2225
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [],
+     "n_tests": 0
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkLnArguments",
+     "registry": "command",
+     "source_lines": [
+      1244,
+      1248
+     ],
+     "lines": 5,
+     "codes": [
+      2226
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [],
+     "n_tests": 0
+    }
+   ],
+   "haskell_lines": 19,
+   "n_tests": 11,
+   "codes": [
+    2219,
+    2224,
+    2225,
+    2226
+   ]
+  },
+  {
+   "id": "T144",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkFindRedirections",
+     "registry": "command",
+     "source_lines": [
+      1252,
+      1265
+     ],
+     "lines": 14,
+     "codes": [
+      2227
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkFindRedirections1",
+      "prop_checkFindRedirections2",
+      "prop_checkFindRedirections3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 14,
+   "n_tests": 3,
+   "codes": [
+    2227
+   ]
+  },
+  {
+   "id": "T145",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkSudoRedirect",
+     "registry": "command",
+     "source_lines": [
+      1277,
+      1299
+     ],
+     "lines": 23,
+     "codes": [
+      2024
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [],
+     "n_tests": 0
+    }
+   ],
+   "haskell_lines": 23,
+   "n_tests": 0,
+   "codes": [
+    2024
+   ]
+  },
+  {
+   "id": "T146",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkSudoArgs",
+     "registry": "command",
+     "source_lines": [
+      1307,
+      1318
+     ],
+     "lines": 12,
+     "codes": [
+      2232
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [],
+     "n_tests": 0
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkSourceArgs",
+     "registry": "command",
+     "source_lines": [
+      1322,
+      1329
+     ],
+     "lines": 8,
+     "codes": [
+      2240
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkSourceArgs1",
+      "prop_checkSourceArgs2",
+      "prop_checkSourceArgs3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 3,
+   "codes": [
+    2232,
+    2240
+   ]
+  },
+  {
+   "id": "T147",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkChmodDashr",
+     "registry": "command",
+     "source_lines": [
+      1333,
+      1340
+     ],
+     "lines": 8,
+     "codes": [
+      2253
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkChmodDashr1",
+      "prop_checkChmodDashr2",
+      "prop_checkChmodDashr3"
+     ],
+     "n_tests": 3
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkXargsDashi",
+     "registry": "command",
+     "source_lines": [
+      1346,
+      1354
+     ],
+     "lines": 9,
+     "codes": [
+      2267
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkXargsDashi1",
+      "prop_checkXargsDashi2",
+      "prop_checkXargsDashi3",
+      "prop_checkXargsDashi4",
+      "prop_checkXargsDashi5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 8,
+   "codes": [
+    2253,
+    2267
+   ]
+  },
+  {
+   "id": "T148",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkArgComparison",
+     "registry": "command",
+     "source_lines": [
+      1363,
+      1392
+     ],
+     "lines": 30,
+     "codes": [
+      2290
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [],
+     "n_tests": 0
+    }
+   ],
+   "haskell_lines": 30,
+   "n_tests": 0,
+   "codes": [
+    2290
+   ]
+  },
+  {
+   "id": "T149",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkMaskedReturns",
+     "registry": "command",
+     "source_lines": [
+      1408,
+      1448
+     ],
+     "lines": 41,
+     "codes": [
+      2155
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [],
+     "n_tests": 0
+    }
+   ],
+   "haskell_lines": 41,
+   "n_tests": 0,
+   "codes": [
+    2155
+   ]
+  },
+  {
+   "id": "T150",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkUnquotedEchoSpaces",
+     "registry": "command",
+     "source_lines": [
+      1455,
+      1474
+     ],
+     "lines": 20,
+     "codes": [
+      2291
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkUnquotedEchoSpaces1",
+      "prop_checkUnquotedEchoSpaces2",
+      "prop_checkUnquotedEchoSpaces3",
+      "prop_checkUnquotedEchoSpaces4",
+      "prop_checkUnquotedEchoSpaces5",
+      "prop_checkUnquotedEchoSpaces6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 6,
+   "codes": [
+    2291
+   ]
+  },
+  {
+   "id": "T151",
+   "module": "Checks/Commands.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkEvalArray",
+     "registry": "command",
+     "source_lines": [
+      1480,
+      1494
+     ],
+     "lines": 15,
+     "codes": [
+      2293,
+      2294
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkEvalArray1",
+      "prop_checkEvalArray2",
+      "prop_checkEvalArray3",
+      "prop_checkEvalArray4",
+      "prop_checkEvalArray5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 15,
+   "n_tests": 5,
+   "codes": [
+    2293,
+    2294
+   ]
+  },
+  {
+   "id": "T152",
+   "module": "Checks/Commands.hs",
+   "phase": "cfg",
+   "checks": [
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkBackreferencingDeclaration",
+     "registry": "command",
+     "source_lines": [
+      1502,
+      1541
+     ],
+     "lines": 40,
+     "codes": [
+      2318
+     ],
+     "codes_inferred": false,
+     "uses_cfg": true,
+     "tests": [],
+     "n_tests": 0
+    }
+   ],
+   "haskell_lines": 40,
+   "n_tests": 0,
+   "codes": [
+    2318
+   ]
+  },
+  {
+   "id": "T153",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkForDecimals",
+     "registry": "shell-support",
+     "source_lines": [
+      80,
+      88
+     ],
+     "lines": 9,
+     "codes": [
+      2079
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkForDecimals1",
+      "prop_checkForDecimals2",
+      "prop_checkForDecimals3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 9,
+   "n_tests": 3,
+   "codes": [
+    2079
+   ]
+  },
+  {
+   "id": "T154",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkBashisms",
+     "registry": "shell-support",
+     "source_lines": [
+      249,
+      536
+     ],
+     "lines": 288,
+     "codes": [
+      3001,
+      3002,
+      3004,
+      3005,
+      3006,
+      3007,
+      3008,
+      3009,
+      3010,
+      3011,
+      3012,
+      3014,
+      3015,
+      3016,
+      3017,
+      3018,
+      3019,
+      3020,
+      3021,
+      3022,
+      3023,
+      3024,
+      3025,
+      3026,
+      3028,
+      3029,
+      3030,
+      3031,
+      3032,
+      3033,
+      3034,
+      3035,
+      3036,
+      3037,
+      3038,
+      3039,
+      3040,
+      3041,
+      3042,
+      3043,
+      3044,
+      3045,
+      3046,
+      3047,
+      3048,
+      3049,
+      3050,
+      3051,
+      3052,
+      3053,
+      3054,
+      3055,
+      3056,
+      3057,
+      3058,
+      3059,
+      3060,
+      3061,
+      3062,
+      3063,
+      3064,
+      3065,
+      3066,
+      3067
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBashisms",
+      "prop_checkBashisms2",
+      "prop_checkBashisms3",
+      "prop_checkBashisms4",
+      "prop_checkBashisms5",
+      "prop_checkBashisms6",
+      "prop_checkBashisms6b",
+      "prop_checkBashisms6c",
+      "prop_checkBashisms6d",
+      "prop_checkBashisms7",
+      "prop_checkBashisms8",
+      "prop_checkBashisms9",
+      "prop_checkBashisms10",
+      "prop_checkBashisms11",
+      "prop_checkBashisms12",
+      "prop_checkBashisms13",
+      "prop_checkBashisms14",
+      "prop_checkBashisms15",
+      "prop_checkBashisms16",
+      "prop_checkBashisms17",
+      "prop_checkBashisms18",
+      "prop_checkBashisms19",
+      "prop_checkBashisms20",
+      "prop_checkBashisms21",
+      "prop_checkBashisms21b",
+      "prop_checkBashisms22",
+      "prop_checkBashisms23",
+      "prop_checkBashisms24",
+      "prop_checkBashisms25",
+      "prop_checkBashisms26",
+      "prop_checkBashisms27",
+      "prop_checkBashisms28",
+      "prop_checkBashisms29",
+      "prop_checkBashisms30",
+      "prop_checkBashisms31",
+      "prop_checkBashisms32",
+      "prop_checkBashisms33",
+      "prop_checkBashisms34",
+      "prop_checkBashisms35",
+      "prop_checkBashisms36",
+      "prop_checkBashisms37",
+      "prop_checkBashisms38",
+      "prop_checkBashisms39",
+      "prop_checkBashisms40",
+      "prop_checkBashisms41",
+      "prop_checkBashisms42",
+      "prop_checkBashisms43",
+      "prop_checkBashisms44",
+      "prop_checkBashisms45",
+      "prop_checkBashisms46",
+      "prop_checkBashisms47",
+      "prop_checkBashisms48",
+      "prop_checkBashisms49",
+      "prop_checkBashisms50",
+      "prop_checkBashisms51",
+      "prop_checkBashisms52",
+      "prop_checkBashisms52b",
+      "prop_checkBashisms52c",
+      "prop_checkBashisms53",
+      "prop_checkBashisms54",
+      "prop_checkBashisms55",
+      "prop_checkBashisms56",
+      "prop_checkBashisms57",
+      "prop_checkBashisms58",
+      "prop_checkBashisms59",
+      "prop_checkBashisms60",
+      "prop_checkBashisms61",
+      "prop_checkBashisms62",
+      "prop_checkBashisms63",
+      "prop_checkBashisms64",
+      "prop_checkBashisms65",
+      "prop_checkBashisms66",
+      "prop_checkBashisms67",
+      "prop_checkBashisms68",
+      "prop_checkBashisms69",
+      "prop_checkBashisms70",
+      "prop_checkBashisms71",
+      "prop_checkBashisms72",
+      "prop_checkBashisms73",
+      "prop_checkBashisms74",
+      "prop_checkBashisms75",
+      "prop_checkBashisms76",
+      "prop_checkBashisms77",
+      "prop_checkBashisms78",
+      "prop_checkBashisms79",
+      "prop_checkBashisms80",
+      "prop_checkBashisms81",
+      "prop_checkBashisms82",
+      "prop_checkBashisms83",
+      "prop_checkBashisms84",
+      "prop_checkBashisms85",
+      "prop_checkBashisms86",
+      "prop_checkBashisms87",
+      "prop_checkBashisms88",
+      "prop_checkBashisms89",
+      "prop_checkBashisms90",
+      "prop_checkBashisms91",
+      "prop_checkBashisms92",
+      "prop_checkBashisms93",
+      "prop_checkBashisms94",
+      "prop_checkBashisms95",
+      "prop_checkBashisms96",
+      "prop_checkBashisms97",
+      "prop_checkBashisms98",
+      "prop_checkBashisms99",
+      "prop_checkBashisms100",
+      "prop_checkBashisms101",
+      "prop_checkBashisms102",
+      "prop_checkBashisms103",
+      "prop_checkBashisms104",
+      "prop_checkBashisms105",
+      "prop_checkBashisms106",
+      "prop_checkBashisms107",
+      "prop_checkBashisms108",
+      "prop_checkBashisms109",
+      "prop_checkBashisms110",
+      "prop_checkBashisms111",
+      "prop_checkBashisms112",
+      "prop_checkBashisms113",
+      "prop_checkBashisms114",
+      "prop_checkBashisms115",
+      "prop_checkBashisms116",
+      "prop_checkBashisms117",
+      "prop_checkBashisms118",
+      "prop_checkBashisms119",
+      "prop_checkBashisms120",
+      "prop_checkBashisms121",
+      "prop_checkBashisms122",
+      "prop_checkBashisms123",
+      "prop_checkBashisms124",
+      "prop_checkBashisms125",
+      "prop_checkBashisms126",
+      "prop_checkBashisms127",
+      "prop_checkBashisms128",
+      "prop_checkBashisms129",
+      "prop_checkBashisms130",
+      "prop_checkBashisms131",
+      "prop_checkBashisms132",
+      "prop_checkBashisms133",
+      "prop_checkBashisms134",
+      "prop_checkBashisms135",
+      "prop_checkBashisms136",
+      "prop_checkBashisms137a",
+      "prop_checkBashisms137b",
+      "prop_checkBashisms138",
+      "prop_checkBashisms139",
+      "prop_checkBashisms140a",
+      "prop_checkBashisms140b",
+      "prop_checkBashisms141",
+      "prop_checkBashisms142",
+      "prop_checkBashisms143",
+      "prop_checkBashisms144",
+      "prop_checkBashisms145a",
+      "prop_checkBashisms145b",
+      "prop_checkBashisms146",
+      "prop_checkBashisms147",
+      "prop_checkBashisms148",
+      "prop_checkBashisms149",
+      "prop_checkBashisms150",
+      "prop_checkBashisms151"
+     ],
+     "n_tests": 160
+    }
+   ],
+   "haskell_lines": 288,
+   "n_tests": 160,
+   "codes": [
+    3001,
+    3002,
+    3004,
+    3005,
+    3006,
+    3007,
+    3008,
+    3009,
+    3010,
+    3011,
+    3012,
+    3014,
+    3015,
+    3016,
+    3017,
+    3018,
+    3019,
+    3020,
+    3021,
+    3022,
+    3023,
+    3024,
+    3025,
+    3026,
+    3028,
+    3029,
+    3030,
+    3031,
+    3032,
+    3033,
+    3034,
+    3035,
+    3036,
+    3037,
+    3038,
+    3039,
+    3040,
+    3041,
+    3042,
+    3043,
+    3044,
+    3045,
+    3046,
+    3047,
+    3048,
+    3049,
+    3050,
+    3051,
+    3052,
+    3053,
+    3054,
+    3055,
+    3056,
+    3057,
+    3058,
+    3059,
+    3060,
+    3061,
+    3062,
+    3063,
+    3064,
+    3065,
+    3066,
+    3067
+   ]
+  },
+  {
+   "id": "T155",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkEchoSed",
+     "registry": "shell-support",
+     "source_lines": [
+      579,
+      614
+     ],
+     "lines": 36,
+     "codes": [
+      2001
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkEchoSed1",
+      "prop_checkEchoSed1b",
+      "prop_checkEchoSed2",
+      "prop_checkEchoSed2b"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 36,
+   "n_tests": 4,
+   "codes": [
+    2001
+   ]
+  },
+  {
+   "id": "T156",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkBraceExpansionVars",
+     "registry": "shell-support",
+     "source_lines": [
+      619,
+      642
+     ],
+     "lines": 24,
+     "codes": [
+      2051,
+      2175
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBraceExpansionVars1",
+      "prop_checkBraceExpansionVars2",
+      "prop_checkBraceExpansionVars3",
+      "prop_checkBraceExpansionVars4"
+     ],
+     "n_tests": 4
+    }
+   ],
+   "haskell_lines": 24,
+   "n_tests": 4,
+   "codes": [
+    2051,
+    2175
+   ]
+  },
+  {
+   "id": "T157",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkMultiDimensionalArrays",
+     "registry": "shell-support",
+     "source_lines": [
+      649,
+      662
+     ],
+     "lines": 14,
+     "codes": [
+      2180
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkMultiDimensionalArrays1",
+      "prop_checkMultiDimensionalArrays2",
+      "prop_checkMultiDimensionalArrays3",
+      "prop_checkMultiDimensionalArrays4",
+      "prop_checkMultiDimensionalArrays5",
+      "prop_checkMultiDimensionalArrays6"
+     ],
+     "n_tests": 6
+    }
+   ],
+   "haskell_lines": 14,
+   "n_tests": 6,
+   "codes": [
+    2180
+   ]
+  },
+  {
+   "id": "T158",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkPS1Assignments",
+     "registry": "shell-support",
+     "source_lines": [
+      673,
+      689
+     ],
+     "lines": 17,
+     "codes": [
+      2025
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkPS11",
+      "prop_checkPS11a",
+      "prop_checkPSf2",
+      "prop_checkPS13",
+      "prop_checkPS14",
+      "prop_checkPS14a",
+      "prop_checkPS15",
+      "prop_checkPS16",
+      "prop_checkPS17",
+      "prop_checkPS18"
+     ],
+     "n_tests": 10
+    }
+   ],
+   "haskell_lines": 17,
+   "n_tests": 10,
+   "codes": [
+    2025
+   ]
+  },
+  {
+   "id": "T159",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkMultipleBangs",
+     "registry": "shell-support",
+     "source_lines": [
+      692,
+      699
+     ],
+     "lines": 8,
+     "codes": [
+      2325
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkMultipleBangs1",
+      "prop_checkMultipleBangs2"
+     ],
+     "n_tests": 2
+    },
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkBangAfterPipe",
+     "registry": "shell-support",
+     "source_lines": [
+      703,
+      714
+     ],
+     "lines": 12,
+     "codes": [
+      2326
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkBangAfterPipe1",
+      "prop_checkBangAfterPipe2",
+      "prop_checkBangAfterPipe3"
+     ],
+     "n_tests": 3
+    }
+   ],
+   "haskell_lines": 20,
+   "n_tests": 5,
+   "codes": [
+    2325,
+    2326
+   ]
+  },
+  {
+   "id": "T160",
+   "module": "Checks/ShellSupport.hs",
+   "phase": "checks",
+   "checks": [
+    {
+     "module": "Checks/ShellSupport.hs",
+     "check": "checkNegatedUnaryOps",
+     "registry": "shell-support",
+     "source_lines": [
+      720,
+      730
+     ],
+     "lines": 11,
+     "codes": [
+      2332
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "tests": [
+      "prop_checkNegatedUnaryOps1",
+      "prop_checkNegatedUnaryOps2",
+      "prop_checkNegatedUnaryOps3",
+      "prop_checkNegatedUnaryOps4",
+      "prop_checkNegatedUnaryOps5"
+     ],
+     "n_tests": 5
+    }
+   ],
+   "haskell_lines": 11,
+   "n_tests": 5,
+   "codes": [
+    2332
+   ]
+  }
+ ]
+}

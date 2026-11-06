@@ -1,0 +1,1142 @@
+{
+ "totals": {
+  "agree": 1574,
+  "disagree": 2,
+  "unknown_codes": 214,
+  "parse": 315
+ },
+ "per_check": {
+  "Analytics.hs:checkEchoWc": {
+   "agree": 1,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkPipedAssignment": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkAssignAteCommand": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkArithmeticOpCommand": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkWrongArithmeticAssignment": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUuoc": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkPipePitfalls": {
+   "agree": 21,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkShebangParameters": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkShebang": {
+   "agree": 17,
+   "disagree": 1,
+   "unknown_codes": 0,
+   "disagreeing_tests": [
+    "prop_checkShebang3"
+   ]
+  },
+  "Analytics.hs:checkForInQuoted": {
+   "agree": 12,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkForInCat": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkForInLs": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkFindExec": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnquotedExpansions": {
+   "agree": 13,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkRedirectToSame": {
+   "agree": 10,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkShorthandIf": {
+   "agree": 11,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkDollarStar": {
+   "agree": 10,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnquotedDollarAt": {
+   "agree": 11,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkConcatenatedDollarAt": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkArrayAsString": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkArrayWithoutIndex": {
+   "agree": 12,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkStderrRedirect": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSingleQuotedVariables": {
+   "agree": 40,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnquotedN": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkNumberComparisons": {
+   "agree": 24,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSingleBracketOperators": {
+   "agree": 1,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkDoubleBracketOperators": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkConditionalAndOrs": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkQuotedCondRegex": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkGlobbedRegex": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkConstantIfs": {
+   "agree": 13,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkLiteralBreakingTest": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkConstantNullary": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkForDecimals": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkDivBeforeMult": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkArithmeticDeref": {
+   "agree": 17,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkArithmeticBadOctal": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkComparisonAgainstGlob": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkCaseAgainstGlob": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkCommarrays": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkOrNeq": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkAndEq": {
+   "agree": 14,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkValidCondOps": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUuoeVar": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkTestRedirects": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkPS1Assignments": {
+   "agree": 10,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkBackticks": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkBadParameterSubstitution": {
+   "agree": 11,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkInexplicablyUnquoted": {
+   "agree": 12,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkTildeInQuotes": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkLonelyDotDash": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSpuriousExec": {
+   "agree": 13,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSpuriousExpansion": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkDollarBrackets": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSshHereDoc": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:subshellAssignmentCheck": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 39,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSpacefulnessCfg": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 66,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkVerboseSpacefulnessCfg": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 1,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkVariableBraces": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkQuotesInLiterals": {
+   "agree": 11,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkFunctionsUsedExternally": {
+   "agree": 12,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnusedAssignments": {
+   "agree": 59,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnassignedReferences": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 57,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:(checkUnassignedReferences' True)": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 1,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkGlobsAsOptions": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkWhileReadPitfalls": {
+   "agree": 15,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkPrefixAssignmentReference": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkCharRangeGlob": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkCdAndBack": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkLoopKeywordScope": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkFunctionDeclarations": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkStderrPipe": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnpassedInFunctions": {
+   "agree": 18,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkOverridingPath": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkTildeInPath": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnsupported": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkMultipleAppends": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSuspiciousIFS": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkShouldUseGrepQ": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkTestArgumentSplitting": {
+   "agree": 21,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkReadWithoutR": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkCpLegacyR": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUncheckedCdPushdPopd": {
+   "agree": 39,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkLoopVariableReassignment": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkTrailingBracket": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkReturnAgainstZero": {
+   "agree": 22,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkRedirectedNowhere": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkArrayAssignmentIndices": {
+   "agree": 13,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnmatchableCases": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSubshellAsTest": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSplittingInArrays": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkRedirectionToNumber": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkGlobAsCommand": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkFlagAsCommand": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkEmptyCondition": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkPipeToNowhere": {
+   "agree": 21,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUseBeforeDefinition": {
+   "agree": 11,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkForLoopGlobVariables": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSubshelledTests": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnnecessarilyInvertedTest": {
+   "agree": 15,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkRedirectionToCommand": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkNullaryExpansionTest": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkDollarQuoteParen": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkTranslatedStringVariable": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkDefaultCase": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUselessBang": {
+   "agree": 10,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkModifiedArithmeticInRedirection": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkAliasUsedInSameParsingUnit": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkBlatantRecursion": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkBadTestAndOr": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkComparisonWithLeadingX": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkAssignToSelf": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkEqualsInCommand": {
+   "agree": 24,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSecondArgIsComparison": {
+   "agree": 10,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkCommandWithTrailingSymbol": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkRequireDoubleBracket": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkRequireDoubleEquals": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnquotedParameterExpansionPattern": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkArrayValueUsedAsIndex": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkSetESuppressed": {
+   "agree": 19,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkExtraMaskedReturns": {
+   "agree": 41,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkBatsTestDoesNotUseNegation": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkCommandIsUnreachable": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkOverwrittenExitCode": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnnecessaryArithmeticExpansionIndex": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnnecessaryParens": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkPlusEqualsNumber": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkExpansionWithRedirection": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Analytics.hs:checkUnaryTestA": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkTr": {
+   "agree": 14,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkFindNameGlob": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkExpr": {
+   "agree": 14,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkGrepRe": {
+   "agree": 23,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkGrepSendsPipefail": {
+   "agree": 17,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkEgrepSendsPipefail": {
+   "agree": 1,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkFgrepSendsPipefail": {
+   "agree": 1,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkTrapQuotes": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkReturn": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkExit": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkFindExecWithSingleArgument": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkUnusedEchoEscapes": {
+   "agree": 12,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkInjectableFindSh": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkFindActionPrecedence": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkMkdirDashPM": {
+   "agree": 22,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkNonportableSignals": {
+   "agree": 7,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkInteractiveSu": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkSshCommandString": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkPrintfVar": {
+   "agree": 23,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkUuoeCmd": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkSetAssignment": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkExportedExpansions": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkReadExpansions": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkAliasesUsesArgs": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkAliasesExpandEarly": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkUnsetGlobs": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkFindWithoutPath": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkTimeParameters": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkTimedCommand": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkLocalScope": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:(checkMultipleDeclaring": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 7,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkDeprecatedTempfile": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkDeprecatedEgrep": {
+   "agree": 1,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkDeprecatedFgrep": {
+   "agree": 1,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkWhileGetoptsCase": {
+   "agree": 8,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkCatastrophicRm": {
+   "agree": 14,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkLetUsage": {
+   "agree": 2,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkMvArguments": {
+   "agree": 9,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkFindRedirections": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkWhich": {
+   "agree": 1,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:(checkSudoRedirect": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 7,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:(checkSudoArgs": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 7,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkSourceArgs": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkChmodDashr": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkXargsDashi": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:(checkArgComparison": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 7,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:(checkMaskedReturns": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 15,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkUnquotedEchoSpaces": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:checkEvalArray": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/Commands.hs:(checkBackreferencingDeclaration": {
+   "agree": 0,
+   "disagree": 0,
+   "unknown_codes": 7,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkForDecimals": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkBashisms": {
+   "agree": 160,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkEchoSed": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkBraceExpansionVars": {
+   "agree": 4,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkMultiDimensionalArrays": {
+   "agree": 6,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkPS1Assignments": {
+   "agree": 10,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkMultipleBangs": {
+   "agree": 1,
+   "disagree": 1,
+   "unknown_codes": 0,
+   "disagreeing_tests": [
+    "prop_checkMultipleBangs1"
+   ]
+  },
+  "Checks/ShellSupport.hs:checkBangAfterPipe": {
+   "agree": 3,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  },
+  "Checks/ShellSupport.hs:checkNegatedUnaryOps": {
+   "agree": 5,
+   "disagree": 0,
+   "unknown_codes": 0,
+   "disagreeing_tests": []
+  }
+ }
+}
