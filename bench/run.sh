@@ -17,12 +17,9 @@ if [ ! -x bench/.bin/shellcheck-hs ]; then
   docker rm "$cid" >/dev/null
 fi
 
-# 2. Rust side. The CLI crate is still a stub, so use the checker example
-#    (crates/checker/examples/sc_bench.rs); it mirrors
-#    `shellcheck -f json1 --norc -o all FILE`. Switch to the CLI binary here
-#    once it is wired.
-cargo build --release -p shellcheck-checker --example sc_bench
-export RUST_BIN=$CARGO_TARGET_DIR/release/examples/sc_bench
+# 2. Rust side: the real CLI.
+cargo build --release -p shellcheck-rust
+export RUST_BIN=$CARGO_TARGET_DIR/release/shellcheck-rust
 
 # 3. Inputs.
 python3 bench/gen_inputs.py
@@ -30,13 +27,16 @@ python3 bench/gen_inputs.py
 # 4. Measure.
 python3 bench/measure.py
 
-# 5. Optional parallel-files mode (separate from the single-thread table).
+# 5. Optional parallel-files mode (separate from the single-thread table):
+#    N files through xargs -P on both sides (process-level parallelism).
 if [ -n "${PARALLEL:-}" ]; then
-  echo; echo "parallel-files mode (Rust: one thread per file; Haskell: xargs -P):"
-  files=(bench/handwritten/*.sh bench/inputs/gen_*.sh bench/inputs/corpus_concat.sh)
-  /usr/bin/time -f "rust --parallel: %e s, %M KB" "$RUST_BIN" --quiet --parallel "${files[@]}"
-  /usr/bin/time -f "haskell xargs -P$(nproc): %e s" sh -c \
-    "printf '%s\n' ${files[*]} | xargs -P$(nproc) -n1 bench/.bin/shellcheck-hs -f json1 --norc -o all >/dev/null || true"
+  echo; echo "parallel-files mode (xargs -P$(nproc), 4 copies of each mid-size input):"
+  files=$(for i in 1 2 3 4; do ls bench/handwritten/*.sh bench/inputs/gen_1k.sh bench/inputs/gen_10k.sh bench/inputs/corpus_concat.sh; done)
+  for bin in "$RUST_BIN" bench/.bin/shellcheck-hs; do
+    echo "$bin"
+    # shellcheck disable=SC2086
+    printf '%s\n' $files | /usr/bin/time -f "  %e s wall" xargs -P"$(nproc)" -n1 "$bin" -f json1 --norc -o all >/dev/null || true
+  done
 fi
 
 if [ -n "${CRITERION:-}" ]; then

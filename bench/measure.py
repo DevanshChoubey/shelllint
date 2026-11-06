@@ -44,7 +44,7 @@ rows = []
 for path in inputs:
     name = os.path.basename(path)
     hw, hr, ho, hs_ = measure([HS] + ARGS + [path])
-    rw, rr, ro, rs_ = measure([RS, path])
+    rw, rr, ro, rs_ = measure([RS] + ARGS + [path])
     hc, rc = codes(ho), codes(ro)
     if hc is None or rc is None:
         match = "n/a"
