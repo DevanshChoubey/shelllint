@@ -69,10 +69,7 @@ fn main() -> ExitCode {
                         println!("FAIL {}: {m}", r.key());
                     }
                 }
-                println!(
-                    "pass {} / fail {} / blocked {} / unported {}",
-                    c.pass, c.fail, c.blocked, c.unported
-                );
+                println!("pass {} / fail {} / blocked {} / unported {}", c.pass, c.fail, c.blocked, c.unported);
                 println!("(skipped, not run: {} unit/unparsed records)", c.skipped);
             }
             if c.fail > 0 { ExitCode::from(1) } else { ExitCode::SUCCESS }
@@ -132,11 +129,8 @@ fn main() -> ExitCode {
                     return ExitCode::from(2);
                 }
             };
-            let regressed: Vec<_> = baseline
-                .iter()
-                .filter(|(k, v)| **v && !res.matches.contains_key(*k))
-                .map(|(k, _)| k)
-                .collect();
+            let regressed: Vec<_> =
+                baseline.iter().filter(|(k, v)| **v && !res.matches.contains_key(*k)).map(|(k, _)| k).collect();
             for k in &regressed {
                 println!("REGRESSION {k}");
             }
@@ -241,7 +235,9 @@ fn markdown_report(res: &FullParityResult) -> String {
             s.push_str(&format!("- `{k}`\n"));
         }
     }
-    s.push_str("\n## Diffs\n\n`-` oracle only, `+` ours only. Format: line:col-endLine:endCol level code message [fix].\n");
+    s.push_str(
+        "\n## Diffs\n\n`-` oracle only, `+` ours only. Format: line:col-endLine:endCol level code message [fix].\n",
+    );
     for m in &res.mismatches {
         s.push_str(&format!("\n### `{}`\n\n```diff\n", m.key));
         for l in diff_lines(&m.ours, &m.oracle) {

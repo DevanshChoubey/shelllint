@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkAliasesExpandEarly`, lines 936-944 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::{arguments, get_word_parts, is_literal, oversimplify};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkAliasesExpandEarly",
     registry: "command",

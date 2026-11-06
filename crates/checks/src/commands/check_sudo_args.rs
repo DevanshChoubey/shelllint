@@ -37,7 +37,7 @@ fn check_sudo_args(p: &Params<'_>, t: Id, c: &mut Comments) {
     c.warn(
         t,
         2232,
-        &format!(
+        format!(
             "Can't use sudo/doas/run0 with builtins like {}. Did you want sudo/doas/run0 sh -c .. instead?",
             command
         ),

@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkLoopKeywordScope`, lines 2952-2971 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, Scope, get_path_m, lead_type};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::{get_command_name, is_function, is_loop};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkLoopKeywordScope",
     registry: "node",

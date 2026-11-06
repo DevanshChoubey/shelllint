@@ -3,7 +3,7 @@
 
 use crate::support::{fix_with, replace_end};
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     get_all_flags, get_command_argv, get_command_basename, get_command_sequences,
@@ -11,8 +11,7 @@ use shellcheck_core::astlib::{
 };
 use shellcheck_core::prelude::head_or_default;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkWhileReadPitfalls",
     registry: "node",

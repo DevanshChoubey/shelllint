@@ -4,12 +4,11 @@
 use shellcheck_analyzer::analyzerlib::{
     Comments, Params, is_quoted_alternative_reference, is_strictly_quote_free,
 };
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::is_array_expansion;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnquotedDollarAt",
     registry: "node",

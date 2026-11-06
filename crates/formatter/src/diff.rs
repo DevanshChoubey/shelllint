@@ -54,11 +54,7 @@ pub struct DiffFormatter {
 }
 
 pub fn format(options: FormatterOptions) -> DiffFormatter {
-    DiffFormatter {
-        found_issues: false,
-        reported_issues: false,
-        color: should_output_color(options.color_option),
-    }
+    DiffFormatter { found_issues: false, reported_issues: false, color: should_output_color(options.color_option) }
 }
 
 fn ansi(n: i32) -> String {
@@ -66,11 +62,7 @@ fn ansi(n: i32) -> String {
 }
 
 fn colorize(on: bool, n: i32, s: &str) -> String {
-    if on {
-        format!("{}{}{}", ansi(n), s, ansi(0))
-    } else {
-        s.to_string()
-    }
+    if on { format!("{}{}{}", ansi(n), s, ansi(0)) } else { s.to_string() }
 }
 
 fn print_err(color: bool, msg: &str) {
@@ -82,10 +74,7 @@ impl Formatter for DiffFormatter {
 
     fn footer(&mut self, _out: &mut dyn Write) {
         if self.found_issues && !self.reported_issues {
-            print_err(
-                self.color,
-                "Issues were detected, but none were auto-fixable. Use another format to see them.",
-            );
+            print_err(self.color, "Issues were detected, but none were auto-fixable. Use another format to see them.");
         }
     }
 
@@ -502,11 +491,7 @@ mod tests {
     fn prop_identifies_proper_context() {
         assert_eq!(
             group_diff(&[b(1), b(2), b(3), b(4), l(5), b(6), b(7), b(8), b(9)]),
-            vec![
-                (false, vec![b(1)]),
-                (true, vec![b(2), b(3), b(4), l(5), b(6), b(7), b(8)]),
-                (false, vec![b(9)]),
-            ]
+            vec![(false, vec![b(1)]), (true, vec![b(2), b(3), b(4), l(5), b(6), b(7), b(8)]), (false, vec![b(9)]),]
         );
     }
 
@@ -527,11 +512,7 @@ mod tests {
     fn prop_splits_into_multiple_hunks() {
         assert_eq!(
             group_diff(&[l(1), b(1), b(2), b(3), b(4), b(5), b(6), b(7), r(8)]),
-            vec![
-                (true, vec![l(1), b(1), b(2), b(3)]),
-                (false, vec![b(4)]),
-                (true, vec![b(5), b(6), b(7), r(8)]),
-            ]
+            vec![(true, vec![l(1), b(1), b(2), b(3)]), (false, vec![b(4)]), (true, vec![b(5), b(6), b(7), r(8)]),]
         );
     }
 
@@ -595,10 +576,7 @@ mod tests {
             Some("#!/bin/sh\necho \"$1\"\ntrue")
         );
         // The last line changed: the `+` line of the diff ends in a newline.
-        assert_eq!(
-            apply_fix_to_contents("#!/bin/sh\necho $1", &fix).as_deref(),
-            Some("#!/bin/sh\necho \"$1\"\n")
-        );
+        assert_eq!(apply_fix_to_contents("#!/bin/sh\necho $1", &fix).as_deref(), Some("#!/bin/sh\necho \"$1\"\n"));
         // CRs stay part of the line.
         assert_eq!(
             apply_fix_to_contents("#!/bin/sh\r\necho $1\r\n", &fix).as_deref(),

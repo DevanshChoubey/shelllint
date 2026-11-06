@@ -198,85 +198,228 @@ pub enum ConditionType {
 macro_rules! for_each_child {
     ($tok:expr, $f:ident) => {
         match $tok {
-            Token::TA_Binary(_, a, b) => { $f(a); $f(b); }
-            Token::TA_Assignment(_, a, b) => { $f(a); $f(b); }
-            Token::TA_Variable(_, l) => { for x in l { $f(x); } }
-            Token::TA_Expansion(l) => { for x in l { $f(x); } }
-            Token::TA_Sequence(l) => { for x in l { $f(x); } }
-            Token::TA_Parenthesis(a) => { $f(a); }
-            Token::TA_Trinary(a, b, c) => { $f(a); $f(b); $f(c); }
-            Token::TA_Unary(_, a) => { $f(a); }
-            Token::TC_And(_, _, a, b) => { $f(a); $f(b); }
-            Token::TC_Binary(_, _, a, b) => { $f(a); $f(b); }
-            Token::TC_Group(_, a) => { $f(a); }
-            Token::TC_Nullary(_, a) => { $f(a); }
-            Token::TC_Or(_, _, a, b) => { $f(a); $f(b); }
-            Token::TC_Unary(_, _, a) => { $f(a); }
+            Token::TA_Binary(_, a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::TA_Assignment(_, a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::TA_Variable(_, l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::TA_Expansion(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::TA_Sequence(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::TA_Parenthesis(a) => {
+                $f(a);
+            }
+            Token::TA_Trinary(a, b, c) => {
+                $f(a);
+                $f(b);
+                $f(c);
+            }
+            Token::TA_Unary(_, a) => {
+                $f(a);
+            }
+            Token::TC_And(_, _, a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::TC_Binary(_, _, a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::TC_Group(_, a) => {
+                $f(a);
+            }
+            Token::TC_Nullary(_, a) => {
+                $f(a);
+            }
+            Token::TC_Or(_, _, a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::TC_Unary(_, _, a) => {
+                $f(a);
+            }
             Token::TC_Empty(_) => {}
             Token::T_AND_IF => {}
-            Token::T_AndIf(a, b) => { $f(a); $f(b); }
-            Token::T_Arithmetic(a) => { $f(a); }
-            Token::T_Array(l) => { for x in l { $f(x); } }
-            Token::T_IndexedElement(l, a) => { for x in l { $f(x); } $f(a); }
+            Token::T_AndIf(a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::T_Arithmetic(a) => {
+                $f(a);
+            }
+            Token::T_Array(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::T_IndexedElement(l, a) => {
+                for x in l {
+                    $f(x);
+                }
+                $f(a);
+            }
             Token::T_UnparsedIndex(_, _) => {}
-            Token::T_Assignment(_, _, l, a) => { for x in l { $f(x); } $f(a); }
-            Token::T_Backgrounded(a) => { $f(a); }
-            Token::T_Backticked(l) => { for x in l { $f(x); } }
+            Token::T_Assignment(_, _, l, a) => {
+                for x in l {
+                    $f(x);
+                }
+                $f(a);
+            }
+            Token::T_Backgrounded(a) => {
+                $f(a);
+            }
+            Token::T_Backticked(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_Bang => {}
-            Token::T_Banged(a) => { $f(a); }
-            Token::T_BraceExpansion(l) => { for x in l { $f(x); } }
-            Token::T_BraceGroup(l) => { for x in l { $f(x); } }
+            Token::T_Banged(a) => {
+                $f(a);
+            }
+            Token::T_BraceExpansion(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::T_BraceGroup(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_CLOBBER => {}
             Token::T_Case => {}
             Token::T_CaseExpression(a, cases) => {
                 $f(a);
                 for (_, pats, body) in cases {
-                    for x in pats { $f(x); }
-                    for x in body { $f(x); }
+                    for x in pats {
+                        $f(x);
+                    }
+                    for x in body {
+                        $f(x);
+                    }
                 }
             }
-            Token::T_Condition(_, _, a) => { $f(a); }
+            Token::T_Condition(_, _, a) => {
+                $f(a);
+            }
             Token::T_DGREAT => {}
             Token::T_DLESS => {}
             Token::T_DLESSDASH => {}
             Token::T_DSEMI => {}
             Token::T_Do => {}
-            Token::T_DollarArithmetic(a) => { $f(a); }
-            Token::T_DollarBraced(_, a) => { $f(a); }
-            Token::T_DollarBracket(a) => { $f(a); }
-            Token::T_DollarDoubleQuoted(l) => { for x in l { $f(x); } }
-            Token::T_DollarExpansion(l) => { for x in l { $f(x); } }
+            Token::T_DollarArithmetic(a) => {
+                $f(a);
+            }
+            Token::T_DollarBraced(_, a) => {
+                $f(a);
+            }
+            Token::T_DollarBracket(a) => {
+                $f(a);
+            }
+            Token::T_DollarDoubleQuoted(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::T_DollarExpansion(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_DollarSingleQuoted(_) => {}
-            Token::T_DollarBraceCommandExpansion(_, l) => { for x in l { $f(x); } }
+            Token::T_DollarBraceCommandExpansion(_, l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_Done => {}
-            Token::T_DoubleQuoted(l) => { for x in l { $f(x); } }
+            Token::T_DoubleQuoted(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_EOF => {}
             Token::T_Elif => {}
             Token::T_Else => {}
             Token::T_Esac => {}
-            Token::T_Extglob(_, l) => { for x in l { $f(x); } }
-            Token::T_FdRedirect(_, a) => { $f(a); }
+            Token::T_Extglob(_, l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::T_FdRedirect(_, a) => {
+                $f(a);
+            }
             Token::T_Fi => {}
             Token::T_For => {}
-            Token::T_ForArithmetic(a, b, c, l) => { $f(a); $f(b); $f(c); for x in l { $f(x); } }
-            Token::T_ForIn(_, l1, l2) => { for x in l1 { $f(x); } for x in l2 { $f(x); } }
-            Token::T_Function(_, _, _, a) => { $f(a); }
+            Token::T_ForArithmetic(a, b, c, l) => {
+                $f(a);
+                $f(b);
+                $f(c);
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::T_ForIn(_, l1, l2) => {
+                for x in l1 {
+                    $f(x);
+                }
+                for x in l2 {
+                    $f(x);
+                }
+            }
+            Token::T_Function(_, _, _, a) => {
+                $f(a);
+            }
             Token::T_GREATAND => {}
             Token::T_Glob(_) => {}
             Token::T_Greater => {}
-            Token::T_HereDoc(_, _, _, l) => { for x in l { $f(x); } }
-            Token::T_HereString(a) => { $f(a); }
+            Token::T_HereDoc(_, _, _, l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
+            Token::T_HereString(a) => {
+                $f(a);
+            }
             Token::T_If => {}
             Token::T_IfExpression(conds, elses) => {
                 for (c, b) in conds {
-                    for x in c { $f(x); }
-                    for x in b { $f(x); }
+                    for x in c {
+                        $f(x);
+                    }
+                    for x in b {
+                        $f(x);
+                    }
                 }
-                for x in elses { $f(x); }
+                for x in elses {
+                    $f(x);
+                }
             }
             Token::T_In => {}
-            Token::T_IoFile(a, b) => { $f(a); $f(b); }
-            Token::T_IoDuplicate(a, _) => { $f(a); }
+            Token::T_IoFile(a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::T_IoDuplicate(a, _) => {
+                $f(a);
+            }
             Token::T_LESSAND => {}
             Token::T_LESSGREAT => {}
             Token::T_Lbrace => {}
@@ -284,35 +427,108 @@ macro_rules! for_each_child {
             Token::T_Literal(_) => {}
             Token::T_Lparen => {}
             Token::T_NEWLINE => {}
-            Token::T_NormalWord(l) => { for x in l { $f(x); } }
+            Token::T_NormalWord(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_OR_IF => {}
-            Token::T_OrIf(a, b) => { $f(a); $f(b); }
+            Token::T_OrIf(a, b) => {
+                $f(a);
+                $f(b);
+            }
             Token::T_ParamSubSpecialChar(_) => {}
-            Token::T_Pipeline(l1, l2) => { for x in l1 { $f(x); } for x in l2 { $f(x); } }
-            Token::T_ProcSub(_, l) => { for x in l { $f(x); } }
+            Token::T_Pipeline(l1, l2) => {
+                for x in l1 {
+                    $f(x);
+                }
+                for x in l2 {
+                    $f(x);
+                }
+            }
+            Token::T_ProcSub(_, l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_Rbrace => {}
-            Token::T_Redirecting(l, a) => { for x in l { $f(x); } $f(a); }
+            Token::T_Redirecting(l, a) => {
+                for x in l {
+                    $f(x);
+                }
+                $f(a);
+            }
             Token::T_Rparen => {}
-            Token::T_Script(a, l) => { $f(a); for x in l { $f(x); } }
+            Token::T_Script(a, l) => {
+                $f(a);
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_Select => {}
-            Token::T_SelectIn(_, l1, l2) => { for x in l1 { $f(x); } for x in l2 { $f(x); } }
+            Token::T_SelectIn(_, l1, l2) => {
+                for x in l1 {
+                    $f(x);
+                }
+                for x in l2 {
+                    $f(x);
+                }
+            }
             Token::T_Semi => {}
-            Token::T_SimpleCommand(l1, l2) => { for x in l1 { $f(x); } for x in l2 { $f(x); } }
+            Token::T_SimpleCommand(l1, l2) => {
+                for x in l1 {
+                    $f(x);
+                }
+                for x in l2 {
+                    $f(x);
+                }
+            }
             Token::T_SingleQuoted(_) => {}
-            Token::T_Subshell(l) => { for x in l { $f(x); } }
+            Token::T_Subshell(l) => {
+                for x in l {
+                    $f(x);
+                }
+            }
             Token::T_Then => {}
             Token::T_Until => {}
-            Token::T_UntilExpression(l1, l2) => { for x in l1 { $f(x); } for x in l2 { $f(x); } }
+            Token::T_UntilExpression(l1, l2) => {
+                for x in l1 {
+                    $f(x);
+                }
+                for x in l2 {
+                    $f(x);
+                }
+            }
             Token::T_While => {}
-            Token::T_WhileExpression(l1, l2) => { for x in l1 { $f(x); } for x in l2 { $f(x); } }
-            Token::T_Annotation(_, a) => { $f(a); }
+            Token::T_WhileExpression(l1, l2) => {
+                for x in l1 {
+                    $f(x);
+                }
+                for x in l2 {
+                    $f(x);
+                }
+            }
+            Token::T_Annotation(_, a) => {
+                $f(a);
+            }
             Token::T_Pipe(_) => {}
             // The `Maybe Token` name is not a `t`, so it is not traversed.
-            Token::T_CoProc(_, a) => { $f(a); }
-            Token::T_CoProcBody(a) => { $f(a); }
-            Token::T_Include(a) => { $f(a); }
-            Token::T_SourceCommand(a, b) => { $f(a); $f(b); }
-            Token::T_BatsTest(_, a) => { $f(a); }
+            Token::T_CoProc(_, a) => {
+                $f(a);
+            }
+            Token::T_CoProcBody(a) => {
+                $f(a);
+            }
+            Token::T_Include(a) => {
+                $f(a);
+            }
+            Token::T_SourceCommand(a, b) => {
+                $f(a);
+                $f(b);
+            }
+            Token::T_BatsTest(_, a) => {
+                $f(a);
+            }
         }
     };
 }
@@ -413,8 +629,7 @@ impl Ast {
     // overflow the Rust stack; the visiting order is identical.
     pub fn analyze(&self, root: Id, pre: &mut dyn FnMut(Id), post: &mut dyn FnMut(Id)) {
         pre(root);
-        let mut stack: Vec<(Id, std::vec::IntoIter<Id>)> =
-            vec![(root, self.get(root).children().into_iter())];
+        let mut stack: Vec<(Id, std::vec::IntoIter<Id>)> = vec![(root, self.get(root).children().into_iter())];
         while let Some((id, iter)) = stack.last_mut() {
             match iter.next() {
                 Some(child) => {
@@ -450,12 +665,7 @@ impl Ast {
         let mut nb = tb.clone();
         na.map_children(&mut |_| Id(0));
         nb.map_children(&mut |_| Id(0));
-        na == nb
-            && ta
-                .children()
-                .into_iter()
-                .zip(tb.children())
-                .all(|(x, y)| self.structurally_eq(x, y))
+        na == nb && ta.children().into_iter().zip(tb.children()).all(|(x, y)| self.structurally_eq(x, y))
     }
 }
 

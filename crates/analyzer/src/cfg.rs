@@ -271,10 +271,7 @@ impl CfGraph {
     }
     /// fgl `labEdges`: every edge `(from, to, label)`.
     pub fn lab_edges(&self) -> impl Iterator<Item = (Node, Node, CFEdge)> + '_ {
-        self.succs
-            .iter()
-            .enumerate()
-            .flat_map(|(i, s)| s.iter().map(move |(to, l)| (i as Node, *to, *l)))
+        self.succs.iter().enumerate().flat_map(|(i, s)| s.iter().map(move |(to, l)| (i as Node, *to, *l)))
     }
 }
 

@@ -79,15 +79,7 @@ fn attr(s: &str, v: &str) -> String {
 }
 
 fn escape(s: &str) -> String {
-    s.chars()
-        .map(|c| {
-            if is_ok(c) {
-                c.to_string()
-            } else {
-                format!("&#{};", c as u32)
-            }
-        })
-        .collect()
+    s.chars().map(|c| if is_ok(c) { c.to_string() } else { format!("&#{};", c as u32) }).collect()
 }
 
 fn is_ok(c: char) -> bool {

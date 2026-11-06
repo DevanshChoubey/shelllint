@@ -2,7 +2,13 @@
 name = "shellcheck-wasm"
 version.workspace = true
 edition.workspace = true
-license = "GPL-3.0-or-later"
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 description = "WebAssembly bindings for shellcheck-rust (browser playground)"
 publish = false
 
@@ -10,11 +16,14 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-shellcheck-core = { path = "../core" }
-shellcheck-checker = { path = "../checker" }
-shellcheck-checks = { path = "../checks" }
-shellcheck-formatter = { path = "../formatter" }
+shellcheck-core.workspace = true
+shellcheck-checker.workspace = true
+shellcheck-checks.workspace = true
+shellcheck-formatter.workspace = true
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Must match the wasm-bindgen-cli version in scripts/build-wasm.sh.
 wasm-bindgen = "=0.2.130"
+
+[lints]
+workspace = true

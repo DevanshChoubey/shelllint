@@ -5,13 +5,12 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{Params, make_comment};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::interface::{Severity, TokenComment};
 use shellcheck_core::regex::{matches, mk_regex};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkShebangParameters",
     registry: "tree",

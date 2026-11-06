@@ -18,13 +18,8 @@ impl<'a> P<'a> {
 
     pub(crate) fn read_normal_dollar(&mut self) -> PR<Id> {
         self.ensure_dollar()?;
-        alt!(
-            self,
-            |p| p.read_dollar_exp(),
-            |p| p.read_dollar_double_quote(),
-            |p| p.read_dollar_single_quote(),
-            |p| p.read_dollar_lonely(false),
-        )
+        alt!(self, |p| p.read_dollar_exp(), |p| p.read_dollar_double_quote(), |p| p.read_dollar_single_quote(), |p| p
+            .read_dollar_lonely(false),)
     }
 
     pub(crate) fn read_double_quoted_dollar(&mut self) -> PR<Id> {
@@ -168,10 +163,7 @@ impl<'a> P<'a> {
             })?;
             p.allspacing()?;
             let term = p.read_term()?;
-            p.alt(
-                |p| p.char_('}'),
-                |p| p.fail("Expected } to end the ksh-style ${ ..; } command expansion"),
-            )?;
+            p.alt(|p| p.char_('}'), |p| p.fail("Expected } to end the ksh-style ${ ..; } command expansion"))?;
             let id = p.end_span(start);
             let piped = if c == '|' { Piped::Piped } else { Piped::Unpiped };
             Ok(p.node(id, Token::T_DollarBraceCommandExpansion(piped, term)))
@@ -216,7 +208,12 @@ impl<'a> P<'a> {
                 |_| Ok(value),
                 |p| {
                     p.look_ahead(|p| p.digit())?;
-                    p.parse_note_at(pos, Severity::ErrorC, 1037, "Braces are required for positionals over 9, e.g. ${10}.");
+                    p.parse_note_at(
+                        pos,
+                        Severity::ErrorC,
+                        1037,
+                        "Braces are required for positionals over 9, e.g. ${10}.",
+                    );
                     Ok(())
                 },
             )

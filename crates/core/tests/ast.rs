@@ -49,10 +49,7 @@ fn children_order_matches_traversable() {
     let w = leaf(&mut ast, Token::T_Literal("w".into()));
     let pt = leaf(&mut ast, Token::T_Literal("p".into()));
     let body = leaf(&mut ast, Token::T_Literal("body".into()));
-    let case = leaf(
-        &mut ast,
-        Token::T_CaseExpression(w, vec![(CaseType::CaseBreak, vec![pt], vec![body])]),
-    );
+    let case = leaf(&mut ast, Token::T_CaseExpression(w, vec![(CaseType::CaseBreak, vec![pt], vec![body])]));
     assert_eq!(ast.children(case).collect::<Vec<_>>(), vec![w, pt, body]);
 
     // The coprocess name is a `Maybe Token`, not a `t`, so Traversable skips it.
@@ -68,15 +65,8 @@ fn analyze_pre_post_order() {
     let b = leaf(&mut ast, Token::T_Literal("b".into()));
     let root = leaf(&mut ast, Token::T_NormalWord(vec![a, b]));
     let log = std::cell::RefCell::new(Vec::new());
-    ast.analyze(
-        root,
-        &mut |id| log.borrow_mut().push(("pre", id.0)),
-        &mut |id| log.borrow_mut().push(("post", id.0)),
-    );
-    assert_eq!(
-        log.into_inner(),
-        vec![("pre", 2), ("pre", 0), ("post", 0), ("pre", 1), ("post", 1), ("post", 2)]
-    );
+    ast.analyze(root, &mut |id| log.borrow_mut().push(("pre", id.0)), &mut |id| log.borrow_mut().push(("post", id.0)));
+    assert_eq!(log.into_inner(), vec![("pre", 2), ("pre", 0), ("post", 0), ("pre", 1), ("post", 1), ("post", 2)]);
 }
 
 #[test]

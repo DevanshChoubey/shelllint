@@ -79,12 +79,8 @@ impl<'a> P<'a> {
     }
 
     fn cond_any_op(&mut self) -> PR<String> {
-        alt!(
-            self,
-            |p| p.cond_flag_op(),
-            |p| p.cond_flagless_op(),
-            |p| p.fail("Expected comparison operator (don't wrap commands in []/[[]])")
-        )
+        alt!(self, |p| p.cond_flag_op(), |p| p.cond_flagless_op(), |p| p
+            .fail("Expected comparison operator (don't wrap commands in []/[[]])"))
     }
 
     fn cond_flag_op(&mut self) -> PR<String> {
@@ -126,18 +122,11 @@ impl<'a> P<'a> {
     }
 
     fn cond_read_regular_or_escaped(&mut self, p: PFn<'a, String>) -> PR<String> {
-        self.alt(|q| q.cond_read_escaped(p), |q| p(q))
+        self.alt(|q| q.cond_read_escaped(p), p)
     }
 
     fn cond_guard_arithmetic(&mut self, single: bool) -> PR<()> {
-        self.try_(|p| {
-            p.look_ahead(|p| {
-                p.alt(
-                    |p| p.one_of("+*/%").map(drop),
-                    |p| p.string("- ").map(drop),
-                )
-            })
-        })?;
+        self.try_(|p| p.look_ahead(|p| p.alt(|p| p.one_of("+*/%").map(drop), |p| p.string("- ").map(drop))))?;
         self.parse_problem(
             ErrorC,
             1076,
@@ -220,18 +209,12 @@ impl<'a> P<'a> {
     }
 
     fn cond_read_and_op(&mut self, single: bool) -> PR<(Id, String)> {
-        self.alt(
-            |p| p.cond_read_and_or_op(single, "&&", false),
-            |p| p.cond_read_and_or_op(single, "-a", true),
-        )
+        self.alt(|p| p.cond_read_and_or_op(single, "&&", false), |p| p.cond_read_and_or_op(single, "-a", true))
     }
 
     fn cond_read_or_op(&mut self, single: bool) -> PR<(Id, String)> {
         self.optional(|p| p.cond_guard_arithmetic(single))?;
-        self.alt(
-            |p| p.cond_read_and_or_op(single, "||", false),
-            |p| p.cond_read_and_or_op(single, "-o", true),
-        )
+        self.alt(|p| p.cond_read_and_or_op(single, "||", false), |p| p.cond_read_and_or_op(single, "-o", true))
     }
 
     /// Returns the id and operator of the (not yet built) `TC_And`/`TC_Or`.
@@ -294,10 +277,7 @@ impl<'a> P<'a> {
         let ast = &self.user.ast;
         let found = match ast.get(x) {
             Token::T_NormalWord(list) => list.last().copied().and_then(|last| match ast.get(last) {
-                Token::T_Literal(str) => BINARY_TEST_OPS
-                    .iter()
-                    .find(|op| str.ends_with(**op))
-                    .map(|op| (last, *op)),
+                Token::T_Literal(str) => BINARY_TEST_OPS.iter().find(|op| str.ends_with(**op)).map(|op| (last, *op)),
                 _ => None,
             }),
             _ => None,
@@ -408,9 +388,8 @@ impl<'a> P<'a> {
 
     fn cond_regex_literal(&mut self) -> PR<Id> {
         let start = self.start_span();
-        let str = self.read_generic_literal1(|p| {
-            alt!(p, |p| p.single_quote(), |p| p.double_quotable(), |p| p.one_of("()"))
-        })?;
+        let str =
+            self.read_generic_literal1(|p| alt!(p, |p| p.single_quote(), |p| p.double_quotable(), |p| p.one_of("()")))?;
         let id = self.end_span(start);
         Ok(self.node(id, Token::T_Literal(str)))
     }
@@ -438,12 +417,8 @@ impl<'a> P<'a> {
     }
 
     fn cond_read_expr(&mut self, single: bool) -> PR<Id> {
-        alt!(
-            self,
-            |p| p.cond_read_group(single),
-            |p| p.cond_read_unary_exp(single),
-            |p| p.cond_read_nullary_or_binary(single)
-        )
+        alt!(self, |p| p.cond_read_group(single), |p| p.cond_read_unary_exp(single), |p| p
+            .cond_read_nullary_or_binary(single))
     }
 
     fn cond_read_or(&mut self, single: bool) -> PR<Id> {

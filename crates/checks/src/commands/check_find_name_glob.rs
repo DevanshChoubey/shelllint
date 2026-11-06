@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkFindNameGlob`, lines 259-268 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::{arguments, get_literal_string, is_glob};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkFindNameGlob",
     registry: "command",
@@ -39,7 +38,7 @@ fn check_find_name_glob(p: &Params<'_>, t: Id, c: &mut Comments) {
         let (a, b) = (pair[0], pair[1]);
         if let Some(s) = get_literal_string(p.ast, a) {
             if accepts_glob(&s) && is_glob(p.ast, b) {
-                c.warn(b, 2061, &format!("Quote the parameter to {} so the shell won't interpret it.", s));
+                c.warn(b, 2061, format!("Quote the parameter to {} so the shell won't interpret it.", s));
             }
         }
     }

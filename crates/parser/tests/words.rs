@@ -6,7 +6,6 @@
 // Each test runs its target through `testing::named_parser`; a wrong result
 // (or a panic, including an `unported:` stub) fails the test.
 
-
 use shellcheck_parser::testing::{named_parser, parses_cleanly};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

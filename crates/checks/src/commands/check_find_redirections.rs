@@ -2,11 +2,10 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkFindRedirections`, lines 1252-1265 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command_m};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Token};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkFindRedirections",
     registry: "command",

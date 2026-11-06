@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/ShellSupport.hs `checkNegatedUnaryOps`, lines 720-730 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/ShellSupport.hs",
     name: "checkNegatedUnaryOps",
     registry: "shell-support",
@@ -21,7 +20,7 @@ fn f(p: &Params<'_>, t: Id, c: &mut Comments) {
         if o == "!" {
             if let Token::TC_Unary(_, op, _) = p.ast.get(*inner) {
                 if op == "-a" || op == "-o" {
-                    c.err(t, 2332, &msg(op));
+                    c.err(t, 2332, msg(op));
                 }
             }
         }

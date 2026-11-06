@@ -13,10 +13,10 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
-use regex::Regex;
 use crate::ast::{Annotation, Ast, Id, Token};
 use crate::prelude::please_report;
 use crate::regex::{match_all_strings, match_regex, matches, mk_regex};
+use regex::Regex;
 
 /// `(String, (Token, Token))` as returned by the getOpts family.
 pub type Opt = (String, (Id, Id));
@@ -60,9 +60,7 @@ pub fn is_glob(ast: &Ast, t: Id) -> bool {
     match ast.get(t) {
         Token::T_Extglob(..) => true,
         Token::T_Glob(..) => true,
-        Token::T_NormalWord(l) => {
-            l.iter().any(|&p| is_glob(ast, p)) || has_split_range(ast, l)
-        }
+        Token::T_NormalWord(l) => l.iter().any(|&p| is_glob(ast, p)) || has_split_range(ast, l),
         _ => false,
     }
 }
@@ -89,9 +87,7 @@ fn is_closing_range(ast: &Ast, t: Id) -> bool {
 pub fn is_constant(ast: &Ast, token: Id) -> bool {
     match ast.get(token) {
         // This ignores some cases like ~"foo":
-        Token::T_NormalWord(l)
-            if matches!(l.first().map(|&f| ast.get(f)), Some(Token::T_Literal(s)) if s.starts_with('~')) =>
-        {
+        Token::T_NormalWord(l) if matches!(l.first().map(|&f| ast.get(f)), Some(Token::T_Literal(s)) if s.starts_with('~')) => {
             false
         }
         Token::T_NormalWord(l) => l.iter().all(|&p| is_constant(ast, p)),
@@ -157,17 +153,9 @@ pub fn get_flags_until(ast: &Ast, stop_condition: &dyn Fn(&str) -> bool, t: Id) 
 /// `getFlagsUntil` on the arguments of a command (its words after the
 /// command name), for callers that hold a word list rather than a
 /// `T_SimpleCommand` token (e.g. AnalyzerLib's synthetic `builtin` command).
-pub fn get_flags_until_words(
-    ast: &Ast,
-    stop_condition: &dyn Fn(&str) -> bool,
-    args: &[Id],
-) -> Vec<(Id, String)> {
-    let token_and_text: Vec<(Id, String)> =
-        args.iter().map(|&x| (x, oversimplify(ast, x).concat())).collect();
-    let split = token_and_text
-        .iter()
-        .position(|(_, s)| stop_condition(s))
-        .unwrap_or(token_and_text.len());
+pub fn get_flags_until_words(ast: &Ast, stop_condition: &dyn Fn(&str) -> bool, args: &[Id]) -> Vec<(Id, String)> {
+    let token_and_text: Vec<(Id, String)> = args.iter().map(|&x| (x, oversimplify(ast, x).concat())).collect();
+    let split = token_and_text.iter().position(|(_, s)| stop_condition(s)).unwrap_or(token_and_text.len());
     let (flag_args, rest) = token_and_text.split_at(split);
     let mut out: Vec<(Id, String)> = flag_args.iter().flat_map(|(x, s)| flag(*x, s)).collect();
     out.extend(rest.iter().map(|(t, _)| (*t, String::new())));
@@ -378,9 +366,7 @@ pub fn get_generic_opts(ast: &Ast, tokens: &[Id]) -> Vec<Opt> {
         out
     } else if let Some(opt_string) = s.strip_prefix('-') {
         let opts: Vec<char> = opt_string.chars().take_while(|&c| c != '\0').collect();
-        let each = |cs: &[char]| -> Vec<Opt> {
-            cs.iter().map(|c| (c.to_string(), (token, token))).collect()
-        };
+        let each = |cs: &[char]| -> Vec<Opt> { cs.iter().map(|c| (c.to_string(), (token, token))).collect() };
         match rest.split_first() {
             Some((&next, _)) if get_literal_string_def(ast, "\0", next).starts_with('-') => {
                 let mut out = each(&opts);
@@ -461,8 +447,7 @@ pub fn get_literal_string(ast: &Ast, t: Id) -> Option<String> {
 
 /// Definitely get a literal string, with a given default for all non-literals
 pub fn get_literal_string_def(ast: &Ast, x: &str, t: Id) -> String {
-    get_literal_string_ext(ast, &|_| Some(x.to_string()), t)
-        .expect("callback always succeeds")
+    get_literal_string_ext(ast, &|_| Some(x.to_string()), t).expect("callback always succeeds")
 }
 
 /// Definitely get a literal string, skipping over all non-literals
@@ -699,11 +684,7 @@ pub fn escape_for_message(str: &str) -> String {
         format!("{:X}", c as u32)
     }
     fn should_escape(c: char) -> bool {
-        if c.is_ascii() {
-            !(' '..='~').contains(&c)
-        } else {
-            !crate::unicode::is_letter(c)
-        }
+        if c.is_ascii() { !(' '..='~').contains(&c) } else { !crate::unicode::is_letter(c) }
     }
     let mut out = String::new();
     for c in str.chars() {
@@ -936,10 +917,7 @@ pub fn get_command_sequences(ast: &Ast, t: Id) -> Vec<Vec<Id>> {
         Token::T_ForIn(_, _, cmds) => vec![cmds.clone()],
         Token::T_ForArithmetic(_, _, _, cmds) => vec![cmds.clone()],
         Token::T_IfExpression(thens, elses) => {
-            let mut out: Vec<Vec<Id>> = thens
-                .iter()
-                .flat_map(|(a, b)| [a.clone(), b.clone()])
-                .collect();
+            let mut out: Vec<Vec<Id>> = thens.iter().flat_map(|(a, b)| [a.clone(), b.clone()]).collect();
             out.push(elses.clone());
             out
         }
@@ -1023,7 +1001,11 @@ pub fn word_to_pseudo_glob_(ast: &Ast, exact: bool, word: Id) -> Option<Vec<Pseu
             Token::T_Glob(s) if s == "*" => Some(vec![PGMany]),
             Token::T_Glob(s) if s.starts_with('[') && !exact => Some(vec![PGAny]),
             _ => {
-                if exact { None } else { Some(vec![PGMany]) }
+                if exact {
+                    None
+                } else {
+                    Some(vec![PGMany])
+                }
             }
         }
     };
@@ -1044,8 +1026,7 @@ pub fn word_to_pseudo_glob_(ast: &Ast, exact: bool, word: Id) -> Option<Vec<Pseu
                         }
                         let mut this = vec![PGMany];
                         this.extend(str.chars().skip_while(|&c| c != '/').map(PGChar));
-                        let parts: Vec<Id> =
-                            rest.iter().flat_map(|&p| get_word_parts(ast, p)).collect();
+                        let parts: Vec<Id> = rest.iter().flat_map(|&p| get_word_parts(ast, p)).collect();
                         this.extend(map_f(parts)?);
                         return Some(this);
                     }
@@ -1067,10 +1048,7 @@ pub fn simplify_pseudo_glob(list: &[PseudoGlob]) -> Vec<PseudoGlob> {
             out.push(list[i]);
             i += 1;
         } else {
-            let n = list[i..]
-                .iter()
-                .take_while(|&&x| x == PGMany || x == PGAny)
-                .count();
+            let n = list[i..].iter().take_while(|&&x| x == PGMany || x == PGAny).count();
             let anys = &list[i..i + n];
             // order: all PGAny, then at most one PGMany
             out.extend(anys.iter().filter(|&&x| x == PGAny));
@@ -1271,10 +1249,7 @@ pub fn get_braced_modifier(s: &str) -> String {
         _ => vec![s.to_string()],
     };
     // headOrDefault "" over the list monad
-    candidates
-        .iter()
-        .find_map(|a| drop_prefix(&var, a))
-        .unwrap_or_default()
+    candidates.iter().find_map(|a| drop_prefix(&var, a)).unwrap_or_default()
 }
 
 /// Get the variables from indices like ["x", "y"] in ${var[x+y+1]}

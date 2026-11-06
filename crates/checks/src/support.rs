@@ -25,14 +25,12 @@ use shellcheck_analyzer::analyzerlib::{
 };
 use shellcheck_analyzer::cfg_analysis::{CFVariableProp, SpaceStatus, VariableState, get_incoming_state};
 use shellcheck_core::ast::{Ast, Id, Pos, Token};
-use shellcheck_core::data::SPECIAL_VARIABLES_WITHOUT_SPACES;
 use shellcheck_core::astlib::{
     arguments, brace_expand, get_all_flags, get_braced_modifier, get_braced_reference, get_literal_string_ext,
     get_opts, get_path, get_word_parts, is_array_expansion, may_become_multiple_args, oversimplify,
 };
-use shellcheck_core::interface::{
-    Fix, InsertionPoint, Position, Replacement, Shell, TokenComment,
-};
+use shellcheck_core::data::SPECIAL_VARIABLES_WITHOUT_SPACES;
+use shellcheck_core::interface::{Fix, InsertionPoint, Position, Replacement, Shell, TokenComment};
 
 // ---- Analytics.hs ----
 
@@ -79,9 +77,7 @@ fn get_condition_children(ast: &Ast, t: Id) -> Vec<Id> {
     match ast.get(t) {
         Token::T_AndIf(left, _right) => vec![*left],
         Token::T_OrIf(left, _right) => vec![*left],
-        Token::T_IfExpression(conditions, _elses) => {
-            conditions.iter().filter_map(|(c, _)| c.last().copied()).collect()
-        }
+        Token::T_IfExpression(conditions, _elses) => conditions.iter().filter_map(|(c, _)| c.last().copied()).collect(),
         Token::T_WhileExpression(c, _l) => c.last().copied().into_iter().collect(),
         Token::T_UntilExpression(c, _l) => c.last().copied().into_iter().collect(),
         _ => vec![],
@@ -200,9 +196,7 @@ pub fn do_variable_flow_analysis<S, V>(
     for x in flow {
         let l = match x {
             StackData::Reference(base, token, name) => read_func(&mut state, *base, *token, name),
-            StackData::Assignment(base, token, name, values) => {
-                write_func(&mut state, *base, *token, name, values)
-            }
+            StackData::Assignment(base, token, name, values) => write_func(&mut state, *base, *token, name, values),
             _ => vec![],
         };
         chunks.push(l);
@@ -482,16 +476,19 @@ impl Scratch {
 /// command with `CommandName::<kind>(cmd)`, all at `order`. `check` is
 /// called as `check(cmd, params, t, comments)`.
 ///
+/// The entries go in a `pub(crate) static ENTRIES: [CheckEntry; N]`, in list
+/// order; `build.rs` adds `&ENTRIES[0]`, ..., `&ENTRIES[N - 1]` to
+/// `crate::CHECKS`, so a file may invoke this at most once.
+///
 /// ```ignore
 /// parametrised_command_checks!("checkArgComparison", 45, Exactly, check_arg_comparison,
 ///     ["alias", "local", "declare"]);
 /// ```
 macro_rules! parametrised_command_checks {
     ($name:literal, $order:literal, $kind:ident, $check:path, [$($cmd:literal),+ $(,)?]) => {
-        $(
-            const _: () = {
-                #[linkme::distributed_slice(::shellcheck_analyzer::api::CHECKS)]
-                static ENTRY: ::shellcheck_analyzer::api::CheckEntry = ::shellcheck_analyzer::api::CheckEntry {
+        pub(crate) static ENTRIES: [::shellcheck_analyzer::api::CheckEntry; [$($cmd),+].len()] = [
+            $(
+                ::shellcheck_analyzer::api::CheckEntry {
                     module: "Checks/Commands.hs",
                     name: concat!($name, " \"", $cmd, "\""),
                     registry: "command",
@@ -499,19 +496,20 @@ macro_rules! parametrised_command_checks {
                     optional: None,
                     kind: ::shellcheck_analyzer::api::CheckKind::Command(
                         ::shellcheck_analyzer::api::CommandName::$kind($cmd),
-                        run,
+                        {
+                            fn run(
+                                p: &::shellcheck_analyzer::analyzerlib::Params<'_>,
+                                t: ::shellcheck_core::ast::Id,
+                                c: &mut ::shellcheck_analyzer::analyzerlib::Comments,
+                            ) {
+                                $check($cmd, p, t, c)
+                            }
+                            run
+                        },
                     ),
-                };
-
-                fn run(
-                    p: &::shellcheck_analyzer::analyzerlib::Params<'_>,
-                    t: ::shellcheck_core::ast::Id,
-                    c: &mut ::shellcheck_analyzer::analyzerlib::Comments,
-                ) {
-                    $check($cmd, p, t, c)
-                }
-            };
-        )+
+                },
+            )+
+        ];
     };
 }
 pub(crate) use parametrised_command_checks;

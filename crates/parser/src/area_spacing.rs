@@ -85,13 +85,7 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn whitespace(&mut self) -> PR<char> {
-        alt!(
-            self,
-            |p| p.one_of(" \t"),
-            |p| p.carriage_return(),
-            |p| p.almost_space(),
-            |p| p.linefeed()
-        )
+        alt!(self, |p| p.one_of(" \t"), |p| p.carriage_return(), |p| p.almost_space(), |p| p.linefeed())
     }
 
     pub(crate) fn linewhitespace(&mut self) -> PR<char> {

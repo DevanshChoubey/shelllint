@@ -11,18 +11,19 @@
 // verdict: `verify` = non-empty, `verifyNot` = empty, `verifyCodes` = equal.
 
 use crate::analyzerlib::run_and_get_codes;
-use crate::api::{CHECKS, CheckEntry, CheckKind, CommandName, entry_test_checker};
+use crate::api::{CheckEntry, CheckKind, CommandName, entry_test_checker};
 use shellcheck_core::interface::Code;
 
-/// Resolve a test's check expression to registry entries.
+/// Resolve a test's check expression to entries of `checks` (the registry,
+/// normally `shellcheck_checks::CHECKS`).
 ///
 /// `name` is the Haskell expression the test applies its helper to, without
 /// the outer parentheses: `checkEchoWc`, or for parametrised command checks
 /// `checkSudoArgs "sudo"`. Entries whose `name` equals the whole string win;
 /// otherwise `f "arg"` selects the `Command` entries named `f` whose
 /// `CommandName` is `arg`.
-pub fn find_entries(module: &str, name: &str) -> Vec<&'static CheckEntry> {
-    let exact: Vec<_> = CHECKS.iter().filter(|e| e.module == module && e.name == name).collect();
+pub fn find_entries(checks: &[&'static CheckEntry], module: &str, name: &str) -> Vec<&'static CheckEntry> {
+    let exact: Vec<_> = checks.iter().copied().filter(|e| e.module == module && e.name == name).collect();
     if !exact.is_empty() {
         return exact;
     }
@@ -30,8 +31,9 @@ pub fn find_entries(module: &str, name: &str) -> Vec<&'static CheckEntry> {
     let Some(arg) = arg.trim().strip_prefix('"').and_then(|a| a.strip_suffix('"')) else {
         return vec![];
     };
-    CHECKS
+    checks
         .iter()
+        .copied()
         .filter(|e| {
             e.module == module
                 && e.name == f
@@ -51,8 +53,14 @@ pub fn find_entries(module: &str, name: &str) -> Vec<&'static CheckEntry> {
 /// script does not parse (every Haskell helper then fails, so a passing
 /// Haskell test never gets here) or if `kind` contradicts the entry's
 /// `CheckKind`.
-pub fn run_check(module: &str, name: &str, kind: &str, script: &str) -> Option<Vec<Code>> {
-    let entries = find_entries(module, name);
+pub fn run_check(
+    checks: &[&'static CheckEntry],
+    module: &str,
+    name: &str,
+    kind: &str,
+    script: &str,
+) -> Option<Vec<Code>> {
+    let entries = find_entries(checks, module, name);
     if entries.is_empty() {
         return None;
     }

@@ -29,8 +29,7 @@ use super::CFValue::*;
 use super::CFVariableProp::*;
 use super::fgl;
 use super::{
-    CFEdge, CFEffect, CFNode, CFStringPart, CFValue, CfgParameters, CfgResult, IdTagged, NO_RANGE, Node, PropSet,
-    Scope,
+    CFEdge, CFEffect, CFNode, CFStringPart, CFValue, CfgParameters, CfgResult, IdTagged, NO_RANGE, Node, PropSet, Scope,
 };
 
 /// `data Range = Range Node Node`
@@ -401,14 +400,10 @@ impl<'a> Builder<'a> {
             Token::T_BatsTest(_, body) => {
                 // These are technically set by the 'run' command, but we'll just define them
                 // up front to avoid figuring out which commands named "run" belong to Bats.
-                let status = self.new_node_range(apply_single(IdTagged(
-                    id,
-                    CFWriteVariable("status".to_string(), CFValueInteger),
-                )));
-                let output = self.new_node_range(apply_single(IdTagged(
-                    id,
-                    CFWriteVariable("output".to_string(), CFValueString),
-                )));
+                let status = self
+                    .new_node_range(apply_single(IdTagged(id, CFWriteVariable("status".to_string(), CFValueInteger))));
+                let output = self
+                    .new_node_range(apply_single(IdTagged(id, CFWriteVariable("output".to_string(), CFValueString))));
                 let main = self.build(*body);
                 self.link_ranges(&[status, output, main])
             }
@@ -472,8 +467,7 @@ impl<'a> Builder<'a> {
                     deps.push(node_to_range(self.new_node(apply_single(IdTagged(id, CFReadVariable(x))))));
                 }
                 let deps = self.link_ranges(&deps);
-                let read =
-                    node_to_range(self.new_node(apply_single(IdTagged(id, CFReadVariable(reference.clone())))));
+                let read = node_to_range(self.new_node(apply_single(IdTagged(id, CFReadVariable(reference.clone())))));
                 let total_read = self.link_range(deps, read);
 
                 if ["=", ":="].iter().any(|p| modifier.starts_with(p)) {
@@ -1045,8 +1039,7 @@ impl<'a> Builder<'a> {
         let before = self.sequentially(&evaluated);
         let assignments = self.new_node_range(CFApplyEffects(assignments));
         let added_props = if added.is_empty() { self.none() } else { self.new_node_range(CFApplyEffects(added)) };
-        let removed_props =
-            if removed.is_empty() { self.none() } else { self.new_node_range(CFApplyEffects(removed)) };
+        let removed_props = if removed.is_empty() { self.none() } else { self.new_node_range(CFApplyEffects(removed)) };
         let result = self.new_node_range(CFSetExitCode(cmd));
         self.link_ranges(&[before, assignments, added_props, removed_props, result])
     }
@@ -1096,8 +1089,7 @@ impl<'a> Builder<'a> {
             Some((c, name))
         };
         let get_from_fallback = || args.iter().rev().find_map(|&c| get_if_var(c));
-        let (id, name) =
-            get_from_arg().or_else(get_from_fallback).unwrap_or_else(|| (cmd, "MAPFILE".to_string()));
+        let (id, name) = get_from_arg().or_else(get_from_fallback).unwrap_or_else(|| (cmd, "MAPFILE".to_string()));
         self.new_node_range(CFApplyEffects(vec![IdTagged(id, CFWriteVariable(name, CFValueArray))]))
     }
 
@@ -1176,8 +1168,7 @@ impl<'a> Builder<'a> {
         let assignments: Vec<Range> =
             vars.iter().map(|&v| self.build_assignment(Some(Scope::PrefixScope), v)).collect();
         let exe = p(self);
-        let drop_assignments =
-            if vars.is_empty() { None } else { Some(self.new_node_range(CFDropPrefixAssignments)) };
+        let drop_assignments = if vars.is_empty() { None } else { Some(self.new_node_range(CFDropPrefixAssignments)) };
 
         let mut all = vec![args];
         all.extend(assignments);
@@ -1187,12 +1178,7 @@ impl<'a> Builder<'a> {
     }
 
     /// `regularExpansionWithStatus vars args@(cmd NE.:| _) p`
-    fn regular_expansion_with_status(
-        &mut self,
-        vars: &[Id],
-        args: &[Id],
-        p: impl FnOnce(&mut Self) -> Range,
-    ) -> Range {
+    fn regular_expansion_with_status(&mut self, vars: &[Id], args: &[Id], p: impl FnOnce(&mut Self) -> Range) -> Range {
         let initial = self.regular_expansion(vars, args, p);
         let status = self.new_node_range(CFSetExitCode(args[0]));
         self.link_range(initial, status)
@@ -1346,11 +1332,8 @@ fn structural_collapse(
         }
     }
     let is_candidate = |n: Node| is_structural(n) && in_degree[n as usize] == 1 && out_degree[n as usize] == 1;
-    let edges_to_collapse: BTreeSet<(Node, Node, CFEdge)> = edges
-        .iter()
-        .filter(|&&(a, b, l)| l == CFEFlow && is_candidate(a) && is_candidate(b))
-        .copied()
-        .collect();
+    let edges_to_collapse: BTreeSet<(Node, Node, CFEdge)> =
+        edges.iter().filter(|&&(a, b, l)| l == CFEFlow && is_candidate(a) && is_candidate(b)).copied().collect();
 
     // `M.fromList $ map orderEdge $ S.toList edgesToCollapse`: later keys win.
     let mut remapping: BTreeMap<Node, Node> = BTreeMap::new();
@@ -1383,15 +1366,10 @@ fn structural_collapse(
 /// previously pointing to x would be wrong.
 #[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn remove_unnecessary_structural_nodes(g: Cfw) -> Cfw {
-    let max_node = g
-        .nodes
-        .iter()
-        .map(|(n, _)| *n)
-        .chain(g.edges.iter().flat_map(|(a, b, _)| [*a, *b]))
-        .max()
-        .unwrap_or(0) as usize;
-    let structural: BTreeSet<Node> =
-        g.nodes.iter().filter(|(_, l)| *l == CFStructuralNode).map(|(n, _)| *n).collect();
+    let max_node =
+        g.nodes.iter().map(|(n, _)| *n).chain(g.edges.iter().flat_map(|(a, b, _)| [*a, *b])).max().unwrap_or(0)
+            as usize;
+    let structural: BTreeSet<Node> = g.nodes.iter().filter(|(_, l)| *l == CFStructuralNode).map(|(n, _)| *n).collect();
     let (collapse, recursive) = structural_collapse(max_node, &|n| structural.contains(&n), &g.edges);
     remap_graph(
         &recursive,

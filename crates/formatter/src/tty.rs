@@ -4,8 +4,7 @@
 use std::io::Write;
 
 use shellcheck_core::interface::{
-    CheckResult, Code, ColorOption, Fix, FormatterOptions, PositionedComment, Severity,
-    SystemInterface,
+    CheckResult, Code, ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface,
 };
 
 use crate::fixer::{apply_fix, map_positions, merge_fixes};
@@ -45,17 +44,9 @@ fn rank_error(err: &PositionedComment) -> Ranking {
     (ranking, err.comment.severity, err.comment.code)
 }
 
-fn append_comments(
-    err_ref: &mut Vec<(Ranking, Code, String)>,
-    comments: &[PositionedComment],
-    max: i64,
-) {
+fn append_comments(err_ref: &mut Vec<(Ranking, Code, String)>, comments: &[PositionedComment], max: i64) {
     let mut all: Vec<(Ranking, Code, String)> = err_ref.clone();
-    all.extend(
-        comments
-            .iter()
-            .map(|x| (rank_error(x), x.comment.code, x.comment.message.clone())),
-    );
+    all.extend(comments.iter().map(|x| (rank_error(x), x.comment.code, x.comment.message.clone())));
     all.sort();
     // nubBy on the ranking only; the list is sorted by ranking first.
     let mut nubbed: Vec<(Ranking, Code, String)> = vec![];
@@ -72,9 +63,7 @@ type ColorFunc = Box<dyn Fn(&str, &str) -> String>;
 
 fn get_color_func(color_option: ColorOption) -> ColorFunc {
     if should_output_color(color_option) {
-        Box::new(|level, comment| {
-            format!("{}{}{}", ansi(color_for_level(level)), comment, ansi(0))
-        })
+        Box::new(|level, comment| format!("{}{}{}", ansi(color_for_level(level)), comment, ansi(0)))
     } else {
         Box::new(|_, comment| comment.to_string())
     }
@@ -123,29 +112,16 @@ fn shorten(msg: &str) -> String {
     }
 }
 
-fn output_for_file(
-    color: &ColorFunc,
-    sys: &dyn SystemInterface,
-    comments: &[PositionedComment],
-    out: &mut dyn Write,
-) {
+fn output_for_file(color: &ColorFunc, sys: &dyn SystemInterface, comments: &[PositionedComment], out: &mut dyn Write) {
     let file_name = source_file(&comments[0]);
     let contents = read_or_empty(sys, file_name);
     let file_lines = haskell_lines(&contents);
     let line_count = file_lines.len() as i64;
     for comments_for_line in group_with(comments, line_no) {
         let line_num = line_no(&comments_for_line[0]);
-        let line = if line_num < 1 || line_num > line_count {
-            ""
-        } else {
-            file_lines[(line_num - 1) as usize]
-        };
+        let line = if line_num < 1 || line_num > line_count { "" } else { file_lines[(line_num - 1) as usize] };
         let _ = writeln!(out);
-        let _ = writeln!(
-            out,
-            "{}",
-            color("message", &format!("In {} line {}:", file_name, line_num))
-        );
+        let _ = writeln!(out, "{}", color("message", &format!("In {} line {}:", file_name, line_num)));
         let _ = writeln!(out, "{}", color("source", line));
         for c in comments_for_line {
             let _ = writeln!(out, "{}", color(severity_text(c), &cute_indent(c)));
@@ -179,12 +155,7 @@ fn slice_file<'a>(fix: &Fix, lines: &[&'a str]) -> (Fix, Vec<&'a str>) {
     (map_positions(adjust, fix), excerpt)
 }
 
-fn show_fixed_string(
-    color: &ColorFunc,
-    comments: &[PositionedComment],
-    file_lines: &[&str],
-    out: &mut dyn Write,
-) {
+fn show_fixed_string(color: &ColorFunc, comments: &[PositionedComment], file_lines: &[&str], out: &mut dyn Write) {
     let fixes: Vec<Fix> = comments.iter().filter_map(|c| c.fix.clone()).collect();
     if fixes.is_empty() {
         return;

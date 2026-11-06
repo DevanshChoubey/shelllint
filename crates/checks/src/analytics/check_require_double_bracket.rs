@@ -2,14 +2,13 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkRequireDoubleBracket`, lines 4864-4895 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::interface::{Shell, TokenComment};
 
 use crate::support::{fix_with, node_checks_to_tree_check, replace_end, replace_start};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkRequireDoubleBracket",
     registry: "optional-tree",

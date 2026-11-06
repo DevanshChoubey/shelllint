@@ -1,0 +1,4 @@
+# Closest fit to the hand-formatted code (the smallest `cargo fmt` diff of
+# the configurations tried); applied once to the whole tree.
+max_width = 120
+use_small_heuristics = "Max"

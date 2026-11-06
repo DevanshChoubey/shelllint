@@ -18,10 +18,7 @@ use regex::{Regex, RegexBuilder};
 // tdfa's defaultCompOpt has `multiline = True`: `^`/`$` match at line
 // boundaries and `.` does not match newline (the `regex` default).
 pub fn mk_regex(str: &str) -> Regex {
-    RegexBuilder::new(str)
-        .multi_line(true)
-        .build()
-        .unwrap_or_else(|e| panic!("Invalid regex {str:?}: {e}"))
+    RegexBuilder::new(str).multi_line(true).build().unwrap_or_else(|e| panic!("Invalid regex {str:?}: {e}"))
 }
 
 /// Does the regex match?
@@ -36,10 +33,7 @@ pub fn match_regex(re: &Regex, str: &str) -> Option<Vec<String>> {
 
 // tdfa reports an unmatched group as "".
 fn groups(c: &regex::Captures) -> Vec<String> {
-    c.iter()
-        .skip(1)
-        .map(|m| m.map_or(String::new(), |m| m.as_str().to_string()))
-        .collect()
+    c.iter().skip(1).map(|m| m.map_or(String::new(), |m| m.as_str().to_string())).collect()
 }
 
 /// Get all full matches

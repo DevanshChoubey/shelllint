@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkStderrPipe`, lines 2998-3006 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkStderrPipe",
     registry: "node",
@@ -17,10 +16,7 @@ static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_stderr_pipe(params: &Params<'_>, t: Id, c: &mut Comments) {
-    match params.shell_type {
-        Shell::Ksh => match_(params, t, c),
-        _ => {}
-    }
+    if params.shell_type == Shell::Ksh { match_(params, t, c) }
 }
 
 fn match_(p: &Params<'_>, id: Id, c: &mut Comments) {

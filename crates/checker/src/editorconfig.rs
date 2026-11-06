@@ -65,11 +65,7 @@ fn split_sections(contents: &str) -> Vec<(String, Vec<(usize, &str)>)> {
 fn parse_header(l: &str) -> Option<String> {
     let t = trim(drop_line_comment(l));
     let cs = t.strip_prefix('[')?;
-    if !cs.is_empty() && cs.ends_with(']') {
-        Some(cs[..cs.len() - 1].to_string())
-    } else {
-        None
-    }
+    if !cs.is_empty() && cs.ends_with(']') { Some(cs[..cs.len() - 1].to_string()) } else { None }
 }
 
 /// All 'shellcheck.*' directives (as (line, key, value) tuples) found
@@ -192,11 +188,7 @@ fn pre_section_lines(contents: &str) -> Vec<&str> {
 fn root_value(l: &str) -> Option<String> {
     let t = trim(drop_line_comment(l));
     let (key, value) = t.split_once('=')?;
-    if trim(key).to_lowercase() == "root" {
-        Some(trim(value).to_lowercase())
-    } else {
-        None
-    }
+    if trim(key).to_lowercase() == "root" { Some(trim(value).to_lowercase()) } else { None }
 }
 
 /// Does the top-level (pre-section) part of an EditorConfig file
@@ -284,8 +276,7 @@ fn translate_class(cls: &[char]) -> String {
     let escape_class = |cs: &[char]| {
         let mut out = String::new();
         for (i, &c) in cs.iter().enumerate() {
-            let literal_dash = c == '-'
-                && (i == 0 || i + 1 == cs.len() || cs[i - 1] == '-' || cs[i + 1] == '-');
+            let literal_dash = c == '-' && (i == 0 || i + 1 == cs.len() || cs[i - 1] == '-' || cs[i + 1] == '-');
             if matches!(c, '\\' | '[' | '&' | '~') || literal_dash {
                 out.push('\\');
             }
@@ -340,11 +331,7 @@ fn brace_alternatives(body: &[char]) -> Vec<Vec<char>> {
         let (from_str, rest) = (&body[..i], &body[i + 1..]);
         if let ['.', to_str @ ..] = rest {
             if let (Some(from), Some(to)) = (read_int(from_str), read_int(to_str)) {
-                return if from < to {
-                    (from..=to).map(|n| n.to_string().chars().collect()).collect()
-                } else {
-                    vec![]
-                };
+                return if from < to { (from..=to).map(|n| n.to_string().chars().collect()).collect() } else { vec![] };
             }
         }
     }
@@ -456,10 +443,9 @@ pub fn get_editor_config(fs: &dyn EditorConfigFs, filename: &str) -> Option<(Str
 fn directives_for(path: &str, file: &str, contents: &str) -> Option<(String, String)> {
     let relative = make_relative_to(&take_directory(file), path);
     match invalid_root_lines(contents).first() {
-        Some(&bad_line) => Some((
-            file.to_string(),
-            "\n".repeat(bad_line.saturating_sub(1)) + "invalid editorconfig value\n",
-        )),
+        Some(&bad_line) => {
+            Some((file.to_string(), "\n".repeat(bad_line.saturating_sub(1)) + "invalid editorconfig value\n"))
+        }
         None => editor_config_directives(contents, &relative).map(|blob| (file.to_string(), blob)),
     }
 }

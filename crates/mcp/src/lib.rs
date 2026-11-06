@@ -181,9 +181,11 @@ mod tests {
 
     #[test]
     fn initialize_echoes_known_version_and_falls_back() {
-        let known = handle_line(r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}"#);
+        let known =
+            handle_line(r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}"#);
         assert_eq!(known.unwrap()["result"]["protocolVersion"], "2025-06-18");
-        let unknown = handle_line(r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"1999-01-01"}}"#);
+        let unknown =
+            handle_line(r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"1999-01-01"}}"#);
         assert_eq!(unknown.unwrap()["result"]["protocolVersion"], INITIALIZE_FALLBACK);
     }
 

@@ -28,10 +28,7 @@ pub fn default_options() -> Options {
         check_spec: empty_check_spec(),
         external_sources: false,
         source_paths: vec![],
-        formatter_options: FormatterOptions {
-            color_option: ColorOption::ColorAuto,
-            ..new_formatter_options()
-        },
+        formatter_options: FormatterOptions { color_option: ColorOption::ColorAuto, ..new_formatter_options() },
         min_severity: Severity::StyleC,
         rcfile: None,
         fix: false,
@@ -42,9 +39,7 @@ pub fn default_options() -> Options {
 pub const USAGE_HEADER: &str = "Usage: shellcheck [OPTIONS...] FILES...";
 
 /// The formats shellcheck.hs registers (`Map.keys`, so sorted).
-pub const FORMAT_NAMES: [&str; 7] = [
-    "checkstyle", "diff", "gcc", "json", "json1", "quiet", "tty",
-];
+pub const FORMAT_NAMES: [&str; 7] = ["checkstyle", "diff", "gcc", "json", "json1", "quiet", "tty"];
 
 #[derive(Clone, Copy)]
 pub enum ArgDescr {
@@ -89,14 +84,38 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["norc"], No("norc"), "", "Don't look for .shellcheckrc and .editorconfig files"),
         o("", &["rcfile"], Req("rcfile"), "RCFILE", "Prefer the specified configuration file over searching for one"),
         o("o", &["enable"], Req("enable"), "check1,check2..", "List of optional checks to enable (or 'all')"),
-        o("P", &["source-path"], Req("source-path"), "SOURCEPATHS", "Specify path when looking for sourced files (\"SCRIPTDIR\" for script's dir)"),
+        o(
+            "P",
+            &["source-path"],
+            Req("source-path"),
+            "SOURCEPATHS",
+            "Specify path when looking for sourced files (\"SCRIPTDIR\" for script's dir)",
+        ),
         o("s", &["shell"], Req("shell"), "SHELLNAME", "Specify dialect (sh, bash, dash, ksh, busybox)"),
-        o("S", &["severity"], Req("severity"), "SEVERITY", "Minimum severity of errors to consider (error, warning, info, style)"),
+        o(
+            "S",
+            &["severity"],
+            Req("severity"),
+            "SEVERITY",
+            "Minimum severity of errors to consider (error, warning, info, style)",
+        ),
         o("V", &["version"], No("version"), "", "Print version information"),
-        o("W", &["wiki-link-count"], Req("wiki-link-count"), "NUM", "The number of wiki links to show, when applicable"),
+        o(
+            "W",
+            &["wiki-link-count"],
+            Req("wiki-link-count"),
+            "NUM",
+            "The number of wiki links to show, when applicable",
+        ),
         o("x", &["external-sources"], No("externals"), "", "Allow 'source' outside of FILES"),
         o("", &["help"], No("help"), "", "Show this usage summary and exit"),
-        o("", &["files-from"], Req("files-from"), "FILE", "Read input files from FILE (one per line, or '-' for stdin)"),
+        o(
+            "",
+            &["files-from"],
+            Req("files-from"),
+            "FILE",
+            "Read input files from FILE (one per line, or '-' for stdin)",
+        ),
         // Extensions beyond ShellCheck (not in upstream's --help).
         o("", &["fix"], No("fix"), "", "Apply all auto-fixes to FILES in place, then report what is left"),
         o("", &["dry-run"], No("dry-run"), "", "With --fix, print the fixes as a diff (like -f diff) instead"),
@@ -157,10 +176,14 @@ enum Opt {
 
 fn flag_of(d: &OptDescr, arg: Option<String>) -> Flag {
     match (d.arg, arg) {
-        (No(name), _) => Flag(name.to_string(), match name {
-            "sourced" => "false",
-            _ => "true",
-        }.to_string()),
+        (No(name), _) => Flag(
+            name.to_string(),
+            match name {
+                "sourced" => "false",
+                _ => "true",
+            }
+            .to_string(),
+        ),
         (Req(name), Some(a)) => Flag(name.to_string(), a),
         (Opt(name, _), Some(a)) => Flag(name.to_string(), a),
         (Opt(name, default), None) => Flag(name.to_string(), default.to_string()),
@@ -255,10 +278,7 @@ fn long_opt(ls: &str, rs: &[String], optdescr: &[OptDescr]) -> (Opt, usize, Opti
     };
     let exact: Vec<&OptDescr> = optdescr.iter().filter(|d| d.longs.contains(&opt)).collect();
     let options: Vec<&OptDescr> = if exact.is_empty() {
-        optdescr
-            .iter()
-            .filter(|d| d.longs.iter().any(|l| l.starts_with(opt)))
-            .collect()
+        optdescr.iter().filter(|d| d.longs.iter().any(|l| l.starts_with(opt))).collect()
     } else {
         exact
     };
@@ -267,22 +287,16 @@ fn long_opt(ls: &str, rs: &[String], optdescr: &[OptDescr]) -> (Opt, usize, Opti
     match options.as_slice() {
         [d] => match (d.arg, arg) {
             (No(_), "") => (Opt::Opt(flag_of(d, None)), 0, None),
-            (No(_), a) if a.starts_with('=') => (
-                Opt::OptErr(format!("option `{}' doesn't allow an argument\n", opt_str)),
-                0,
-                None,
-            ),
+            (No(_), a) if a.starts_with('=') => {
+                (Opt::OptErr(format!("option `{}' doesn't allow an argument\n", opt_str)), 0, None)
+            }
             (Req(_), "") => match rs.first() {
                 None => (err_req(d, &opt_str), 0, None),
                 Some(r) => (Opt::Opt(flag_of(d, Some(r.clone()))), 1, None),
             },
-            (Req(_), a) if a.starts_with('=') => {
-                (Opt::Opt(flag_of(d, Some(a[1..].to_string()))), 0, None)
-            }
+            (Req(_), a) if a.starts_with('=') => (Opt::Opt(flag_of(d, Some(a[1..].to_string()))), 0, None),
             (Opt(..), "") => (Opt::Opt(flag_of(d, None)), 0, None),
-            (Opt(..), a) if a.starts_with('=') => {
-                (Opt::Opt(flag_of(d, Some(a[1..].to_string()))), 0, None)
-            }
+            (Opt(..), a) if a.starts_with('=') => (Opt::Opt(flag_of(d, Some(a[1..].to_string()))), 0, None),
             _ => unreq(),
         },
         [] => unreq(),

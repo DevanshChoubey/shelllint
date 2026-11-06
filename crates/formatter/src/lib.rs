@@ -9,9 +9,7 @@
 
 use std::io::{IsTerminal, Write};
 
-use shellcheck_core::interface::{
-    ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface,
-};
+use shellcheck_core::interface::{ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface};
 
 pub mod checkstyle;
 pub mod diff;
@@ -102,10 +100,10 @@ pub fn haskell_lines(s: &str) -> Vec<&str> {
 }
 
 /// NE.groupWith: group adjacent elements with equal keys (no sorting).
-pub fn group_with<'a, K: PartialEq>(
-    items: &'a [PositionedComment],
+pub fn group_with<K: PartialEq>(
+    items: &[PositionedComment],
     key: impl Fn(&PositionedComment) -> K,
-) -> Vec<&'a [PositionedComment]> {
+) -> Vec<&[PositionedComment]> {
     let mut groups = vec![];
     let mut start = 0;
     for i in 1..=items.len() {
@@ -133,13 +131,7 @@ pub fn make_non_virtual(comments: &[PositionedComment], contents: &str) -> Vec<P
 }
 
 fn untabbed_fix(f: &Fix, arr: &[&str]) -> Fix {
-    Fix {
-        replacements: f
-            .replacements
-            .iter()
-            .map(|r| fixer::remove_tab_stops_replacement(r, arr))
-            .collect(),
-    }
+    Fix { replacements: f.replacements.iter().map(|r| fixer::remove_tab_stops_replacement(r, arr)).collect() }
 }
 
 pub fn should_output_color(color_option: ColorOption) -> bool {

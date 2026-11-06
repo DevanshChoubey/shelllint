@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSecondArgIsComparison`, lines 4796-4820 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::get_leading_unquoted_string;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkSecondArgIsComparison",
     registry: "node",

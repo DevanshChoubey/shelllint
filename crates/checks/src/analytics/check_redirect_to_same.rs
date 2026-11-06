@@ -2,13 +2,12 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkRedirectToSame`, lines 868-920 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command, make_comment};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_command_basename, get_path, is_assignment, oversimplify};
 use shellcheck_core::interface::Severity;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkRedirectToSame",
     registry: "node",

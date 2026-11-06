@@ -2,14 +2,13 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkOverwrittenExitCode`, lines 5281-5317 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_analyzer::cfg_analysis::{CfgAnalysis, does_post_dominate, get_incoming_state};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_command_basename, get_command_name, get_literal_string};
 use std::collections::BTreeSet;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkOverwrittenExitCode",
     registry: "node",
@@ -76,7 +75,7 @@ mod tests {
     use shellcheck_analyzer::testing::run_check;
 
     fn codes(s: &str) -> Vec<u32> {
-        run_check("Analytics.hs", "checkOverwrittenExitCode", "node", s)
+        run_check(crate::CHECKS, "Analytics.hs", "checkOverwrittenExitCode", "node", s)
             .unwrap()
             .into_iter()
             .map(|c| c as u32)

@@ -20,25 +20,17 @@ impl<'a> P<'a> {
 
     fn arith_spacing(&mut self) -> PR<()> {
         self.many(|p| {
-            alt!(
-                p,
-                |p| p.whitespace(),
-                |p| {
-                    p.try_(|p| p.string("\\\n"))?;
-                    Ok('\n')
-                }
-            )
+            alt!(p, |p| p.whitespace(), |p| {
+                p.try_(|p| p.string("\\\n"))?;
+                Ok('\n')
+            })
         })
         .map(drop)
     }
 
     // splitBy x ops = chainl1 x (readBinary ops)
     fn arith_split_by(&mut self, x: fn(&mut Self) -> PR<Id>, ops: &[&str]) -> PR<Id> {
-        self.chainl1(
-            x,
-            |p| p.arith_read_binary(ops),
-            |p, (id, op), l, r| p.node(id, Token::TA_Binary(op, l, r)),
-        )
+        self.chainl1(x, |p| p.arith_read_binary(ops), |p, (id, op), l, r| p.node(id, Token::TA_Binary(op, l, r)))
     }
 
     fn arith_read_binary(&mut self, ops: &[&str]) -> PR<(Id, String)> {
@@ -76,14 +68,7 @@ impl<'a> P<'a> {
         self.optional(|p| {
             let (str, alt) = p.look_ahead(|p| {
                 p.choice(
-                    [
-                        ("lt", "<"),
-                        ("gt", ">"),
-                        ("le", "<="),
-                        ("ge", ">="),
-                        ("eq", "=="),
-                        ("ne", "!="),
-                    ],
+                    [("lt", "<"), ("gt", ">"), ("le", "<="), ("ge", ">="), ("eq", "=="), ("ne", "!=")],
                     |p, (str, alt)| {
                         p.try_(|p| {
                             p.string(str)?;
@@ -162,12 +147,7 @@ impl<'a> P<'a> {
     }
 
     fn arith_read_arith_term(&mut self) -> PR<Id> {
-        alt!(
-            self,
-            |p| p.arith_read_group(),
-            |p| p.arith_read_variable(),
-            |p| p.arith_read_expansion()
-        )
+        alt!(self, |p| p.arith_read_group(), |p| p.arith_read_variable(), |p| p.arith_read_expansion())
     }
 
     fn arith_sequence(&mut self) -> PR<Id> {
@@ -287,11 +267,7 @@ impl<'a> P<'a> {
     }
 
     fn arith_read_anycremented(&mut self) -> PR<Id> {
-        alt!(
-            self,
-            |p| p.arith_read_normal_or_postfix_incremented(),
-            |p| p.arith_read_prefix_incremented()
-        )
+        alt!(self, |p| p.arith_read_normal_or_postfix_incremented(), |p| p.arith_read_prefix_incremented())
     }
 
     fn arith_read_prefix_incremented(&mut self) -> PR<Id> {

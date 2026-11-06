@@ -30,7 +30,9 @@ pub fn cli_bin() -> Option<PathBuf> {
 pub fn require_cli(test: &str) -> Option<PathBuf> {
     let bin = cli_bin();
     if bin.is_none() {
-        eprintln!("SKIPPED {test}: shellcheck-rust CLI binary not found; run `cargo build -p shellcheck-rust` (or set SHELLCHECK_RUST_CLI)");
+        eprintln!(
+            "SKIPPED {test}: shellcheck-rust CLI binary not found; run `cargo build -p shellcheck-rust` (or set SHELLCHECK_RUST_CLI)"
+        );
     }
     bin
 }
@@ -38,11 +40,7 @@ pub fn require_cli(test: &str) -> Option<PathBuf> {
 /// Runs the CLI with `args` on `file` and returns its stdout. The exit
 /// status is ignored: 1 just means that issues were found.
 pub fn run_cli(bin: &Path, args: &[&str], file: &Path) -> String {
-    let out = std::process::Command::new(bin)
-        .args(args)
-        .arg(file)
-        .output()
-        .expect("failed to run the CLI");
+    let out = std::process::Command::new(bin).args(args).arg(file).output().expect("failed to run the CLI");
     assert!(out.status.code() != Some(2) && out.status.code() != Some(4), "CLI failed: {:?}", out);
     String::from_utf8(out.stdout).expect("CLI output is UTF-8")
 }

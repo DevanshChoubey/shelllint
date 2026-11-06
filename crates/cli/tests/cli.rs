@@ -13,11 +13,7 @@ struct Out {
 
 fn run_with(args: &[&str], stdin: &str, env: &[(&str, &str)]) -> Out {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"));
-    cmd.args(args)
-        .env_remove("SHELLCHECK_OPTS")
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+    cmd.args(args).env_remove("SHELLCHECK_OPTS").stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
     for (k, v) in env {
         cmd.env(k, v);
     }
@@ -187,12 +183,12 @@ fn bad_option_messages_match_oracle() {
     let usage = expected_help();
     let usage = format!("Usage: shellcheck [OPTIONS...] FILES...\n{}", usage.split_once('\n').unwrap().1);
     let o = run(&["--bogus"], "");
-    assert_eq!(o.stderr, format!("unrecognized option `--bogus'\n\n{}\n", usage.trim_end_matches('\n').to_string() + "\n"));
-    assert_eq!(run(&["-e"], "").stderr.lines().next().unwrap(), "option `-e' requires an argument CODE1,CODE2..");
     assert_eq!(
-        run(&["--help=1"], "").stderr.lines().next().unwrap(),
-        "option `--help' doesn't allow an argument"
+        o.stderr,
+        format!("unrecognized option `--bogus'\n\n{}\n", usage.trim_end_matches('\n').to_string() + "\n")
     );
+    assert_eq!(run(&["-e"], "").stderr.lines().next().unwrap(), "option `-e' requires an argument CODE1,CODE2..");
+    assert_eq!(run(&["--help=1"], "").stderr.lines().next().unwrap(), "option `--help' doesn't allow an argument");
     let amb = run(&["--e"], "").stderr;
     assert!(amb.starts_with("option `--e' is ambiguous; could be one of:\n  -e CODE1,CODE2.."), "{}", amb);
     assert_eq!(run(&["-Cbad", "-"], "").stderr, "Unknown value for --color. Valid options are: auto, always, never\n");
@@ -200,13 +196,13 @@ fn bad_option_messages_match_oracle() {
         run(&["-S", "x", "-"], "").stderr,
         "Unknown value for --severity. Valid options are: error, warning, info, style\n"
     );
-    assert_eq!(run(&["-f", "nope", "-"], "").stderr, "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  json\n  json1\n  quiet\n  tty\n");
+    assert_eq!(
+        run(&["-f", "nope", "-"], "").stderr,
+        "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  json\n  json1\n  quiet\n  tty\n"
+    );
     assert_eq!(run(&["-s", "zsh", "-"], "").stderr, "Unknown shell: zsh\n");
     assert_eq!(run(&["-W", "x", "-"], "").stderr, "Invalid number: x\n");
-    assert_eq!(
-        run(&["--extended-analysis=maybe", "-"], "").stderr,
-        "Invalid boolean, expected true/false: maybe\n"
-    );
+    assert_eq!(run(&["--extended-analysis=maybe", "-"], "").stderr, "Invalid boolean, expected true/false: maybe\n");
 }
 
 #[test]
@@ -215,7 +211,10 @@ fn stdin_dash() {
     assert_eq!(o.code, 0, "{}", o.stderr);
     assert!(o.stderr.is_empty());
     // Not an "unrecognized option": a lone dash is a file operand.
-    assert_eq!(run(&["-f", "checkstyle", "-"], CLEAN).stdout.lines().next().unwrap(), "<?xml version='1.0' encoding='UTF-8'?>");
+    assert_eq!(
+        run(&["-f", "checkstyle", "-"], CLEAN).stdout.lines().next().unwrap(),
+        "<?xml version='1.0' encoding='UTF-8'?>"
+    );
 }
 
 #[test]
@@ -346,7 +345,11 @@ fn editorconfig_error_exits_4() {
     std::fs::write(&f, WARN).unwrap();
     let o = run(&["-f", "gcc", f.to_str().unwrap()], "");
     assert_eq!(o.code, 4);
-    assert!(o.stdout.contains("Expected '=' after directive key. [SC1134]") || o.stdout.contains("[SC1134]"), "{}", o.stdout);
+    assert!(
+        o.stdout.contains("Expected '=' after directive key. [SC1134]") || o.stdout.contains("[SC1134]"),
+        "{}",
+        o.stdout
+    );
 }
 
 // Each file group is rendered against its own file's contents

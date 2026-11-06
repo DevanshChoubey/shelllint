@@ -88,8 +88,7 @@ impl Fixer {
     }
 
     fn is_given(&self, name: &str) -> bool {
-        self.given.contains(name)
-            || std::fs::canonicalize(name).is_ok_and(|p| self.given_canonical.contains(&p))
+        self.given.contains(name) || std::fs::canonicalize(name).is_ok_and(|p| self.given_canonical.contains(&p))
     }
 
     /// One `-f diff | patch -p1` over every file; true if any file changed.
@@ -98,21 +97,14 @@ impl Fixer {
         for file in targets {
             // Unreadable files are reported by the final lint.
             let Ok(contents) = sys.read_file(None, file) else { continue };
-            let spec = CheckSpec {
-                filename: file.clone(),
-                script: contents,
-                ..options.check_spec.clone()
-            };
+            let spec = CheckSpec { filename: file.clone(), script: contents, ..options.check_spec.clone() };
             let result = check_script_owned(sys, spec);
             for (name, fix) in diff::fixes_by_file(&result) {
                 if self.reported.contains(&name) {
                     continue;
                 }
                 if !self.is_given(&name) {
-                    print_err(&format!(
-                        "--fix: not fixing {}: it was not given on the command line.",
-                        name
-                    ));
+                    print_err(&format!("--fix: not fixing {}: it was not given on the command line.", name));
                     self.reported.insert(name);
                     continue;
                 }
@@ -137,8 +129,7 @@ fn fix_file(path: &str, fix: &Fix) -> Result<bool, String> {
         return Err(format!("{}: not a regular file.", path));
     }
     let bytes = std::fs::read(path).map_err(|e| sys::show_io_error(path, &e))?;
-    let contents =
-        std::str::from_utf8(&bytes).map_err(|_| format!("{}: it is not valid UTF-8.", path))?;
+    let contents = std::str::from_utf8(&bytes).map_err(|_| format!("{}: it is not valid UTF-8.", path))?;
     match diff::apply_fix_to_contents(contents, fix) {
         None => Ok(false),
         Some(new) => {

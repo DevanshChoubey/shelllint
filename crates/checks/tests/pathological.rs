@@ -20,8 +20,7 @@ use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
 use shellcheck_analyzer::testing::run_check;
-// Link the check registrations (linkme statics) into this test binary.
-extern crate shellcheck_checks;
+use shellcheck_checks::CHECKS;
 
 const CHILD_ENV: &str = "SC_CHECK_PATHOLOGICAL_CHILD";
 const TIME_LIMIT: Duration = Duration::from_secs(10);
@@ -53,11 +52,11 @@ fn check(
         // The parser recurses; give it a big stack, as the CLI does.
         let codes = std::thread::Builder::new()
             .stack_size(256 * 1024 * 1024)
-            .spawn(move || run_check(module, name, kind, &script).expect("check is registered"))
+            .spawn(move || run_check(CHECKS, module, name, kind, &script).expect("check is registered"))
             .unwrap()
             .join()
             .unwrap();
-        let codes: Vec<i64> = codes.into_iter().map(i64::from).collect();
+        let codes: Vec<i64> = codes.into_iter().collect();
         expect(&codes);
         println!("PEAK_RSS_MB={}", peak_rss_mb());
         return;

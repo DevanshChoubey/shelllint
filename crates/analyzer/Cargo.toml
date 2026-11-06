@@ -2,11 +2,20 @@
 name = "shellcheck-analyzer"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Analyzer for shellcheck-rust (a Rust port of ShellCheck): analysis parameters, data flow, CFG and the check-registry machinery"
 
 [dependencies]
-shellcheck-core = { path = "../core" }
+shellcheck-core.workspace = true
 regex = "1"
-shellcheck-parser = { path = "../parser" }
-linkme = "0.3"
+shellcheck-parser.workspace = true
 rpds = { version = "1.2.1", default-features = false, features = ["std"] }
+
+[lints]
+workspace = true

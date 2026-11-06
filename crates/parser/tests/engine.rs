@@ -93,7 +93,15 @@ fn errors_merge_at_same_pos() {
 fn later_error_position_wins() {
     // try (char 'x' >> fail "late") <|> fail "early": the try'd error is one column further.
     let (r, ..) = run("x", |p| {
-        p.alt(|p| p.try_(|p| { p.char_('x')?; p.fail::<()>("late") }), |p| p.fail("early"))
+        p.alt(
+            |p| {
+                p.try_(|p| {
+                    p.char_('x')?;
+                    p.fail::<()>("late")
+                })
+            },
+            |p| p.fail("early"),
+        )
     });
     let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
     assert_eq!(e.messages, vec!["late".to_string()]);
@@ -159,7 +167,11 @@ fn eof_and_not_followed_by() {
     assert_eq!(r, Ok(()));
     let (r, ..) = run("a", |p| p.eof());
     assert!(matches!(r, Err(Fail::Empty(_))));
-    let (r, ..) = run("ab", |p| { p.char_('a')?; p.not_followed_by(|p| p.char_('c'))?; p.char_('b') });
+    let (r, ..) = run("ab", |p| {
+        p.char_('a')?;
+        p.not_followed_by(|p| p.char_('c'))?;
+        p.char_('b')
+    });
     assert_eq!(r, Ok('b'));
 }
 
@@ -173,11 +185,7 @@ fn reluctantly_till_stops_at_end() {
 #[test]
 fn chainl1_is_left_associative() {
     let (r, ..) = run("1-2-3", |p| {
-        p.chainl1(
-            |p| p.digit().map(|c| c.to_string()),
-            |p| p.char_('-'),
-            |_, _, x, y| format!("({x}-{y})"),
-        )
+        p.chainl1(|p| p.digit().map(|c| c.to_string()), |p| p.char_('-'), |_, _, x, y| format!("({x}-{y})"))
     });
     assert_eq!(r, Ok("((1-2)-3)".to_string()));
 }
@@ -185,11 +193,7 @@ fn chainl1_is_left_associative() {
 #[test]
 fn chainr1_is_right_associative() {
     let (r, ..) = run("1=2=3", |p| {
-        p.chainr1(
-            |p| p.digit().map(|c| c.to_string()),
-            |p| p.char_('='),
-            |_, _, x, y| format!("({x}={y})"),
-        )
+        p.chainr1(|p| p.digit().map(|c| c.to_string()), |p| p.char_('='), |_, _, x, y| format!("({x}={y})"))
     });
     assert_eq!(r, Ok("(1=(2=3))".to_string()));
 }
@@ -198,7 +202,10 @@ fn chainr1_is_right_associative() {
 fn called_leaves_context_on_consumed_failure() {
     // parsecBracket only pops the context when the body fails without consuming.
     let mut p = P::new(test_environment(), "-", "ab");
-    let r = p.called("thing", |p| { p.char_('a')?; p.char_('x') });
+    let r = p.called("thing", |p| {
+        p.char_('a')?;
+        p.char_('x')
+    });
     assert!(matches!(r, Err(Fail::Consumed(_))));
     assert_eq!(p.sys.context_stack.len(), 1);
     let mut p = P::new(test_environment(), "-", "ab");
@@ -266,7 +273,15 @@ fn many_of_empty_parser_panics_like_parsec() {
 #[test]
 fn with_stack_runs_deep_recursion() {
     fn nest(p: &mut P<'_>) -> PR<u32> {
-        p.alt(|p| { p.char_('(')?; let n = nest(p)?; p.char_(')')?; Ok(n + 1) }, |_| Ok(0))
+        p.alt(
+            |p| {
+                p.char_('(')?;
+                let n = nest(p)?;
+                p.char_(')')?;
+                Ok(n + 1)
+            },
+            |_| Ok(0),
+        )
     }
     let depth = 5000;
     let input = format!("{}{}", "(".repeat(depth), ")".repeat(depth));

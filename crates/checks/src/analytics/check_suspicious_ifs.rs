@@ -2,13 +2,12 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSuspiciousIFS`, lines 3197-3215 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::get_literal_string;
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkSuspiciousIFS",
     registry: "node",
@@ -30,13 +29,13 @@ fn check_suspicious_ifs(p: &Params<'_>, t: Id, c: &mut Comments) {
     let tab = if has_dollar_single { "$'\\t'" } else { "\"$(printf '\\t')\"" };
 
     let suggest = |c: &mut Comments, r: &str| {
-        c.warn(value, 2141, &format!("This backslash is literal. Did you mean IFS={} ?", r))
+        c.warn(value, 2141, format!("This backslash is literal. Did you mean IFS={} ?", r))
     };
     let suggest2 = |c: &mut Comments, desc: &str| {
         c.warn(
             value,
             2141,
-            &format!(
+            format!(
                 "This IFS value contains {}. For tabs/linefeeds/escapes, use $'..', literal, or printf.",
                 desc
             ),

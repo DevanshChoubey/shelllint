@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, should_ignore_code};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     get_command_sequences, get_literal_string_def, get_unquoted_literal, is_variable_name,
@@ -13,8 +13,7 @@ use shellcheck_core::interface::TokenComment;
 
 use crate::support::is_sourced;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkAliasUsedInSameParsingUnit",
     registry: "tree",

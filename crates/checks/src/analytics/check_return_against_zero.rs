@@ -2,14 +2,13 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkReturnAgainstZero`, lines 3533-3599 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     get_literal_string, get_path, get_word_parts, is_function, oversimplify,
 };
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkReturnAgainstZero",
     registry: "node",

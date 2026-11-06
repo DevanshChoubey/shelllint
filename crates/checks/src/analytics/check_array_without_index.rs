@@ -4,7 +4,7 @@
 use std::collections::HashSet;
 
 use shellcheck_analyzer::analyzerlib::{DataType, Params, make_comment};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{AssignmentMode, Id, Token};
 use shellcheck_core::astlib::get_literal_string;
 use shellcheck_core::data::ARRAY_VARIABLES;
@@ -12,8 +12,7 @@ use shellcheck_core::interface::{Severity, Shell, TokenComment};
 
 use crate::support::do_variable_flow_analysis;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkArrayWithoutIndex",
     registry: "tree",

@@ -85,10 +85,7 @@ fn build() -> Vec<Entry> {
             },
         );
     }
-    let optional: Vec<CheckDescription> = shellcheck_analyzer::api::analytics_optional_checks()
-        .into_iter()
-        .chain(shellcheck_analyzer::api::commands_optional_checks())
-        .collect();
+    let optional: Vec<CheckDescription> = shellcheck_checker::optional_checks();
     for d in optional {
         for &code in &d.id {
             let code = u32::try_from(code).expect("SC codes are positive");

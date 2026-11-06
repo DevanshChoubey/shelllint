@@ -3,12 +3,11 @@
 
 use crate::support::{fix_with, replace_start};
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_word_parts, is_command_substitution, is_constant};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkNullaryExpansionTest",
     registry: "optional-tree",

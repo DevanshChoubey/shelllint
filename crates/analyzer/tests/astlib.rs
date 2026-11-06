@@ -4,8 +4,8 @@
 // None of the 61 ASTLib unit tests parse a script: they are either on
 // hand-built single-token trees or on plain strings, so none needs
 // `#[ignore = "needs parser"]`.
-use shellcheck_core::ast::{Ast, Id, Pos, Token};
 use shellcheck_analyzer::astlib::*;
+use shellcheck_core::ast::{Ast, Id, Pos, Token};
 
 fn dsq(s: &str) -> (Ast, Id) {
     let mut ast = Ast::new();
@@ -389,10 +389,7 @@ mod extra {
     #[test]
     fn pseudo_globs() {
         let v = [PseudoGlob::PGChar('f'), PseudoGlob::PGMany, PseudoGlob::PGAny, PseudoGlob::PGMany];
-        assert_eq!(
-            simplify_pseudo_glob(&v),
-            vec![PseudoGlob::PGChar('f'), PseudoGlob::PGAny, PseudoGlob::PGMany]
-        );
+        assert_eq!(simplify_pseudo_glob(&v), vec![PseudoGlob::PGChar('f'), PseudoGlob::PGAny, PseudoGlob::PGMany]);
         let a = [PseudoGlob::PGChar('a')];
         let b = [PseudoGlob::PGChar('b')];
         assert!(!pseudo_globs_can_overlap(&a, &b));

@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{Comments, Params, StackData};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_analyzer::cfg_analysis::{NumericalStatus, get_incoming_state};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::astlib::{
@@ -18,8 +18,7 @@ use shellcheck_core::regex::{match_regex, mk_regex};
 
 use crate::support::has_floating_point;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkNumberComparisons",
     registry: "node",
@@ -227,7 +226,7 @@ mod tests {
     use shellcheck_analyzer::testing::run_check;
 
     fn fires(script: &str) -> bool {
-        !run_check("Analytics.hs", "checkNumberComparisons", "node", script).expect("check runs").is_empty()
+        !run_check(crate::CHECKS, "Analytics.hs", "checkNumberComparisons", "node", script).expect("check runs").is_empty()
     }
 
     macro_rules! t {
