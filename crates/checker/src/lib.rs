@@ -80,11 +80,26 @@ fn nub_token_comments(list: Vec<TokenComment>) -> Vec<TokenComment> {
 // ---- Checker.hs ----------------------------------------------------------
 
 /// `tokenToPosition startMap t`
-fn token_to_position(pr: &ParseResult, t: TokenComment) -> PositionedComment {
+// DIVERGENCE: in Haskell, a fix's replacement positions come from
+// `tokenPositions` and so carry their file name. Here checks build them
+// from the arena spans, which have none; a replacement with an empty file
+// gets the file of the comment's token (a fix edits the file its comment
+// is in).
+pub fn token_to_position(pr: &ParseResult, t: TokenComment) -> PositionedComment {
     let Some((start, end)) = pr.token_positions(t.id) else {
         panic!("Internal shellcheck error: id doesn't exist. Please report!");
     };
-    PositionedComment { start_pos: start, end_pos: end, comment: t.comment, fix: t.fix, ..new_positioned_comment() }
+    let fix = t.fix.map(|mut fix| {
+        for r in &mut fix.replacements {
+            for pos in [&mut r.start_pos, &mut r.end_pos] {
+                if pos.file.is_empty() {
+                    pos.file = start.file.clone();
+                }
+            }
+        }
+        fix
+    });
+    PositionedComment { start_pos: start, end_pos: end, comment: t.comment, fix, ..new_positioned_comment() }
 }
 
 pub fn shell_from_filename(filename: &str) -> Option<Shell> {

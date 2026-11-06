@@ -1470,3 +1470,67 @@ fn merge_configs_cases() {
     assert!(is_editor_config_rejection("\n  \ninvalid editorconfig value\n"));
     assert!(!is_editor_config_rejection("shell=sh\n"));
 }
+
+// ---- fix round 1 -------------------------------------------------------------
+
+/// Parse `main` (`source lib` with `-x`) and return the result.
+fn parse_with_lib(main: &str, lib: &str) -> shellcheck_parser::ParseResult {
+    let sys = mocked_system_interface(files(&[("lib", lib)]));
+    let spec = shellcheck_core::interface::ParseSpec {
+        filename: "main".into(),
+        script: main.into(),
+        check_sourced: true,
+        ..shellcheck_core::interface::new_parse_spec()
+    };
+    shellcheck_parser::parse_script(&sys, &spec)
+}
+
+fn find_literal(pr: &shellcheck_parser::ParseResult, s: &str) -> shellcheck_core::ast::Id {
+    let mut found = None;
+    pr.ast.analyze(
+        pr.root.unwrap(),
+        &mut |id| {
+            if matches!(pr.ast.get(id), shellcheck_core::ast::Token::T_Literal(l) if l == s) {
+                found.get_or_insert(id);
+            }
+        },
+        &mut |_| {},
+    );
+    found.unwrap_or_else(|| panic!("no literal {s:?}"))
+}
+
+#[test]
+fn token_positions_use_the_sourced_file_name() {
+    let pr = parse_with_lib("#!/bin/bash\nsource lib\necho mainword", "echo libword");
+    let (s, e) = pr.token_positions(find_literal(&pr, "libword")).unwrap();
+    assert_eq!((s.file.as_str(), s.line, s.column, e.file.as_str(), e.line, e.column), ("lib", 1, 6, "lib", 1, 13));
+    let (s, e) = pr.token_positions(find_literal(&pr, "mainword")).unwrap();
+    assert_eq!((s.file.as_str(), s.line, s.column, e.file.as_str(), e.column), ("main", 3, 6, "main", 14));
+    assert!(pr.token_positions(shellcheck_core::ast::Id(pr.ast.len())).is_none());
+}
+
+#[test]
+fn fix_replacements_get_the_comment_file() {
+    use shellcheck_core::interface::{Fix, Replacement, TokenComment, new_replacement};
+    let pr = parse_with_lib("#!/bin/bash\nsource lib\necho mainword", "echo libword");
+    let rep = |file: &str, line, column| Replacement {
+        start_pos: Position { file: file.into(), line, column },
+        end_pos: Position { file: file.into(), line, column: column + 1 },
+        ..new_replacement()
+    };
+    let tc = |id, reps: Vec<Replacement>| TokenComment {
+        id,
+        comment: Comment { severity: Severity::InfoC, code: 2086, message: "m".into() },
+        fix: Some(Fix { replacements: reps }),
+    };
+    let files_of = |pc: PositionedComment| -> Vec<(String, String)> {
+        pc.fix.unwrap().replacements.into_iter().map(|r| (r.start_pos.file, r.end_pos.file)).collect()
+    };
+    // A token in the sourced file: empty files become "lib"; a set file is kept.
+    let pc = shellcheck_checker::token_to_position(&pr, tc(find_literal(&pr, "libword"), vec![rep("", 1, 6), rep("other", 1, 13)]));
+    assert_eq!(pc.start_pos.file, "lib");
+    assert_eq!(files_of(pc), vec![("lib".into(), "lib".into()), ("other".into(), "other".into())]);
+    // A main-file token.
+    let pc = shellcheck_checker::token_to_position(&pr, tc(find_literal(&pr, "mainword"), vec![rep("", 3, 6)]));
+    assert_eq!(files_of(pc), vec![("main".into(), "main".into())]);
+}
