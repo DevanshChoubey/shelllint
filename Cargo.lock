@@ -422,6 +422,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "shellcheck-rs"
+version = "0.0.1"
+dependencies = [
+ "serde",
+ "serde_json",
+ "shellcheck-analyzer",
+ "shellcheck-checker",
+ "shellcheck-checks",
+ "shellcheck-core",
+ "shellcheck-formatter",
+]
+
+[[package]]
 name = "shellcheck-rust"
 version = "0.0.1"
 dependencies = [

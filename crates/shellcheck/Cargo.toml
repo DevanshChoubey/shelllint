@@ -1,0 +1,25 @@
+[package]
+name = "shellcheck-rs"
+version.workspace = true
+edition.workspace = true
+license = "GPL-3.0-or-later"
+description = "Embeddable library facade for the shellcheck-rust linter (a Rust port of ShellCheck)"
+
+[lib]
+name = "shellcheck"
+path = "src/lib.rs"
+
+[features]
+default = []
+serde = ["dep:serde"]
+
+[dependencies]
+shellcheck-core = { path = "../core" }
+shellcheck-analyzer = { path = "../analyzer" }
+shellcheck-checker = { path = "../checker" }
+shellcheck-checks = { path = "../checks" }
+shellcheck-formatter = { path = "../formatter" }
+serde = { version = "1", features = ["derive"], optional = true }
+
+[dev-dependencies]
+serde_json = "1"
