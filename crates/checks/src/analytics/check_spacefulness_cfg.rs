@@ -2,13 +2,12 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSpacefulnessCfg`, lines 2298-2298 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::Id;
 
 use crate::support::check_spacefulness_cfg_prime;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkSpacefulnessCfg",
     registry: "node",
@@ -26,7 +25,7 @@ mod tests {
     use shellcheck_analyzer::testing::run_check;
 
     fn codes(script: &str) -> Vec<u32> {
-        run_check("Analytics.hs", "checkSpacefulnessCfg", "node", script)
+        run_check(crate::CHECKS, "Analytics.hs", "checkSpacefulnessCfg", "node", script)
             .expect("check is registered")
             .into_iter()
             .map(|c| c as u32)

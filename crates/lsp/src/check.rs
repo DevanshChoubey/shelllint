@@ -102,7 +102,11 @@ pub fn disable_edits(lines: &[&str], line: u32, code: i64) -> Vec<TextEdit> {
     if line > 0 {
         let prev = lines[line - 1];
         let trimmed = prev.trim_start();
-        if let Some(rest) = trimmed.strip_prefix('#').map(str::trim_start).and_then(|t| t.strip_prefix("shellcheck").map(str::trim_start)) {
+        if let Some(rest) = trimmed
+            .strip_prefix('#')
+            .map(str::trim_start)
+            .and_then(|t| t.strip_prefix("shellcheck").map(str::trim_start))
+        {
             if let Some(codes) = rest.strip_prefix("disable=") {
                 let codes_now: Vec<&str> = codes.split(',').map(str::trim).collect();
                 if codes_now.iter().any(|c| c.eq_ignore_ascii_case(&tag)) {
@@ -122,11 +126,8 @@ pub fn disable_edits(lines: &[&str], line: u32, code: i64) -> Vec<TextEdit> {
     }
     let target = lines.get(line).copied().unwrap_or("");
     let indent: String = target.chars().take_while(|c| *c == ' ' || *c == '\t').collect();
-    let (insert_at, indent) = if line == 0 && lines[0].starts_with("#!") {
-        (1usize, String::new())
-    } else {
-        (line, indent)
-    };
+    let (insert_at, indent) =
+        if line == 0 && lines[0].starts_with("#!") { (1usize, String::new()) } else { (line, indent) };
     let pos = Position { line: insert_at as u32, character: 0 };
     vec![TextEdit {
         range: Range { start: pos, end: pos },

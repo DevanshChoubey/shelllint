@@ -114,7 +114,7 @@ mod tests {
 
     fn fires(cmd: &str, script: &str) -> bool {
         let name = format!("checkBackreferencingDeclaration \"{cmd}\"");
-        let codes = run_check("Checks/Commands.hs", &name, "node", script).expect("registered");
+        let codes = run_check(crate::CHECKS, "Checks/Commands.hs", &name, "node", script).expect("registered");
         codes.contains(&2318)
     }
 

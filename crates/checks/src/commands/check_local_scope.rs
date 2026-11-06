@@ -2,13 +2,12 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkLocalScope`, lines 1025-1030 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_path_m, when_shell};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::{get_command_token_or_this, is_function_like};
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkLocalScope",
     registry: "command",

@@ -30,10 +30,9 @@ Each file starts with these two lines:
 
 ```rust
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",       // exactly as in corpus/tasks.json
     name: "checkEchoWc",          // the Haskell name
     registry: "node",             // from corpus/tasks.json
@@ -42,6 +41,8 @@ static ENTRY: CheckEntry = CheckEntry {
     kind: CheckKind::Node(check_echo_wc),
 };
 ```
+
+Write the declaration exactly like this, starting at the beginning of a line: `crates/checks/build.rs` scans each file for `pub(crate) static <NAME>: CheckEntry` and lists every one it finds in the generated `shellcheck_checks::CHECKS` registry, which the checker passes to the analyzer. A static written any other way (indented, `pub`, or without `pub(crate)`) is not registered.
 
 Each registry needs a matching `kind` and function signature:
 
@@ -63,14 +64,14 @@ A function that no Haskell list registers but that has `prop_` tests is register
 
 Some checks are registered once per argument, for example `map checkSudoArgs privilegeElevationCommands`. The 49 corpus tests for these checks call them as `(checkSudoArgs "sudo")`. The `registrations` field in tasks.json (which the brief prints) lists one expression per argument. For each expression:
 
-- Register one static (`ENTRY_SUDO`, `ENTRY_DOAS`, ...), with `name` set to the expression exactly, for example `name: "checkSudoArgs \"sudo\""`. This is the string the harness rebuilds from the test source.
-- Give every static the same `order`.
-- `NodeFn` is a plain `fn` pointer and can't capture the argument, so write one small wrapper function per argument that calls a shared function with the argument:
+- For command checks, use `parametrised_command_checks!` from `crate::support` (at the start of a line, at most once per file). It declares `pub(crate) static ENTRIES`, one entry per argument, each with `name` set to the expression exactly (for example `checkSudoArgs "sudo"`, the string the harness rebuilds from the test source), all with the same `order`. `build.rs` registers every element:
 
 ```rust
-fn check_sudo_args(arg: &'static str, p: &Params<'_>, t: Id, c: &mut Comments) { /* the port */ }
-fn sudo(p: &Params<'_>, t: Id, c: &mut Comments) { check_sudo_args("sudo", p, t, c) }
+parametrised_command_checks!("checkSudoArgs", 49, Basename, check_sudo_args_, ["sudo", "doas", "run0"]);
+fn check_sudo_args_(cmd: &str, p: &Params<'_>, t: Id, c: &mut Comments) { /* the port */ }
 ```
+
+- Otherwise, register one static per argument (`ENTRY_SUDO`, `ENTRY_DOAS`, ...) with the same `order`. `NodeFn` is a plain `fn` pointer and can't capture the argument, so write one small wrapper function per argument that calls a shared function with the argument.
 
 `checkUnassignedReferences` works the same way. It has a second registration, `checkUnassignedReferences' True`, in `optional-tree`.
 

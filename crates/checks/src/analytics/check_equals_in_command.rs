@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     get_braced_modifier, get_braced_reference, get_literal_string_ext, get_unquoted_literal,
@@ -16,8 +16,7 @@ use shellcheck_core::regex::{matches, mk_regex};
 
 use crate::support::{fix_with, replace_end, replace_start, replace_token};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkEqualsInCommand",
     registry: "node",
@@ -67,7 +66,7 @@ fn is_conflict_marker(params: &Params<'_>, cmd: Id) -> bool {
     }
     let n = s.chars().count();
     // Git uses 7 but who knows
-    n >= 4 && n <= 12
+    (4..=12).contains(&n)
 }
 
 fn may_be_variable_name(params: &Params<'_>, l: &[Id]) -> bool {
@@ -172,7 +171,7 @@ fn msg(params: &Params<'_>, original_token: Id, cmd: Id, leading: &[Id], eq: Id,
             let is_plain = is_variable_name(&variable_str);
             let is_positional = variable_str.chars().all(|c| c.is_ascii_digit());
 
-            let is_array = variable_reference != "" && variable_modifier.starts_with('[') && variable_modifier.ends_with(']');
+            let is_array = !variable_reference.is_empty() && variable_modifier.starts_with('[') && variable_modifier.ends_with(']');
 
             if variable_str.is_empty() {
                 // Don't try to fix ${}=foo

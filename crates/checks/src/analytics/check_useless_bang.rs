@@ -2,14 +2,13 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUselessBang`, lines 4326-4363 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::get_path;
 
 use crate::support::{fix_with, is_condition, replace_end, replace_start};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUselessBang",
     registry: "node",
@@ -27,8 +26,8 @@ fn check_useless_bang(params: &Params<'_>, t: Id, c: &mut Comments) {
 }
 
 fn check(params: &Params<'_>, t: Id, c: &mut Comments) {
-    match params.ast.get(t) {
-        &Token::T_Banged(cmd) if !is_condition(params.ast, &get_path(params.ast, t)) => {
+    match *params.ast.get(t) {
+        Token::T_Banged(cmd) if !is_condition(params.ast, &get_path(params.ast, t)) => {
             c.info_with_fix(
                 t,
                 2251,
@@ -39,7 +38,7 @@ fn check(params: &Params<'_>, t: Id, c: &mut Comments) {
                 ]),
             );
         }
-        &Token::T_Annotation(_, inner) => check(params, inner, c),
+        Token::T_Annotation(_, inner) => check(params, inner, c),
         _ => {}
     }
 }

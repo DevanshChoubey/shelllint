@@ -2,19 +2,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Builds crates/wasm for the browser playground into playground/pkg/.
 #
-# STATUS: BLOCKED. The wasm32-unknown-unknown link does not compile:
-# linkme 0.3 (the checks registry, `#[linkme::distributed_slice(CHECKS)]` in
-# ~220 places) has no implementation for target_os = "unknown"
-# ("distributed_slice is not implemented for this platform"). Fixing it needs
-# the registry replaced on all targets or on wasm only; not done yet.
-#
 # Runs inside docker, so the host needs no Rust toolchain or wasm32 target.
 # The wasm-bindgen CLI version is read from Cargo.lock, so it always matches
 # the library. Cargo's registry and build cache live in named docker volumes
 # and are reused across builds.
 #
 # Usage: scripts/build-wasm.sh            (no wasm-opt)
-#        WASM_OPT=1 scripts/build-wasm.sh (also runs binaryen's wasm-opt -Oz)
+#        WASM_OPT=1 scripts/build-wasm.sh (also runs binaryen's wasm-opt -Oz;
+#                                          the first run builds wasm-opt, ~minutes)
 # Env:   RUST_IMAGE (default rust:1.93-bookworm; must be >= the workspace
 #        MSRV, edition 2024 needs 1.85).
 set -euo pipefail
@@ -40,6 +35,8 @@ docker run --rm --memory=6g --cpus=4 \
   -v shellcheck-wasm-cargo-target:/cargo-target \
   -w /src \
   "$RUST_IMAGE" sh -eu -c '
+    # `cargo install` puts wasm-bindgen in $CARGO_HOME/bin (the volume).
+    export PATH="$CARGO_HOME/bin:$PATH"
     rustup target add wasm32-unknown-unknown
     if ! wasm-bindgen --version 2>/dev/null | grep -q "$BINDGEN_VERSION"; then
       cargo install wasm-bindgen-cli --version "=$BINDGEN_VERSION" --locked -j 4
@@ -50,8 +47,15 @@ docker run --rm --memory=6g --cpus=4 \
     wasm-bindgen --target web --no-typescript --out-dir "$OUT" --out-name shellcheck_wasm \
       /cargo-target/wasm32-unknown-unknown/release/shellcheck_wasm.wasm
     if [ "$WASM_OPT" = 1 ]; then
-      apt-get update -qq && apt-get install -y -qq binaryen >/dev/null
+      # Debian bookworm ships binaryen 108, which corrupts the wasm-bindgen
+      # externref table (rustc >= 1.82 emits reference types). The wasm-opt
+      # crate builds binaryen 116 from source; it is cached in the volume.
+      if ! wasm-opt --version 2>/dev/null | grep -q "version 116"; then
+        cargo install wasm-opt --version "=0.116.1" --locked -j 4
+      fi
+      wasm-opt --version
       wasm-opt -Oz --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext \
+        --enable-reference-types --enable-multivalue --enable-mutable-globals \
         "$OUT/shellcheck_wasm_bg.wasm" -o "$OUT/shellcheck_wasm_bg.wasm"
     fi
     # Files are written as root inside the container; hand them back to the caller.

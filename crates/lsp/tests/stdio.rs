@@ -107,7 +107,9 @@ impl Lsp {
         let started = Instant::now();
         let deadline = started + TIMEOUT;
         let is_match = |m: &Value| {
-            m["method"] == "textDocument/publishDiagnostics" && m["params"]["uri"] == uri && pred(&m["params"]["diagnostics"])
+            m["method"] == "textDocument/publishDiagnostics"
+                && m["params"]["uri"] == uri
+                && pred(&m["params"]["diagnostics"])
         };
         if let Some(i) = self.stash.iter().position(is_match) {
             return (self.stash.remove(i), started.elapsed());
@@ -190,10 +192,8 @@ fn publishes_diagnostics_on_open_and_serves_code_actions_and_hover() {
     assert_eq!(disable["edit"]["changes"][uri][0]["range"]["start"], json!({"line": 1, "character": 0}));
 
     // Hover on the diagnostic: message and wiki link.
-    let hover = lsp.request(
-        "textDocument/hover",
-        json!({"textDocument": {"uri": uri}, "position": {"line": 1, "character": 6}}),
-    );
+    let hover = lsp
+        .request("textDocument/hover", json!({"textDocument": {"uri": uri}, "position": {"line": 1, "character": 6}}));
     let value = hover["result"]["contents"]["value"].as_str().expect("hover markdown");
     assert!(value.contains("SC2086") && value.contains("https://www.shellcheck.net/wiki/SC2086"), "{value}");
     lsp.shutdown();

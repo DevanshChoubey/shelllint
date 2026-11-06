@@ -1,7 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Linked only so the linkme-registered checks end up in the binary.
-use shellcheck_checks as _;
-
 fn main() {
     let arg = std::env::args().nth(1);
     match arg.as_deref() {
@@ -10,7 +7,11 @@ fn main() {
             return;
         }
         Some("--help") | Some("-h") => {
-            println!("{} - ShellCheck language server over stdio.\n\nUsage: {} [--version | --help]\nNo arguments: speak LSP on stdin/stdout.", shellcheck_lsp::SERVER_NAME, shellcheck_lsp::SERVER_NAME);
+            println!(
+                "{} - ShellCheck language server over stdio.\n\nUsage: {} [--version | --help]\nNo arguments: speak LSP on stdin/stdout.",
+                shellcheck_lsp::SERVER_NAME,
+                shellcheck_lsp::SERVER_NAME
+            );
             return;
         }
         _ => {}

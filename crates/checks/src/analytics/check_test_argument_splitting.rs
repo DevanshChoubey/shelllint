@@ -2,14 +2,13 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkTestArgumentSplitting`, lines 3273-3351 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::astlib::{get_word_parts, is_array_expansion, is_brace_expansion, is_glob};
 use shellcheck_core::data::ARITHMETIC_BINARY_TEST_OPS;
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkTestArgumentSplitting",
     registry: "node",

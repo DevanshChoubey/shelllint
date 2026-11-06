@@ -60,11 +60,9 @@ use std::io;
 use std::path::Path;
 use std::sync::OnceLock;
 
-// Linked only so the linkme-registered checks end up in the binary.
-use shellcheck_checks as _;
-
-use shellcheck_analyzer::api::{CHECKS, CheckEntry};
+use shellcheck_analyzer::api::CheckEntry;
 use shellcheck_checker::{check_script, decode_string};
+use shellcheck_checks::CHECKS;
 use shellcheck_core::interface::{
     CheckSpec, Fix as CoreFix, InsertionPoint as CoreInsertionPoint, NewSystemInterface, PositionedComment,
     Severity as CoreSeverity, Shell as CoreShell, empty_check_spec,
@@ -300,10 +298,7 @@ fn pos(line: usize, column: usize) -> shellcheck_core::interface::Position {
 /// assert_ne!(fixed, src);
 /// ```
 pub fn apply_fixes(src: &str, diagnostics: &[Diagnostic]) -> String {
-    let fixes: Vec<CoreFix> = diagnostics
-        .iter()
-        .filter_map(|d| d.fix.as_ref().map(|f| f.raw.clone()))
-        .collect();
+    let fixes: Vec<CoreFix> = diagnostics.iter().filter_map(|d| d.fix.as_ref().map(|f| f.raw.clone())).collect();
     apply_raw(&merge_fixes(&fixes), src)
 }
 
@@ -316,7 +311,8 @@ fn apply_raw(fix: &CoreFix, src: &str) -> String {
     if new.is_empty() {
         return String::new();
     }
-    let keeps_missing_newline = !src.is_empty() && !src.ends_with('\n') && old.last().copied() == new.last().map(String::as_str);
+    let keeps_missing_newline =
+        !src.is_empty() && !src.ends_with('\n') && old.last().copied() == new.last().map(String::as_str);
     let mut out = new.join("\n");
     if !keeps_missing_newline {
         out.push('\n');
@@ -354,7 +350,7 @@ pub struct CheckInfo {
 pub fn list_checks() -> &'static [CheckInfo] {
     static LIST: OnceLock<Vec<CheckInfo>> = OnceLock::new();
     LIST.get_or_init(|| {
-        let mut entries: Vec<&CheckEntry> = CHECKS.iter().filter(|e| e.optional.is_some()).collect();
+        let mut entries: Vec<&CheckEntry> = CHECKS.iter().copied().filter(|e| e.optional.is_some()).collect();
         entries.sort_by(|a, b| a.optional.unwrap().name.cmp(b.optional.unwrap().name));
         let mut seen = HashSet::new();
         entries
@@ -512,12 +508,7 @@ impl Linter {
         // `check_script` runs the parser on a thread with a large stack.
         let result = check_script(&NewSystemInterface, &spec);
         let untabbed = make_non_virtual(&result.comments, &script);
-        result
-            .comments
-            .iter()
-            .zip(untabbed.iter())
-            .map(|(raw, pc)| to_diagnostic(pc, raw.fix.as_ref()))
-            .collect()
+        result.comments.iter().zip(untabbed.iter()).map(|(raw, pc)| to_diagnostic(pc, raw.fix.as_ref())).collect()
     }
 }
 

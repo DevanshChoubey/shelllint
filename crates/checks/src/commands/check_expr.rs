@@ -2,15 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkExpr`, lines 284-337 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     arguments, get_command_token_or_this, get_literal_string, get_word_parts, is_glob,
     only_literal_string, will_split,
 };
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkExpr",
     registry: "command",

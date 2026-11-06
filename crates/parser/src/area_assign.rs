@@ -72,23 +72,18 @@ impl<'a> P<'a> {
     // bash allows a=(b), ksh allows $a=(b). dash allows neither. Let's warn.
     pub(crate) fn read_eval_suffix(&mut self) -> PR<Vec<Id>> {
         self.many1(|p| {
-            alt!(
-                p,
-                |p: &mut Self| p.read_io_redirect(),
-                |p: &mut Self| p.read_cmd_word(),
-                |p: &mut Self| {
-                    // evalFallback
-                    let pos = p.get_position();
-                    p.look_ahead(|p| p.char_('('))?;
-                    p.parse_problem_at(
-                        pos,
-                        WarningC,
-                        1098,
-                        "Quote/escape special characters when using eval, e.g. eval \"a=(b)\".",
-                    );
-                    p.fail("Unexpected parentheses. Make sure to quote when eval'ing as shell parsers differ.")
-                },
-            )
+            alt!(p, |p: &mut Self| p.read_io_redirect(), |p: &mut Self| p.read_cmd_word(), |p: &mut Self| {
+                // evalFallback
+                let pos = p.get_position();
+                p.look_ahead(|p| p.char_('('))?;
+                p.parse_problem_at(
+                    pos,
+                    WarningC,
+                    1098,
+                    "Quote/escape special characters when using eval, e.g. eval \"a=(b)\".",
+                );
+                p.fail("Unexpected parentheses. Make sure to quote when eval'ing as shell parsers differ.")
+            },)
         })
     }
 
@@ -135,11 +130,8 @@ impl<'a> P<'a> {
                 let _pos = p.get_position();
                 // Check for a leading $ at parse time, to warn for $foo=(bar) which
                 // would otherwise cause a parse failure so it can't be checked later.
-                let leading_dollar_pos = if lenient {
-                    p.option_maybe(|p| p.get_span_positions_for(|p| p.char_('$')))?
-                } else {
-                    None
-                };
+                let leading_dollar_pos =
+                    if lenient { p.option_maybe(|p| p.get_span_positions_for(|p| p.char_('$')))? } else { None };
                 let variable = p.read_variable_name()?;
                 let indices = p.many(|p| p.read_array_index())?;
                 let has_left_space = !p.spacing()?.is_empty();
@@ -168,9 +160,7 @@ impl<'a> P<'a> {
             let has_right_space = !p.spacing()?.is_empty();
             let right_pos_end = p.get_position();
             let is_end_of_command = p
-                .option_maybe(|p| {
-                    p.try_(|p| p.look_ahead(|p| p.alt(|p| p.one_of("\r\n;&|)").map(drop), |p| p.eof())))
-                })?
+                .option_maybe(|p| p.try_(|p| p.look_ahead(|p| p.alt(|p| p.one_of("\r\n;&|)").map(drop), |p| p.eof()))))?
                 .is_some();
 
             if has_right_space || is_end_of_command {
@@ -243,7 +233,12 @@ impl<'a> P<'a> {
             p.char_('(')?;
             p.optional(|p| {
                 p.look_ahead(|p| p.char_('('))?;
-                p.parse_problem_at(opening, ErrorC, 1116, "Missing $ on a $((..)) expression? (or use ( ( for arrays).");
+                p.parse_problem_at(
+                    opening,
+                    ErrorC,
+                    1116,
+                    "Missing $ on a $((..)) expression? (or use ( ( for arrays).",
+                );
                 Ok(())
             })?;
             p.allspacing()?;

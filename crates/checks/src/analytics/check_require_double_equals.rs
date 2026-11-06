@@ -3,13 +3,12 @@
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
 use shellcheck_analyzer::api::{
-    CHECKS, CheckEntry, CheckKind, StaticCheckDescription, node_checks_to_tree_check,
+    CheckEntry, CheckKind, StaticCheckDescription, node_checks_to_tree_check,
 };
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::interface::{Shell, TokenComment};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkRequireDoubleEquals",
     registry: "optional-tree",

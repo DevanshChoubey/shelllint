@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSubshelledTests`, lines 4090-4167 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, is_command};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Ast, Id, Token};
 use shellcheck_core::astlib::{get_braced_modifier, get_path, is_function, oversimplify};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkSubshelledTests",
     registry: "node",

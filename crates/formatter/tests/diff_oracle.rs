@@ -14,8 +14,8 @@
 // by the synthetic `cross_file_fix_uses_reader` test instead.
 
 use shellcheck_core::interface::*;
-use shellcheck_formatter::diff;
 use shellcheck_formatter::Formatter;
+use shellcheck_formatter::diff;
 
 const DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/golden/diff");
 
@@ -163,10 +163,7 @@ fn cross_file_fix_reads_each_file() {
         }],
     };
     let mut f = diff::format(new_formatter_options());
-    let sys = mocked_system_interface(vec![
-        ("main.sh".into(), "echo\n".into()),
-        ("other.sh".into(), "ls\n".into()),
-    ]);
+    let sys = mocked_system_interface(vec![("main.sh".into(), "echo\n".into()), ("other.sh".into(), "ls\n".into())]);
     let mut out = vec![];
     f.on_result(&cr, &sys, &mut out);
     assert_eq!(

@@ -2,13 +2,12 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkConstantIfs`, lines 1474-1488 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::astlib::{is_constant, words_can_be_equal};
 use shellcheck_core::data::ARITHMETIC_BINARY_TEST_OPS;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkConstantIfs",
     registry: "node",

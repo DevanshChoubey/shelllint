@@ -12,6 +12,12 @@ use shellcheck_core::interface::*;
 
 // ---- helpers ----
 
+/// `shellcheck_checks::CHECKS` plus this file's test-only optional checks.
+fn registry() -> &'static [&'static CheckEntry] {
+    static R: std::sync::OnceLock<Vec<&'static CheckEntry>> = std::sync::OnceLock::new();
+    R.get_or_init(|| shellcheck_checks::CHECKS.iter().copied().chain([&OPT_A, &OPT_B, &OPT_CMD]).collect())
+}
+
 struct Parsed {
     ast: Ast,
     root: Id,
@@ -78,22 +84,22 @@ fn run_module(checker: &Checker, s: &str, spec: &AnalysisSpec) -> Vec<Code> {
 
 #[test]
 fn pilots_are_registered_by_module_and_name() {
-    for (module, name, registry) in [
+    for (module, name, list) in [
         ("Analytics.hs", "checkEchoWc", "node"),
         ("Analytics.hs", "checkShebangParameters", "tree"),
         ("Checks/Commands.hs", "checkTr", "command"),
         ("Checks/ShellSupport.hs", "checkForDecimals", "shell-support"),
         ("Analytics.hs", "checkForDecimals", "unregistered"),
     ] {
-        let e = find_entries(module, name);
+        let e = find_entries(registry(), module, name);
         assert_eq!(e.len(), 1, "{module}:{name}");
-        assert_eq!(e[0].registry, registry);
+        assert_eq!(e[0].registry, list);
     }
 }
 
 #[test]
 fn pilot_codes() {
-    let run = |m, n, k, s| run_check(m, n, k, s).unwrap();
+    let run = |m, n, k, s| run_check(registry(), m, n, k, s).unwrap();
     assert_eq!(run("Analytics.hs", "checkEchoWc", "node", "n=$(echo $foo | wc -m)"), [2000]);
     assert_eq!(run("Analytics.hs", "checkEchoWc", "node", "echo $foo | wc -l"), Vec::<Code>::new());
     assert_eq!(run("Analytics.hs", "checkShebangParameters", "tree", "#!/bin/bash -x -e\ntrue"), [2096]);
@@ -110,7 +116,7 @@ fn pilot_codes() {
 
 #[test]
 fn analytics_checker_runs_node_and_tree_checks() {
-    let c = analytics_checker(&spec());
+    let c = analytics_checker(registry(), &spec());
     assert_eq!(run_module(&c, "#!/bin/bash -x -e\nn=$(echo $foo | wc -c)", &spec()), [2000, 2034, 2086, 2096, 2154]);
     // "unregistered" entries are never run by the module checker.
     assert_eq!(run_module(&c, "#!/bin/bash\n((3.14*c))", &spec()), [2154]); // no 2079
@@ -118,7 +124,7 @@ fn analytics_checker_runs_node_and_tree_checks() {
 
 #[test]
 fn commands_checker_dispatches_by_basename() {
-    let c = commands_checker(&spec());
+    let c = commands_checker(registry(), &spec());
     assert_eq!(run_module(&c, "tr a-z A-Z", &spec()), [2018, 2019]);
     assert_eq!(run_module(&c, "/bin/tr a-z x", &spec()), [2018]);
     // `builtin tr` looks up `Exactly "tr"` only; checkTr is `Basename "tr"`.
@@ -132,11 +138,11 @@ fn shell_support_checker_honours_shell_list() {
     for (shebang, want) in [("#!/bin/sh", vec![2079, 3006]), ("#!/bin/bash", vec![2079]), ("#!/bin/ksh", vec![])] {
         let p = parse(&format!("{shebang}\n{s}"));
         let params = p.params(&spec());
-        assert_eq!(codes(&run_checker(&params, &shell_support_checker(&params))), want, "{shebang}");
+        assert_eq!(codes(&run_checker(&params, &shell_support_checker(registry(), &params))), want, "{shebang}");
     }
 }
 
-// Test-only optional checks. They live in this test binary only.
+// Test-only optional checks. They are in `registry()` only.
 
 fn opt_a(_: &Params<'_>, root: Id) -> Vec<TokenComment> {
     vec![make_comment(Severity::InfoC, root, 9001, "a")]
@@ -152,7 +158,6 @@ const fn desc(name: &'static str) -> StaticCheckDescription {
     StaticCheckDescription { name, id: &[], description: "", positive: "", negative: "" }
 }
 
-#[linkme::distributed_slice(CHECKS)]
 static OPT_A: CheckEntry = CheckEntry {
     module: "Test.hs",
     name: "optA",
@@ -162,7 +167,6 @@ static OPT_A: CheckEntry = CheckEntry {
     kind: CheckKind::Tree(opt_a),
 };
 
-#[linkme::distributed_slice(CHECKS)]
 static OPT_B: CheckEntry = CheckEntry {
     module: "Test.hs",
     name: "optB",
@@ -172,7 +176,6 @@ static OPT_B: CheckEntry = CheckEntry {
     kind: CheckKind::Tree(opt_b),
 };
 
-#[linkme::distributed_slice(CHECKS)]
 static OPT_CMD: CheckEntry = CheckEntry {
     module: "Test.hs",
     name: "optCmd",
@@ -188,8 +191,10 @@ fn selected_optionals_all_versus_keys() {
     let script = "tr x y";
     // Only the test-only optional codes (9001..=9003); real registered checks also fire.
     let test_only = |v: Vec<Code>| v.into_iter().filter(|c| (9001..=9003).contains(c)).collect::<Vec<Code>>();
-    let analytics = |keys: &[&str]| test_only(run_module(&analytics_checker(&with(keys)), script, &with(keys)));
-    let commands = |keys: &[&str]| test_only(run_module(&commands_checker(&with(keys)), script, &with(keys)));
+    let analytics =
+        |keys: &[&str]| test_only(run_module(&analytics_checker(registry(), &with(keys)), script, &with(keys)));
+    let commands =
+        |keys: &[&str]| test_only(run_module(&commands_checker(registry(), &with(keys)), script, &with(keys)));
     assert_eq!(analytics(&[]), Vec::<Code>::new());
     assert_eq!(analytics(&["opt-b"]), [9002]);
     assert_eq!(analytics(&["opt-b", "nope", "opt-a"]), [9001, 9002]);
@@ -199,9 +204,9 @@ fn selected_optionals_all_versus_keys() {
     assert_eq!(commands(&["opt-cmd"]), [9003]);
     assert_eq!(commands(&["all"]), [9003]);
     let names: Vec<String> =
-        analytics_optional_checks().into_iter().map(|d| d.name).filter(|n| n.starts_with("opt-")).collect();
+        analytics_optional_checks(registry()).into_iter().map(|d| d.name).filter(|n| n.starts_with("opt-")).collect();
     assert_eq!(names, ["opt-a", "opt-b"]);
-    assert_eq!(commands_optional_checks().into_iter().filter(|d| d.name.starts_with("opt-")).count(), 1);
+    assert_eq!(commands_optional_checks(registry()).into_iter().filter(|d| d.name.starts_with("opt-")).count(), 1);
 }
 
 // ---- support.rs ----
@@ -211,7 +216,17 @@ fn is_condition_walks_parents() {
     let p = parse("if a; b; then c; fi; d && e; f || g; while h; do i; done");
     let path = |s: &str| shellcheck_core::astlib::get_path(&p.ast, p.literal(s));
     // Only the last command of an if/while condition list counts.
-    let want = [("a", false), ("b", true), ("c", false), ("d", true), ("e", false), ("f", true), ("g", false), ("h", true), ("i", false)];
+    let want = [
+        ("a", false),
+        ("b", true),
+        ("c", false),
+        ("d", true),
+        ("e", false),
+        ("f", true),
+        ("g", false),
+        ("h", true),
+        ("i", false),
+    ];
     for (s, w) in want {
         assert_eq!(is_condition(&p.ast, &path(s)), w, "{s}");
     }
@@ -301,7 +316,11 @@ fn run_node_analysis_visits_every_node() {
 fn grep_codes(s: &str) -> Vec<Code> {
     let p = parse(s);
     let params = p.params(&spec());
-    let grep = p.find(|t| matches!(t, Token::T_SimpleCommand(..))).into_iter().find(|&t| is_command(&p.ast, t, "grep")).unwrap();
+    let grep = p
+        .find(|t| matches!(t, Token::T_SimpleCommand(..)))
+        .into_iter()
+        .find(|&t| is_command(&p.ast, t, "grep"))
+        .unwrap();
     let mut c = Comments::new();
     check_grep_sends_pipefail_impl(&params, grep, &mut c);
     codes(&c.into_vec())

@@ -32,7 +32,7 @@ impl Formatter for Gcc {
 fn output_result(contents: &str, warnings: &[PositionedComment], out: &mut dyn Write) {
     let comments = make_non_virtual(warnings, contents);
     for c in &comments {
-        let _ = writeln!(out, "{}", format_comment(&source_file(c).to_string(), c));
+        let _ = writeln!(out, "{}", format_comment(source_file(c), c));
     }
 }
 

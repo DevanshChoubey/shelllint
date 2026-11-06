@@ -17,12 +17,12 @@ use lsp_types::notification::{
 };
 use lsp_types::request::{CodeActionRequest, HoverRequest, Request as _};
 use lsp_types::{
-    CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability,
-    CodeDescription, Diagnostic, DidChangeConfigurationParams, DidChangeTextDocumentParams,
-    DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams, Hover,
-    HoverContents, HoverParams, HoverProviderCapability, InitializeParams, MarkupContent, MarkupKind, NumberOrString,
-    Position, PublishDiagnosticsParams, Range, SaveOptions, ServerCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions, TextEdit, Url, WorkspaceEdit,
+    CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability, CodeDescription,
+    Diagnostic, DidChangeConfigurationParams, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
+    DidOpenTextDocumentParams, DidSaveTextDocumentParams, Hover, HoverContents, HoverParams, HoverProviderCapability,
+    InitializeParams, MarkupContent, MarkupKind, NumberOrString, Position, PublishDiagnosticsParams, Range,
+    SaveOptions, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TextDocumentSyncSaveOptions, TextEdit, Url, WorkspaceEdit,
 };
 
 use crate::check::{Finding, WIKI_LINK, disable_edits, run_check};
@@ -141,11 +141,7 @@ struct Server {
 impl Server {
     fn next_timeout(&self) -> Duration {
         let now = Instant::now();
-        self.pending
-            .values()
-            .min()
-            .map(|t| t.saturating_duration_since(now))
-            .unwrap_or(Duration::from_secs(3600))
+        self.pending.values().min().map(|t| t.saturating_duration_since(now)).unwrap_or(Duration::from_secs(3600))
     }
 
     fn flush_due(&mut self) {
@@ -172,10 +168,8 @@ impl Server {
 
     fn publish(&self, uri: Url, diagnostics: Vec<Diagnostic>, version: Option<i32>) {
         let params = PublishDiagnosticsParams { uri, diagnostics, version };
-        let _ = self.sender.send(Message::Notification(Notification::new(
-            PublishDiagnostics::METHOD.to_string(),
-            params,
-        )));
+        let _ =
+            self.sender.send(Message::Notification(Notification::new(PublishDiagnostics::METHOD.to_string(), params)));
     }
 
     fn respond<T: serde::Serialize>(&self, id: RequestId, result: T) {
@@ -376,11 +370,13 @@ impl Server {
 fn new_document(uri: Url, version: i32, text: String) -> Document {
     let is_file = uri.scheme() == "file";
     let filename = if is_file {
-        uri.to_file_path()
-            .map(|p| p.to_string_lossy().into_owned())
-            .unwrap_or_else(|_| uri.path().to_string())
+        uri.to_file_path().map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| uri.path().to_string())
     } else {
-        uri.path_segments().and_then(|mut s| s.next_back()).filter(|s| !s.is_empty()).unwrap_or("untitled.sh").to_string()
+        uri.path_segments()
+            .and_then(|mut s| s.next_back())
+            .filter(|s| !s.is_empty())
+            .unwrap_or("untitled.sh")
+            .to_string()
     };
     Document { text, version, filename, is_file }
 }

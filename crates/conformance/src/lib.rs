@@ -6,12 +6,6 @@
 
 pub mod runner;
 
-// The checks register into the analyzer's `CHECKS` slice via linkme; nothing
-// references the checks crate by name, so without this it is not linked and
-// every check reads as `unported`.
-#[cfg(feature = "analyzer")]
-use shellcheck_checks as _;
-
 use serde::Deserialize;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};
@@ -89,10 +83,7 @@ pub fn default_corpus_dir() -> PathBuf {
 }
 
 pub fn parse_corpus(text: &str) -> Result<Vec<Record>, serde_json::Error> {
-    text.lines()
-        .filter(|l| !l.trim().is_empty())
-        .map(serde_json::from_str)
-        .collect()
+    text.lines().filter(|l| !l.trim().is_empty()).map(serde_json::from_str).collect()
 }
 
 pub fn load_corpus(path: &Path) -> Result<Vec<Record>, String> {
@@ -128,14 +119,11 @@ pub struct OracleFull {
 
 /// Loads oracle-full.jsonl keyed by `Record::key`. A duplicate key is an
 /// error, since the comparison could otherwise pick the wrong script.
-pub fn load_oracle_full(
-    path: &Path,
-) -> Result<std::collections::BTreeMap<String, OracleFull>, String> {
+pub fn load_oracle_full(path: &Path) -> Result<std::collections::BTreeMap<String, OracleFull>, String> {
     let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut map = std::collections::BTreeMap::new();
     for (i, l) in text.lines().enumerate().filter(|(_, l)| !l.trim().is_empty()) {
-        let r: OracleFull = serde_json::from_str(l)
-            .map_err(|e| format!("{}:{}: {e}", path.display(), i + 1))?;
+        let r: OracleFull = serde_json::from_str(l).map_err(|e| format!("{}:{}: {e}", path.display(), i + 1))?;
         if map.contains_key(&r.key) {
             return Err(format!("{}:{}: duplicate key {}", path.display(), i + 1, r.key));
         }
@@ -180,11 +168,7 @@ pub fn classify<F: FnOnce() -> Outcome>(f: F) -> Outcome {
         Ok(o) => o,
         Err(p) => {
             let msg = panic_message(&*p);
-            if msg.starts_with("unported:") {
-                Outcome::Blocked(msg)
-            } else {
-                Outcome::Fail(format!("panic: {msg}"))
-            }
+            if msg.starts_with("unported:") { Outcome::Blocked(msg) } else { Outcome::Fail(format!("panic: {msg}")) }
         }
     }
 }

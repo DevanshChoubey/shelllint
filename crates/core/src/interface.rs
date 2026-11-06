@@ -22,13 +22,7 @@ pub trait SystemInterface: Sync {
     ///   a list of source-path annotations in effect,
     ///   and a sourced file,
     ///   find the sourced file
-    fn find_source(
-        &self,
-        _current: &str,
-        _external: Option<bool>,
-        _source_paths: &[String],
-        name: &str,
-    ) -> String {
+    fn find_source(&self, _current: &str, _external: Option<bool>, _source_paths: &[String], name: &str) -> String {
         name.to_string()
     }
 
@@ -60,10 +54,7 @@ pub struct CheckResult {
 }
 
 pub fn empty_check_result() -> CheckResult {
-    CheckResult {
-        filename: String::new(),
-        comments: vec![],
-    }
+    CheckResult { filename: String::new(), comments: vec![] }
 }
 
 pub fn empty_check_spec() -> CheckSpec {
@@ -155,10 +146,7 @@ pub struct FormatterOptions {
 }
 
 pub fn new_formatter_options() -> FormatterOptions {
-    FormatterOptions {
-        color_option: ColorOption::ColorAuto,
-        wiki_link_count: 3,
-    }
+    FormatterOptions { color_option: ColorOption::ColorAuto, wiki_link_count: 3 }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -219,11 +207,7 @@ pub struct Position {
 }
 
 pub fn new_position() -> Position {
-    Position {
-        file: String::new(),
-        line: 1,
-        column: 1,
-    }
+    Position { file: String::new(), line: 1, column: 1 }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -234,11 +218,7 @@ pub struct Comment {
 }
 
 pub fn new_comment() -> Comment {
-    Comment {
-        severity: Severity::StyleC,
-        code: 0,
-        message: String::new(),
-    }
+    Comment { severity: Severity::StyleC, code: 0, message: String::new() }
 }
 
 /// only support single line for now
@@ -275,9 +255,7 @@ pub struct Fix {
 }
 
 pub fn new_fix() -> Fix {
-    Fix {
-        replacements: vec![],
-    }
+    Fix { replacements: vec![] }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -289,12 +267,7 @@ pub struct PositionedComment {
 }
 
 pub fn new_positioned_comment() -> PositionedComment {
-    PositionedComment {
-        start_pos: new_position(),
-        end_pos: new_position(),
-        comment: new_comment(),
-        fix: None,
-    }
+    PositionedComment { start_pos: new_position(), end_pos: new_position(), comment: new_comment(), fix: None }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -305,11 +278,7 @@ pub struct TokenComment {
 }
 
 pub fn new_token_comment() -> TokenComment {
-    TokenComment {
-        id: Id(0),
-        comment: new_comment(),
-        fix: None,
-    }
+    TokenComment { id: Id(0), comment: new_comment(), fix: None }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -339,28 +308,17 @@ impl SystemInterface for MockedSystemInterface {
         }
     }
 
-    fn find_source(
-        &self,
-        _current: &str,
-        _external: Option<bool>,
-        _source_paths: &[String],
-        file: &str,
-    ) -> String {
+    fn find_source(&self, _current: &str, _external: Option<bool>, _source_paths: &[String], file: &str) -> String {
         file.to_string()
     }
 
     fn get_config(&self, _file: &str) -> Option<(String, String)> {
-        self.rc
-            .as_ref()
-            .map(|rc| (".shellcheckrc".to_string(), rc.clone()))
+        self.rc.as_ref().map(|rc| (".shellcheckrc".to_string(), rc.clone()))
     }
 }
 
 pub fn mock_rc_file(rcfile: &str, mock: MockedSystemInterface) -> MockedSystemInterface {
-    MockedSystemInterface {
-        rc: Some(rcfile.to_string()),
-        ..mock
-    }
+    MockedSystemInterface { rc: Some(rcfile.to_string()), ..mock }
 }
 
 #[cfg(test)]
@@ -371,17 +329,11 @@ mod tests {
     fn mocked_system_interface_behaviour() {
         let mock = mocked_system_interface(vec![("lib.sh".into(), "echo hi".into())]);
         assert_eq!(mock.read_file(None, "lib.sh"), Ok("echo hi".to_string()));
-        assert_eq!(
-            mock.read_file(None, "other.sh"),
-            Err("File not included in mock.".to_string())
-        );
+        assert_eq!(mock.read_file(None, "other.sh"), Err("File not included in mock.".to_string()));
         assert_eq!(mock.find_source("a", None, &[], "lib.sh"), "lib.sh");
         assert_eq!(mock.get_config("a"), None);
         let mock = mock_rc_file("disable=SC2086", mock);
-        assert_eq!(
-            mock.get_config("a"),
-            Some((".shellcheckrc".to_string(), "disable=SC2086".to_string()))
-        );
+        assert_eq!(mock.get_config("a"), Some((".shellcheckrc".to_string(), "disable=SC2086".to_string())));
     }
 
     #[test]

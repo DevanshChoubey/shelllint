@@ -4,14 +4,13 @@
 use shellcheck_analyzer::analyzerlib::{
     Comments, Params, is_counting_reference, is_quoted_alternative_reference,
 };
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_braced_reference, oversimplify};
 use shellcheck_core::data::VARIABLES_WITHOUT_SPACES;
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkSplittingInArrays",
     registry: "node",

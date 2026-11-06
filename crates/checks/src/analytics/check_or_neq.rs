@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkOrNeq`, lines 1675-1712 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::astlib::{is_constant, is_glob};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkOrNeq",
     registry: "node",
@@ -34,7 +33,7 @@ fn check_or_neq(p: &Params<'_>, t: Id, c: &mut Comments) {
                 c.warn(
                     t,
                     2055,
-                    &format!(
+                    format!(
                         "You probably wanted {} here, otherwise it's always true.",
                         if *typ == ConditionType::SingleBracket { "-a" } else { "&&" }
                     ),

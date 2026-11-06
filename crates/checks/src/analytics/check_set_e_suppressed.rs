@@ -2,15 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSetESuppressed`, lines 5041-5082 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, contains_errexit};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_path, get_unquoted_literal};
 use shellcheck_core::interface::TokenComment;
 
 use crate::support::{functions, run_node_analysis};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkSetESuppressed",
     registry: "optional-tree",

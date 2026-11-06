@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkTrailingBracket`, lines 3491-3510 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::oversimplify;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkTrailingBracket",
     registry: "node",
@@ -37,7 +36,7 @@ fn check(p: &Params<'_>, last: Id, command: Id, c: &mut Comments) {
             c.warn(
                 last,
                 2171,
-                &format!(
+                format!(
                     "Found trailing {} outside test. Add missing {} or quote if intentional.",
                     str, opposite
                 ),

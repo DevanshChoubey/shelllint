@@ -344,10 +344,7 @@ impl<'a> P<'a> {
             panic!("{}", please_report("no parser span for id"));
         };
         let (s, e) = self.user.ast.span(id);
-        (
-            SourcePos { file: sf, line: s.line, column: s.column },
-            SourcePos { file: ef, line: e.line, column: e.column },
-        )
+        (SourcePos { file: sf, line: s.line, column: s.column }, SourcePos { file: ef, line: e.line, column: e.column })
     }
 
     /// Create a new id with the same span as an existing one
@@ -385,9 +382,7 @@ impl<'a> P<'a> {
 
     pub fn add_pending_here_doc(&mut self, id: Id, d: Dashed, q: Quoted, str: &str) {
         let context = self.get_current_contexts();
-        self.user
-            .pending_here_docs
-            .push(HereDocContext::HereDocPending(id, d, q, str.to_string(), context));
+        self.user.pending_here_docs.push(HereDocContext::HereDocPending(id, d, q, str.to_string(), context));
     }
 
     /// Returns the pending here-docs oldest first (Haskell: `reverse`).
@@ -421,10 +416,7 @@ impl<'a> P<'a> {
 
     pub fn should_ignore_code(&self, code: Code) -> bool {
         let check_sourced = self.env.check_sourced;
-        self.sys
-            .context_stack
-            .iter()
-            .any(|c| context_item_disables_code(check_sourced, code, c))
+        self.sys.context_stack.iter().any(|c| context_item_disables_code(check_sourced, code, c))
     }
 
     pub fn get_current_annotations(&self, include_source: bool) -> Vec<Annotation> {
@@ -492,7 +484,14 @@ impl<'a> P<'a> {
         self.sys.context_stack.push(c);
     }
 
-    pub fn parse_problem_at_with_end(&mut self, start: SourcePos, end: SourcePos, level: Severity, code: Code, msg: &str) {
+    pub fn parse_problem_at_with_end(
+        &mut self,
+        start: SourcePos,
+        end: SourcePos,
+        level: Severity,
+        code: Code,
+        msg: &str,
+    ) {
         let irrelevant = self.should_ignore_code(code);
         if !irrelevant {
             self.add_parse_problem(ParseNote::new(start, end, level, code, msg));
@@ -565,10 +564,7 @@ impl<'a> P<'a> {
 
     /// `isFollowedBy p = (lookAhead . try $ p $> True) <|> return False`
     pub fn is_followed_by<T>(&mut self, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<bool> {
-        self.alt(
-            |q| q.look_ahead(|q| q.try_(|q| p(q).map(|_| true))),
-            |_| Ok(false),
-        )
+        self.alt(|q| q.look_ahead(|q| q.try_(|q| p(q).map(|_| true))), |_| Ok(false))
     }
 
     /// `reluctantlyTill p end`

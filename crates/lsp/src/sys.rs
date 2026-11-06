@@ -31,10 +31,7 @@ fn read_config(file: &str) -> Option<(String, String)> {
 
 fn xdg_dir() -> Option<String> {
     let home = std::env::var("HOME").ok().filter(|h| !h.is_empty());
-    std::env::var("XDG_CONFIG_HOME")
-        .ok()
-        .filter(|h| !h.is_empty())
-        .or_else(|| home.map(|h| format!("{}/.config", h)))
+    std::env::var("XDG_CONFIG_HOME").ok().filter(|h| !h.is_empty()).or_else(|| home.map(|h| format!("{}/.config", h)))
 }
 
 /// Candidate rc paths for `filename`: nearest directory first, then the

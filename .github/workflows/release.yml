@@ -3,6 +3,14 @@ name: Release
 # Builds release binaries for a pushed version tag (for example v0.1.0) and
 # attaches them, with SHA-256 checksums, to a **draft** GitHub release. A
 # maintainer reviews the draft and publishes it by hand.
+#
+# Assets: shellcheck-rust-<tag>-<target>.tar.gz (.zip on Windows), one
+# .sha256 per archive, a combined SHA256SUMS, and version-less copies
+# shellcheck-rust-latest-<target>.* (listed in SHA256SUMS too) so that
+# `releases/latest/download/...` works for action.yml `version: latest`.
+# The docker-image job pushes the static image (repo Dockerfile) to
+# ghcr.io/<owner>/shellcheck-rust:<version> and :latest for the
+# pre-commit docker hook.
 
 on:
   push:
@@ -103,10 +111,16 @@ jobs:
           pattern: dist-*
           path: dist
           merge-multiple: true
-      - name: Combined checksum file
+      - name: Version-less aliases and combined checksum file
         run: |
+          set -euo pipefail
           cd dist
-          cat ./*.sha256 | sort -k2 > SHA256SUMS
+          # shellcheck-rust-v1.2.3-<target>.tar.gz -> shellcheck-rust-latest-<target>.tar.gz
+          for f in "$BIN-$GITHUB_REF_NAME"-*.tar.gz "$BIN-$GITHUB_REF_NAME"-*.zip; do
+            [ -f "$f" ] || continue
+            cp "$f" "$BIN-latest-${f#"$BIN-$GITHUB_REF_NAME"-}"
+          done
+          sha256sum ./*.tar.gz ./*.zip | sed 's| \./| |' | sort -k2 > SHA256SUMS
           cat SHA256SUMS
       - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
@@ -117,3 +131,43 @@ jobs:
             dist/*.zip
             dist/*.sha256
             dist/SHA256SUMS
+
+  docker-image:
+    name: docker image
+    needs: build
+    runs-on: ubuntu-latest
+    # linux/arm64 builds under QEMU with fat LTO, which is slow.
+    timeout-minutes: 180
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Image name and tags
+        id: meta
+        run: |
+          # ghcr.io names must be lowercase; tags drop the leading v.
+          image="ghcr.io/$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')/shellcheck-rust"
+          version="${GITHUB_REF_NAME#v}"
+          {
+            echo "tags<<EOF"
+            echo "$image:$version"
+            echo "$image:latest"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      # TODO: pin these actions by commit SHA like the ones above.
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}

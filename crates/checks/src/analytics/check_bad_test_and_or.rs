@@ -3,11 +3,10 @@
 
 use crate::support::{fix_with, replace_end};
 use shellcheck_analyzer::analyzerlib::{Comments, Params, is_test_command};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkBadTestAndOr",
     registry: "node",

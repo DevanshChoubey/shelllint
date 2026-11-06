@@ -5,13 +5,12 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::{arguments, get_literal_string, is_literal, may_become_multiple_args, oversimplify};
 use shellcheck_core::regex::{match_regex, mk_regex};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkPrintfVar",
     registry: "command",
@@ -80,7 +79,7 @@ fn check(p: &Params<'_>, format: Id, more: &[Id], c: &mut Comments) {
             // We don't know so trust the user
         } else if arg_count < format_count && only_trailing_ts(&formats, arg_count) {
             // Allow trailing %()Ts since they use the current time
-        } else if arg_count > 0 && arg_count % format_count == 0 {
+        } else if arg_count > 0 && arg_count.is_multiple_of(format_count) {
             // Great: a suitable number of arguments
         } else {
             c.warn(

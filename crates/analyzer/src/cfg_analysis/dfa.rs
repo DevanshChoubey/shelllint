@@ -30,9 +30,7 @@ use super::{
     CFVariableProp, CfgAnalysis, CfgParameters, Layer, NumericalStatus, PMap, ProgramState, SpaceStatus, StateData,
     VariableProperties, VariableState, VariableValue,
 };
-use crate::cfg::{
-    CFEdge, CFEffect, CFNode, CFStringPart, CFValue, CfGraph, IdTagged, Node, PropSet, Scope,
-};
+use crate::cfg::{CFEdge, CFEffect, CFNode, CFStringPart, CFValue, CfGraph, IdTagged, Node, PropSet, Scope};
 
 /// The number of iterations for DFA to stabilize
 const ITERATION_COUNT: u32 = 1_000_000;
@@ -386,10 +384,8 @@ fn create_environment_state() -> IState {
     for name in data::VARIABLES_WITHOUT_SPACES {
         s.insert_global(name, spaceless.clone());
     }
-    let integer = VariableState {
-        variable_value: unknown_integer_value(),
-        variable_properties: VariableProperties::DEFAULT,
-    };
+    let integer =
+        VariableState { variable_value: unknown_integer_value(), variable_properties: VariableProperties::DEFAULT };
     for name in data::SPECIAL_INTEGER_VARIABLES {
         s.insert_global(name, integer.clone());
     }
@@ -764,8 +760,10 @@ impl<'g> Ctx<'g> {
 
     fn update_prefix_value(&mut self, name: &str, val: VariableValue) {
         // Prefix variables don't inherit properties
-        self.output
-            .insert_prefix(name, VariableState { variable_value: val, variable_properties: VariableProperties::DEFAULT });
+        self.output.insert_prefix(
+            name,
+            VariableState { variable_value: val, variable_properties: VariableProperties::DEFAULT },
+        );
     }
 
     fn undefine_variable(&mut self, name: &str) {
@@ -945,7 +943,12 @@ impl<'g> Ctx<'g> {
     // ---- stack frames ----
 
     /// Call a function with a new stack entry on the stack
-    fn with_new_stack_frame<T>(&mut self, node: Node, is_call: bool, f: impl FnOnce(&mut Self) -> T) -> (T, StackEntry) {
+    fn with_new_stack_frame<T>(
+        &mut self,
+        node: Node,
+        is_call: bool,
+        f: impl FnOnce(&mut Self) -> T,
+    ) -> (T, StackEntry) {
         let entry = StackEntry {
             entry_point: node,
             is_function_call: is_call,
@@ -985,10 +988,7 @@ impl<'g> Ctx<'g> {
     /// The main DFA 'transfer' function, applying the effects of a node to the output state
     fn transfer(&mut self, label: &CFNode) {
         match label {
-            CFNode::CFStructuralNode
-            | CFNode::CFEntryPoint(_)
-            | CFNode::CFImpliedExit
-            | CFNode::CFResolvedExit => {}
+            CFNode::CFStructuralNode | CFNode::CFEntryPoint(_) | CFNode::CFImpliedExit | CFNode::CFResolvedExit => {}
             CFNode::CFExecuteCommand(cmd) => self.transfer_command(cmd.as_deref()),
             CFNode::CFExecuteSubshell(_reason, entry, exit) => self.transfer_subshell(*entry, *exit),
             CFNode::CFApplyEffects(effects) => {
@@ -1147,9 +1147,7 @@ impl<'g> Ctx<'g> {
             // on the stack, it won't be found by the normal check.
             DepIsRecursive(node, _) if *node == entry => true,
             DepIsRecursive(node, val) => *val == self.stack.iter().any(|f| f.entry_point == *node),
-            DepExitCodes(val) => {
-                self.peek_stack(|s| s.exit_codes.clone(), Rc::new(BTreeSet::new())) == *val
-            }
+            DepExitCodes(val) => self.peek_stack(|s| s.exit_codes.clone(), Rc::new(BTreeSet::new())) == *val,
         }
     }
 
@@ -1190,10 +1188,8 @@ impl<'g> Ctx<'g> {
                 self.undefine_variable(name);
                 self.undefine_function(name);
             }
-            CFEffect::CFDefineFunction(name, _id, entry, exit) => self.write_function(
-                name,
-                FunctionDefinition::FunctionDefinition(Rc::from(name.as_str()), *entry, *exit),
-            ),
+            CFEffect::CFDefineFunction(name, _id, entry, exit) => self
+                .write_function(name, FunctionDefinition::FunctionDefinition(Rc::from(name.as_str()), *entry, *exit)),
             // TODO
             CFEffect::CFUndefineNameref(name) => self.undefine_variable(name),
             CFEffect::CFHintArray(_) | CFEffect::CFHintDefined(_) => {}
@@ -1289,10 +1285,8 @@ impl<'g> Ctx<'g> {
         let input = if incoming.is_empty() {
             new_internal_state()
         } else {
-            let mut inputs = incoming
-                .iter()
-                .filter_map(|c| states.get(c).map(|s| &s.1))
-                .filter(|c| c.is_reachable != Some(false));
+            let mut inputs =
+                incoming.iter().filter_map(|c| states.get(c).map(|s| &s.1)).filter(|c| c.is_reachable != Some(false));
             match inputs.next() {
                 None => unreachable_state(),
                 Some(first) => {
@@ -1431,11 +1425,8 @@ impl Externalizer {
             Layer::Map(diff.globals.storage.clone()),
             bg.clone(),
         ];
-        let exit_codes = diff
-            .exit_codes
-            .clone()
-            .or_else(|| base.exit_codes.clone())
-            .unwrap_or_else(|| self.empty_codes.clone());
+        let exit_codes =
+            diff.exit_codes.clone().or_else(|| base.exit_codes.clone()).unwrap_or_else(|| self.empty_codes.clone());
         // the base's sIsReachable is Nothing
         self.make(scopes, exit_codes, diff.is_reachable.unwrap_or(true))
     }

@@ -2,7 +2,13 @@
 name = "shellcheck-rs"
 version.workspace = true
 edition.workspace = true
-license = "GPL-3.0-or-later"
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 description = "Embeddable library facade for the shellcheck-rust linter (a Rust port of ShellCheck)"
 
 [lib]
@@ -14,12 +20,15 @@ default = []
 serde = ["dep:serde"]
 
 [dependencies]
-shellcheck-core = { path = "../core" }
-shellcheck-analyzer = { path = "../analyzer" }
-shellcheck-checker = { path = "../checker" }
-shellcheck-checks = { path = "../checks" }
-shellcheck-formatter = { path = "../formatter" }
+shellcheck-core.workspace = true
+shellcheck-analyzer.workspace = true
+shellcheck-checker.workspace = true
+shellcheck-checks.workspace = true
+shellcheck-formatter.workspace = true
 serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
 serde_json = "1"
+
+[lints]
+workspace = true

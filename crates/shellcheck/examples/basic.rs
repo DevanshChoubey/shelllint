@@ -10,9 +10,6 @@ fn main() {
 
     let linter = Linter::builder().shell(Shell::Bash).build();
     for d in linter.check_str(script) {
-        println!(
-            "{}:{}-{}:{} {:?} SC{}: {}",
-            d.line, d.column, d.end_line, d.end_column, d.level, d.code, d.message
-        );
+        println!("{}:{}-{}:{} {:?} SC{}: {}", d.line, d.column, d.end_line, d.end_column, d.level, d.code, d.message);
     }
 }

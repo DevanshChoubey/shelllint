@@ -6,12 +6,12 @@
 //! wiki link, `.shellcheckrc` / `.editorconfig` discovery, and `# shellcheck`
 //! directives (handled by the parser). Incremental document sync.
 
+pub mod check;
 pub mod config;
 pub mod document;
 pub mod position;
-pub mod check;
-pub mod sys;
 pub mod server;
+pub mod sys;
 
 /// The binary name. Editors launch this; keep it in one place.
 pub const SERVER_NAME: &str = "shellcheck-rust-lsp";

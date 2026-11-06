@@ -28,8 +28,8 @@ use std::rc::Rc;
 
 use shellcheck_core::ast::{Ast, Id};
 
-pub use crate::cfg::{CFVariableProp, CfGraph, CfgParameters, Node, PropSet};
 use crate::cfg::CfgResult;
+pub use crate::cfg::{CFVariableProp, CfGraph, CfgParameters, Node, PropSet};
 
 mod dfa;
 

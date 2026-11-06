@@ -6,7 +6,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{Comments, Params, StackData};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{AssignmentMode, ConditionType, Id, Token};
 use shellcheck_core::astlib::{
     get_braced_reference, get_command_name, get_leading_flags, get_literal_string, is_flag, is_glob,
@@ -15,8 +15,7 @@ use shellcheck_core::astlib::{
 use shellcheck_core::interface::Shell;
 use shellcheck_core::regex::{match_regex, matches, mk_regex};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/ShellSupport.hs",
     name: "checkBashisms",
     registry: "shell-support",

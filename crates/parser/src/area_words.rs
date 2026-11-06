@@ -2,8 +2,8 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1108-1611:
 // words, quotes, backticks, globs, extglobs, escapes, brace expansions.
 
-use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::ast::{Id, Token};
+use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::interface::Severity::{ErrorC, InfoC, WarningC};
 
 use crate::area_spacing::{QUOTABLE_CHARS, UNICODE_DOUBLE_QUOTES, UNICODE_SINGLE_QUOTES};
@@ -21,23 +21,6 @@ const GLOB_CLASS_CHARS: &str = "![?*@!+";
 /// `standardEnd = "[{}" ++ quotableChars ++ extglobStartChars ++ unicodeDoubleQuotes ++ unicodeSingleQuotes`
 const NORMAL_LITERAL_STANDARD_END: &str =
     "[{}|&;<>()\\ '\t\n\r\u{A0}\\\"$`?*@!+\u{201C}\u{201D}\u{2033}\u{2036}\u{2018}\u{2019}";
-
-#[cfg(test)]
-mod char_set_tests {
-    use super::*;
-    use crate::area_spacing::{DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS};
-
-    #[test]
-    fn spelled_out_char_sets_match_their_definitions() {
-        assert_eq!(SINGLE_QUOTED_PART_END, format!("'\\{UNICODE_SINGLE_QUOTES}"));
-        assert_eq!(DOUBLE_LITERAL_PART_END, format!("{DOUBLE_QUOTABLE_CHARS}{UNICODE_DOUBLE_QUOTES}"));
-        assert_eq!(GLOB_CLASS_CHARS, format!("![{EXTGLOB_START_CHARS}"));
-        assert_eq!(
-            NORMAL_LITERAL_STANDARD_END,
-            format!("[{{}}{QUOTABLE_CHARS}{EXTGLOB_START_CHARS}{UNICODE_DOUBLE_QUOTES}{UNICODE_SINGLE_QUOTES}")
-        );
-    }
-}
 
 impl<'a> P<'a> {
     pub(crate) fn read_normal_word(&mut self) -> PR<Id> {
@@ -335,7 +318,12 @@ impl<'a> P<'a> {
     }
 
     /// Run a parser on a new input, such as for `..` or here documents.
-    pub(crate) fn sub_parse<T>(&mut self, pos: SourcePos, parser: impl FnOnce(&mut Self) -> PR<T>, input: &str) -> PR<T> {
+    pub(crate) fn sub_parse<T>(
+        &mut self,
+        pos: SourcePos,
+        parser: impl FnOnce(&mut Self) -> PR<T>,
+        input: &str,
+    ) -> PR<T> {
         let last_position = self.get_position();
         let last_input = self.get_input();
         self.set_position(pos);
@@ -633,12 +621,7 @@ impl<'a> P<'a> {
         let x = self.look_ahead(|p| p.any_char())?;
 
         if x == '\'' {
-            self.parse_problem_at(
-                pos,
-                InfoC,
-                1003,
-                "Want to escape a single quote? echo 'This is how it'\\''s done'.",
-            );
+            self.parse_problem_at(pos, InfoC, 1003, "Want to escape a single quote? echo 'This is how it'\\''s done'.");
         }
 
         Ok(s.to_string())
@@ -684,10 +667,8 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_generic_literal1<T>(&mut self, end_exp: impl FnMut(&mut Self) -> PR<T>) -> PR<String> {
-        let strings = self.reluctantly_till1(
-            |p| p.alt(|p| p.read_generic_escaped(), |p| p.any_char().map(String::from)),
-            end_exp,
-        )?;
+        let strings = self
+            .reluctantly_till1(|p| p.alt(|p| p.read_generic_escaped(), |p| p.any_char().map(String::from)), end_exp)?;
         Ok(strings.concat())
     }
 
@@ -743,5 +724,22 @@ impl<'a> P<'a> {
                 })
             },
         )
+    }
+}
+
+#[cfg(test)]
+mod char_set_tests {
+    use super::*;
+    use crate::area_spacing::{DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS};
+
+    #[test]
+    fn spelled_out_char_sets_match_their_definitions() {
+        assert_eq!(SINGLE_QUOTED_PART_END, format!("'\\{UNICODE_SINGLE_QUOTES}"));
+        assert_eq!(DOUBLE_LITERAL_PART_END, format!("{DOUBLE_QUOTABLE_CHARS}{UNICODE_DOUBLE_QUOTES}"));
+        assert_eq!(GLOB_CLASS_CHARS, format!("![{EXTGLOB_START_CHARS}"));
+        assert_eq!(
+            NORMAL_LITERAL_STANDARD_END,
+            format!("[{{}}{QUOTABLE_CHARS}{EXTGLOB_START_CHARS}{UNICODE_DOUBLE_QUOTES}{UNICODE_SINGLE_QUOTES}")
+        );
     }
 }

@@ -20,14 +20,9 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
 
-// Linked only so the linkme-registered checks end up in the binary.
-use shellcheck_checks as _;
-
 use shellcheck_checker::{check_script, optional_checks};
 use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
-use shellcheck_core::interface::{
-    CheckResult, CheckSpec, Fix, Severity, empty_check_spec, new_system_interface,
-};
+use shellcheck_core::interface::{CheckResult, CheckSpec, Fix, Severity, empty_check_spec, new_system_interface};
 use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
 use shellcheck_formatter::{Formatter, haskell_lines, json1};
 
@@ -122,10 +117,7 @@ pub fn fix(script: &str, options_json: &str, index: i32) -> Result<String, Strin
     let fixes: Vec<Fix> = if index < 0 {
         result.comments.iter().filter_map(|c| c.fix.clone()).collect()
     } else {
-        let comment = result
-            .comments
-            .get(index as usize)
-            .ok_or_else(|| format!("no diagnostic at index {index}"))?;
+        let comment = result.comments.get(index as usize).ok_or_else(|| format!("no diagnostic at index {index}"))?;
         comment.fix.iter().cloned().collect()
     };
     if fixes.is_empty() {
@@ -212,6 +204,6 @@ mod tests {
     #[test]
     fn lists_optional_checks() {
         let v: Value = serde_json::from_str(&list_checks()).unwrap();
-        assert!(v.as_array().map_or(false, |a| !a.is_empty()));
+        assert!(v.as_array().is_some_and(|a| !a.is_empty()));
     }
 }

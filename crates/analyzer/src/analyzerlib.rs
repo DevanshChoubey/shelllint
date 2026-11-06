@@ -25,8 +25,8 @@ use regex::Regex;
 use shellcheck_core::ast::{Annotation, AssignmentMode, Ast, ConditionType, Id, Token};
 use shellcheck_core::data::{FLAGS_FOR_READ, shell_for_executable};
 use shellcheck_core::interface::{
-    AnalysisSpec, Code, Comment, Fix, ParseSpec, Severity, Shell, TokenComment,
-    mocked_system_interface, new_analysis_spec, new_parse_spec,
+    AnalysisSpec, Code, Comment, Fix, ParseSpec, Severity, Shell, TokenComment, mocked_system_interface,
+    new_analysis_spec, new_parse_spec,
 };
 use shellcheck_core::regex::{match_all_submatches, matches, mk_regex};
 use shellcheck_parser::{ParseResult, parse_script};
@@ -221,11 +221,7 @@ pub fn default_spec(_pr: &ParseResult) -> AnalysisSpec {
 
 /// `pScript s`
 pub fn p_script(s: &str) -> ParseResult {
-    let p_spec = ParseSpec {
-        filename: "script".to_string(),
-        script: s.to_string(),
-        ..new_parse_spec()
-    };
+    let p_spec = ParseSpec { filename: "script".to_string(), script: s.to_string(), ..new_parse_spec() };
     parse_script(&mocked_system_interface(vec![]), &p_spec)
 }
 
@@ -241,24 +237,14 @@ pub fn run_and_get_codes(c: &Checker, s: &str) -> Option<Vec<Code>> {
     pr.ast.compute_parents(root);
     let spec = default_spec(&pr);
     let params = make_parameters(&spec, &pr.ast, root);
-    let mut codes: Vec<Code> = filter_by_annotation(&spec, &params, run_checker(&params, c))
-        .into_iter()
-        .map(|tc| tc.comment.code)
-        .collect();
+    let mut codes: Vec<Code> =
+        filter_by_annotation(&spec, &params, run_checker(&params, c)).into_iter().map(|tc| tc.comment.code).collect();
     codes.sort();
     Some(codes)
 }
 
 pub fn make_comment(severity: Severity, id: Id, code: Code, note: impl Into<String>) -> TokenComment {
-    TokenComment {
-        id,
-        comment: Comment {
-            severity,
-            code,
-            message: note.into(),
-        },
-        fix: None,
-    }
+    TokenComment { id, comment: Comment { severity, code, message: note.into() }, fix: None }
 }
 
 /// The Writer half of `AnalyzerM`: the comments a check emits, in order.
@@ -316,25 +302,12 @@ impl Comments {
         self.add_comment_with_fix(Severity::StyleC, id, code, str, fix);
     }
 
-    pub fn add_comment_with_fix(
-        &mut self,
-        severity: Severity,
-        id: Id,
-        code: Code,
-        str: impl Into<String>,
-        fix: Fix,
-    ) {
+    pub fn add_comment_with_fix(&mut self, severity: Severity, id: Id, code: Code, str: impl Into<String>, fix: Fix) {
         self.add_comment(make_comment_with_fix(severity, id, code, str, fix));
     }
 }
 
-pub fn make_comment_with_fix(
-    severity: Severity,
-    id: Id,
-    code: Code,
-    str: impl Into<String>,
-    fix: Fix,
-) -> TokenComment {
+pub fn make_comment_with_fix(severity: Severity, id: Id, code: Code, str: impl Into<String>, fix: Fix) -> TokenComment {
     let comment = make_comment(severity, id, code, str);
     TokenComment {
         // If fix is empty, pretend it wasn't there.
@@ -351,13 +324,9 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
         ast.children(root).all(|c| ast.parent(c) == Some(root)),
         "make_parameters: call Ast::compute_parents(root) first"
     );
-    let extended_analysis = spec
-        .extended_analysis
-        .or_else(|| get_extended_analysis_directive(ast, root))
-        .unwrap_or(true);
-    let shell_type = spec
-        .shell_type
-        .unwrap_or_else(|| determine_shell(ast, spec.fallback_shell, root));
+    let extended_analysis =
+        spec.extended_analysis.or_else(|| get_extended_analysis_directive(ast, root)).unwrap_or(true);
+    let shell_type = spec.shell_type.unwrap_or_else(|| determine_shell(ast, spec.fallback_shell, root));
     let mut params = Params {
         ast,
         root,
@@ -511,9 +480,7 @@ pub fn determine_shell(ast: &Ast, fallback_shell: Option<Shell>, t: Id) -> Shell
         }
     };
     let shell_string = get_candidate(t);
-    shell_for_executable(&shell_string)
-        .or(fallback_shell)
-        .unwrap_or(Shell::Bash)
+    shell_for_executable(&shell_string).or(fallback_shell).unwrap_or(Shell::Bash)
 }
 
 /// Is this token in a quoting free context? (i.e. would variable expansion split)
@@ -540,8 +507,7 @@ pub fn is_quote_free_node(ast: &Ast, strict: bool, shell: Shell, t: Id) -> bool 
     // assignment passed to a Declaration Utility. This will soon be required
     // by POSIX: https://austingroupbugs.net/view.php?id=351
     let shell_parses_params_as_assignments = shell != Shell::Sh;
-    let assignment_is_quoting =
-        |id: Id| shell_parses_params_as_assignments || !is_assignment_param_to_command(id);
+    let assignment_is_quoting = |id: Id| shell_parses_params_as_assignments || !is_assignment_param_to_command(id);
     // Is this node self-quoting in itself?
     let is_quote_free_element = |t: Id| match ast.get(t) {
         Token::T_Assignment(..) => assignment_is_quoting(t),
@@ -570,11 +536,7 @@ pub fn is_quote_free_node(ast: &Ast, strict: bool, shell: Shell, t: Id) -> bool 
             _ => None,
         }
     };
-    is_quote_free_element(t)
-        || path_iter(ast, t)
-            .skip(1)
-            .find_map(is_quote_free_context)
-            .unwrap_or(false)
+    is_quote_free_element(t) || path_iter(ast, t).skip(1).find_map(is_quote_free_context).unwrap_or(false)
 }
 
 /// Check if a token is a parameter to a certain command by name:
@@ -681,9 +643,7 @@ pub fn token_is_just_command_output(ast: &Ast, t: Id) -> bool {
                 return check(cmds);
             }
             match ast.get(parts[0]) {
-                Token::T_DoubleQuoted(inner) if inner.len() == 1 => {
-                    expansion(inner[0]).is_some_and(|cmds| check(cmds))
-                }
+                Token::T_DoubleQuoted(inner) if inner.len() == 1 => expansion(inner[0]).is_some_and(|cmds| check(cmds)),
                 _ => false,
             }
         }
@@ -697,20 +657,14 @@ pub fn get_variable_flow(params: &Params<'_>, t: Id) -> Vec<StackData> {
     // DIVERGENCE: the Haskell prepends to a list and reverses it at the end;
     // appending gives the same order.
     let state = RefCell::new(Vec::new());
-    let assign_first = |t: Id| {
-        matches!(ast.get(t), Token::T_ForIn(..) | Token::T_SelectIn(..) | Token::T_BatsTest(..))
-    };
+    let assign_first = |t: Id| matches!(ast.get(t), Token::T_ForIn(..) | Token::T_SelectIn(..) | Token::T_BatsTest(..));
     let set_read = |t: Id| {
         let read = get_referenced_variables(ast, t);
-        state
-            .borrow_mut()
-            .extend(read.into_iter().map(|(a, b, c)| StackData::Reference(a, b, c)));
+        state.borrow_mut().extend(read.into_iter().map(|(a, b, c)| StackData::Reference(a, b, c)));
     };
     let set_written = |t: Id| {
         let written = get_modified_variables(ast, t);
-        state
-            .borrow_mut()
-            .extend(written.into_iter().map(|(a, b, c, d)| StackData::Assignment(a, b, c, d)));
+        state.borrow_mut().extend(written.into_iter().map(|(a, b, c, d)| StackData::Assignment(a, b, c, d)));
     };
     let start_scope = |t: Id| {
         let scope_type = lead_type(params, t);
@@ -748,11 +702,7 @@ pub fn lead_type(params: &Params<'_>, t: Id) -> Scope {
         let Token::T_Pipeline(_, list) = ast.get(parent_pipeline()?) else {
             return None;
         };
-        Some(if list.len() >= 2 {
-            !params.has_lastpipe || *list.last().expect("non-empty") != t
-        } else {
-            false
-        })
+        Some(if list.len() >= 2 { !params.has_lastpipe || *list.last().expect("non-empty") != t } else { false })
     };
     match ast.get(t) {
         Token::T_DollarExpansion(_) => Scope::SubshellScope("$(..) expansion".to_string()),
@@ -801,9 +751,7 @@ pub fn get_modified_variables(ast: &Ast, t: Id) -> Vec<ModifiedVariable> {
         Token::T_SimpleCommand(vars, words) if words.is_empty() => vars
             .iter()
             .filter_map(|&x| match ast.get(x) {
-                Token::T_Assignment(_, name, _, w) => {
-                    Some((x, x, name.clone(), data_type_from(ast, DataString, *w)))
-                }
+                Token::T_Assignment(_, name, _, w) => Some((x, x, name.clone(), data_type_from(ast, DataString, *w))),
                 _ => None,
             })
             .collect(),
@@ -815,8 +763,7 @@ pub fn get_modified_variables(ast: &Ast, t: Id) -> Vec<ModifiedVariable> {
         },
         Token::TA_Assignment(op, lhs, _rhs) => match ast.get(*lhs) {
             Token::TA_Variable(name, _)
-                if ["=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="]
-                    .contains(&op.as_str()) =>
+                if ["=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="].contains(&op.as_str()) =>
             {
                 vec![(t, t, name.clone(), DataString(SourceInteger))]
             }
@@ -864,10 +811,9 @@ pub fn get_modified_variables(ast: &Ast, t: Id) -> Vec<ModifiedVariable> {
 
         Token::T_CoProc(None, _) => vec![(t, t, "COPROC".to_string(), DataArray(SourceInteger))],
 
-        Token::T_CoProc(Some(token), _) => get_literal_string(ast, *token)
-            .map(|name| (t, t, name, DataArray(SourceInteger)))
-            .into_iter()
-            .collect(),
+        Token::T_CoProc(Some(token), _) => {
+            get_literal_string(ast, *token).map(|name| (t, t, name, DataArray(SourceInteger))).into_iter().collect()
+        }
 
         //Points to 'for' rather than variable
         Token::T_ForIn(str, words, _) if words.is_empty() => {
@@ -918,10 +864,7 @@ fn literal_command<'t>(ast: &Ast, words: &'t [Id]) -> Option<(String, &'t [Id])>
 // `T_SimpleCommand id cmdPrefix rest` for `builtin`; an arena cannot hold it,
 // so the flags are computed from the word list directly.
 fn all_flag_strings(ast: &Ast, words: &[Id]) -> Vec<String> {
-    get_flags_until_words(ast, &|s| s == "--", words.get(1..).unwrap_or(&[]))
-        .into_iter()
-        .map(|(_, f)| f)
-        .collect()
+    get_flags_until_words(ast, &|s| s == "--", words.get(1..).unwrap_or(&[])).into_iter().map(|(_, f)| f).collect()
 }
 
 /// Consider 'export/declare -x' a reference, since it makes the var available
@@ -966,18 +909,13 @@ pub fn get_referenced_variable_command(ast: &Ast, base: Id) -> Vec<ReferencedVar
             }
         }
         "trap" => match rest.first() {
-            Some(&head) => get_variables_from_literal_token(ast, head)
-                .into_iter()
-                .map(|x| (base, head, x))
-                .collect(),
+            Some(&head) => get_variables_from_literal_token(ast, head).into_iter().map(|x| (base, head, x)).collect(),
             None => vec![],
         },
         "alias" => rest
             .iter()
             .flat_map(|&token| {
-                get_variables_from_literal_token(ast, token)
-                    .into_iter()
-                    .map(move |name| (base, token, name))
+                get_variables_from_literal_token(ast, token).into_iter().map(move |name| (base, token, name))
             })
             .collect(),
         _ => vec![],
@@ -1051,23 +989,13 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
     // quote or `\ ` in the stripped part, i.e. before its first '='.
     let let_param_to_literal = |token: Id| -> Vec<ModifiedVariable> {
         let s = oversimplify(ast, token).concat();
-        let var: String = s
-            .chars()
-            .skip_while(|c| "+-".contains(*c))
-            .take_while(|&c| is_variable_char(c))
-            .collect();
-        if var.is_empty() {
-            vec![]
-        } else {
-            vec![(base, token, var, DataString(SourceFrom(vec![token])))]
-        }
+        let var: String = s.chars().skip_while(|c| "+-".contains(*c)).take_while(|&c| is_variable_char(c)).collect();
+        if var.is_empty() { vec![] } else { vec![(base, token, var, DataString(SourceFrom(vec![token])))] }
     };
 
     fn get_set_params(ast: &Ast, list: &[Id]) -> Option<Vec<Id>> {
         match list {
-            [t, _, rest @ ..] if get_literal_string(ast, *t).as_deref() == Some("-o") => {
-                get_set_params(ast, rest)
-            }
+            [t, _, rest @ ..] if get_literal_string(ast, *t).as_deref() == Some("-o") => get_set_params(ast, rest),
             [t, rest @ ..] => match get_literal_string(ast, *t) {
                 Some(s) if s == "--" => Some(rest.to_vec()),
                 Some(s) if s.starts_with('-') => get_set_params(ast, rest),
@@ -1091,9 +1019,8 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
             let ctor: fn(DataSource) -> DataType = if index.is_empty() { DataString } else { DataArray };
             Some((base, value, base_name.to_string(), ctor(data_source)))
         };
-    let get_printf_variable = |list: &[Id]| {
-        get_flag_assigned_variable("v", SourceFrom(list.to_vec()), get_bsd_opts(ast, "v:", list))
-    };
+    let get_printf_variable =
+        |list: &[Id]| get_flag_assigned_variable("v", SourceFrom(list.to_vec()), get_bsd_opts(ast, "v:", list));
     let get_wait_variable =
         |list: &[Id]| get_flag_assigned_variable("p", SourceInteger, Some(get_generic_opts(ast, list)));
 
@@ -1109,11 +1036,7 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
         };
         let parse_args = || -> Option<ModifiedVariable> {
             let args = get_gnu_opts(ast, "d:n:O:s:u:C:c:t", rest)?;
-            let ys: Vec<Id> = args
-                .into_iter()
-                .filter(|(n, _)| n.is_empty())
-                .map(|(_, (_, y))| y)
-                .collect();
+            let ys: Vec<Id> = args.into_iter().filter(|(n, _)| n.is_empty()).map(|(_, (_, y))| y).collect();
             match ys.first() {
                 None => Some((base, base, "MAPFILE".to_string(), DataArray(SourceExternal))),
                 Some(&first) => {
@@ -1148,18 +1071,13 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
         "builtin" => modified_variable_command_words(ast, base, rest),
         "read" => {
             // catMaybes $ takeWhile isJust (reverse $ map getLiteral rest)
-            let fallback =
-                || -> Vec<ModifiedVariable> { rest.iter().rev().map_while(|&t| get_literal(t)).collect() };
+            let fallback = || -> Vec<ModifiedVariable> { rest.iter().rev().map_while(|&t| get_literal(t)).collect() };
             let parsed = || -> Option<Vec<ModifiedVariable>> {
                 let parsed = get_gnu_opts(ast, FLAGS_FOR_READ, rest)?;
                 match parsed.iter().find(|(n, _)| n == "a") {
                     Some((_, (_, var))) => get_literal_array(*var).map(|x| vec![x]),
                     None => Some(
-                        parsed
-                            .iter()
-                            .filter(|(n, _)| n.is_empty())
-                            .filter_map(|(_, (_, v))| get_literal(*v))
-                            .collect(),
+                        parsed.iter().filter(|(n, _)| n.is_empty()).filter_map(|(_, (_, v))| get_literal(*v)).collect(),
                     ),
                 }
             };
@@ -1208,10 +1126,7 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
         "DEFINE_integer" => get_flag_variable(rest).into_iter().collect(),
         "DEFINE_string" => get_flag_variable(rest).into_iter().collect(),
 
-        "run" => get_bats_run_variables(ast, rest)
-            .into_iter()
-            .map(|(name, value)| (base, base, name, value))
-            .collect(),
+        "run" => get_bats_run_variables(ast, rest).into_iter().map(|(name, value)| (base, base, name, value)).collect(),
 
         _ => vec![],
     };
@@ -1228,10 +1143,7 @@ pub fn get_variable_for_test_dash_v(ast: &Ast, t: Id) -> Option<String> {
         Token::T_Glob(s) => Some(s.clone()),
         _ => Some("\0".to_string()),
     };
-    let str: String = get_literal_string_ext(ast, &to_str, t)?
-        .chars()
-        .take_while(|&c| c != '[')
-        .collect();
+    let str: String = get_literal_string_ext(ast, &to_str, t)?.chars().take_while(|&c| c != '[').collect();
     if !is_variable_name(&str) {
         return None;
     }
@@ -1242,10 +1154,7 @@ pub fn get_referenced_variables(ast: &Ast, t: Id) -> Vec<ReferencedVariable> {
     // Try to reduce false positives for unused vars only referenced from evaluated vars
     let special_references = |name: &str, base: Id, word: Id| -> Vec<ReferencedVariable> {
         if ["PS1", "PS2", "PS3", "PS4", "PROMPT_COMMAND"].contains(&name) {
-            get_variables_from_literal_token(ast, word)
-                .into_iter()
-                .map(|x| (base, base, x))
-                .collect()
+            get_variables_from_literal_token(ast, word).into_iter().map(|x| (base, base, x)).collect()
         } else {
             vec![]
         }
@@ -1385,16 +1294,13 @@ pub fn filter_by_annotation(
     let should_ignore = |note: &TokenComment| {
         // `getPath parents (T_Bang $ tcId note)`: the dummy T_Bang stands in
         // for the note's token, so only its parents are tested.
-        path_iter(ast, note.id)
-            .skip(1)
-            .any(|t| should_ignore_for(note.comment.code, t))
+        path_iter(ast, note.id).skip(1).any(|t| should_ignore_for(note.comment.code, t))
     };
     notes.into_iter().filter(|n| !should_ignore(n)).collect()
 }
 
 pub fn should_ignore_code(params: &Params<'_>, code: Code, t: Id) -> bool {
-    path_iter(params.ast, t)
-        .any(|p| is_annotation_ignoring_code(params.ast, code, p))
+    path_iter(params.ast, t).any(|p| is_annotation_ignoring_code(params.ast, code, p))
 }
 
 /// Is this a ${#anything}, to get string length or array count?
@@ -1410,10 +1316,9 @@ static QUOTED_ALTERNATIVE_RE: LazyLock<Regex> = LazyLock::new(|| mk_regex("(^|\\
 /// FIXME: doesn't handle ${a:+$var} vs ${a:+"$var"}
 pub fn is_quoted_alternative_reference(ast: &Ast, t: Id) -> bool {
     match ast.get(t) {
-        Token::T_DollarBraced(_, l) => matches(
-            &get_braced_modifier(&oversimplify(ast, *l).concat()),
-            &QUOTED_ALTERNATIVE_RE,
-        ),
+        Token::T_DollarBraced(_, l) => {
+            matches(&get_braced_modifier(&oversimplify(ast, *l).concat()), &QUOTED_ALTERNATIVE_RE)
+        }
         _ => false,
     }
 }

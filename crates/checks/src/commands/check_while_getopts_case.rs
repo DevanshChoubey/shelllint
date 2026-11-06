@@ -4,12 +4,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, find_first, get_path_m, modifies_variable};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{CaseType, Id, Token};
 use shellcheck_core::astlib::{e4m, get_literal_string, get_word_parts};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkWhileGetoptsCase",
     registry: "command",

@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkUnquotedEchoSpaces`, lines 1455-1474 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command_m};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Pos, Token};
 use shellcheck_core::astlib::arguments;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkUnquotedEchoSpaces",
     registry: "command",

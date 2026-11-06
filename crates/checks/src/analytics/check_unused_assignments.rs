@@ -4,14 +4,13 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, StackData};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_literal_string, is_variable_char, is_variable_name};
 use shellcheck_core::data::INTERNAL_VARIABLES;
 use shellcheck_core::interface::TokenComment;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnusedAssignments",
     registry: "tree",
