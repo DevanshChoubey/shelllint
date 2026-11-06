@@ -1,0 +1,9 @@
+--- a/dblbracket.sh
++++ b/dblbracket.sh
+@@ -1,4 +1,4 @@
+ #!/bin/bash
+-if [ $a == $b ]; then
++if [ "$a" == "$b" ]; then
+   echo hi
+ fi
+
