@@ -215,7 +215,7 @@ pub struct P<'a> {
     consumed: u64,
     /// The error Parsec carries along with the most recent success.
     err: ParseError,
-    files: Vec<String>,
+    pub(crate) files: Vec<String>,
     pub user: UserState,
     pub sys: SystemState,
     pub env: Environment<'a>,

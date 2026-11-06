@@ -62,7 +62,7 @@ pub struct UserState {
     /// The token arena; also `positionMap` (spans) and `lastId` (length).
     pub ast: Ast,
     /// File of each span's (start, end); parallel to `ast`.
-    span_files: Vec<(FileId, FileId)>,
+    pub(crate) span_files: Vec<(FileId, FileId)>,
     /// Oldest first.
     pub parse_notes: Vec<ParseNote>,
     /// `Map.insert` log, oldest first; later entries win.
@@ -79,6 +79,12 @@ pub struct UserSnapshot {
     parse_notes_len: usize,
     here_doc_map_len: usize,
     pending_here_docs: Vec<HereDocContext>,
+}
+
+impl UserSnapshot {
+    pub(crate) fn ast_len(&self) -> u32 {
+        self.ast_len
+    }
 }
 
 impl UserState {

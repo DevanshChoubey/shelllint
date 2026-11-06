@@ -146,10 +146,22 @@ dependencies = [
 [[package]]
 name = "shellcheck-checker"
 version = "0.0.1"
+dependencies = [
+ "shellcheck-analyzer",
+ "shellcheck-checks",
+ "shellcheck-core",
+ "shellcheck-parser",
+]
 
 [[package]]
 name = "shellcheck-checks"
 version = "0.0.1"
+dependencies = [
+ "linkme",
+ "regex",
+ "shellcheck-analyzer",
+ "shellcheck-core",
+]
 
 [[package]]
 name = "shellcheck-conformance"

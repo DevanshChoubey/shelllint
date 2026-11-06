@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 59-155:
 // character classes, spacing, unicode quotes and spaces.
-#![allow(dead_code)]
 
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::data::SPECIAL_VARIABLES;

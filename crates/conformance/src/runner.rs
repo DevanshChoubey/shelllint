@@ -186,6 +186,8 @@ pub struct ParityResult {
     pub available: bool,
     /// Keys of tests whose code set equals the oracle's.
     pub matches: BTreeMap<String, bool>,
+    /// (key, ours, oracle) for every script whose code set differs.
+    pub mismatches: Vec<(String, Vec<i64>, Vec<i64>)>,
 }
 
 pub fn run_parity(recs: &[Record]) -> ParityResult {
@@ -205,6 +207,12 @@ pub fn run_parity(recs: &[Record]) -> ParityResult {
             if code_set(&got) == code_set(oracle) {
                 res.matched += 1;
                 res.matches.insert(r.key(), true);
+            } else {
+                let mut g: Vec<i64> = code_set(&got).into_iter().collect();
+                let mut o: Vec<i64> = code_set(oracle).into_iter().collect();
+                g.sort();
+                o.sort();
+                res.mismatches.push((r.key(), g, o));
             }
         }
     }

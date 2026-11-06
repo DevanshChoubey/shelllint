@@ -25,30 +25,62 @@ LISTS = [
     ("Analytics.hs", "optionalChecks", "optional"),
     ("Analytics.hs", "optionalTreeChecks", "optional-tree"),
     ("Checks/Commands.hs", "commandChecks", "command"),
-    ("Checks/Commands.hs", "optionalChecks", "optional-command"),
+    ("Checks/Commands.hs", "optionalCommandChecks", "optional-command"),
     ("Checks/ShellSupport.hs", "checks", "shell-support"),
 ]
+NAME_RE = r"\b(check[A-Z]\w*|subshellAssignmentCheck)\b"
+# Haskell list constants that `map checkX list` registrations range over.
+data_text = (src / "Data.hs").read_text()
+
+
+def string_list(var):
+    m = re.search(rf"^{var}\s*=\s*\[(.*?)\]", data_text, re.S | re.M)
+    return re.findall(r'"([^"]*)"', m.group(1))
+
+
+def registrations_in(body, name, reg, idx):
+    """Every way `name` is registered in this list body, as the expression
+    a CheckEntry's `name` must hold (what tests' check_expr() produces):
+    plain `checkX`, `map checkX ("a" : list)` -> one `checkX "arg"` per
+    argument, or `checkX' True`."""
+    out = []
+    for m in re.finditer(rf"\bmap\s+{name}\s+(?:\(\s*((?:\"\w+\"\s*:\s*)*)(\w+)\s*\)|(\w+))", body):
+        lead = re.findall(r'"(\w+)"', m.group(1) or "")
+        args = lead + string_list(m.group(2) or m.group(3))
+        out += [{"registry": reg, "order": idx, "expr": f'{name} "{a}"'} for a in args]
+    for m in re.finditer(rf"\b{name}'\s+(True|False)\b", body):
+        out.append({"registry": reg, "order": idx, "expr": f"{name}' {m.group(1)}"})
+    if not out:
+        out.append({"registry": reg, "order": idx, "expr": name})
+    if reg.startswith("optional"):
+        for r in out:
+            pos = body.find(r["expr"].split(" ")[0])
+            names = re.findall(r'cdName\s*=\s*"([^"]*)"', body[:pos])
+            r["optional_name"] = names[-1] if names else None
+    return out
+
+
 registered = {}  # (module, name) -> registry
 order = {}  # (module, name) -> index in its Haskell registration list
+registrations = defaultdict(list)  # (module, name) -> every registration
 for mod, lst, reg in LISTS:
     text = (src / mod).read_text()
     m = re.search(rf"^{lst}\s*=\s*(.*?)^\S", text, re.S | re.M)
     if not m:
         continue
-    for idx, name in enumerate(dict.fromkeys(re.findall(r"\b(check[A-Z]\w*)", m.group(1)))):
+    for idx, name in enumerate(dict.fromkeys(re.findall(NAME_RE, m.group(1)))):
         if f"{mod}:{name}" in checks:
             if (mod, name) not in registered:
                 registered[(mod, name)] = reg
                 order[(mod, name)] = idx
+            registrations[(mod, name)] += registrations_in(m.group(1), name, reg, idx)
 
-by_target = defaultdict(list)
-for t in tests:
-    if t.get("target"):
-        by_target[(t["module"], t["target"])].append(t)
+test_by_name = {(t["module"], t["name"]): t for t in tests}
 
 
 def inferred_codes(key):
-    ts = [t for t in by_target[key] if "oracle_codes" in t and "expect_fires" in t]
+    names = checks[f"{key[0]}:{key[1]}"]["tests"]
+    ts = [t for t in (test_by_name[(key[0], n)] for n in names) if "oracle_codes" in t and "expect_fires" in t]
     pos = [set(t["oracle_codes"]) for t in ts if t["expect_fires"]]
     neg = set().union(*[set(t["oracle_codes"]) for t in ts if not t["expect_fires"]]) if ts else set()
     if not pos:
@@ -66,6 +98,7 @@ for (mod, name), reg in registered.items():
         "source_lines": [c["line"], c["end_line"]], "lines": c["lines"],
         "codes": codes, "codes_inferred": not c["codes"] and bool(codes),
         "uses_cfg": c["uses_cfg"] or name.endswith("Cfg"),
+        "registrations": registrations[(mod, name)],
         "tests": c["tests"], "n_tests": len(c["tests"]),
     })
 

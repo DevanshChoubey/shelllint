@@ -6,8 +6,8 @@ license.workspace = true
 publish = false
 
 [features]
-default = ["parser", "analyzer"]
-# Each hook task (3, 13, 15) flips its feature on.
+default = ["parser", "analyzer", "checker"]
+# Each hook task (3, 13, 15) flipped its feature on.
 parser = ["dep:shellcheck-parser"]
 # The checks register themselves into the analyzer's CHECKS slice (linkme),
 # so the crate holding them must be linked too.

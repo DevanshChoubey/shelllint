@@ -4,16 +4,12 @@
 // markers) and lines 3128-3673 (keywords and operators, shebang, EOF check,
 // rc files, readScript, runParser, parseShell, parseScript, tryWithErrors).
 // Some definitions are unused in the Haskell too (g_OPERATOR, readComment, ...).
-#![allow(dead_code)]
 
 // toplevel imports
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 
 use shellcheck_core::ast::{Annotation, Id};
-// `Token` may also be imported by the annotations block; a glob never clashes.
-#[allow(unused_imports)]
-use shellcheck_core::ast::*;
 use shellcheck_core::astlib::{e4m, executable_from_shebang, get_associative_arrays};
 use shellcheck_core::interface::Severity::{ErrorC, InfoC};
 use shellcheck_core::interface::{
@@ -177,7 +173,7 @@ impl<'a> P<'a> {
                                         p.char_('-')?;
                                         p.read_annotation_code()
                                     },
-                                    |_| Ok(from + 1)
+                                    |_| Ok(from.saturating_add(1))
                                 )?;
                                 Ok(Annotation::DisableComment(from, to))
                             },
@@ -333,6 +329,7 @@ impl<'a> P<'a> {
         self.try_token(";;", |p, id| p.node(id, Token::T_DSEMI))
     }
 
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn g_dless(&mut self) -> PR<Id> {
         self.try_token("<<", |p, id| p.node(id, Token::T_DLESS))
     }
@@ -353,6 +350,7 @@ impl<'a> P<'a> {
         self.try_token("<>", |p, id| p.node(id, Token::T_LESSGREAT))
     }
 
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn g_dlessdash(&mut self) -> PR<Id> {
         self.try_token("<<-", |p, id| p.node(id, Token::T_DLESSDASH))
     }
@@ -361,6 +359,7 @@ impl<'a> P<'a> {
         self.try_token(">|", |p, id| p.node(id, Token::T_CLOBBER))
     }
 
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn g_operator(&mut self) -> PR<Id> {
         crate::alt!(
             self,
@@ -500,6 +499,7 @@ impl<'a> P<'a> {
     }
 
     /// `ifParse p t f = (lookAhead (try p) >> t) <|> f`
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn if_parse<T, U>(
         &mut self,
         p: impl FnOnce(&mut Self) -> PR<T>,
@@ -804,12 +804,14 @@ impl<'a> P<'a> {
     }
 
     /// Needs `&self` to compare file names (see `P::compare_pos`).
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn compare_notes(&self, a: &ParseNote, b: &ParseNote) -> Ordering {
         self.compare_pos(a.start, b.start)
             .then_with(|| self.compare_pos(a.end, b.end))
             .then_with(|| a.severity.cmp(&b.severity))
     }
 
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn sort_notes(&self, notes: Vec<ParseNote>) -> Vec<ParseNote> {
         let mut notes = notes;
         notes.sort_by(|a, b| self.compare_notes(a, b));
@@ -871,10 +873,14 @@ pub(crate) fn parse_shell(env: Environment<'_>, name: &str, contents: &str) -> P
         Ok((script, userstate)) => {
             let mut notes: Vec<ParseNote> = userstate.parse_notes.iter().rev().cloned().collect();
             notes.extend(parse_problems);
+            let span_files: Vec<(u32, u32)> = userstate.span_files.iter().map(|(s, e)| (s.0, e.0)).collect();
+            let files = p.files.clone();
             ParseResult {
                 comments: nub(notes).iter().map(|n| p.to_positioned_comment(n)).collect(),
                 ast: userstate.ast,
                 root: Some(script),
+                span_files,
+                files,
             }
         }
         Err(err) => {
@@ -887,6 +893,8 @@ pub(crate) fn parse_shell(env: Environment<'_>, name: &str, contents: &str) -> P
                 comments: notes.iter().map(|n| p.to_positioned_comment(n)).collect(),
                 ast: Default::default(),
                 root: None,
+                span_files: vec![],
+                files: vec![],
             }
         }
     }
@@ -1049,6 +1057,7 @@ impl<'a> P<'a> {
         Position { file: self.source_name(sp).to_string(), line: sp.line as i64, column: sp.column as i64 }
     }
 
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn start_end_pos_to_pos(&self, se: (SourcePos, SourcePos)) -> (Position, Position) {
         (self.pos_to_pos(se.0), self.pos_to_pos(se.1))
     }
@@ -1071,6 +1080,11 @@ impl<'a> P<'a> {
     // DIVERGENCE: instead of copying the user state into the separate parse,
     // it is moved there and, on failure, restored with a checkpoint snapshot
     // taken first (the inner parse only appends to it).
+    //
+    // INVARIANT: the failed inner parse never `Ast::set`s an id allocated
+    // before the snapshot (area-notes rule: pre-existing ids are only set on
+    // the success path), so truncating back to the snapshot loses nothing
+    // and leaves no half-written pre-existing token behind.
     pub(crate) fn try_with_errors<T>(&mut self, parser: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         let snapshot = self.user.snapshot();
         let old_context = self.get_current_contexts();
@@ -1097,6 +1111,10 @@ impl<'a> P<'a> {
                 Ok(result)
             }
             Err(err) => {
+                debug_assert!(
+                    end_state.ast.len() >= snapshot.ast_len(),
+                    "try_with_errors: inner parse shrank the AST below the snapshot (sanity check only; the no-set-below-snapshot invariant is not enforced)"
+                );
                 end_state.restore(&snapshot);
                 self.user = end_state;
                 let new_context = self.get_current_contexts();

@@ -1,26 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Tests ported from ShellCheck src/ShellCheck/Parser.hs (e11f964), prop_a1..prop_a23
-//
-// A reader that depends on another area's still-unported stub panics with
-// "unported: ..."; such a case is skipped here (the conformance report shows
-// it as `blocked`). Once every area has landed, nothing is skipped.
-
-use std::panic::{AssertUnwindSafe, catch_unwind};
 
 use shellcheck_parser::testing::{is_ok, named_parser};
 
 fn check(input: &str) {
     let p = named_parser("readArithmeticContents").expect("registered reader");
-    match catch_unwind(AssertUnwindSafe(|| is_ok(p, input))) {
-        Ok(ok) => assert!(ok, "readArithmeticContents should parse {input:?} cleanly"),
-        Err(e) => {
-            let msg = e.downcast_ref::<String>().cloned().or_else(|| e.downcast_ref::<&str>().map(|s| s.to_string()));
-            match msg {
-                Some(m) if m.starts_with("unported:") => eprintln!("skipped (blocked): {m}"),
-                _ => std::panic::resume_unwind(e),
-            }
-        }
-    }
+    assert!(is_ok(p, input), "readArithmeticContents should parse {input:?} cleanly");
 }
 
 #[test]
