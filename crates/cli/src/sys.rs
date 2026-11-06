@@ -127,6 +127,49 @@ fn dir_of(path: &str) -> String {
     }
 }
 
+/// System.Directory `getHomeDirectory` (POSIX): `$HOME` when it is set, even
+/// to the empty string, else the passwd entry's home directory.
+fn home_directory() -> Option<String> {
+    #[allow(deprecated)]
+    std::env::home_dir().map(|p| p.to_string_lossy().into_owned())
+}
+
+/// System.Directory `getXdgDirectory XdgConfig suffix`: `$XDG_CONFIG_HOME`
+/// when it is absolute, otherwise (unset, empty or relative, as the XDG Base
+/// Directory spec says) `home </> ".config"`; then `simplify (dir </> suffix)`.
+/// `None` when the fallback needs a home directory and there is none.
+fn xdg_config_path(home: Option<&str>, xdg: Option<&str>, suffix: &str) -> Option<String> {
+    let dir = match xdg {
+        Some(x) if x.starts_with('/') => x.to_string(),
+        _ => join_path(home?, ".config"),
+    };
+    Some(simplify_path(&join_path(&dir, suffix)))
+}
+
+/// System.FilePath `</>` (POSIX) for a relative right-hand side.
+fn join_path(a: &str, b: &str) -> String {
+    if a.is_empty() {
+        b.to_string()
+    } else if a.ends_with('/') {
+        format!("{}{}", a, b)
+    } else {
+        format!("{}/{}", a, b)
+    }
+}
+
+/// System.Directory's `simplify` (POSIX `normalise`): collapses repeated
+/// slashes and drops `.` components; `..` is kept.
+fn simplify_path(p: &str) -> String {
+    let parts: Vec<&str> = p.split('/').filter(|c| !c.is_empty() && *c != ".").collect();
+    let body = parts.join("/");
+    let trailing = if p.ends_with('/') && !body.is_empty() { "/" } else { "" };
+    match (p.starts_with('/'), body.is_empty()) {
+        (true, _) => format!("/{}{}", body, trailing),
+        (false, true) => ".".to_string(),
+        (false, false) => format!("{}{}", body, trailing),
+    }
+}
+
 impl IoInterface {
     fn allowable(&self, rc_suggests_external: Option<bool>, x: &str) -> bool {
         if rc_suggests_external.unwrap_or(self.external_sources) { true } else { self.inputs.contains(&normalize(x)) }
@@ -146,15 +189,19 @@ impl IoInterface {
     }
 
     fn default_paths() -> Vec<String> {
-        Self::default_paths_from(std::env::var("HOME").ok(), std::env::var("XDG_CONFIG_HOME").ok())
+        Self::default_paths_from(home_directory(), std::env::var("XDG_CONFIG_HOME").ok())
     }
 
+    /// `defaultPaths`: `getAppUserDataDirectory "shellcheckrc"` (`home ++
+    /// "/.shellcheckrc"`) and `getXdgDirectory XdgConfig "shellcheckrc"`. No
+    /// home directory throws, and the handler gives `[]`.
     fn default_paths_from(home: Option<String>, xdg: Option<String>) -> Vec<String> {
-        let home = home.filter(|h| !h.is_empty());
-        let xdg = xdg.filter(|h| !h.is_empty()).or_else(|| home.as_ref().map(|h| format!("{}/.config", h)));
-        match (home, xdg) {
-            (Some(h), Some(x)) => vec![format!("{}/.shellcheckrc", h), format!("{}/shellcheckrc", x)],
-            _ => vec![],
+        match home {
+            Some(h) => {
+                let x = xdg_config_path(Some(&h), xdg.as_deref(), "shellcheckrc").unwrap_or_default();
+                vec![format!("{}/.shellcheckrc", h), x]
+            }
+            None => vec![],
         }
     }
 
@@ -212,12 +259,8 @@ impl EditorConfigFs for IoInterface {
 
     /// `getXdgDirectory XdgConfig "editorconfig.ini"`
     fn global_editor_config_path(&self) -> Option<String> {
-        let home = std::env::var("HOME").ok().filter(|h| !h.is_empty());
-        let xdg = std::env::var("XDG_CONFIG_HOME")
-            .ok()
-            .filter(|h| !h.is_empty())
-            .or_else(|| home.map(|h| format!("{}/.config", h)))?;
-        Some(format!("{}/editorconfig.ini", xdg))
+        let xdg = std::env::var("XDG_CONFIG_HOME").ok();
+        xdg_config_path(home_directory().as_deref(), xdg.as_deref(), "editorconfig.ini")
     }
 }
 
@@ -418,6 +461,24 @@ mod tests {
         let v = IoInterface::default_paths_from(Some("/h".into()), Some("/x".into()));
         assert_eq!(v, vec!["/h/.shellcheckrc", "/x/shellcheckrc"]);
         assert!(IoInterface::default_paths_from(None, None).is_empty());
+        assert!(IoInterface::default_paths_from(None, Some("/x".into())).is_empty());
+        // An empty or relative XDG_CONFIG_HOME is ignored (getXdgDirectory).
+        for x in ["", "xdg", "./xdg", "../w/xdg", "xdg/"] {
+            let v = IoInterface::default_paths_from(Some("/h".into()), Some(x.into()));
+            assert_eq!(v, vec!["/h/.shellcheckrc", "/h/.config/shellcheckrc"], "XDG_CONFIG_HOME={:?}", x);
+        }
+        // Checked against the oracle with strace: the XDG path is simplified,
+        // the home one is a plain concatenation, and an empty HOME is used as is.
+        let v = IoInterface::default_paths_from(Some("/hh/".into()), Some("//x/./y//".into()));
+        assert_eq!(v, vec!["/hh//.shellcheckrc", "/x/y/shellcheckrc"]);
+        let v = IoInterface::default_paths_from(Some("".into()), Some("rel".into()));
+        assert_eq!(v, vec!["/.shellcheckrc", ".config/shellcheckrc"]);
+        assert_eq!(xdg_config_path(None, Some("/x"), "editorconfig.ini").as_deref(), Some("/x/editorconfig.ini"));
+        assert_eq!(xdg_config_path(None, Some("x"), "editorconfig.ini"), None);
+        assert_eq!(
+            xdg_config_path(Some("/h/"), Some("x"), "editorconfig.ini").as_deref(),
+            Some("/h/.config/editorconfig.ini")
+        );
         // They are searched after every directory up to the root.
         let d = tmp();
         let home_rc = write(&d.join("home/.shellcheckrc"), "enable=all");

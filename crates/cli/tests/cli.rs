@@ -477,3 +477,43 @@ fn list_optional_is_checker_optional_checks() {
     let listed: Vec<&str> = o.stdout.lines().filter_map(|l| l.strip_prefix("name:    ")).collect();
     assert_eq!(listed, names);
 }
+
+/// Like `run_in`, with extra environment variables.
+fn run_in_env(dir: &std::path::Path, args: &[&str], env: &[(&str, &str)]) -> Out {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"));
+    cmd.args(args).current_dir(dir).env_remove("SHELLCHECK_OPTS").stdin(Stdio::null());
+    for (k, v) in env {
+        cmd.env(k, v);
+    }
+    let o = cmd.output().unwrap();
+    Out {
+        code: o.status.code().unwrap_or(-1),
+        stdout: String::from_utf8_lossy(&o.stdout).into_owned(),
+        stderr: String::from_utf8_lossy(&o.stderr).into_owned(),
+    }
+}
+
+#[test]
+fn relative_or_empty_xdg_config_home_falls_back_to_home_config() {
+    // Expected output captured from the Haskell oracle.
+    let d = tmpdir("xdg-rel");
+    let (w, h) = (d.join("w"), d.join("h"));
+    std::fs::create_dir_all(w.join("xdg")).unwrap();
+    std::fs::create_dir_all(h.join(".config")).unwrap();
+    std::fs::write(w.join("a.sh"), "#!/bin/sh\necho $1\nfoo=`ls`\n").unwrap();
+    std::fs::write(w.join("xdg/shellcheckrc"), "disable=SC2086\n").unwrap();
+    std::fs::write(w.join("xdg/editorconfig.ini"), "[*]\nshellcheck.disable=SC2006\n").unwrap();
+    std::fs::write(h.join(".config/shellcheckrc"), "disable=SC2034\n").unwrap();
+    let home = h.to_string_lossy().into_owned();
+    let home_only = "a.sh:2:6: note: Double quote to prevent globbing and word splitting. [SC2086]\n\
+                     a.sh:3:5: note: Use $(...) notation instead of legacy backticks `...`. [SC2006]\n";
+    for xdg in ["xdg", "./xdg", "xdg/", "../w/xdg", ""] {
+        let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("XDG_CONFIG_HOME", xdg)]);
+        assert_eq!(o.stdout, home_only, "XDG_CONFIG_HOME={:?}", xdg);
+        assert_eq!(o.code, 1);
+    }
+    // An absolute one is used, and its editorconfig.ini too.
+    let abs = format!("{}/./", w.join("xdg").to_string_lossy());
+    let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("XDG_CONFIG_HOME", &abs)]);
+    assert_eq!(o.stdout, "a.sh:3:1: warning: foo appears unused. Verify use (or export if used externally). [SC2034]\n");
+}
