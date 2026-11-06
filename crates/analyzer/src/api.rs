@@ -250,7 +250,10 @@ fn check_command(map: &CommandMap, p: &Params<'_>, t: Id, c: &mut Comments) {
         let Some(fs) = map.exactly.get(selected_builtin.as_str()) else { return };
         // DIVERGENCE: `t' = T_SimpleCommand id cmdPrefix rest` is a synthetic
         // token with the same id. The arena is cloned with `t` replaced, and
-        // the checks run against that copy (only when one would run).
+        // the checks run against that copy (only when one would run). The
+        // copy keeps the recorded parents, so `parent(rest[i])` is `t`, which
+        // in the copy is the rewritten command; in Haskell `parentMap` maps
+        // rest[i] to the original `builtin ...` token.
         let mut ast = p.ast.clone();
         ast.set(t, Token::T_SimpleCommand(cmd_prefix.clone(), rest.to_vec()));
         let p2 = Params { ast: &ast, ..p.clone() };

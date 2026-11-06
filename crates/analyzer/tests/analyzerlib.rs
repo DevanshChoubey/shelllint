@@ -2,10 +2,6 @@
 // Port of the prop_ tests in ShellCheck src/ShellCheck/AnalyzerLib.hs (e11f964),
 // plus tests of the check registry (src/api.rs) on hand-built trees.
 //
-// The 13 determineShell tests parse a script, so they are
-// `#[ignore = "needs parser"]` until the parser is ported.
-use std::panic::{AssertUnwindSafe, catch_unwind};
-
 use shellcheck_analyzer::analyzerlib::*;
 use shellcheck_analyzer::api::*;
 use shellcheck_analyzer::testing::{find_entries, run_check};
@@ -15,68 +11,55 @@ use shellcheck_core::interface::*;
 // ---- prop_ tests ----
 
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell0() {
     assert_eq!(determine_shell_test("#!/bin/sh"), Shell::Sh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell1() {
     assert_eq!(determine_shell_test("#!/usr/bin/env ksh"), Shell::Ksh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell2() {
     assert_eq!(determine_shell_test(""), Shell::Bash);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell3() {
     assert_eq!(determine_shell_test("#!/bin/sh -e"), Shell::Sh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell4() {
     assert_eq!(determine_shell_test("#!/bin/ksh\n#shellcheck shell=sh\nfoo"), Shell::Sh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell5() {
     assert_eq!(determine_shell_test("#shellcheck shell=sh\nfoo"), Shell::Sh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell6() {
     assert_eq!(determine_shell_test("#! /bin/sh"), Shell::Sh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell7() {
     assert_eq!(determine_shell_test("#! /bin/ash"), Shell::Dash);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell8() {
     assert_eq!(determine_shell_test_(Some(Shell::Ksh), "#!/bin/sh"), Shell::Sh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell9() {
     assert_eq!(determine_shell_test("#!/bin/env -S dash -x"), Shell::Dash);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell10() {
     assert_eq!(determine_shell_test("#!/bin/env --split-string= dash -x"), Shell::Dash);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell11() {
     // busybox sh is a specific shell, not posix sh
     assert_eq!(determine_shell_test("#!/bin/busybox sh"), Shell::BusyboxSh);
 }
 #[test]
-#[ignore = "needs parser"]
 fn determine_shell12() {
     assert_eq!(determine_shell_test("#!/bin/busybox ash"), Shell::BusyboxSh);
 }
@@ -355,6 +338,10 @@ fn filter_by_annotation_drops_disabled_codes() {
         make_comment(Severity::WarningC, root, 2000, "z"),
     ];
     assert_eq!(codes(&filter_by_annotation(&spec(), &p, notes)), [2001, 2000]);
+    // A note on the T_Annotation itself is not suppressed by it: Haskell
+    // tests `getPath parents (T_Bang id)`, i.e. only the note's parents.
+    let on_ann = vec![make_comment(Severity::WarningC, ann, 2000, "a")];
+    assert_eq!(codes(&filter_by_annotation(&spec(), &p, on_ann)), [2000]);
     assert!(should_ignore_code(&p, 2000, w));
     assert!(!should_ignore_code(&p, 2000, root));
 }
@@ -375,19 +362,7 @@ fn run_check_lookup() {
     assert_eq!(run_check("Other.hs", "checkRunCheck", "node", "true"), None);
     assert_eq!(find_entries("Test.hs", "checkRunCheck \"sudo\"").len(), 1);
     assert!(find_entries("Test.hs", "checkRunCheck \"doas\"").is_empty());
-    // With the parser stubbed, running a registered check is `blocked`.
-    let r = catch_unwind(AssertUnwindSafe(|| run_check("Test.hs", "checkRunCheck", "node", "sudo x")));
-    match r {
-        Ok(codes) => assert_eq!(codes, Some(vec![1002])),
-        Err(p) => {
-            let msg = p
-                .downcast_ref::<String>()
-                .cloned()
-                .or_else(|| p.downcast_ref::<&str>().map(|s| s.to_string()))
-                .unwrap_or_default();
-            assert!(msg.starts_with("unported:"), "{msg}");
-        }
-    }
+    assert_eq!(run_check("Test.hs", "checkRunCheck", "node", "sudo x"), Some(vec![1002]));
 }
 
 #[test]
@@ -397,7 +372,6 @@ fn run_check_rejects_kind_mismatch() {
 }
 
 #[test]
-#[ignore = "needs parser"]
 fn run_check_runs_command_check() {
     assert_eq!(run_check("Test.hs", "checkRunCheck", "node", "sudo x"), Some(vec![1002]));
     assert_eq!(run_check("Test.hs", "checkRunCheck \"sudo\"", "node", "ls"), Some(vec![]));

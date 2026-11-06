@@ -847,27 +847,12 @@ fn literal_command<'t>(ast: &Ast, words: &'t [Id]) -> Option<(String, &'t [Id])>
 /// `map snd $ getAllFlags base` for a command whose words are `words`.
 // DIVERGENCE: `getModifiedVariableCommand` recurses on a synthetic
 // `T_SimpleCommand id cmdPrefix rest` for `builtin`; an arena cannot hold it,
-// so the flags are computed from the word list directly. This mirrors
-// `getFlagsUntil (== "--")` in astlib.rs.
+// so the flags are computed from the word list directly.
 fn all_flag_strings(ast: &Ast, words: &[Id]) -> Vec<String> {
-    let texts: Vec<String> = words
-        .iter()
-        .skip(1)
-        .map(|&x| oversimplify(ast, x).concat())
-        .collect();
-    let split = texts.iter().position(|s| s == "--").unwrap_or(texts.len());
-    let mut out = Vec::new();
-    for s in &texts[..split] {
-        if let Some(arg) = s.strip_prefix("--") {
-            out.push(arg.chars().take_while(|&c| c != '=').collect());
-        } else if let Some(args) = s.strip_prefix('-') {
-            out.extend(args.chars().map(|v| v.to_string()));
-        } else {
-            out.push(String::new());
-        }
-    }
-    out.extend(texts[split..].iter().map(|_| String::new()));
-    out
+    get_flags_until_words(ast, &|s| s == "--", words.get(1..).unwrap_or(&[]))
+        .into_iter()
+        .map(|(_, f)| f)
+        .collect()
 }
 
 /// Consider 'export/declare -x' a reference, since it makes the var available
@@ -987,10 +972,14 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
         rest.iter().flat_map(|&t| get_modifier_param(default_type, t)).collect()
     };
 
-    // DIVERGENCE: `stripEqualsFrom` builds a synthetic word with the text up
-    // to the first '=' removed from its leading literal. The arena cannot hold
-    // it, so `SourceFrom` gets the original `let` argument (e.g. `foo=bar`
-    // rather than `bar`).
+    // DIVERGENCE: `stripEqualsFrom` builds a synthetic word whose leading
+    // T_Literal (in `T_NormalWord (T_Literal ..:rs)` or
+    // `T_NormalWord [T_DoubleQuoted [T_Literal ..]]`) loses everything up to
+    // and including its first '=' (all of it if there is none). The arena
+    // cannot hold that word, so `SourceFrom` gets the original `let` argument.
+    // Consumers (checkQuotesInLiterals) only test the text for quotes and
+    // `\ `, so the result differs only when that single T_Literal contains a
+    // quote or `\ ` in the stripped part, i.e. before its first '='.
     let let_param_to_literal = |token: Id| -> Vec<ModifiedVariable> {
         let s = oversimplify(ast, token).concat();
         let var: String = s
@@ -1325,8 +1314,11 @@ pub fn filter_by_annotation(
         _ => is_annotation_ignoring_code(ast, code, t),
     };
     let should_ignore = |note: &TokenComment| {
+        // `getPath parents (T_Bang $ tcId note)`: the dummy T_Bang stands in
+        // for the note's token, so only its parents are tested.
         get_path(ast, note.id)
             .into_iter()
+            .skip(1)
             .any(|t| should_ignore_for(note.comment.code, t))
     };
     notes.into_iter().filter(|n| !should_ignore(n)).collect()
