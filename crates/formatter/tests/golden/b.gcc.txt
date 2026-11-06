@@ -1,0 +1,8 @@
+b.sh:3:4: note: Double quote to prevent globbing and word splitting. [SC2086]
+b.sh:4:6: note: Double quote to prevent globbing and word splitting. [SC2086]
+b.sh:4:18: warning: Quote this to prevent word splitting. [SC2046]
+b.sh:4:18: note: Use $(...) notation instead of legacy backticks `...`. [SC2006]
+b.sh:5:6: note: Double quote to prevent globbing and word splitting. [SC2086]
+b.sh:6:8: warning: Use "${var:?}" to ensure this never expands to /* . [SC2115]
+b.sh:6:8: warning: dir is referenced but not assigned. [SC2154]
+b.sh:6:8: note: Double quote to prevent globbing and word splitting. [SC2086]

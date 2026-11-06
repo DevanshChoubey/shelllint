@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<checkstyle version='4.3'>
+<file name='c.sh' >
+<error line='2' column='1' severity='error' message='Couldn&#39;t find &#39;fi&#39; for this &#39;if&#39;.' source='ShellCheck.SC1046' />
+<error line='2' column='1' severity='error' message='Couldn&#39;t parse this if expression. Fix to allow more checks.' source='ShellCheck.SC1073' />
+<error line='4' column='1' severity='error' message='Expected &#39;fi&#39; matching previously mentioned &#39;if&#39;.' source='ShellCheck.SC1047' />
+<error line='4' column='1' severity='error' message='Expected &#39;fi&#39;. Fix any mentioned problems and try again.' source='ShellCheck.SC1072' />
+</file>
+</checkstyle>
