@@ -21,6 +21,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 21,
+       "expr": "checkEchoWc"
+      }
+     ],
      "tests": [
       "prop_checkEchoWc3"
      ],
@@ -41,6 +48,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 23,
+       "expr": "checkPipedAssignment"
+      }
+     ],
      "tests": [
       "prop_checkPipedAssignment1",
       "prop_checkPipedAssignment2",
@@ -77,6 +91,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 24,
+       "expr": "checkAssignAteCommand"
+      }
+     ],
      "tests": [
       "prop_checkAssignAteCommand1",
       "prop_checkAssignAteCommand2",
@@ -116,6 +137,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 44,
+       "expr": "checkArithmeticOpCommand"
+      }
+     ],
      "tests": [
       "prop_checkArithmeticOpCommand1",
       "prop_checkArithmeticOpCommand2",
@@ -150,6 +178,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 52,
+       "expr": "checkWrongArithmeticAssignment"
+      }
+     ],
      "tests": [
       "prop_checkWrongArit",
       "prop_checkWrongArit2"
@@ -183,6 +218,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 10,
+       "expr": "checkUuoc",
+       "optional_name": "useless-use-of-cat"
+      }
+     ],
      "tests": [
       "prop_checkUuoc1",
       "prop_checkUuoc2",
@@ -227,6 +270,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 0,
+       "expr": "checkPipePitfalls"
+      }
+     ],
      "tests": [
       "prop_checkPipePitfalls3",
       "prop_checkPipePitfalls4",
@@ -273,7 +323,7 @@
      "module": "Analytics.hs",
      "check": "checkShebangParameters",
      "registry": "tree",
-     "order": 1,
+     "order": 2,
      "source_lines": [
       675,
       681
@@ -284,6 +334,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 2,
+       "expr": "checkShebangParameters"
+      }
+     ],
      "tests": [
       "prop_checkShebangParameters1",
       "prop_checkShebangParameters2",
@@ -308,7 +365,7 @@
      "module": "Analytics.hs",
      "check": "checkShebang",
      "registry": "tree",
-     "order": 6,
+     "order": 7,
      "source_lines": [
       700,
       717
@@ -322,6 +379,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 7,
+       "expr": "checkShebang"
+      }
+     ],
      "tests": [
       "prop_checkShebang1",
       "prop_checkShebang2",
@@ -378,6 +442,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 1,
+       "expr": "checkForInQuoted"
+      }
+     ],
      "tests": [
       "prop_checkForInQuoted",
       "prop_checkForInQuoted2",
@@ -425,6 +496,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 27,
+       "expr": "checkForInCat"
+      }
+     ],
      "tests": [
       "prop_checkForInCat1",
       "prop_checkForInCat1a",
@@ -462,6 +540,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 2,
+       "expr": "checkForInLs"
+      }
+     ],
      "tests": [
       "prop_checkForInLs",
       "prop_checkForInLs2",
@@ -498,6 +583,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 28,
+       "expr": "checkFindExec"
+      }
+     ],
      "tests": [
       "prop_checkFindExec1",
       "prop_checkFindExec2",
@@ -536,6 +628,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 46,
+       "expr": "checkUnquotedExpansions"
+      }
+     ],
      "tests": [
       "prop_checkUnquotedExpansions1",
       "prop_checkUnquotedExpansions1a",
@@ -580,6 +679,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 48,
+       "expr": "checkRedirectToSame"
+      }
+     ],
      "tests": [
       "prop_checkRedirectToSame",
       "prop_checkRedirectToSame2",
@@ -621,6 +727,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 3,
+       "expr": "checkShorthandIf"
+      }
+     ],
      "tests": [
       "prop_checkShorthandIf",
       "prop_checkShorthandIf2",
@@ -663,6 +776,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 4,
+       "expr": "checkDollarStar"
+      }
+     ],
      "tests": [
       "prop_checkDollarStar",
       "prop_checkDollarStar2",
@@ -692,6 +812,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 5,
+       "expr": "checkUnquotedDollarAt"
+      }
+     ],
      "tests": [
       "prop_checkUnquotedDollarAt",
       "prop_checkUnquotedDollarAt1",
@@ -735,6 +862,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 63,
+       "expr": "checkConcatenatedDollarAt"
+      }
+     ],
      "tests": [
       "prop_checkConcatenatedDollarAt1",
       "prop_checkConcatenatedDollarAt2",
@@ -772,6 +906,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 57,
+       "expr": "checkArrayAsString"
+      }
+     ],
      "tests": [
       "prop_checkArrayAsString1",
       "prop_checkArrayAsString2",
@@ -800,7 +941,7 @@
      "module": "Analytics.hs",
      "check": "checkArrayWithoutIndex",
      "registry": "tree",
-     "order": 5,
+     "order": 6,
      "source_lines": [
       1028,
       1061
@@ -813,6 +954,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 6,
+       "expr": "checkArrayWithoutIndex"
+      }
+     ],
      "tests": [
       "prop_checkArrayWithoutIndex1",
       "prop_checkArrayWithoutIndex2",
@@ -858,6 +1006,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 6,
+       "expr": "checkStderrRedirect"
+      }
+     ],
      "tests": [
       "prop_checkStderrRedirect",
       "prop_checkStderrRedirect2",
@@ -896,6 +1051,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 47,
+       "expr": "checkSingleQuotedVariables"
+      }
+     ],
      "tests": [
       "prop_checkSingleQuotedVariables",
       "prop_checkSingleQuotedVariables2",
@@ -967,6 +1129,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 7,
+       "expr": "checkUnquotedN"
+      }
+     ],
      "tests": [
       "prop_checkUnquotedN",
       "prop_checkUnquotedN2",
@@ -1008,6 +1177,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": true,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 8,
+       "expr": "checkNumberComparisons"
+      }
+     ],
      "tests": [
       "prop_checkNumberComparisons1",
       "prop_checkNumberComparisons2",
@@ -1068,6 +1244,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 9,
+       "expr": "checkSingleBracketOperators"
+      }
+     ],
      "tests": [
       "prop_checkSingleBracketOperators1"
      ],
@@ -1088,6 +1271,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 10,
+       "expr": "checkDoubleBracketOperators"
+      }
+     ],
      "tests": [
       "prop_checkDoubleBracketOperators1",
       "prop_checkDoubleBracketOperators3"
@@ -1126,6 +1316,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 53,
+       "expr": "checkConditionalAndOrs"
+      }
+     ],
      "tests": [
       "prop_checkConditionalAndOrs1",
       "prop_checkConditionalAndOrs2",
@@ -1166,6 +1363,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 26,
+       "expr": "checkQuotedCondRegex"
+      }
+     ],
      "tests": [
       "prop_checkQuotedCondRegex1",
       "prop_checkQuotedCondRegex2",
@@ -1203,6 +1407,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 30,
+       "expr": "checkGlobbedRegex"
+      }
+     ],
      "tests": [
       "prop_checkGlobbedRegex1",
       "prop_checkGlobbedRegex2",
@@ -1243,6 +1454,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 22,
+       "expr": "checkConstantIfs"
+      }
+     ],
      "tests": [
       "prop_checkConstantIfs1",
       "prop_checkConstantIfs2a",
@@ -1289,6 +1507,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 11,
+       "expr": "checkLiteralBreakingTest"
+      }
+     ],
      "tests": [
       "prop_checkLiteralBreakingTest",
       "prop_checkLiteralBreakingTest2",
@@ -1334,6 +1559,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 12,
+       "expr": "checkConstantNullary"
+      }
+     ],
      "tests": [
       "prop_checkConstantNullary",
       "prop_checkConstantNullary2",
@@ -1360,6 +1592,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 13,
+       "expr": "checkDivBeforeMult"
+      }
+     ],
      "tests": [
       "prop_checkDivBeforeMult",
       "prop_checkDivBeforeMult2",
@@ -1399,6 +1638,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 14,
+       "expr": "checkArithmeticDeref"
+      }
+     ],
      "tests": [
       "prop_checkArithmeticDeref",
       "prop_checkArithmeticDeref2",
@@ -1447,6 +1693,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 15,
+       "expr": "checkArithmeticBadOctal"
+      }
+     ],
      "tests": [
       "prop_checkArithmeticBadOctal1",
       "prop_checkArithmeticBadOctal2",
@@ -1483,6 +1736,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 16,
+       "expr": "checkComparisonAgainstGlob"
+      }
+     ],
      "tests": [
       "prop_checkComparisonAgainstGlob",
       "prop_checkComparisonAgainstGlob2",
@@ -1523,6 +1783,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 17,
+       "expr": "checkCaseAgainstGlob"
+      }
+     ],
      "tests": [
       "prop_checkCaseAgainstGlob1",
       "prop_checkCaseAgainstGlob2",
@@ -1557,6 +1824,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 18,
+       "expr": "checkCommarrays"
+      }
+     ],
      "tests": [
       "prop_checkCommarrays1",
       "prop_checkCommarrays2",
@@ -1597,6 +1871,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 19,
+       "expr": "checkOrNeq"
+      }
+     ],
      "tests": [
       "prop_checkOrNeq1",
       "prop_checkOrNeq2",
@@ -1640,6 +1921,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 20,
+       "expr": "checkAndEq"
+      }
+     ],
      "tests": [
       "prop_checkAndEq1",
       "prop_checkAndEq2",
@@ -1687,6 +1975,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 29,
+       "expr": "checkValidCondOps"
+      }
+     ],
      "tests": [
       "prop_checkValidCondOps1",
       "prop_checkValidCondOps2",
@@ -1724,6 +2019,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 25,
+       "expr": "checkUuoeVar"
+      }
+     ],
      "tests": [
       "prop_checkUuoeVar1",
       "prop_checkUuoeVar2",
@@ -1764,6 +2066,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 31,
+       "expr": "checkTestRedirects"
+      }
+     ],
      "tests": [
       "prop_checkTestRedirects1",
       "prop_checkTestRedirects2",
@@ -1799,6 +2108,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 33,
+       "expr": "checkPS1Assignments"
+      }
+     ],
      "tests": [
       "prop_checkPS11",
       "prop_checkPS11a",
@@ -1828,6 +2144,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 34,
+       "expr": "checkBackticks"
+      }
+     ],
      "tests": [
       "prop_checkBackticks1",
       "prop_checkBackticks2",
@@ -1869,6 +2192,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 32,
+       "expr": "checkBadParameterSubstitution"
+      }
+     ],
      "tests": [
       "prop_checkBadParameterSubstitution1",
       "prop_checkBadParameterSubstitution2",
@@ -1919,6 +2249,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 35,
+       "expr": "checkInexplicablyUnquoted"
+      }
+     ],
      "tests": [
       "prop_checkInexplicablyUnquoted1",
       "prop_checkInexplicablyUnquoted2",
@@ -1964,6 +2301,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 36,
+       "expr": "checkTildeInQuotes"
+      }
+     ],
      "tests": [
       "prop_checkTildeInQuotes1",
       "prop_checkTildeInQuotes2",
@@ -1988,6 +2332,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 37,
+       "expr": "checkLonelyDotDash"
+      }
+     ],
      "tests": [
       "prop_checkLonelyDotDash1",
       "prop_checkLonelyDotDash2"
@@ -2022,6 +2373,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 38,
+       "expr": "checkSpuriousExec"
+      }
+     ],
      "tests": [
       "prop_checkSpuriousExec1",
       "prop_checkSpuriousExec2",
@@ -2068,6 +2426,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 39,
+       "expr": "checkSpuriousExpansion"
+      }
+     ],
      "tests": [
       "prop_checkSpuriousExpansion1",
       "prop_checkSpuriousExpansion3",
@@ -2090,6 +2455,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 40,
+       "expr": "checkDollarBrackets"
+      }
+     ],
      "tests": [
       "prop_checkDollarBrackets1",
       "prop_checkDollarBrackets2"
@@ -2126,16 +2498,91 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 41,
+       "expr": "checkSshHereDoc"
+      }
+     ],
      "tests": [
       "prop_checkSshHereDoc1",
       "prop_checkSshHereDoc2"
      ],
      "n_tests": 2
+    },
+    {
+     "module": "Analytics.hs",
+     "check": "subshellAssignmentCheck",
+     "registry": "tree",
+     "order": 0,
+     "source_lines": [
+      2150,
+      2154
+     ],
+     "lines": 5,
+     "codes": [
+      2030,
+      2031
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 0,
+       "expr": "subshellAssignmentCheck"
+      }
+     ],
+     "tests": [
+      "prop_subshellAssignmentCheck",
+      "prop_subshellAssignmentCheck2",
+      "prop_subshellAssignmentCheck3",
+      "prop_subshellAssignmentCheck4",
+      "prop_subshellAssignmentCheck5",
+      "prop_subshellAssignmentCheck6",
+      "prop_subshellAssignmentCheck6a",
+      "prop_subshellAssignmentCheck7",
+      "prop_subshellAssignmentCheck8",
+      "prop_subshellAssignmentCheck9",
+      "prop_subshellAssignmentCheck10",
+      "prop_subshellAssignmentCheck11",
+      "prop_subshellAssignmentCheck12",
+      "prop_subshellAssignmentCheck13",
+      "prop_subshellAssignmentCheck14",
+      "prop_subshellAssignmentCheck15",
+      "prop_subshellAssignmentCheck16",
+      "prop_subshellAssignmentCheck17",
+      "prop_subshellAssignmentCheck18",
+      "prop_subshellAssignmentCheck19",
+      "prop_subshellAssignmentCheck20",
+      "prop_subshellAssignmentCheck21",
+      "prop_subshellAssignmentCheck22",
+      "prop_subshellAssignmentCheck23",
+      "prop_subshellAssignmentCheck24",
+      "prop_subshellAssignmentCheck25",
+      "prop_subshellAssignmentCheck26",
+      "prop_subshellAssignmentCheck27",
+      "prop_subshellAssignmentCheck28",
+      "prop_subshellAssignmentCheck29",
+      "prop_subshellAssignmentCheck30",
+      "prop_subshellAssignmentCheck31",
+      "prop_subshellAssignmentCheck32",
+      "prop_subshellAssignmentCheck33",
+      "prop_subshellAssignmentCheck34",
+      "prop_subshellAssignmentCheck35",
+      "prop_subshellAssignmentCheck40",
+      "prop_subshellAssignmentCheck41",
+      "prop_subshellAssignmentCheck42"
+     ],
+     "n_tests": 39
     }
    ],
-   "haskell_lines": 12,
-   "n_tests": 2,
+   "haskell_lines": 17,
+   "n_tests": 41,
    "codes": [
+    2030,
+    2031,
     2087
    ]
   },
@@ -2159,6 +2606,13 @@
      ],
      "codes_inferred": true,
      "uses_cfg": true,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 96,
+       "expr": "checkSpacefulnessCfg"
+      }
+     ],
      "tests": [
       "prop_checkSpacefulnessCfg1",
       "prop_checkSpacefulnessCfg2",
@@ -2258,6 +2712,14 @@
      ],
      "codes_inferred": true,
      "uses_cfg": true,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 0,
+       "expr": "checkVerboseSpacefulnessCfg",
+       "optional_name": "quote-safe-variables"
+      }
+     ],
      "tests": [
       "prop_checkSpacefulnessCfg37v"
      ],
@@ -2292,6 +2754,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 4,
+       "expr": "checkVariableBraces",
+       "optional_name": "require-variable-braces"
+      }
+     ],
      "tests": [
       "prop_CheckVariableBraces1",
       "prop_CheckVariableBraces2",
@@ -2317,7 +2787,7 @@
      "module": "Analytics.hs",
      "check": "checkQuotesInLiterals",
      "registry": "tree",
-     "order": 0,
+     "order": 1,
      "source_lines": [
       2374,
       2429
@@ -2329,6 +2799,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 1,
+       "expr": "checkQuotesInLiterals"
+      }
+     ],
      "tests": [
       "prop_checkQuotesInLiterals1",
       "prop_checkQuotesInLiterals1a",
@@ -2361,7 +2838,7 @@
      "module": "Analytics.hs",
      "check": "checkFunctionsUsedExternally",
      "registry": "tree",
-     "order": 2,
+     "order": 3,
      "source_lines": [
       2454,
       2506
@@ -2373,6 +2850,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 3,
+       "expr": "checkFunctionsUsedExternally"
+      }
+     ],
      "tests": [
       "prop_checkFunctionsUsedExternally1",
       "prop_checkFunctionsUsedExternally2",
@@ -2406,7 +2890,7 @@
      "module": "Analytics.hs",
      "check": "checkUnusedAssignments",
      "registry": "tree",
-     "order": 3,
+     "order": 4,
      "source_lines": [
       2567,
       2589
@@ -2417,6 +2901,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 4,
+       "expr": "checkUnusedAssignments"
+      }
+     ],
      "tests": [
       "prop_checkUnused0",
       "prop_checkUnused1",
@@ -2496,7 +2987,7 @@
      "module": "Analytics.hs",
      "check": "checkUnassignedReferences",
      "registry": "tree",
-     "order": 7,
+     "order": 8,
      "source_lines": [
       2649,
       2649
@@ -2507,6 +2998,19 @@
      ],
      "codes_inferred": true,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 8,
+       "expr": "checkUnassignedReferences"
+      },
+      {
+       "registry": "optional-tree",
+       "order": 5,
+       "expr": "checkUnassignedReferences' True",
+       "optional_name": "check-unassigned-uppercase"
+      }
+     ],
      "tests": [
       "prop_checkUnassignedReferences1",
       "prop_checkUnassignedReferences2",
@@ -2545,6 +3049,7 @@
       "prop_checkUnassignedReferences35",
       "prop_checkUnassignedReferences36",
       "prop_checkUnassignedReferences37",
+      "prop_checkUnassignedReferences38",
       "prop_checkUnassignedReferences39",
       "prop_checkUnassignedReferences40",
       "prop_checkUnassignedReferences41",
@@ -2566,7 +3071,7 @@
       "prop_checkUnassignedReferences57",
       "prop_checkUnassignedReferences58"
      ],
-     "n_tests": 57
+     "n_tests": 58
     },
     {
      "module": "Analytics.hs",
@@ -2583,6 +3088,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 42,
+       "expr": "checkGlobsAsOptions"
+      }
+     ],
      "tests": [
       "prop_checkGlobsAsOptions1",
       "prop_checkGlobsAsOptions2",
@@ -2597,7 +3109,7 @@
     }
    ],
    "haskell_lines": 19,
-   "n_tests": 65,
+   "n_tests": 66,
    "codes": [
     2035,
     2154
@@ -2623,6 +3135,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 43,
+       "expr": "checkWhileReadPitfalls"
+      }
+     ],
      "tests": [
       "prop_checkWhileReadPitfalls1",
       "prop_checkWhileReadPitfalls2",
@@ -2670,6 +3189,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 49,
+       "expr": "checkPrefixAssignmentReference"
+      }
+     ],
      "tests": [
       "prop_checkPrefixAssign1",
       "prop_checkPrefixAssign2"
@@ -2705,6 +3231,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 45,
+       "expr": "checkCharRangeGlob"
+      }
+     ],
      "tests": [
       "prop_checkCharRangeGlob1",
       "prop_checkCharRangeGlob2",
@@ -2746,6 +3279,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 51,
+       "expr": "checkCdAndBack"
+      }
+     ],
      "tests": [
       "prop_checkCdAndBack1",
       "prop_checkCdAndBack2",
@@ -2787,6 +3327,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 50,
+       "expr": "checkLoopKeywordScope"
+      }
+     ],
      "tests": [
       "prop_checkLoopKeywordScope1",
       "prop_checkLoopKeywordScope2",
@@ -2829,6 +3376,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 54,
+       "expr": "checkFunctionDeclarations"
+      }
+     ],
      "tests": [
       "prop_checkFunctionDeclarations1",
       "prop_checkFunctionDeclarations2",
@@ -2865,6 +3419,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 55,
+       "expr": "checkStderrPipe"
+      }
+     ],
      "tests": [
       "prop_checkStderrPipe1",
       "prop_checkStderrPipe2"
@@ -2887,7 +3448,7 @@
      "module": "Analytics.hs",
      "check": "checkUnpassedInFunctions",
      "registry": "tree",
-     "order": 4,
+     "order": 5,
      "source_lines": [
       3025,
       3107
@@ -2899,6 +3460,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 5,
+       "expr": "checkUnpassedInFunctions"
+      }
+     ],
      "tests": [
       "prop_checkUnpassedInFunctions1",
       "prop_checkUnpassedInFunctions2",
@@ -2949,6 +3517,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 56,
+       "expr": "checkOverridingPath"
+      }
+     ],
      "tests": [
       "prop_checkOverridingPath1",
       "prop_checkOverridingPath2",
@@ -2988,6 +3563,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 64,
+       "expr": "checkTildeInPath"
+      }
+     ],
      "tests": [
       "prop_checkTildeInPath1",
       "prop_checkTildeInPath2",
@@ -3022,6 +3604,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 58,
+       "expr": "checkUnsupported"
+      }
+     ],
      "tests": [
       "prop_checkUnsupported3",
       "prop_checkUnsupported4",
@@ -3057,6 +3646,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 59,
+       "expr": "checkMultipleAppends"
+      }
+     ],
      "tests": [
       "prop_checkMultipleAppends1",
       "prop_checkMultipleAppends2",
@@ -3091,6 +3687,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 60,
+       "expr": "checkSuspiciousIFS"
+      }
+     ],
      "tests": [
       "prop_checkSuspiciousIFS1",
       "prop_checkSuspiciousIFS2",
@@ -3125,6 +3728,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 61,
+       "expr": "checkShouldUseGrepQ"
+      }
+     ],
      "tests": [
       "prop_checkGrepQ1",
       "prop_checkGrepQ2",
@@ -3171,6 +3781,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 62,
+       "expr": "checkTestArgumentSplitting"
+      }
+     ],
      "tests": [
       "prop_checkTestArgumentSplitting1",
       "prop_checkTestArgumentSplitting2",
@@ -3232,6 +3849,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 65,
+       "expr": "checkReadWithoutR"
+      }
+     ],
      "tests": [
       "prop_checkReadWithoutR1",
       "prop_checkReadWithoutR2",
@@ -3269,6 +3893,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 66,
+       "expr": "checkCpLegacyR"
+      }
+     ],
      "tests": [
       "prop_checkCpLegacyR1",
       "prop_checkCpLegacyR2"
@@ -3291,7 +3922,7 @@
      "module": "Analytics.hs",
      "check": "checkUncheckedCdPushdPopd",
      "registry": "tree",
-     "order": 8,
+     "order": 9,
      "source_lines": [
       3421,
       3456
@@ -3302,6 +3933,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 9,
+       "expr": "checkUncheckedCdPushdPopd"
+      }
+     ],
      "tests": [
       "prop_checkUncheckedCd1",
       "prop_checkUncheckedCd2",
@@ -3373,6 +4011,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 67,
+       "expr": "checkLoopVariableReassignment"
+      }
+     ],
      "tests": [
       "prop_checkLoopVariableReassignment1",
       "prop_checkLoopVariableReassignment2",
@@ -3409,6 +4054,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 68,
+       "expr": "checkTrailingBracket"
+      }
+     ],
      "tests": [
       "prop_checkTrailingBracket1",
       "prop_checkTrailingBracket2",
@@ -3445,6 +4097,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 69,
+       "expr": "checkReturnAgainstZero"
+      }
+     ],
      "tests": [
       "prop_checkReturnAgainstZero1",
       "prop_checkReturnAgainstZero2",
@@ -3499,6 +4158,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 70,
+       "expr": "checkRedirectedNowhere"
+      }
+     ],
      "tests": [
       "prop_checkRedirectedNowhere1",
       "prop_checkRedirectedNowhere2",
@@ -3528,7 +4194,7 @@
      "module": "Analytics.hs",
      "check": "checkArrayAssignmentIndices",
      "registry": "tree",
-     "order": 9,
+     "order": 10,
      "source_lines": [
       3646,
       3677
@@ -3541,6 +4207,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 10,
+       "expr": "checkArrayAssignmentIndices"
+      }
+     ],
      "tests": [
       "prop_checkArrayAssignmentIndices1",
       "prop_checkArrayAssignmentIndices2",
@@ -3590,6 +4263,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 71,
+       "expr": "checkUnmatchableCases"
+      }
+     ],
      "tests": [
       "prop_checkUnmatchableCases1",
       "prop_checkUnmatchableCases2",
@@ -3634,6 +4314,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 72,
+       "expr": "checkSubshellAsTest"
+      }
+     ],
      "tests": [
       "prop_checkSubshellAsTest1",
       "prop_checkSubshellAsTest2",
@@ -3674,6 +4361,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 73,
+       "expr": "checkSplittingInArrays"
+      }
+     ],
      "tests": [
       "prop_checkSplittingInArrays1",
       "prop_checkSplittingInArrays2",
@@ -3714,6 +4408,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 74,
+       "expr": "checkRedirectionToNumber"
+      }
+     ],
      "tests": [
       "prop_checkRedirectionToNumber1",
       "prop_checkRedirectionToNumber2",
@@ -3737,6 +4438,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 75,
+       "expr": "checkGlobAsCommand"
+      }
+     ],
      "tests": [
       "prop_checkGlobAsCommand1",
       "prop_checkGlobAsCommand2",
@@ -3772,6 +4480,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 76,
+       "expr": "checkFlagAsCommand"
+      }
+     ],
      "tests": [
       "prop_checkFlagAsCommand1",
       "prop_checkFlagAsCommand2",
@@ -3795,6 +4510,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 77,
+       "expr": "checkEmptyCondition"
+      }
+     ],
      "tests": [
       "prop_checkEmptyCondition1",
       "prop_checkEmptyCondition2"
@@ -3833,6 +4555,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 78,
+       "expr": "checkPipeToNowhere"
+      }
+     ],
      "tests": [
       "prop_checkPipeToNowhere1",
       "prop_checkPipeToNowhere2",
@@ -3878,7 +4607,7 @@
      "module": "Analytics.hs",
      "check": "checkUseBeforeDefinition",
      "registry": "tree",
-     "order": 10,
+     "order": 11,
      "source_lines": [
       4034,
       4065
@@ -3889,6 +4618,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": true,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 11,
+       "expr": "checkUseBeforeDefinition"
+      }
+     ],
      "tests": [
       "prop_checkUseBeforeDefinition1",
       "prop_checkUseBeforeDefinition2",
@@ -3931,6 +4667,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 79,
+       "expr": "checkForLoopGlobVariables"
+      }
+     ],
      "tests": [
       "prop_checkForLoopGlobVariables1",
       "prop_checkForLoopGlobVariables2",
@@ -3967,6 +4710,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 80,
+       "expr": "checkSubshelledTests"
+      }
+     ],
      "tests": [
       "prop_checkSubshelledTests1",
       "prop_checkSubshelledTests2",
@@ -4010,6 +4760,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 2,
+       "expr": "checkUnnecessarilyInvertedTest",
+       "optional_name": "avoid-negated-conditions"
+      }
+     ],
      "tests": [
       "prop_checkUnnecessarilyInvertedTest1",
       "prop_checkUnnecessarilyInvertedTest2",
@@ -4058,6 +4816,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 81,
+       "expr": "checkRedirectionToCommand"
+      }
+     ],
      "tests": [
       "prop_checkRedirectionToCommand1",
       "prop_checkRedirectionToCommand2",
@@ -4093,6 +4858,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 1,
+       "expr": "checkNullaryExpansionTest",
+       "optional_name": "avoid-nullary-conditions"
+      }
+     ],
      "tests": [
       "prop_checkNullaryExpansionTest1",
       "prop_checkNullaryExpansionTest2",
@@ -4131,6 +4904,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 82,
+       "expr": "checkDollarQuoteParen"
+      }
+     ],
      "tests": [
       "prop_checkDollarQuoteParen1",
       "prop_checkDollarQuoteParen2",
@@ -4154,6 +4934,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 84,
+       "expr": "checkTranslatedStringVariable"
+      }
+     ],
      "tests": [
       "prop_checkTranslatedStringVariable1",
       "prop_checkTranslatedStringVariable2",
@@ -4191,6 +4978,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 3,
+       "expr": "checkDefaultCase",
+       "optional_name": "add-default-case"
+      }
+     ],
      "tests": [
       "prop_checkDefaultCase1",
       "prop_checkDefaultCase2",
@@ -4226,6 +5021,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 83,
+       "expr": "checkUselessBang"
+      }
+     ],
      "tests": [
       "prop_checkUselessBang1",
       "prop_checkUselessBang2",
@@ -4267,6 +5069,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 85,
+       "expr": "checkModifiedArithmeticInRedirection"
+      }
+     ],
      "tests": [
       "prop_checkModifiedArithmeticInRedirection1",
       "prop_checkModifiedArithmeticInRedirection2",
@@ -4294,7 +5103,7 @@
      "module": "Analytics.hs",
      "check": "checkAliasUsedInSameParsingUnit",
      "registry": "tree",
-     "order": 11,
+     "order": 12,
      "source_lines": [
       4406,
       4449
@@ -4306,6 +5115,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 12,
+       "expr": "checkAliasUsedInSameParsingUnit"
+      }
+     ],
      "tests": [
       "prop_checkAliasUsedInSameParsingUnit1",
       "prop_checkAliasUsedInSameParsingUnit2",
@@ -4344,6 +5160,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 86,
+       "expr": "checkBlatantRecursion"
+      }
+     ],
      "tests": [
       "prop_checkBlatantRecursion1",
       "prop_checkBlatantRecursion2",
@@ -4383,6 +5206,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 87,
+       "expr": "checkBadTestAndOr"
+      }
+     ],
      "tests": [
       "prop_checkBadTestAndOr1",
       "prop_checkBadTestAndOr2",
@@ -4418,6 +5248,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 91,
+       "expr": "checkComparisonWithLeadingX"
+      }
+     ],
      "tests": [
       "prop_checkComparisonWithLeadingX1",
       "prop_checkComparisonWithLeadingX2",
@@ -4456,6 +5293,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 88,
+       "expr": "checkAssignToSelf"
+      }
+     ],
      "tests": [
       "prop_checkAssignToSelf1",
       "prop_checkAssignToSelf2",
@@ -4503,6 +5347,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 89,
+       "expr": "checkEqualsInCommand"
+      }
+     ],
      "tests": [
       "prop_checkEqualsInCommand1a",
       "prop_checkEqualsInCommand2a",
@@ -4572,6 +5423,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 90,
+       "expr": "checkSecondArgIsComparison"
+      }
+     ],
      "tests": [
       "prop_checkSecondArgIsComparison1",
       "prop_checkSecondArgIsComparison2",
@@ -4618,6 +5476,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 92,
+       "expr": "checkCommandWithTrailingSymbol"
+      }
+     ],
      "tests": [
       "prop_checkCommandWithTrailingSymbol1",
       "prop_checkCommandWithTrailingSymbol2",
@@ -4661,6 +5526,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 6,
+       "expr": "checkRequireDoubleBracket",
+       "optional_name": "require-double-brackets"
+      }
+     ],
      "tests": [
       "prop_checkRequireDoubleBracket1",
       "prop_checkRequireDoubleBracket2",
@@ -4696,6 +5569,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 7,
+       "expr": "checkRequireDoubleEquals",
+       "optional_name": "require-double-equals"
+      }
+     ],
      "tests": [
       "prop_checkRequireDoubleEquals1",
       "prop_checkRequireDoubleEquals2",
@@ -4732,6 +5613,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 93,
+       "expr": "checkUnquotedParameterExpansionPattern"
+      }
+     ],
      "tests": [
       "prop_checkUnquotedParameterExpansionPattern1",
       "prop_checkUnquotedParameterExpansionPattern2",
@@ -4756,7 +5644,7 @@
      "module": "Analytics.hs",
      "check": "checkArrayValueUsedAsIndex",
      "registry": "tree",
-     "order": 12,
+     "order": 13,
      "source_lines": [
       4947,
       5021
@@ -4768,6 +5656,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "tree",
+       "order": 13,
+       "expr": "checkArrayValueUsedAsIndex"
+      }
+     ],
      "tests": [
       "prop_checkArrayValueUsedAsIndex1",
       "prop_checkArrayValueUsedAsIndex2",
@@ -4809,6 +5704,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 8,
+       "expr": "checkSetESuppressed",
+       "optional_name": "check-set-e-suppressed"
+      }
+     ],
      "tests": [
       "prop_checkSetESuppressed1",
       "prop_checkSetESuppressed2",
@@ -4860,6 +5763,14 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-tree",
+       "order": 9,
+       "expr": "checkExtraMaskedReturns",
+       "optional_name": "check-extra-masked-returns"
+      }
+     ],
      "tests": [
       "prop_checkExtraMaskedReturns1",
       "prop_checkExtraMaskedReturns2",
@@ -4933,6 +5844,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 94,
+       "expr": "checkBatsTestDoesNotUseNegation"
+      }
+     ],
      "tests": [
       "prop_checkBatsTestDoesNotUseNegation1",
       "prop_checkBatsTestDoesNotUseNegation2",
@@ -4975,6 +5893,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": true,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 95,
+       "expr": "checkCommandIsUnreachable"
+      }
+     ],
      "tests": [
       "prop_checkCommandIsUnreachable1",
       "prop_checkCommandIsUnreachable2",
@@ -5013,6 +5938,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": true,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 97,
+       "expr": "checkOverwrittenExitCode"
+      }
+     ],
      "tests": [
       "prop_checkOverwrittenExitCode1",
       "prop_checkOverwrittenExitCode2",
@@ -5053,6 +5985,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 98,
+       "expr": "checkUnnecessaryArithmeticExpansionIndex"
+      }
+     ],
      "tests": [
       "prop_checkUnnecessaryArithmeticExpansionIndex1",
       "prop_checkUnnecessaryArithmeticExpansionIndex2",
@@ -5089,6 +6028,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 99,
+       "expr": "checkUnnecessaryParens"
+      }
+     ],
      "tests": [
       "prop_checkUnnecessaryParens1",
       "prop_checkUnnecessaryParens2",
@@ -5129,6 +6075,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": true,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 100,
+       "expr": "checkPlusEqualsNumber"
+      }
+     ],
      "tests": [
       "prop_checkPlusEqualsNumber1",
       "prop_checkPlusEqualsNumber2",
@@ -5170,6 +6123,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 101,
+       "expr": "checkExpansionWithRedirection"
+      }
+     ],
      "tests": [
       "prop_checkExpansionWithRedirection1",
       "prop_checkExpansionWithRedirection2",
@@ -5210,6 +6170,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "node",
+       "order": 102,
+       "expr": "checkUnaryTestA"
+      }
+     ],
      "tests": [
       "prop_checkUnaryTestA1",
       "prop_checkUnaryTestA2",
@@ -5248,6 +6215,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 0,
+       "expr": "checkTr"
+      }
+     ],
      "tests": [
       "prop_checkTr1",
       "prop_checkTr2",
@@ -5297,6 +6271,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 1,
+       "expr": "checkFindNameGlob"
+      }
+     ],
      "tests": [
       "prop_checkFindNameGlob1",
       "prop_checkFindNameGlob2",
@@ -5336,6 +6317,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 2,
+       "expr": "checkExpr"
+      }
+     ],
      "tests": [
       "prop_checkExpr",
       "prop_checkExpr2",
@@ -5388,6 +6376,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 3,
+       "expr": "checkGrepRe"
+      }
+     ],
      "tests": [
       "prop_checkGrepRe1",
       "prop_checkGrepRe2",
@@ -5444,6 +6439,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 42,
+       "expr": "checkGrepSendsPipefail"
+      }
+     ],
      "tests": [
       "prop_checkGrepSendsPipefail1",
       "prop_checkGrepSendsPipefail2",
@@ -5480,6 +6482,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 43,
+       "expr": "checkEgrepSendsPipefail"
+      }
+     ],
      "tests": [
       "prop_checkEgrepSendsPipefail1"
      ],
@@ -5500,6 +6509,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 44,
+       "expr": "checkFgrepSendsPipefail"
+      }
+     ],
      "tests": [
       "prop_checkFgrepSendsPipefail1"
      ],
@@ -5520,6 +6536,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 4,
+       "expr": "checkTrapQuotes"
+      }
+     ],
      "tests": [
       "prop_checkTrapQuotes1",
       "prop_checkTrapQuotes1a",
@@ -5557,6 +6580,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 5,
+       "expr": "checkReturn"
+      }
+     ],
      "tests": [
       "prop_checkReturn1",
       "prop_checkReturn2",
@@ -5584,6 +6614,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 6,
+       "expr": "checkExit"
+      }
+     ],
      "tests": [
       "prop_checkExit1",
       "prop_checkExit2",
@@ -5625,6 +6662,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 7,
+       "expr": "checkFindExecWithSingleArgument"
+      }
+     ],
      "tests": [
       "prop_checkFindExecWithSingleArgument1",
       "prop_checkFindExecWithSingleArgument2",
@@ -5659,6 +6703,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 8,
+       "expr": "checkUnusedEchoEscapes"
+      }
+     ],
      "tests": [
       "prop_checkUnusedEchoEscapes1",
       "prop_checkUnusedEchoEscapes2",
@@ -5702,6 +6753,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 9,
+       "expr": "checkInjectableFindSh"
+      }
+     ],
      "tests": [
       "prop_checkInjectableFindSh1",
       "prop_checkInjectableFindSh2",
@@ -5736,6 +6794,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 10,
+       "expr": "checkFindActionPrecedence"
+      }
+     ],
      "tests": [
       "prop_checkFindActionPrecedence1",
       "prop_checkFindActionPrecedence2",
@@ -5770,6 +6835,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 11,
+       "expr": "checkMkdirDashPM"
+      }
+     ],
      "tests": [
       "prop_checkMkdirDashPM0",
       "prop_checkMkdirDashPM1",
@@ -5824,6 +6896,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 12,
+       "expr": "checkNonportableSignals"
+      }
+     ],
      "tests": [
       "prop_checkNonportableSignals1",
       "prop_checkNonportableSignals2",
@@ -5863,6 +6942,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 13,
+       "expr": "checkInteractiveSu"
+      }
+     ],
      "tests": [
       "prop_checkInteractiveSu1",
       "prop_checkInteractiveSu2",
@@ -5898,6 +6984,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 14,
+       "expr": "checkSshCommandString"
+      }
+     ],
      "tests": [
       "prop_checkSshCmdStr1",
       "prop_checkSshCmdStr2",
@@ -5935,6 +7028,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 15,
+       "expr": "checkPrintfVar"
+      }
+     ],
      "tests": [
       "prop_checkPrintfVar1",
       "prop_checkPrintfVar2",
@@ -5991,6 +7091,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 16,
+       "expr": "checkUuoeCmd"
+      }
+     ],
      "tests": [
       "prop_checkUuoeCmd1",
       "prop_checkUuoeCmd2",
@@ -6016,6 +7123,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 17,
+       "expr": "checkSetAssignment"
+      }
+     ],
      "tests": [
       "prop_checkSetAssignment1",
       "prop_checkSetAssignment2",
@@ -6054,6 +7168,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 18,
+       "expr": "checkExportedExpansions"
+      }
+     ],
      "tests": [
       "prop_checkExportedExpansions1",
       "prop_checkExportedExpansions2",
@@ -6090,6 +7211,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 36,
+       "expr": "checkReadExpansions"
+      }
+     ],
      "tests": [
       "prop_checkReadExpansions1",
       "prop_checkReadExpansions2",
@@ -6131,6 +7259,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 19,
+       "expr": "checkAliasesUsesArgs"
+      }
+     ],
      "tests": [
       "prop_checkAliasesUsesArgs1",
       "prop_checkAliasesUsesArgs2",
@@ -6153,6 +7288,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 20,
+       "expr": "checkAliasesExpandEarly"
+      }
+     ],
      "tests": [
       "prop_checkAliasesExpandEarly1",
       "prop_checkAliasesExpandEarly2",
@@ -6188,6 +7330,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 21,
+       "expr": "checkUnsetGlobs"
+      }
+     ],
      "tests": [
       "prop_checkUnsetGlobs1",
       "prop_checkUnsetGlobs2",
@@ -6224,6 +7373,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 22,
+       "expr": "checkFindWithoutPath"
+      }
+     ],
      "tests": [
       "prop_checkFindWithoutPath1",
       "prop_checkFindWithoutPath2",
@@ -6263,6 +7419,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 23,
+       "expr": "checkTimeParameters"
+      }
+     ],
      "tests": [
       "prop_checkTimeParameters1",
       "prop_checkTimeParameters2",
@@ -6299,6 +7462,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 24,
+       "expr": "checkTimedCommand"
+      }
+     ],
      "tests": [
       "prop_checkTimedCommand1",
       "prop_checkTimedCommand2",
@@ -6334,6 +7504,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 25,
+       "expr": "checkLocalScope"
+      }
+     ],
      "tests": [
       "prop_checkLocalScope1",
       "prop_checkLocalScope2"
@@ -6355,8 +7532,48 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
-     "tests": [],
-     "n_tests": 0
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 47,
+       "expr": "checkMultipleDeclaring \"local\""
+      },
+      {
+       "registry": "command",
+       "order": 47,
+       "expr": "checkMultipleDeclaring \"declare\""
+      },
+      {
+       "registry": "command",
+       "order": 47,
+       "expr": "checkMultipleDeclaring \"export\""
+      },
+      {
+       "registry": "command",
+       "order": 47,
+       "expr": "checkMultipleDeclaring \"readonly\""
+      },
+      {
+       "registry": "command",
+       "order": 47,
+       "expr": "checkMultipleDeclaring \"typeset\""
+      },
+      {
+       "registry": "command",
+       "order": 47,
+       "expr": "checkMultipleDeclaring \"let\""
+      }
+     ],
+     "tests": [
+      "prop_checkMultipleDeclaring1",
+      "prop_checkMultipleDeclaring2",
+      "prop_checkMultipleDeclaring3",
+      "prop_checkMultipleDeclaring4",
+      "prop_checkMultipleDeclaring5",
+      "prop_checkMultipleDeclaring6",
+      "prop_checkMultipleDeclaring7"
+     ],
+     "n_tests": 7
     },
     {
      "module": "Checks/Commands.hs",
@@ -6373,6 +7590,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 26,
+       "expr": "checkDeprecatedTempfile"
+      }
+     ],
      "tests": [
       "prop_checkDeprecatedTempfile1",
       "prop_checkDeprecatedTempfile2"
@@ -6381,7 +7605,7 @@
     }
    ],
    "haskell_lines": 18,
-   "n_tests": 4,
+   "n_tests": 11,
    "codes": [
     2168,
     2186,
@@ -6408,6 +7632,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 27,
+       "expr": "checkDeprecatedEgrep"
+      }
+     ],
      "tests": [
       "prop_checkDeprecatedEgrep"
      ],
@@ -6428,6 +7659,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 28,
+       "expr": "checkDeprecatedFgrep"
+      }
+     ],
      "tests": [
       "prop_checkDeprecatedFgrep"
      ],
@@ -6463,6 +7701,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 29,
+       "expr": "checkWhileGetoptsCase"
+      }
+     ],
      "tests": [
       "prop_checkWhileGetoptsCase1",
       "prop_checkWhileGetoptsCase2",
@@ -6505,6 +7750,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 30,
+       "expr": "checkCatastrophicRm"
+      }
+     ],
      "tests": [
       "prop_checkCatastrophicRm1",
       "prop_checkCatastrophicRm2",
@@ -6551,6 +7803,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 31,
+       "expr": "checkLetUsage"
+      }
+     ],
      "tests": [
       "prop_checkLetUsage1",
       "prop_checkLetUsage2"
@@ -6572,6 +7831,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 32,
+       "expr": "checkMvArguments"
+      }
+     ],
      "tests": [
       "prop_checkMvArguments1",
       "prop_checkMvArguments2",
@@ -6600,6 +7866,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 33,
+       "expr": "checkCpArguments"
+      }
+     ],
      "tests": [],
      "n_tests": 0
     },
@@ -6618,6 +7891,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 34,
+       "expr": "checkLnArguments"
+      }
+     ],
      "tests": [],
      "n_tests": 0
     }
@@ -6651,18 +7931,54 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 35,
+       "expr": "checkFindRedirections"
+      }
+     ],
      "tests": [
       "prop_checkFindRedirections1",
       "prop_checkFindRedirections2",
       "prop_checkFindRedirections3"
      ],
      "n_tests": 3
+    },
+    {
+     "module": "Checks/Commands.hs",
+     "check": "checkWhich",
+     "registry": "optional-command",
+     "order": 0,
+     "source_lines": [
+      1267,
+      1269
+     ],
+     "lines": 3,
+     "codes": [
+      2230
+     ],
+     "codes_inferred": false,
+     "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "optional-command",
+       "order": 0,
+       "expr": "checkWhich",
+       "optional_name": "deprecate-which"
+      }
+     ],
+     "tests": [
+      "prop_checkWhich"
+     ],
+     "n_tests": 1
     }
    ],
-   "haskell_lines": 14,
-   "n_tests": 3,
+   "haskell_lines": 17,
+   "n_tests": 4,
    "codes": [
-    2227
+    2227,
+    2230
    ]
   },
   {
@@ -6685,12 +8001,37 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
-     "tests": [],
-     "n_tests": 0
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 50,
+       "expr": "checkSudoRedirect \"sudo\""
+      },
+      {
+       "registry": "command",
+       "order": 50,
+       "expr": "checkSudoRedirect \"doas\""
+      },
+      {
+       "registry": "command",
+       "order": 50,
+       "expr": "checkSudoRedirect \"run0\""
+      }
+     ],
+     "tests": [
+      "prop_checkSudoRedirect1",
+      "prop_checkSudoRedirect2",
+      "prop_checkSudoRedirect3",
+      "prop_checkSudoRedirect4",
+      "prop_checkSudoRedirect5",
+      "prop_checkSudoRedirect6",
+      "prop_checkSudoRedirect7"
+     ],
+     "n_tests": 7
     }
    ],
    "haskell_lines": 23,
-   "n_tests": 0,
+   "n_tests": 7,
    "codes": [
     2024
    ]
@@ -6715,8 +8056,33 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
-     "tests": [],
-     "n_tests": 0
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 49,
+       "expr": "checkSudoArgs \"sudo\""
+      },
+      {
+       "registry": "command",
+       "order": 49,
+       "expr": "checkSudoArgs \"doas\""
+      },
+      {
+       "registry": "command",
+       "order": 49,
+       "expr": "checkSudoArgs \"run0\""
+      }
+     ],
+     "tests": [
+      "prop_checkSudoArgs1",
+      "prop_checkSudoArgs2",
+      "prop_checkSudoArgs3",
+      "prop_checkSudoArgs4",
+      "prop_checkSudoArgs5",
+      "prop_checkSudoArgs6",
+      "prop_checkSudoArgs7"
+     ],
+     "n_tests": 7
     },
     {
      "module": "Checks/Commands.hs",
@@ -6733,6 +8099,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 37,
+       "expr": "checkSourceArgs"
+      }
+     ],
      "tests": [
       "prop_checkSourceArgs1",
       "prop_checkSourceArgs2",
@@ -6742,7 +8115,7 @@
     }
    ],
    "haskell_lines": 20,
-   "n_tests": 3,
+   "n_tests": 10,
    "codes": [
     2232,
     2240
@@ -6768,6 +8141,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 38,
+       "expr": "checkChmodDashr"
+      }
+     ],
      "tests": [
       "prop_checkChmodDashr1",
       "prop_checkChmodDashr2",
@@ -6790,6 +8170,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 39,
+       "expr": "checkXargsDashi"
+      }
+     ],
      "tests": [
       "prop_checkXargsDashi1",
       "prop_checkXargsDashi2",
@@ -6827,12 +8214,57 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
-     "tests": [],
-     "n_tests": 0
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 45,
+       "expr": "checkArgComparison \"alias\""
+      },
+      {
+       "registry": "command",
+       "order": 45,
+       "expr": "checkArgComparison \"local\""
+      },
+      {
+       "registry": "command",
+       "order": 45,
+       "expr": "checkArgComparison \"declare\""
+      },
+      {
+       "registry": "command",
+       "order": 45,
+       "expr": "checkArgComparison \"export\""
+      },
+      {
+       "registry": "command",
+       "order": 45,
+       "expr": "checkArgComparison \"readonly\""
+      },
+      {
+       "registry": "command",
+       "order": 45,
+       "expr": "checkArgComparison \"typeset\""
+      },
+      {
+       "registry": "command",
+       "order": 45,
+       "expr": "checkArgComparison \"let\""
+      }
+     ],
+     "tests": [
+      "prop_checkArgComparison1",
+      "prop_checkArgComparison2",
+      "prop_checkArgComparison3",
+      "prop_checkArgComparison4",
+      "prop_checkArgComparison7",
+      "prop_checkArgComparison8",
+      "prop_checkArgComparison9"
+     ],
+     "n_tests": 7
     }
    ],
    "haskell_lines": 30,
-   "n_tests": 0,
+   "n_tests": 7,
    "codes": [
     2290
    ]
@@ -6857,12 +8289,60 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
-     "tests": [],
-     "n_tests": 0
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 46,
+       "expr": "checkMaskedReturns \"local\""
+      },
+      {
+       "registry": "command",
+       "order": 46,
+       "expr": "checkMaskedReturns \"declare\""
+      },
+      {
+       "registry": "command",
+       "order": 46,
+       "expr": "checkMaskedReturns \"export\""
+      },
+      {
+       "registry": "command",
+       "order": 46,
+       "expr": "checkMaskedReturns \"readonly\""
+      },
+      {
+       "registry": "command",
+       "order": 46,
+       "expr": "checkMaskedReturns \"typeset\""
+      },
+      {
+       "registry": "command",
+       "order": 46,
+       "expr": "checkMaskedReturns \"let\""
+      }
+     ],
+     "tests": [
+      "prop_checkMaskedReturns1",
+      "prop_checkMaskedReturns2",
+      "prop_checkMaskedReturns3",
+      "prop_checkMaskedReturns4",
+      "prop_checkMaskedReturns5",
+      "prop_checkMaskedReturns6",
+      "prop_checkMaskedReturns7",
+      "prop_checkMaskedReturns8",
+      "prop_checkMaskedReturns9",
+      "prop_checkMaskedReturns10",
+      "prop_checkMaskedReturns11",
+      "prop_checkMaskedReturns12",
+      "prop_checkMaskedReturns13",
+      "prop_checkMaskedReturns14",
+      "prop_checkMaskedReturns15"
+     ],
+     "n_tests": 15
     }
    ],
    "haskell_lines": 41,
-   "n_tests": 0,
+   "n_tests": 15,
    "codes": [
     2155
    ]
@@ -6887,6 +8367,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 40,
+       "expr": "checkUnquotedEchoSpaces"
+      }
+     ],
      "tests": [
       "prop_checkUnquotedEchoSpaces1",
       "prop_checkUnquotedEchoSpaces2",
@@ -6925,6 +8412,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 41,
+       "expr": "checkEvalArray"
+      }
+     ],
      "tests": [
       "prop_checkEvalArray1",
       "prop_checkEvalArray2",
@@ -6962,12 +8456,52 @@
      ],
      "codes_inferred": false,
      "uses_cfg": true,
-     "tests": [],
-     "n_tests": 0
+     "registrations": [
+      {
+       "registry": "command",
+       "order": 48,
+       "expr": "checkBackreferencingDeclaration \"local\""
+      },
+      {
+       "registry": "command",
+       "order": 48,
+       "expr": "checkBackreferencingDeclaration \"declare\""
+      },
+      {
+       "registry": "command",
+       "order": 48,
+       "expr": "checkBackreferencingDeclaration \"export\""
+      },
+      {
+       "registry": "command",
+       "order": 48,
+       "expr": "checkBackreferencingDeclaration \"readonly\""
+      },
+      {
+       "registry": "command",
+       "order": 48,
+       "expr": "checkBackreferencingDeclaration \"typeset\""
+      },
+      {
+       "registry": "command",
+       "order": 48,
+       "expr": "checkBackreferencingDeclaration \"let\""
+      }
+     ],
+     "tests": [
+      "prop_checkBackreferencingDeclaration1",
+      "prop_checkBackreferencingDeclaration2",
+      "prop_checkBackreferencingDeclaration3",
+      "prop_checkBackreferencingDeclaration4",
+      "prop_checkBackreferencingDeclaration5",
+      "prop_checkBackreferencingDeclaration6",
+      "prop_checkBackreferencingDeclaration7"
+     ],
+     "n_tests": 7
     }
    ],
    "haskell_lines": 40,
-   "n_tests": 0,
+   "n_tests": 7,
    "codes": [
     2318
    ]
@@ -6992,6 +8526,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 0,
+       "expr": "checkForDecimals"
+      }
+     ],
      "tests": [
       "prop_checkForDecimals1",
       "prop_checkForDecimals2",
@@ -7089,6 +8630,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 1,
+       "expr": "checkBashisms"
+      }
+     ],
      "tests": [
       "prop_checkBashisms",
       "prop_checkBashisms2",
@@ -7343,6 +8891,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 2,
+       "expr": "checkEchoSed"
+      }
+     ],
      "tests": [
       "prop_checkEchoSed1",
       "prop_checkEchoSed1b",
@@ -7379,6 +8934,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 3,
+       "expr": "checkBraceExpansionVars"
+      }
+     ],
      "tests": [
       "prop_checkBraceExpansionVars1",
       "prop_checkBraceExpansionVars2",
@@ -7415,6 +8977,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 4,
+       "expr": "checkMultiDimensionalArrays"
+      }
+     ],
      "tests": [
       "prop_checkMultiDimensionalArrays1",
       "prop_checkMultiDimensionalArrays2",
@@ -7452,6 +9021,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 5,
+       "expr": "checkPS1Assignments"
+      }
+     ],
      "tests": [
       "prop_checkPS11",
       "prop_checkPS11a",
@@ -7493,6 +9069,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 6,
+       "expr": "checkMultipleBangs"
+      }
+     ],
      "tests": [
       "prop_checkMultipleBangs1",
       "prop_checkMultipleBangs2"
@@ -7514,6 +9097,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 7,
+       "expr": "checkBangAfterPipe"
+      }
+     ],
      "tests": [
       "prop_checkBangAfterPipe1",
       "prop_checkBangAfterPipe2",
@@ -7549,6 +9139,13 @@
      ],
      "codes_inferred": false,
      "uses_cfg": false,
+     "registrations": [
+      {
+       "registry": "shell-support",
+       "order": 8,
+       "expr": "checkNegatedUnaryOps"
+      }
+     ],
      "tests": [
       "prop_checkNegatedUnaryOps1",
       "prop_checkNegatedUnaryOps2",

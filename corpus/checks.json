@@ -1668,6 +1668,63 @@
    "prop_checkSshHereDoc2"
   ]
  },
+ "Analytics.hs:subshellAssignmentCheck": {
+  "module": "Analytics.hs",
+  "name": "subshellAssignmentCheck",
+  "line": 2150,
+  "end_line": 2154,
+  "lines": 5,
+  "codes_direct": [],
+  "codes": [
+   2030,
+   2031
+  ],
+  "helpers": [
+   "findSubshelled"
+  ],
+  "uses_cfg": false,
+  "tests": [
+   "prop_subshellAssignmentCheck",
+   "prop_subshellAssignmentCheck2",
+   "prop_subshellAssignmentCheck3",
+   "prop_subshellAssignmentCheck4",
+   "prop_subshellAssignmentCheck5",
+   "prop_subshellAssignmentCheck6",
+   "prop_subshellAssignmentCheck6a",
+   "prop_subshellAssignmentCheck7",
+   "prop_subshellAssignmentCheck8",
+   "prop_subshellAssignmentCheck9",
+   "prop_subshellAssignmentCheck10",
+   "prop_subshellAssignmentCheck11",
+   "prop_subshellAssignmentCheck12",
+   "prop_subshellAssignmentCheck13",
+   "prop_subshellAssignmentCheck14",
+   "prop_subshellAssignmentCheck15",
+   "prop_subshellAssignmentCheck16",
+   "prop_subshellAssignmentCheck17",
+   "prop_subshellAssignmentCheck18",
+   "prop_subshellAssignmentCheck19",
+   "prop_subshellAssignmentCheck20",
+   "prop_subshellAssignmentCheck21",
+   "prop_subshellAssignmentCheck22",
+   "prop_subshellAssignmentCheck23",
+   "prop_subshellAssignmentCheck24",
+   "prop_subshellAssignmentCheck25",
+   "prop_subshellAssignmentCheck26",
+   "prop_subshellAssignmentCheck27",
+   "prop_subshellAssignmentCheck28",
+   "prop_subshellAssignmentCheck29",
+   "prop_subshellAssignmentCheck30",
+   "prop_subshellAssignmentCheck31",
+   "prop_subshellAssignmentCheck32",
+   "prop_subshellAssignmentCheck33",
+   "prop_subshellAssignmentCheck34",
+   "prop_subshellAssignmentCheck35",
+   "prop_subshellAssignmentCheck40",
+   "prop_subshellAssignmentCheck41",
+   "prop_subshellAssignmentCheck42"
+  ]
+ },
  "Analytics.hs:checkSpacefulnessCfg": {
   "module": "Analytics.hs",
   "name": "checkSpacefulnessCfg",
@@ -2011,6 +2068,7 @@
    "prop_checkUnassignedReferences35",
    "prop_checkUnassignedReferences36",
    "prop_checkUnassignedReferences37",
+   "prop_checkUnassignedReferences38",
    "prop_checkUnassignedReferences39",
    "prop_checkUnassignedReferences40",
    "prop_checkUnassignedReferences41",
@@ -4908,7 +4966,15 @@
    "return"
   ],
   "uses_cfg": false,
-  "tests": []
+  "tests": [
+   "prop_checkMultipleDeclaring1",
+   "prop_checkMultipleDeclaring2",
+   "prop_checkMultipleDeclaring3",
+   "prop_checkMultipleDeclaring4",
+   "prop_checkMultipleDeclaring5",
+   "prop_checkMultipleDeclaring6",
+   "prop_checkMultipleDeclaring7"
+  ]
  },
  "Checks/Commands.hs:checkDeprecatedTempfile": {
   "module": "Checks/Commands.hs",
@@ -5170,7 +5236,15 @@
    "return"
   ],
   "uses_cfg": false,
-  "tests": []
+  "tests": [
+   "prop_checkSudoRedirect1",
+   "prop_checkSudoRedirect2",
+   "prop_checkSudoRedirect3",
+   "prop_checkSudoRedirect4",
+   "prop_checkSudoRedirect5",
+   "prop_checkSudoRedirect6",
+   "prop_checkSudoRedirect7"
+  ]
  },
  "Checks/Commands.hs:checkSudoArgs": {
   "module": "Checks/Commands.hs",
@@ -5188,7 +5262,15 @@
    "return"
   ],
   "uses_cfg": false,
-  "tests": []
+  "tests": [
+   "prop_checkSudoArgs1",
+   "prop_checkSudoArgs2",
+   "prop_checkSudoArgs3",
+   "prop_checkSudoArgs4",
+   "prop_checkSudoArgs5",
+   "prop_checkSudoArgs6",
+   "prop_checkSudoArgs7"
+  ]
  },
  "Checks/Commands.hs:checkSourceArgs": {
   "module": "Checks/Commands.hs",
@@ -5274,7 +5356,15 @@
    "return"
   ],
   "uses_cfg": false,
-  "tests": []
+  "tests": [
+   "prop_checkArgComparison1",
+   "prop_checkArgComparison2",
+   "prop_checkArgComparison3",
+   "prop_checkArgComparison4",
+   "prop_checkArgComparison7",
+   "prop_checkArgComparison8",
+   "prop_checkArgComparison9"
+  ]
  },
  "Checks/Commands.hs:checkMaskedReturns": {
   "module": "Checks/Commands.hs",
@@ -5292,7 +5382,23 @@
    "return"
   ],
   "uses_cfg": false,
-  "tests": []
+  "tests": [
+   "prop_checkMaskedReturns1",
+   "prop_checkMaskedReturns2",
+   "prop_checkMaskedReturns3",
+   "prop_checkMaskedReturns4",
+   "prop_checkMaskedReturns5",
+   "prop_checkMaskedReturns6",
+   "prop_checkMaskedReturns7",
+   "prop_checkMaskedReturns8",
+   "prop_checkMaskedReturns9",
+   "prop_checkMaskedReturns10",
+   "prop_checkMaskedReturns11",
+   "prop_checkMaskedReturns12",
+   "prop_checkMaskedReturns13",
+   "prop_checkMaskedReturns14",
+   "prop_checkMaskedReturns15"
+  ]
  },
  "Checks/Commands.hs:checkUnquotedEchoSpaces": {
   "module": "Checks/Commands.hs",
@@ -5359,7 +5465,15 @@
    "return"
   ],
   "uses_cfg": true,
-  "tests": []
+  "tests": [
+   "prop_checkBackreferencingDeclaration1",
+   "prop_checkBackreferencingDeclaration2",
+   "prop_checkBackreferencingDeclaration3",
+   "prop_checkBackreferencingDeclaration4",
+   "prop_checkBackreferencingDeclaration5",
+   "prop_checkBackreferencingDeclaration6",
+   "prop_checkBackreferencingDeclaration7"
+  ]
  },
  "Checks/ShellSupport.hs:checkForDecimals": {
   "module": "Checks/ShellSupport.hs",
@@ -6664,7 +6778,9 @@
    "whitespace"
   ],
   "uses_cfg": false,
-  "tests": []
+  "tests": [
+   "prop_readAnnotation11"
+  ]
  },
  "Parser.hs:readAnnotations": {
   "module": "Parser.hs",
@@ -8628,7 +8744,11 @@
    "verifyEof"
   ],
   "uses_cfg": false,
-  "tests": []
+  "tests": [
+   "prop_readBackTicked",
+   "prop_readBackTicked2",
+   "prop_readBackTicked3"
+  ]
  },
  "Parser.hs:readDoubleQuoted": {
   "module": "Parser.hs",

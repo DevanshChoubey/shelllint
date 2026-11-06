@@ -56,6 +56,24 @@ ASCII_NAMES = {
 }
 
 
+# Registered checks whose name does not start with `check`.
+EXTRA_CHECKS = {"subshellAssignmentCheck"}
+
+
+def test_check_name(t, checks):
+    """The check a test belongs to. `target` is cut at the first space, so
+    argful targets look like `(checkSudoArgs` or `(checkUnassignedReferences' True)`;
+    those belong to `checkSudoArgs` / `checkUnassignedReferences`."""
+    target = t["target"]
+    if not target.startswith("("):
+        return target
+    name = target.lstrip("(").split()[0].rstrip(")")
+    base = name.rstrip("'")
+    if name != base and f"{t['module']}:{base}" in checks:
+        return base
+    return name
+
+
 class ParseError(Exception):
     pass
 
@@ -297,7 +315,7 @@ def main():
             return out
 
         for name, (line, end, body) in defs.items():
-            if not re.match(r"check[A-Z]", name) and mod != "Parser.hs":
+            if not (re.match(r"check[A-Z]", name) or name in EXTRA_CHECKS) and mod != "Parser.hs":
                 continue
             if mod == "Parser.hs" and not re.match(r"read[A-Z]", name):
                 continue
@@ -314,7 +332,7 @@ def main():
     by_target = {}
     for t in tests:
         if t.get("target"):
-            by_target.setdefault((t["module"], t["target"]), []).append(t["name"])
+            by_target.setdefault((t["module"], test_check_name(t, checks)), []).append(t["name"])
     for key, c in checks.items():
         c["tests"] = by_target.get((c["module"], c["name"]), [])
 
