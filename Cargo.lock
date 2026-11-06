@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "shellcheck-rs"
+name = "shellcheck-rust"
 version = "0.0.1"

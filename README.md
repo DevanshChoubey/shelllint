@@ -1,4 +1,4 @@
-# shellcheck-rs
+# shellcheck-rust
 
 A Rust port of [ShellCheck](https://github.com/koalaman/shellcheck), aiming
 for the same warnings, SC codes, CLI flags and output formats, with lower memory
