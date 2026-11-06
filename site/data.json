@@ -1,0 +1,4281 @@
+{
+ "generated_at": "2026-11-06T17:52:37Z",
+ "project": "shellcheck-rust",
+ "reference": "ShellCheck v0.11.0-171-ge11f964 (Haskell, koalaman/shellcheck:latest)",
+ "notes": [
+  "missing: bench/results/real-repos.json (run bench/run_real.sh)"
+ ],
+ "conformance": {
+  "blocked": 0,
+  "fail": 0,
+  "pass": 2105,
+  "skipped": 229,
+  "unported": 0,
+  "total": 2105,
+  "pass_pct": 100.0
+ },
+ "conformance_failures": [],
+ "corpus": {
+  "records": 2334,
+  "by_kind": {
+   "unit": 225,
+   "node": 1386,
+   "tree": 377,
+   "codes": 27,
+   "parse": 315,
+   "unparsed": 4
+  },
+  "codes_with_tests": 366,
+  "codes_registered": 495,
+  "codes_registered_untested": 129,
+  "per_code": [
+   {
+    "code": 1001,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1003,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1007,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1008,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 1010,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1011,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1012,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1014,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 1017,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1018,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1019,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1020,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1021,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1026,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1027,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1028,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1029,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1033,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1034,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1035,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1036,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1037,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1038,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1039,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1040,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1041,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1042,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1043,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1044,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1045,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1046,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1047,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1048,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1049,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1050,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1054,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1055,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1056,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1057,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1058,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1060,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1061,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1062,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1063,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1064,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1065,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1066,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1070,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1071,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1074,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1075,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1076,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1077,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1078,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1079,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1080,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1081,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1082,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1083,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1084,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1085,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1087,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1088,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1089,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 1090,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1091,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 1092,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1093,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1094,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1097,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1098,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1100,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1101,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1102,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1103,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1104,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1105,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1106,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1107,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 1108,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1109,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1110,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1111,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1112,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1113,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1114,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1115,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1116,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1118,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1123,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1124,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1125,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1126,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1127,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 1128,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1131,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1132,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1133,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1134,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1135,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1137,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1138,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1139,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1140,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1141,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1142,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1143,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1144,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1145,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 1146,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2000,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2001,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2002,
+    "tests": 20,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2003,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2004,
+    "tests": 9,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2005,
+    "tests": 12,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2006,
+    "tests": 19,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2007,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2009,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2010,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2011,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2012,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2013,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2014,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2015,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2016,
+    "tests": 17,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2017,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2018,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2019,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2020,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2021,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2022,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2023,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2024,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2025,
+    "tests": 12,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2026,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2027,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2028,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2029,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2030,
+    "tests": 19,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2031,
+    "tests": 19,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2032,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2033,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2034,
+    "tests": 237,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2035,
+    "tests": 18,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2036,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2037,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2038,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2041,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2042,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2043,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2044,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2045,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2046,
+    "tests": 34,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2048,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2049,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2050,
+    "tests": 24,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2051,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2053,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2054,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2055,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2056,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2057,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2058,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2059,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2060,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2061,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2062,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2063,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2064,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2065,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2066,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2067,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2068,
+    "tests": 26,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2069,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2070,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2071,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2072,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2073,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2074,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2075,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2076,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2077,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2078,
+    "tests": 21,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2079,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2080,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2081,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2082,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2083,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2084,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2086,
+    "tests": 229,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2087,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2088,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2089,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2090,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2091,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2092,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2093,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2094,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2095,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2096,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2097,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2098,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2099,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2100,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2101,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2102,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2103,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2104,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2105,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2106,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2107,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2108,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2109,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2110,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2111,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2112,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2113,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2114,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2115,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2116,
+    "tests": 10,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2117,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2118,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2119,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2120,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2121,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2122,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2123,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2124,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2125,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2126,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2127,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2128,
+    "tests": 9,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2129,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2139,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2140,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2141,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2142,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2143,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2144,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2145,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2146,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2147,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2148,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2150,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2151,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2152,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2153,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2154,
+    "tests": 288,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2155,
+    "tests": 14,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2156,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2157,
+    "tests": 9,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2158,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2159,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2160,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2161,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2162,
+    "tests": 44,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2163,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2164,
+    "tests": 18,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2165,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2166,
+    "tests": 8,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2167,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2168,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2170,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2171,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2172,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2173,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2174,
+    "tests": 10,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2175,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2176,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2177,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2178,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2179,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2180,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2181,
+    "tests": 17,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2182,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2183,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2184,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2185,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2186,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2187,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2188,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2189,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2190,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2191,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2192,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2193,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2194,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2195,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2196,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2197,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2198,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2199,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2200,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2201,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2202,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2203,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2204,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2205,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2206,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2207,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2208,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2209,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2210,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2211,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2212,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2213,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2214,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2215,
+    "tests": 8,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2216,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2217,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2218,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2219,
+    "tests": 10,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2220,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2221,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2222,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2223,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2224,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2225,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2226,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2227,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2229,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2230,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2231,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2232,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2233,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2234,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2235,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2236,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2237,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2238,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2239,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2240,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2241,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2242,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2243,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2244,
+    "tests": 9,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2245,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2246,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2247,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2248,
+    "tests": 50,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2249,
+    "tests": 20,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2250,
+    "tests": 392,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2251,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2252,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2253,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2254,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2255,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2256,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2257,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2258,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2259,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2260,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2261,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2262,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2263,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2264,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2265,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2266,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2267,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2268,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2269,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2270,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2271,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2272,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2273,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2274,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2275,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2276,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2277,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2278,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2279,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2280,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2281,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2282,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2283,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2284,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2285,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2286,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2287,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2288,
+    "tests": 8,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2289,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2290,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2291,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2292,
+    "tests": 130,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2293,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2294,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2295,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2296,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2297,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2298,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2299,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2300,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2301,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2302,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2303,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2304,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2305,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2306,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2307,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2308,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2309,
+    "tests": 8,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2310,
+    "tests": 10,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2311,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2312,
+    "tests": 151,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2313,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2314,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2315,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2316,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2317,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2318,
+    "tests": 7,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2319,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2320,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2321,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2322,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2323,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2324,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2325,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 2326,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2327,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2328,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2329,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2330,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2331,
+    "tests": 4,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2332,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2333,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2334,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2335,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2336,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2337,
+    "tests": 9,
+    "failing": 0,
+    "modules": [
+     "Checks/Commands.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 2338,
+    "tests": 21,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3001,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3002,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3004,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3005,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3006,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3007,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3008,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3009,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3010,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3011,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3012,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3014,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3015,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3016,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3017,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3018,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3019,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3020,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3021,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3022,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3023,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3024,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3025,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3026,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3028,
+    "tests": 5,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3029,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3030,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3031,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3032,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3033,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3034,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3035,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3036,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 3037,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3038,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3039,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3040,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3041,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3042,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 3043,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3044,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Analytics.hs",
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3045,
+    "tests": 15,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3046,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3047,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3048,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3049,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3050,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3051,
+    "tests": 0,
+    "failing": 0,
+    "modules": [],
+    "registered": true
+   },
+   {
+    "code": 3052,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3053,
+    "tests": 6,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3054,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3055,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3056,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3057,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3058,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3059,
+    "tests": 3,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3060,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3061,
+    "tests": 2,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3062,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3063,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3064,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3065,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3066,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   },
+   {
+    "code": 3067,
+    "tests": 1,
+    "failing": 0,
+    "modules": [
+     "Checks/ShellSupport.hs"
+    ],
+    "registered": true
+   }
+  ]
+ },
+ "real": null
+}

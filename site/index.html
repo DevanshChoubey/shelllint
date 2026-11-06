@@ -1,0 +1,146 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>shellcheck-rust: conformance and performance</title>
+  <meta name="description" content="Conformance, real-repo agreement, speed and memory of the Rust port of ShellCheck against the Haskell original.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-row">
+      <div>
+        <p class="eyebrow">shellcheck-rust</p>
+        <h1>Conformance and performance</h1>
+        <p class="lede">How the Rust port compares with ShellCheck&nbsp;<span id="ref-version">(Haskell)</span> on the upstream test corpus, on pinned real-world shell repositories, and on speed and peak memory.</p>
+      </div>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Color theme: follow system">
+        <span aria-hidden="true">&#9680;</span> <span id="theme-label">Auto</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="notes" class="notes" hidden></div>
+
+    <section class="stats" aria-label="Headline numbers">
+      <article class="stat">
+        <p class="stat-label">Corpus pass rate</p>
+        <p class="stat-value" id="stat-pass">-</p>
+        <p class="stat-sub" id="stat-pass-sub"></p>
+      </article>
+      <article class="stat">
+        <p class="stat-label">Real-repo agreement</p>
+        <p class="stat-value" id="stat-agree">-</p>
+        <p class="stat-sub" id="stat-agree-sub"></p>
+      </article>
+      <article class="stat">
+        <p class="stat-label">Speed vs Haskell</p>
+        <p class="stat-value" id="stat-speed">-</p>
+        <p class="stat-sub" id="stat-speed-sub"></p>
+      </article>
+      <article class="stat">
+        <p class="stat-label">Peak memory vs Haskell</p>
+        <p class="stat-value" id="stat-mem">-</p>
+        <p class="stat-sub" id="stat-mem-sub"></p>
+      </article>
+    </section>
+
+    <section class="card" id="conformance" aria-labelledby="h-conformance">
+      <h2 id="h-conformance">Conformance</h2>
+      <p class="muted">Every test in the ShellCheck corpus (<code>corpus/tests.jsonl</code>) run against the port. Blocked means the check's dependencies are not ported yet; unported means no implementation.</p>
+      <div id="conf-bar" class="stack" role="img" aria-label="Corpus test outcomes"></div>
+      <ul id="conf-legend" class="legend"></ul>
+      <details class="fails" id="conf-fails">
+        <summary>Failing tests</summary>
+        <ul id="conf-fail-list" class="fail-list"></ul>
+      </details>
+    </section>
+
+    <section class="card" id="codes" aria-labelledby="h-codes">
+      <h2 id="h-codes">Coverage by SC code</h2>
+      <p class="muted">How many corpus tests name each code (as expected output or as produced by the oracle). Registered codes come from the check registry.</p>
+      <div class="controls">
+        <label class="sr-only" for="code-search">Filter codes</label>
+        <input type="search" id="code-search" placeholder="Search code, e.g. 2086" autocomplete="off">
+        <label class="sr-only" for="code-filter">Show</label>
+        <select id="code-filter">
+          <option value="all">All codes</option>
+          <option value="tested">Tested</option>
+          <option value="untested">Registered, no tests</option>
+          <option value="failing">Failing tests</option>
+        </select>
+      </div>
+      <p class="muted small" id="code-summary"></p>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th scope="col">Code</th><th scope="col" class="num">Tests</th><th scope="col" class="num">Failing</th><th scope="col">Status</th><th scope="col">Modules</th></tr></thead>
+          <tbody id="code-body"></tbody>
+        </table>
+      </div>
+      <button type="button" class="ghost" id="code-more" hidden>Show all</button>
+    </section>
+
+    <section class="card" id="real" aria-labelledby="h-real">
+      <h2 id="h-real">Real-world repositories</h2>
+      <p class="muted">Shell files in pinned commits of popular projects. Diagnostics are compared on (line, column, code) per file.</p>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr>
+            <th scope="col">Repo</th><th scope="col" class="num">Files</th><th scope="col" class="num">Lines</th>
+            <th scope="col" class="num">Identical files</th><th scope="col" class="num">Disagreeing</th>
+          </tr></thead>
+          <tbody id="real-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" id="speed" aria-labelledby="h-speed">
+      <h2 id="h-speed">Speed</h2>
+      <p class="muted">Total wall time to check every shell file in each repo, one process per file, sequential. Lower is better.</p>
+      <ul class="legend" aria-hidden="true">
+        <li><span class="swatch hs"></span>Haskell ShellCheck</li>
+        <li><span class="swatch rs"></span>shellcheck-rust</li>
+      </ul>
+      <div id="speed-chart" class="chart"></div>
+    </section>
+
+    <section class="card" id="memory" aria-labelledby="h-memory">
+      <h2 id="h-memory">Peak memory</h2>
+      <p class="muted">Largest resident set of any single process in the repo run (from <code>/usr/bin/time -v</code>). Lower is better.</p>
+      <ul class="legend" aria-hidden="true">
+        <li><span class="swatch hs"></span>Haskell ShellCheck</li>
+        <li><span class="swatch rs"></span>shellcheck-rust</li>
+      </ul>
+      <div id="memory-chart" class="chart"></div>
+    </section>
+
+    <section class="card" id="mismatch" aria-labelledby="h-mismatch">
+      <h2 id="h-mismatch">Disagreements</h2>
+      <p class="muted">Codes reported by only one side, summed over every file in the real-repo run.</p>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th scope="col">SC code</th><th scope="col" class="num">Only Haskell</th><th scope="col" class="num">Only Rust</th></tr></thead>
+          <tbody id="codes-diff-body"></tbody>
+        </table>
+      </div>
+      <div id="mismatch-lists"></div>
+    </section>
+
+    <section class="card machine" id="machine" aria-labelledby="h-machine">
+      <h2 id="h-machine">Method and machine</h2>
+      <dl id="machine-list"></dl>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Generated by <code>site/generate.py</code> from <code>bench/results/</code> and <code>corpus/</code>. Re-run <code>bench/run_conformance.sh</code> and <code>bench/run_real.sh</code>, then <code>python3 -I site/generate.py</code>.</p>
+    <p class="muted" id="generated-at"></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
