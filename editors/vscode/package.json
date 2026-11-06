@@ -1,0 +1,113 @@
+{
+  "name": "shellcheck-rust",
+  "displayName": "ShellCheck (Rust)",
+  "description": "ShellCheck diagnostics, quick fixes and hovers via the shellcheck-rust language server.",
+  "version": "0.0.1",
+  "publisher": "shellcheck-rust",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shellcheck-rust/shellcheck-rust"
+  },
+  "private": true,
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "shell",
+    "bash",
+    "sh",
+    "shellcheck",
+    "lint",
+    "lsp"
+  ],
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:shellscript"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "shellcheck-rust.restart",
+        "title": "Restart Language Server",
+        "category": "ShellCheck (Rust)"
+      }
+    ],
+    "configuration": {
+      "title": "ShellCheck (Rust)",
+      "properties": {
+        "shellcheck-rust.server.path": {
+          "type": "string",
+          "default": "shellcheck-rust-lsp",
+          "description": "Path to the shellcheck-rust-lsp binary. A bare name is looked up on PATH."
+        },
+        "shellcheck-rust.dialect": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "sh",
+            "bash",
+            "dash",
+            "ksh",
+            "busybox"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "Use the shebang, '# shellcheck shell=' directive or file extension",
+            "POSIX sh",
+            "Bash",
+            "Dash",
+            "Korn shell",
+            "BusyBox sh"
+          ],
+          "description": "Shell dialect to check against when the script does not say."
+        },
+        "shellcheck-rust.enable": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Optional checks to enable by name (for example 'require-variable-braces'), or 'all'."
+        },
+        "shellcheck-rust.exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Codes to suppress everywhere, for example SC2034."
+        },
+        "shellcheck-rust.severity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info",
+            "style"
+          ],
+          "default": "style",
+          "description": "Minimum severity to report."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npx @vscode/vsce package --no-yarn"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.4.5"
+  }
+}
