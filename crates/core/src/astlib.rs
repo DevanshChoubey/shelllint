@@ -14,9 +14,9 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_core::ast::{Annotation, Ast, Id, Token};
-use shellcheck_core::prelude::please_report;
-use shellcheck_core::regex::{match_all_strings, match_regex, matches, mk_regex};
+use crate::ast::{Annotation, Ast, Id, Token};
+use crate::prelude::please_report;
+use crate::regex::{match_all_strings, match_regex, matches, mk_regex};
 
 /// `(String, (Token, Token))` as returned by the getOpts family.
 pub type Opt = (String, (Id, Id));

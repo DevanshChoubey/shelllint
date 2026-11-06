@@ -16,34 +16,278 @@ use crate::engine::{P, PR, ParseError, SourcePos};
 use crate::state::{Context, Environment, ParseNote, SystemState, UserState};
 use crate::unported;
 
+// annotations imports
+use crate::{alt, choice};
+use shellcheck_core::ast::{ConditionType, Token};
+use shellcheck_core::data::shell_for_executable;
+use shellcheck_core::interface::Severity;
+
 // BEGIN annotations
 impl<'a> P<'a> {
     pub(crate) fn read_condition(&mut self) -> PR<Id> {
-        unported!("readCondition")
+        self.called("test expression", |p| {
+            let opos = p.get_position();
+            let start = p.start_span();
+            let open = p.alt(|p| p.try_(|p| p.string("[[")), |p| p.string("["))?;
+            let single = open == "[";
+            let typ = if single { ConditionType::SingleBracket } else { ConditionType::DoubleBracket };
+
+            let pos = p.get_position();
+            let space = p.allspacing()?;
+            if space.is_empty() {
+                p.parse_problem_at_with_end(
+                    opos,
+                    pos,
+                    Severity::ErrorC,
+                    1035,
+                    &format!(
+                        "You need a space after the {}",
+                        if single { "[ and before the ]." } else { "[[ and before the ]]." }
+                    ),
+                );
+            }
+            if single && space.contains('\n') {
+                p.parse_problem_at(pos, Severity::ErrorC, 1080, "You need \\ before line feeds to break lines in [ ].");
+            }
+
+            let condition = p.alt(
+                |p| p.read_condition_contents(single),
+                |p| {
+                    p.guard(!space.is_empty())?;
+                    p.look_ahead(|p| p.string("]"))?;
+                    let id = p.end_span(start);
+                    Ok(p.node(id, Token::TC_Empty(typ)))
+                },
+            )?;
+
+            let cpos = p.get_position();
+            let close = alt!(
+                p,
+                |p| p.try_(|p| p.string("]]")),
+                |p| p.string("]"),
+                |p| p.fail("Expected test to end here (don't wrap commands in []/[[]])")
+            )?;
+            let id = p.end_span(start);
+            if open == "[[" && close != "]]" {
+                p.parse_problem_at(
+                    cpos,
+                    Severity::ErrorC,
+                    1033,
+                    "Test expression was opened with double [[ but closed with single ]. Make sure they match.",
+                );
+            }
+            if open == "[" && close != "]" {
+                p.parse_problem_at(
+                    opos,
+                    Severity::ErrorC,
+                    1034,
+                    "Test expression was opened with single [ but closed with double ]]. Make sure they match.",
+                );
+            }
+            p.spacing()?;
+            let close_typ = if close == "]" { ConditionType::SingleBracket } else { ConditionType::DoubleBracket };
+            Ok(p.node(id, Token::T_Condition(typ, close_typ, condition)))
+        })
     }
 
     pub(crate) fn read_annotation_prefix(&mut self) -> PR<String> {
-        unported!("readAnnotationPrefix")
+        self.char_('#')?;
+        self.many(|p| p.linewhitespace())?;
+        self.string("shellcheck")
     }
 
     pub(crate) fn read_annotation(&mut self) -> PR<Vec<Annotation>> {
-        unported!("readAnnotation")
+        self.called("shellcheck directive", |p| {
+            p.try_(|p| p.read_annotation_prefix())?;
+            p.many1(|p| p.linewhitespace())?;
+            p.read_annotation_without_prefix(true)
+        })
     }
 
     pub(crate) fn read_annotation_without_prefix(&mut self, sandboxed: bool) -> PR<Vec<Annotation>> {
-        unported!("readAnnotationWithoutPrefix")
+        let values = self.many1(|p| p.read_annotation_key(sandboxed))?;
+        self.optional(|p| p.read_any_comment())?;
+        alt!(
+            self,
+            |p| p.linefeed().map(drop),
+            |p| p.eof(),
+            |p| {
+                p.parse_note(
+                    Severity::ErrorC,
+                    1125,
+                    "Invalid key=value pair? Ignoring the rest of this directive starting here.",
+                );
+                p.many(|p| p.none_of("\n"))?;
+                alt!(p, |p| p.linefeed().map(drop), |p| p.eof())
+            }
+        )?;
+        self.many(|p| p.linewhitespace())?;
+        Ok(values.into_iter().flatten().collect())
+    }
+
+    /// `plainOrQuoted p = quoted p <|> p`
+    fn annotation_plain_or_quoted<T>(&mut self, f: &dyn Fn(&mut Self) -> PR<T>) -> PR<T> {
+        self.alt(|p| p.annotation_quoted(f), |p| f(p))
+    }
+
+    fn annotation_quoted<T>(&mut self, f: &dyn Fn(&mut Self) -> PR<T>) -> PR<T> {
+        let c = self.one_of("'\"")?;
+        let start = self.get_position();
+        let excl: String = [c, '\n'].iter().collect();
+        let str: String = self.many1(|p| p.none_of(&excl))?.into_iter().collect();
+        self.alt(|p| p.char_(c), |p| p.fail("Missing terminating quote for directive."))?;
+        self.sub_parse(start, |p| f(p), &str)
+    }
+
+    /// `quoted (many1 anyChar) <|> (many1 $ noneOf " \n")`
+    fn annotation_filename(&mut self) -> PR<String> {
+        self.alt(
+            |p| p.annotation_quoted(&|p| Ok(p.many1(|p| p.any_char())?.into_iter().collect::<String>())),
+            |p| Ok(p.many1(|p| p.none_of(" \n"))?.into_iter().collect::<String>()),
+        )
+    }
+
+    fn read_annotation_key(&mut self, sandboxed: bool) -> PR<Vec<Annotation>> {
+        let key_pos = self.get_position();
+        let key: String = self.many1(|p| p.alt(|p| p.letter(), |p| p.char_('-')))?.into_iter().collect();
+        self.alt(|p| p.char_('='), |p| p.fail("Expected '=' after directive key"))?;
+        let annotations = match key.as_str() {
+            "disable" => self.annotation_plain_or_quoted(&|p| {
+                p.sep_by(
+                    |p| {
+                        // readElement = readRange <|> readAll
+                        p.alt(
+                            |p| {
+                                // readRange
+                                let from = p.read_annotation_code()?;
+                                let to = choice!(
+                                    p,
+                                    |p| {
+                                        p.char_('-')?;
+                                        p.read_annotation_code()
+                                    },
+                                    |_| Ok(from + 1)
+                                )?;
+                                Ok(Annotation::DisableComment(from, to))
+                            },
+                            |p| {
+                                // readAll
+                                p.string("all")?;
+                                Ok(Annotation::DisableComment(0, 1000000))
+                            },
+                        )
+                    },
+                    |p| p.char_(','),
+                )
+            })?,
+            "enable" => self.annotation_plain_or_quoted(&|p| {
+                p.sep_by(
+                    |p| {
+                        let name: String =
+                            p.many1(|p| p.alt(|p| p.letter(), |p| p.char_('-')))?.into_iter().collect();
+                        Ok(Annotation::EnableComment(name))
+                    },
+                    |p| p.char_(','),
+                )
+            })?,
+            "source" => {
+                let filename = self.annotation_filename()?;
+                vec![Annotation::SourceOverride(filename)]
+            }
+            "source-path" => {
+                let dirname = self.annotation_filename()?;
+                vec![Annotation::SourcePath(dirname)]
+            }
+            "shell" => {
+                let pos = self.get_position();
+                let shell = self.annotation_filename()?;
+                if shell_for_executable(&shell).is_none() {
+                    self.parse_note_at(pos, Severity::ErrorC, 1103, "This shell type is unknown. Use e.g. sh or bash.");
+                }
+                vec![Annotation::ShellOverride(shell)]
+            }
+            "extended-analysis" => {
+                let pos = self.get_position();
+                let value = self.annotation_plain_or_quoted(&|p| {
+                    Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>())
+                })?;
+                match value.as_str() {
+                    "true" => vec![Annotation::ExtendedAnalysis(true)],
+                    "false" => vec![Annotation::ExtendedAnalysis(false)],
+                    _ => {
+                        self.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1146,
+                            "Unknown extended-analysis value. Expected true/false.",
+                        );
+                        vec![]
+                    }
+                }
+            }
+            "external-sources" => {
+                let pos = self.get_position();
+                let value = self.annotation_plain_or_quoted(&|p| {
+                    Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>())
+                })?;
+                match value.as_str() {
+                    "true" => {
+                        if sandboxed {
+                            self.parse_note_at(
+                                pos,
+                                Severity::ErrorC,
+                                1144,
+                                "external-sources can only be enabled in .shellcheckrc, not in individual files.",
+                            );
+                            vec![]
+                        } else {
+                            vec![Annotation::ExternalSources(true)]
+                        }
+                    }
+                    "false" => vec![Annotation::ExternalSources(false)],
+                    _ => {
+                        self.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1145,
+                            "Unknown external-sources value. Expected true/false.",
+                        );
+                        vec![]
+                    }
+                }
+            }
+            _ => {
+                self.parse_note_at(key_pos, Severity::WarningC, 1107, "This directive is unknown. It will be ignored.");
+                self.reluctantly_till(|p| p.any_char(), |p| p.whitespace())?;
+                vec![]
+            }
+        };
+
+        self.many(|p| p.linewhitespace())?;
+        Ok(annotations)
+    }
+
+    /// `readCode` of the `disable` directive
+    fn read_annotation_code(&mut self) -> PR<i64> {
+        self.optional(|p| p.string("SC"))?;
+        let int: String = self.many1(|p| p.digit())?.into_iter().collect();
+        // DIVERGENCE: Haskell reads an arbitrary-size Integer; saturate at i64.
+        Ok(int.parse::<i64>().unwrap_or(i64::MAX))
     }
 
     pub(crate) fn read_annotations(&mut self) -> PR<Vec<Annotation>> {
-        unported!("readAnnotations")
+        let annotations = self.many(|p| p.then_skip(|p| p.read_annotation(), |p| p.allspacing()))?;
+        Ok(annotations.into_iter().flatten().collect())
     }
 
     pub(crate) fn read_comment(&mut self) -> PR<String> {
-        unported!("readComment")
+        self.unexpecting("shellcheck annotation", |p| p.read_annotation_prefix())?;
+        self.read_any_comment()
     }
 
     pub(crate) fn read_any_comment(&mut self) -> PR<String> {
-        unported!("readAnyComment")
+        self.char_('#')?;
+        Ok(self.many(|p| p.none_of("\r\n"))?.into_iter().collect())
     }
 }
 // END annotations
