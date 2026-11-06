@@ -29,14 +29,17 @@ LISTS = [
     ("Checks/ShellSupport.hs", "checks", "shell-support"),
 ]
 registered = {}  # (module, name) -> registry
+order = {}  # (module, name) -> index in its Haskell registration list
 for mod, lst, reg in LISTS:
     text = (src / mod).read_text()
     m = re.search(rf"^{lst}\s*=\s*(.*?)^\S", text, re.S | re.M)
     if not m:
         continue
-    for name in re.findall(r"\b(check[A-Z]\w*)", m.group(1)):
+    for idx, name in enumerate(dict.fromkeys(re.findall(r"\b(check[A-Z]\w*)", m.group(1)))):
         if f"{mod}:{name}" in checks:
-            registered.setdefault((mod, name), reg)
+            if (mod, name) not in registered:
+                registered[(mod, name)] = reg
+                order[(mod, name)] = idx
 
 by_target = defaultdict(list)
 for t in tests:
@@ -59,7 +62,7 @@ for (mod, name), reg in registered.items():
     c = checks[f"{mod}:{name}"]
     codes = c["codes"] or inferred_codes((mod, name))
     units.append({
-        "module": mod, "check": name, "registry": reg,
+        "module": mod, "check": name, "registry": reg, "order": order[(mod, name)],
         "source_lines": [c["line"], c["end_line"]], "lines": c["lines"],
         "codes": codes, "codes_inferred": not c["codes"] and bool(codes),
         "uses_cfg": c["uses_cfg"] or name.endswith("Cfg"),
