@@ -3,7 +3,7 @@
 
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, PositionedComment};
+use shellcheck_core::interface::{CheckResult, PositionedComment, SystemInterface};
 
 use crate::*;
 
@@ -32,12 +32,14 @@ impl Formatter for CheckStyle {
         );
     }
 
-    fn on_result(&mut self, cr: &CheckResult, source: &str, out: &mut dyn Write) {
+    fn on_result(&mut self, cr: &CheckResult, sys: &dyn SystemInterface, out: &mut dyn Write) {
         if cr.comments.is_empty() {
             output_file(&cr.filename, "", &[], out);
         } else {
             for group in group_with(&cr.comments, |c| source_file(c).to_string()) {
-                output_file(source_file(&group[0]), source, group, out);
+                let filename = source_file(&group[0]);
+                let contents = read_or_empty(sys, filename);
+                output_file(filename, &contents, group, out);
             }
         }
     }

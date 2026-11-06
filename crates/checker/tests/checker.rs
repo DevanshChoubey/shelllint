@@ -951,6 +951,7 @@ fn decode_string_cases() {
     // F4 90 80 80 is above U+10FFFF: each byte falls back.
     assert_eq!(decode_string(b"\xf4\x90\x80\x80"), "\u{f4}\u{90}\u{80}\u{80}");
     assert_eq!(decode_string(b"\xf8\x80"), "\u{f8}\u{80}");
+    assert_eq!(decode_string(b"\x80"), "\u{80}"); // stray continuation
 }
 
 #[test]

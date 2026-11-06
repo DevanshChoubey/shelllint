@@ -31,6 +31,22 @@ fn run_with(args: &[&str], stdin: &str, env: &[(&str, &str)]) -> Out {
     }
 }
 
+/// Run with `dir` as the working directory and no stdin.
+fn run_in(dir: &std::path::Path, args: &[&str]) -> Out {
+    let o = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"))
+        .args(args)
+        .current_dir(dir)
+        .env_remove("SHELLCHECK_OPTS")
+        .stdin(Stdio::null())
+        .output()
+        .unwrap();
+    Out {
+        code: o.status.code().unwrap_or(-1),
+        stdout: String::from_utf8_lossy(&o.stdout).into_owned(),
+        stderr: String::from_utf8_lossy(&o.stderr).into_owned(),
+    }
+}
+
 fn run(args: &[&str], stdin: &str) -> Out {
     run_with(args, stdin, &[])
 }
@@ -309,4 +325,130 @@ fn editorconfig_error_exits_4() {
     let o = run(&["-f", "gcc", f.to_str().unwrap()], "");
     assert_eq!(o.code, 4);
     assert!(o.stdout.contains("Expected '=' after directive key. [SC1134]") || o.stdout.contains("[SC1134]"), "{}", o.stdout);
+}
+
+// Each file group is rendered against its own file's contents
+// (`siReadFile sys (Just True) (sourceFile group)` in TTY/GCC/JSON1/
+// CheckStyle/Diff.hs), not the checked file's. Expected texts are the
+// oracle's.
+#[test]
+fn sourced_file_groups_use_their_own_contents() {
+    let d = tmpdir("groups-tty");
+    std::fs::write(d.join("main.sh"), "#!/bin/sh\n. ./lib.sh\necho \"$y\"\n").unwrap();
+    std::fs::write(d.join("lib.sh"), "#!/bin/sh\nfoo=1\necho $bar\n").unwrap();
+    let o = run_in(&d, &["--norc", "-Cnever", "-x", "-a", "main.sh"]);
+    assert_eq!(o.stdout, TTY_GROUPS);
+
+    let d = tmpdir("groups-tab");
+    std::fs::write(d.join("main.sh"), "#!/bin/sh\n. ./lib.sh\n").unwrap();
+    std::fs::write(d.join("lib.sh"), "#!/bin/sh\n\t\techo $bar\n").unwrap();
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "gcc", "main.sh"]);
+    assert_eq!(
+        o.stdout,
+        "./lib.sh:2:8: warning: bar is referenced but not assigned. [SC2154]\n\
+         ./lib.sh:2:8: note: Double quote to prevent globbing and word splitting. [SC2086]\n"
+    );
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "json1", "main.sh"]);
+    assert!(o.stdout.contains("\"line\":2,\"endLine\":2,\"column\":8,\"endColumn\":12"), "{}", o.stdout);
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "checkstyle", "main.sh"]);
+    assert!(o.stdout.contains("<error line='2' column='8' severity='warning'"), "{}", o.stdout);
+
+    // diff reads lib.sh through the SystemInterface, so Latin-1 bytes decode.
+    std::fs::write(d.join("lib.sh"), b"#!/bin/sh\n# \xe9\necho $bar\n").unwrap();
+    let o = run_in(&d, &["--norc", "-x", "-a", "-f", "diff", "main.sh"]);
+    assert_eq!(
+        o.stdout,
+        "--- a/./lib.sh\n+++ b/./lib.sh\n@@ -1,3 +1,3 @@\n #!/bin/sh\n # \u{e9}\n-echo $bar\n+echo \"$bar\"\n\n"
+    );
+}
+
+const TTY_GROUPS: &str = "\nIn ./lib.sh line 2:\nfoo=1\n^-^ SC2034 (warning): foo appears unused. Verify use (or export if used externally).\n\n\nIn ./lib.sh line 3:\necho $bar\n     ^--^ SC2154 (warning): bar is referenced but not assigned.\n     ^--^ SC2086 (info): Double quote to prevent globbing and word splitting.\n\nDid you mean:\necho \"$bar\"\n\n\nIn main.sh line 3:\necho \"$y\"\n      ^-- SC2154 (warning): y is referenced but not assigned.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC2034 -- foo appears unused. Verify use (o...\n  https://www.shellcheck.net/wiki/SC2154 -- bar is referenced but not assigned.\n  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ...\n";
+
+// The CLI decodes input with shellcheck_checker::decode_string: a UTF-8
+// encoded surrogate is one character, as Haskell's `chr` makes it, so later
+// columns match the oracle's (2:10, not 2:12).
+#[test]
+fn encoded_surrogate_is_one_column() {
+    let d = tmpdir("surrogate");
+    std::fs::write(d.join("s.sh"), b"#!/bin/sh\necho \"\xed\xa0\x80\" $x\n").unwrap();
+    let o = run_in(&d, &["--norc", "-f", "gcc", "s.sh"]);
+    assert_eq!(
+        o.stdout,
+        "s.sh:2:10: warning: x is referenced but not assigned. [SC2154]\n\
+         s.sh:2:10: note: Double quote to prevent globbing and word splitting. [SC2086]\n"
+    );
+}
+
+// stdin can be read once: `getContents` (--files-from=-) and `inputFile "-"`
+// close it, so a later read fails as in the oracle. Failed reads are not
+// cached, so each later '-' fails.
+#[test]
+fn stdin_is_read_only_once() {
+    let a = tmpfile("once.sh", CLEAN);
+    let o = run(&["--norc", "-f", "gcc", "--files-from=-"], &format!("{}\n-\n", a));
+    assert_eq!(o.code, 2);
+    assert_eq!(o.stdout, "");
+    assert_eq!(o.stderr, "-: <stdin>: hGetContents: illegal operation (handle is closed)\n");
+    let o = run(&["--norc", "-f", "gcc", "--files-from=-", "-", "-"], &format!("{}\n", a));
+    assert_eq!(o.code, 2);
+    assert_eq!(o.stderr, "-: <stdin>: hGetContents: illegal operation (handle is closed)\n".repeat(2));
+    // A second getContents is an uncaught exception.
+    let o = run(&["--norc", "-f", "gcc", "--files-from=-", "--files-from=-"], &format!("{}\n", a));
+    assert_eq!(o.code, 1);
+    assert_eq!(o.stdout, "");
+    assert_eq!(o.stderr, "shellcheck-rust: <stdin>: hGetContents: illegal operation (handle is semi-closed)\n");
+    // Reading '-' twice as a script uses the cached contents.
+    let o = run(&["--norc", "-f", "gcc", "-", "-"], "#!/bin/sh\necho $x\n");
+    assert_eq!(o.code, 1);
+    assert_eq!(o.stdout.matches("[SC2154]").count(), 2, "{}", o.stdout);
+}
+
+// An internal error (here regex-tdfa rejecting an EditorConfig glob, a
+// Haskell `error`) prints `<prog>: <message>` and exits 1, not 101.
+#[test]
+fn internal_error_exits_1() {
+    let d = tmpdir("ec-regex");
+    std::fs::write(d.join(".editorconfig"), "root=true\n[[z-a].sh]\nshellcheck.disable=SC2086\n").unwrap();
+    std::fs::write(d.join("a.sh"), "#!/bin/sh\ntrue\n").unwrap();
+    let o = run_in(&d, &["-f", "gcc", "a.sh"]);
+    assert_eq!(o.code, 1, "{}", o.stderr);
+    assert!(o.stderr.starts_with("shellcheck-rust: "), "{}", o.stderr);
+    assert!(!o.stderr.contains("panicked") && !o.stderr.contains("RUST_BACKTRACE"), "{}", o.stderr);
+}
+
+// --rcfile accepts anything `doesFileExist` does, such as a fifo (or a
+// process substitution's /proc/self/fd/N). Oracle: SC2148 and SC2154 only.
+#[test]
+fn rcfile_may_be_a_fifo() {
+    let d = tmpdir("rc-fifo");
+    let fifo = d.join("p");
+    let _ = std::fs::remove_file(&fifo);
+    assert!(Command::new("mkfifo").arg(&fifo).status().unwrap().success());
+    std::fs::write(d.join("t.sh"), "echo $x\n").unwrap();
+    let fifo2 = fifo.clone();
+    let writer = std::thread::spawn(move || std::fs::write(&fifo2, "disable=SC2086\n").unwrap());
+    let o = run_in(&d, &["-f", "gcc", "--rcfile", fifo.to_str().unwrap(), "t.sh"]);
+    // If the fifo was never opened, unblock the writer instead of hanging.
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let _r = std::fs::OpenOptions::new().read(true).custom_flags(0o4000 /* O_NONBLOCK */).open(&fifo);
+        writer.join().unwrap();
+    }
+    assert_eq!(o.stderr, "");
+    assert_eq!(
+        o.stdout,
+        "t.sh:1:1: error: Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive. [SC2148]\n\
+         t.sh:1:6: warning: x is referenced but not assigned. [SC2154]\n"
+    );
+}
+
+// --list-optional is `sortOn cdName ShellCheck.Analyzer.optionalChecks`,
+// with shellcheck_checker::optional_checks as the one source of truth.
+#[test]
+fn list_optional_is_checker_optional_checks() {
+    let o = run(&["--list-optional"], "");
+    let mut names: Vec<String> = shellcheck_checker::optional_checks().into_iter().map(|c| c.name).collect();
+    names.sort();
+    let listed: Vec<&str> = o.stdout.lines().filter_map(|l| l.strip_prefix("name:    ")).collect();
+    assert_eq!(listed, names);
 }

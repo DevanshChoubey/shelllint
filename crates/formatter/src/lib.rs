@@ -2,15 +2,15 @@
 // Port of ShellCheck src/ShellCheck/Formatter/Format.hs (e11f964)
 //
 // DIVERGENCE: the Haskell `Formatter` record of IO actions becomes a trait.
-// `onResult` receives the file contents directly (`source`) instead of a
-// `SystemInterface`, and writes to `out` instead of stdout. Haskell writes
+// `onResult` receives the `SystemInterface` as in Haskell, and writes to
+// `out` instead of stdout. Haskell writes
 // `onFailure` messages to stderr for tty/gcc/json/json1; those formatters
 // still write to the process stderr, while checkstyle writes to `out`.
 
 use std::io::{IsTerminal, Write};
 
 use shellcheck_core::interface::{
-    ColorOption, Fix, FormatterOptions, PositionedComment, Severity,
+    ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface,
 };
 
 pub mod checkstyle;
@@ -27,7 +27,7 @@ pub trait Formatter {
     fn on_result(
         &mut self,
         r: &shellcheck_core::interface::CheckResult,
-        source: &str,
+        sys: &dyn SystemInterface,
         out: &mut dyn Write,
     );
     fn on_failure(&mut self, file: &str, msg: &str, out: &mut dyn Write);
@@ -52,6 +52,13 @@ pub fn by_name(name: &str, opts: FormatterOptions) -> Option<Box<dyn Formatter>>
         "quiet" => Some(Box::new(quiet::format(opts))),
         _ => None,
     }
+}
+
+/// `siReadFile sys (Just True) name`, with a failed read giving "" (the
+/// `either (const "") id result` the tty, gcc, json1 and checkstyle
+/// formatters use).
+pub fn read_or_empty(sys: &dyn SystemInterface, name: &str) -> String {
+    sys.read_file(Some(true), name).unwrap_or_default()
 }
 
 pub fn source_file(pc: &PositionedComment) -> &str {

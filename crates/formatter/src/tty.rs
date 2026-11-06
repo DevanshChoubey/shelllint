@@ -5,6 +5,7 @@ use std::io::Write;
 
 use shellcheck_core::interface::{
     CheckResult, Code, ColorOption, Fix, FormatterOptions, PositionedComment, Severity,
+    SystemInterface,
 };
 
 use crate::fixer::{apply_fix, map_positions, merge_fixes};
@@ -101,12 +102,12 @@ impl Formatter for Tty {
         eprintln!("{}", color("error", &format!("{}: {}", file, error)));
     }
 
-    fn on_result(&mut self, result: &CheckResult, source: &str, out: &mut dyn Write) {
+    fn on_result(&mut self, result: &CheckResult, sys: &dyn SystemInterface, out: &mut dyn Write) {
         let color = get_color_func(self.options.color_option);
         let comments = &result.comments;
         append_comments(&mut self.top_errors, comments, self.options.wiki_link_count);
         for group in group_with(comments, |c| source_file(c).to_string()) {
-            output_for_file(&color, source, group, out);
+            output_for_file(&color, sys, group, out);
         }
     }
 }
@@ -124,12 +125,13 @@ fn shorten(msg: &str) -> String {
 
 fn output_for_file(
     color: &ColorFunc,
-    contents: &str,
+    sys: &dyn SystemInterface,
     comments: &[PositionedComment],
     out: &mut dyn Write,
 ) {
     let file_name = source_file(&comments[0]);
-    let file_lines = haskell_lines(contents);
+    let contents = read_or_empty(sys, file_name);
+    let file_lines = haskell_lines(&contents);
     let line_count = file_lines.len() as i64;
     for comments_for_line in group_with(comments, line_no) {
         let line_num = line_no(&comments_for_line[0]);

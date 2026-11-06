@@ -1,17 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of ShellCheck src/ShellCheck/Formatter/Diff.hs (e11f964)
 //
-// DIVERGENCE: Haskell reads the files named by fixes through
-// `siReadFile sys (Just True)`. The Rust `Formatter` trait only hands over the
-// contents of the file that produced the result, so this formatter uses that
-// for `CheckResult::filename` and falls back to a configurable reader (the
-// filesystem by default) for any other file, e.g. one pulled in with `-x`.
-//
-// DIVERGENCE: `Data.Algorithm.Diff.getDiff` is replaced by a line-based LCS
-// that takes a common-prefix-first greedy diagonal and prefers deletions
-// before insertions. This yields the same script as Haskell for all cases
-// where the minimal edit script is unique, and for replaced lines (`-` then
-// `+`); ties between equally short scripts over repeated lines may differ.
+// `Data.Algorithm.Diff.getDiff` from the Diff package is ported below.
 //
 // DIVERGENCE: `a </> name` is only implemented for POSIX paths (an absolute
 // `name` replaces the `a` prefix); Windows drive/separator handling is not.
@@ -19,7 +9,7 @@
 use std::collections::BTreeMap;
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, Fix, FormatterOptions};
+use shellcheck_core::interface::{CheckResult, Fix, FormatterOptions, SystemInterface};
 
 use crate::fixer::{apply_fix, merge_fixes};
 use crate::*;
@@ -57,32 +47,18 @@ pub struct DiffDoc<T> {
     pub regions: Vec<DiffRegion<T>>,
 }
 
-type FileReader = Box<dyn Fn(&str) -> Result<String, String>>;
-
 pub struct DiffFormatter {
     found_issues: bool,
     reported_issues: bool,
     color: bool,
-    reader: FileReader,
 }
 
 pub fn format(options: FormatterOptions) -> DiffFormatter {
-    format_with_reader(options, Box::new(default_reader))
-}
-
-pub fn format_with_reader(options: FormatterOptions, reader: FileReader) -> DiffFormatter {
     DiffFormatter {
         found_issues: false,
         reported_issues: false,
         color: should_output_color(options.color_option),
-        reader,
     }
-}
-
-fn default_reader(path: &str) -> Result<String, String> {
-    std::fs::read(path)
-        .map(|b| String::from_utf8_lossy(&b).into_owned())
-        .map_err(|e| format!("{}: {}", path, e))
 }
 
 fn ansi(n: i32) -> String {
@@ -117,7 +93,7 @@ impl Formatter for DiffFormatter {
         print_err(self.color, &format!("{}: {}", file, msg));
     }
 
-    fn on_result(&mut self, result: &CheckResult, source: &str, out: &mut dyn Write) {
+    fn on_result(&mut self, result: &CheckResult, sys: &dyn SystemInterface, out: &mut dyn Write) {
         let comments = &result.comments;
         if !comments.is_empty() {
             self.found_issues = true;
@@ -125,12 +101,7 @@ impl Formatter for DiffFormatter {
         let suggested: Vec<Fix> = comments.iter().filter_map(|c| c.fix.clone()).collect();
         let fixmap = build_fix_map(&suggested);
         for (name, fix) in fixmap {
-            let contents = if name == result.filename {
-                Ok(source.to_string())
-            } else {
-                (self.reader)(&name)
-            };
-            match contents {
+            match sys.read_file(Some(true), &name) {
                 Ok(contents) => {
                     let doc = make_diff(&name, &contents, &fix);
                     // putStrLn: formatDoc output plus one more newline
@@ -168,47 +139,136 @@ fn compute_diff(contents: &str, fix: &Fix) -> Vec<Diff<String>> {
     get_diff(&old, &new)
 }
 
-/// Stand-in for Data.Algorithm.Diff.getDiff (see DIVERGENCE above).
+// ---- Data.Algorithm.Diff (package Diff >= 0.4) ------------------------------
+//
+// A port of `getDiff`: the O(ND) algorithm of Myers' "An O(ND) Difference
+// Algorithm and Its Variations", as the Haskell writes it, including its
+// `Ord L` instance and `pairMaxes`, which decide between equally short edit
+// scripts:
+//
+//   data L = L {poi :: !Int, poj :: !Int, path :: [DI]}
+//   instance Ord L where x <= y = if poi x == poi y then poj x > poj y
+//                                                   else poi x <= poi y
+//   dstep cd dls = hd:pairMaxes rst
+//     where (hd:rst) = nextDLs dls
+//           nextDLs (dl:rest) = dl':dl'':nextDLs rest
+//             where dl'  = addsnake cd $ dl {poi=poi dl + 1, path=(F : pdl)}
+//                   dl'' = addsnake cd $ dl {poj=poj dl + 1, path=(S : pdl)}
+//   lcs cd lena lenb = path . head . dropWhile (\dl -> poi dl /= lena || poj dl /= lenb) .
+//               concat . iterate (dstep cd) . (:[]) . addsnake cd $ L {poi=0,poj=0,path=[]}
+//
+// So element m (0..=n) of step d+1 is `F` of element m of step d (m = 0),
+// `max (S of m-1) (F of m)`, or `S` of element n-1 (m = n).
+//
+// DIVERGENCE: instead of carrying each `path` (a cons list the GC shares
+// and reclaims), every step records each element's `poi` and whether it
+// came from an `S`; the winning path is rebuilt by walking back. The edit
+// script is the same; memory is 5 bytes per frontier element and step.
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Di {
+    F,
+    S,
+    /// `n` consecutive `B`s (one snake).
+    B(usize),
+}
+
+/// `x <= y` of `instance Ord L`, on (poi, poj).
+fn l_le(x: (usize, usize), y: (usize, usize)) -> bool {
+    if x.0 == y.0 { x.1 > y.1 } else { x.0 <= y.0 }
+}
+
+/// `lcs`: the path of the first `L`, in `concat . iterate (dstep cd)` order,
+/// that reaches (lena, lenb), in chronological order.
+fn lcs<T: PartialEq>(a: &[T], b: &[T]) -> Vec<Di> {
+    // `addsnake cd`, with `canDiag`'s bounds checks.
+    let addsnake = |(mut i, mut j): (usize, usize)| {
+        while i < a.len() && j < b.len() && a[i] == b[j] {
+            i += 1;
+            j += 1;
+        }
+        (i, j)
+    };
+    let start = addsnake((0, 0));
+    let mut frontier: Vec<(usize, usize)> = vec![start];
+    let mut trace_poi: Vec<Vec<u32>> = vec![vec![start.0 as u32]];
+    let mut trace_s: Vec<Vec<bool>> = vec![vec![false]];
+    let (mut d, mut m) = loop {
+        if let Some(m) = frontier.iter().position(|&(i, j)| i == a.len() && j == b.len()) {
+            break (trace_poi.len() - 1, m);
+        }
+        // dstep
+        let n = frontier.len();
+        let mut next = Vec::with_capacity(n + 1);
+        let mut pois = Vec::with_capacity(n + 1);
+        let mut from_s = Vec::with_capacity(n + 1);
+        let f = |(i, j): (usize, usize)| addsnake((i + 1, j));
+        let s = |(i, j): (usize, usize)| addsnake((i, j + 1));
+        let mut push = |l: (usize, usize), is_s: bool| {
+            next.push(l);
+            pois.push(l.0 as u32);
+            from_s.push(is_s);
+        };
+        push(f(frontier[0]), false);
+        for k in 1..n {
+            // pairMaxes: max x y = if x <= y then y else x
+            let x = s(frontier[k - 1]);
+            let y = f(frontier[k]);
+            if l_le(x, y) { push(y, false) } else { push(x, true) }
+        }
+        push(s(frontier[n - 1]), true);
+        frontier = next;
+        trace_poi.push(pois);
+        trace_s.push(from_s);
+    };
+    drop(frontier);
+    // Walk back from (d, m), emitting each step's snake, then its F or S.
+    let mut steps = vec![];
+    let mut cur = trace_poi[d][m] as usize;
+    while d > 0 {
+        let is_s = trace_s[d][m];
+        let parent_m = if is_s { m - 1 } else { m };
+        let parent = trace_poi[d - 1][parent_m] as usize;
+        let snake = cur - (parent + usize::from(!is_s));
+        if snake > 0 {
+            steps.push(Di::B(snake));
+        }
+        steps.push(if is_s { Di::S } else { Di::F });
+        d -= 1;
+        m = parent_m;
+        cur = parent;
+    }
+    if cur > 0 {
+        steps.push(Di::B(cur));
+    }
+    steps.reverse();
+    steps
+}
+
+/// Data.Algorithm.Diff `getDiff` (`getDiffBy (==)`): `markup a b` of the
+/// reversed `lcs` path.
 pub fn get_diff<T: Clone + PartialEq>(a: &[T], b: &[T]) -> Vec<Diff<T>> {
-    let (n, m) = (a.len(), b.len());
-    // Strip common prefix and suffix, then LCS table on the middle.
-    let mut pre = 0;
-    while pre < n && pre < m && a[pre] == b[pre] {
-        pre += 1;
-    }
-    let mut suf = 0;
-    while suf < n - pre && suf < m - pre && a[n - 1 - suf] == b[m - 1 - suf] {
-        suf += 1;
-    }
-    let (am, bm) = (&a[pre..n - suf], &b[pre..m - suf]);
-    let (p, q) = (am.len(), bm.len());
-    let w = q + 1;
-    let mut t = vec![0u32; (p + 1) * w];
-    for i in (0..p).rev() {
-        for j in (0..q).rev() {
-            t[i * w + j] = if am[i] == bm[j] {
-                t[(i + 1) * w + j + 1] + 1
-            } else {
-                t[(i + 1) * w + j].max(t[i * w + j + 1])
-            };
-        }
-    }
-    let mut out: Vec<Diff<T>> = a[..pre].iter().map(|x| Diff::Both(x.clone(), x.clone())).collect();
+    let mut out = Vec::with_capacity(a.len().max(b.len()));
     let (mut i, mut j) = (0, 0);
-    while i < p || j < q {
-        if i < p && j < q && am[i] == bm[j] {
-            out.push(Diff::Both(am[i].clone(), bm[j].clone()));
-            i += 1;
-            j += 1;
-        } else if i < p && (j == q || t[(i + 1) * w + j] >= t[i * w + j + 1]) {
-            out.push(Diff::First(am[i].clone()));
-            i += 1;
-        } else {
-            out.push(Diff::Second(bm[j].clone()));
-            j += 1;
+    for step in lcs(a, b) {
+        match step {
+            Di::F => {
+                out.push(Diff::First(a[i].clone()));
+                i += 1;
+            }
+            Di::S => {
+                out.push(Diff::Second(b[j].clone()));
+                j += 1;
+            }
+            Di::B(n) => {
+                for _ in 0..n {
+                    out.push(Diff::Both(a[i].clone(), b[j].clone()));
+                    i += 1;
+                    j += 1;
+                }
+            }
         }
     }
-    out.extend(a[n - suf..].iter().map(|x| Diff::Both(x.clone(), x.clone())));
     out
 }
 
@@ -457,6 +517,20 @@ mod tests {
     #[test]
     fn prop_count_deltas_works2() {
         assert_eq!(count_delta::<i32>(&[]), (0, 0));
+    }
+
+    // Oracle-confirmed ties (koalaman/shellcheck -f diff): a line-LCS that
+    // prefers deletions picked a different, equally short script here.
+    #[test]
+    fn get_diff_breaks_ties_like_data_algorithm_diff() {
+        // old: #!, `echo $1 $1`, `echo $1`, `echo "$1"`; every line fixed to `echo "$1"`-like.
+        assert_eq!(get_diff(&[0, 1, 2, 3], &[0, 4, 3, 3]), vec![b(0), l(1), l(2), r(4), b(3), r(3)]);
+        // `echo $1` then `echo "$1"`, the first one fixed.
+        assert_eq!(get_diff(&[0, 1, 2], &[0, 2, 2]), vec![b(0), l(1), b(2), r(2)]);
+        assert_eq!(get_diff::<i32>(&[], &[]), vec![]);
+        assert_eq!(get_diff(&[1, 2], &[]), vec![l(1), l(2)]);
+        assert_eq!(get_diff(&[], &[1, 2]), vec![r(1), r(2)]);
+        assert_eq!(get_diff(&[1, 2, 3], &[1, 2, 3]), vec![b(1), b(2), b(3)]);
     }
 
     #[test]

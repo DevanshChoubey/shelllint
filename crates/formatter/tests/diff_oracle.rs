@@ -81,7 +81,8 @@ fn run_many(scripts: &[&str], color: ColorOption) -> String {
     f.header(&mut out);
     for s in scripts {
         let (cr, src) = result_for(s);
-        f.on_result(&cr, &src, &mut out);
+        let sys = mocked_system_interface(vec![(cr.filename.clone(), src)]);
+        f.on_result(&cr, &sys, &mut out);
     }
     f.footer(&mut out);
     String::from_utf8(out).unwrap()
@@ -137,7 +138,7 @@ fn color_always_wraps_headers_and_lines() {
 }
 
 #[test]
-fn cross_file_fix_uses_reader() {
+fn cross_file_fix_reads_each_file() {
     let p = |f: &str, c| Position { file: f.into(), line: 1, column: c };
     let rep = |f: &str, c, s: &str, ins| Replacement {
         start_pos: p(f, c),
@@ -161,12 +162,13 @@ fn cross_file_fix_uses_reader() {
             fix: Some(fix),
         }],
     };
-    let mut f = diff::format_with_reader(
-        new_formatter_options(),
-        Box::new(|n| if n == "other.sh" { Ok("ls\n".to_string()) } else { Err("nope".to_string()) }),
-    );
+    let mut f = diff::format(new_formatter_options());
+    let sys = mocked_system_interface(vec![
+        ("main.sh".into(), "echo\n".into()),
+        ("other.sh".into(), "ls\n".into()),
+    ]);
     let mut out = vec![];
-    f.on_result(&cr, "echo\n", &mut out);
+    f.on_result(&cr, &sys, &mut out);
     assert_eq!(
         String::from_utf8(out).unwrap(),
         "--- a/main.sh\n+++ b/main.sh\n@@ -1,1 +1,1 @@\n-echo\n+# echo\n\n\

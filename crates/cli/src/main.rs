@@ -11,7 +11,7 @@ use std::io::Write;
 use std::process::exit;
 
 use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
-use shellcheck_checker::check_script;
+use shellcheck_checker::{check_script_owned, optional_checks};
 use shellcheck_core::interface::{
     CheckSpec, ColorOption, Severity, SystemInterface,
 };
@@ -72,6 +72,31 @@ fn get_env_args() -> Vec<String> {
 }
 
 fn main() {
+    // Haskell's `error` (an uncaught ErrorCall) prints `<prog>: <message>`
+    // and exits 1. A Rust panic would exit 101 with a backtrace hint, so the
+    // hook prints the message the same way and `main` exits 1 once the
+    // unwinding (which flushes buffered stdout) reaches it.
+    // DIVERGENCE: the message text is the port's own, not GHC's (there is
+    // no `CallStack (from HasCallStack)` trailer).
+    std::panic::set_hook(Box::new(|info| {
+        let payload = info.payload();
+        let msg = payload
+            .downcast_ref::<&str>()
+            .map(|s| s.to_string())
+            .or_else(|| payload.downcast_ref::<String>().cloned())
+            .unwrap_or_else(|| "internal error".to_string());
+        eprintln!("{}: {}", prog_name(), msg);
+    }));
+    match std::panic::catch_unwind(run_main) {
+        Ok(code) => exit(code),
+        Err(_) => {
+            let _ = std::io::stdout().flush();
+            exit(1)
+        }
+    }
+}
+
+fn run_main() -> i32 {
     // DIVERGENCE: non-UTF-8 arguments are converted lossily (U+FFFD).
     let params: Vec<String> = std::env::args_os()
         .skip(1)
@@ -82,7 +107,25 @@ fn main() {
     let status = match parse_arguments(&args).and_then(|(flags, files)| process(&flags, &files)) {
         Ok(s) | Err(s) => s,
     };
-    exit(status_to_code(status));
+    status_to_code(status)
+}
+
+/// The program name, as GHC's `getProgName` gives it (the basename of argv[0]).
+fn prog_name() -> String {
+    std::env::args_os()
+        .next()
+        .map(|a| {
+            let p = std::path::PathBuf::from(a);
+            p.file_name().unwrap_or(p.as_os_str()).to_string_lossy().into_owned()
+        })
+        .unwrap_or_else(|| "shellcheck".to_string())
+}
+
+/// An uncaught Haskell exception: `<prog>: <message>` on stderr, exit 1.
+fn die(msg: &str) -> ! {
+    let _ = std::io::stdout().flush();
+    eprintln!("{}: {}", prog_name(), msg);
+    exit(1)
 }
 
 fn status_to_code(status: Status) -> i32 {
@@ -134,9 +177,11 @@ fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
     if path == "-" {
         // DIVERGENCE: stdin is read as UTF-8 here (invalid input yields an empty
         // list); Haskell's getContents uses the locale encoding.
-        let mut bytes = String::new();
-        let _ = std::io::Read::read_to_string(&mut std::io::stdin().lock(), &mut bytes);
-        return Ok(parse_file_list_lines(&bytes));
+        return match sys::read_stdin(true) {
+            Ok(bytes) => Ok(parse_file_list_lines(&String::from_utf8(bytes).unwrap_or_default())),
+            // A second `getContents` throws an IOException nothing catches.
+            Err(e) => die(&e.to_string()),
+        };
     }
     match sys::input_file(path) {
         Err(e) => {
@@ -191,11 +236,11 @@ fn process_file(
     };
     let spec = CheckSpec {
         filename: filename.to_string(),
-        script: contents.clone(),
+        script: contents,
         ..options.check_spec.clone()
     };
-    let result = check_script(sys, &spec);
-    format.on_result(&result, &contents, out);
+    let result = check_script_owned(sys, spec);
+    format.on_result(&result, sys, out);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
     // means shellcheck cannot apply the requested configuration.
     if result.comments.iter().any(|pc| {
@@ -358,9 +403,8 @@ fn print_version() {
 }
 
 fn print_optional() {
-    let mut list = shellcheck_analyzer::api::analytics_optional_checks();
-    list.extend(shellcheck_analyzer::api::commands_optional_checks());
-    // DIVERGENCE: ControlFlow's optional checks arrive with Phase 3.
+    // sortOn cdName ShellCheck.Analyzer.optionalChecks
+    let mut list = optional_checks();
     list.sort_by(|a, b| a.name.cmp(&b.name));
     for item in list {
         println!("name:    {}", item.name);

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Port of ShellCheck shellcheck.hs `ioInterface`, `inputFile`, `decodeString` (e11f964)
+// Port of ShellCheck shellcheck.hs `ioInterface` and `inputFile` (e11f964);
+// `decodeString` is shellcheck_checker::decode_string.
 //
 // EditorConfig lookup lives in shellcheck_checker::editorconfig; this file
 // supplies its filesystem (`EditorConfigFs`) and merges the results.
@@ -10,7 +11,9 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 
+use shellcheck_checker::decode_string;
 use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
 use shellcheck_core::interface::{ErrorMessage, SystemInterface};
 
@@ -49,6 +52,9 @@ pub fn show_io_error(file: &str, e: &std::io::Error) -> String {
 
 pub fn show_io_error_in(func: &str, file: &str, e: &std::io::Error) -> String {
     use std::io::ErrorKind::*;
+    if let Some(closed) = e.get_ref().and_then(|x| x.downcast_ref::<StdinClosed>()) {
+        return closed.to_string();
+    }
     let desc = match e.kind() {
         NotFound => "does not exist (No such file or directory)".to_string(),
         PermissionDenied => "permission denied (Permission denied)".to_string(),
@@ -58,11 +64,44 @@ pub fn show_io_error_in(func: &str, file: &str, e: &std::io::Error) -> String {
     format!("{}: {}: {}", file, func, desc)
 }
 
+/// Whether stdin has been read to the end. Haskell's `getContents` and
+/// `hGetContents stdin` close it (`getContents` semi-closes it until the
+/// lazy string is forced), so stdin can only be read once.
+static STDIN_CONSUMED: AtomicBool = AtomicBool::new(false);
+
+/// The IOException a read of an already consumed stdin raises:
+/// `<stdin>: hGetContents: illegal operation (handle is closed)`, or
+/// `semi-closed` while a `getContents` string is still unforced.
+#[derive(Debug)]
+pub struct StdinClosed {
+    pub semi: bool,
+}
+
+impl std::fmt::Display for StdinClosed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let state = if self.semi { "semi-closed" } else { "closed" };
+        write!(f, "<stdin>: hGetContents: illegal operation (handle is {})", state)
+    }
+}
+
+impl std::error::Error for StdinClosed {}
+
+/// Read all of stdin once; a later call fails like Haskell's
+/// `hGetContents` on a closed (`semi`: semi-closed) handle.
+pub fn read_stdin(semi: bool) -> Result<Vec<u8>, std::io::Error> {
+    if STDIN_CONSUMED.swap(true, Ordering::SeqCst) {
+        return Err(std::io::Error::other(StdinClosed { semi }));
+    }
+    let mut bytes = vec![];
+    std::io::stdin().lock().read_to_end(&mut bytes)?;
+    Ok(bytes)
+}
+
 /// `inputFile`: returns (contents, shouldCache).
 pub fn input_file(file: &str) -> Result<(String, bool), std::io::Error> {
     let mut bytes = vec![];
     let should_cache = if file == "-" {
-        std::io::stdin().lock().read_to_end(&mut bytes)?;
+        bytes = read_stdin(false)?;
         true
     } else {
         let mut f = std::fs::File::open(file)?;
@@ -74,54 +113,11 @@ pub fn input_file(file: &str) -> Result<(String, bool), std::io::Error> {
     Ok((decode_string(&bytes), should_cache))
 }
 
-/// Decode a char8 string into a utf8 string, with fallback on ISO-8859-1.
-pub fn decode_string(bytes: &[u8]) -> String {
-    let mut out = String::with_capacity(bytes.len());
-    let mut i = 0;
-    while i < bytes.len() {
-        let c = bytes[i];
-        i += 1;
-        if c < 0x80 {
-            out.push(c as char);
-            continue;
-        }
-        let num = c as u32;
-        let (init, n) = if num >= 0xF8 {
-            (None, 0)
-        } else if num >= 0xF0 {
-            (Some(num & 0x07), 3)
-        } else if num >= 0xE0 {
-            (Some(num & 0x0F), 2)
-        } else if num >= 0xC0 {
-            (Some(num & 0x1F), 1)
-        } else {
-            (None, 0)
-        };
-        let decoded = init.and_then(|x| construct(x, n, &bytes[i..]));
-        match decoded {
-            // DIVERGENCE: Haskell's `chr` accepts surrogates; Rust's `char` cannot
-            // represent them, so such a sequence falls back to Latin-1 like an
-            // invalid one (`c : decode rest`).
-            Some((n, used)) if char::from_u32(n).is_some() => {
-                out.push(char::from_u32(n).unwrap());
-                i += used;
-            }
-            _ => out.push(c as char),
-        }
-    }
-    out
-}
-
-fn construct(mut x: u32, n: usize, rest: &[u8]) -> Option<(u32, usize)> {
-    for k in 0..n {
-        let b = *rest.get(k)? as u32;
-        if (0x80..=0xBF).contains(&b) {
-            x = (x << 6) | (b & 0x3f);
-        } else {
-            return None;
-        }
-    }
-    if x <= 0x10FFFF { Some((x, n)) } else { None }
+/// System.Directory `doesFileExist`: the path exists (following symlinks)
+/// and is not a directory, so fifos, devices and `/proc/self/fd/N` (process
+/// substitution) count.
+fn does_file_exist(path: &str) -> bool {
+    std::fs::metadata(path).map(|m| !m.is_dir()).unwrap_or(false)
 }
 
 fn dir_of(path: &str) -> String {
@@ -143,7 +139,7 @@ impl IoInterface {
     }
 
     fn read_config(file: &str) -> Option<(String, String)> {
-        if !Path::new(file).is_file() {
+        if !does_file_exist(file) {
             return None;
         }
         match input_file(file) {
@@ -301,7 +297,7 @@ impl SystemInterface for IoInterface {
                 candidates.push(Path::new(&adjust(sp)).join(filename).to_string_lossy().into_owned());
             }
             for c in candidates {
-                if self.allowable(rc_suggests_external, &c) && Path::new(&c).is_file() {
+                if self.allowable(rc_suggests_external, &c) && does_file_exist(&c) {
                     return c;
                 }
             }
@@ -458,6 +454,22 @@ mod tests {
     }
 
     #[test]
+    fn does_file_exist_accepts_non_regular_files() {
+        let d = tmp();
+        let f = write(&d.join("f"), "");
+        assert!(does_file_exist(&f));
+        assert!(does_file_exist("/dev/null"));
+        assert!(!does_file_exist(&d.to_string_lossy()));
+        assert!(!does_file_exist("/nonexistent/x"));
+        // /dev/null as --rcfile is read (empty), with no warning.
+        let sys = iface(false, &[], Some("/dev/null"), &[]);
+        assert_eq!(sys.get_config(&f), Some(("/dev/null".into(), String::new())));
+        // find_source accepts a device too.
+        let sys = iface(true, &[], None, &[]);
+        assert_eq!(sys.find_source(&f, None, &["/dev".into()], "null"), "/dev/null");
+    }
+
+    #[test]
     fn rcfile_is_cached_with_slash_sentinel() {
         let d = tmp();
         let rc = write(&d.join("my.rc"), "disable=SC9");
@@ -500,21 +512,5 @@ mod tests {
         assert_eq!(x.read_file(Some(false), &lib).unwrap_err().contains("disabled via directive"), true);
         let e = x.read_file(None, "/nonexistent/q.sh").unwrap_err();
         assert_eq!(e, "/nonexistent/q.sh: openBinaryFile: does not exist (No such file or directory)");
-    }
-
-    #[test]
-    fn decode_string_utf8_and_latin1_fallback() {
-        assert_eq!(decode_string(b"abc"), "abc");
-        assert_eq!(decode_string("h\u{e9}\u{20ac}\u{1f600}".as_bytes()), "h\u{e9}\u{20ac}\u{1f600}");
-        // Invalid UTF-8 bytes become the Latin-1 characters of the same value.
-        assert_eq!(decode_string(&[0x68, 0xe9, 0x21]), "h\u{e9}!");
-        assert_eq!(decode_string(&[0xc3]), "\u{c3}"); // truncated sequence
-        assert_eq!(decode_string(&[0xc3, 0x41]), "\u{c3}A"); // bad continuation
-        assert_eq!(decode_string(&[0x80]), "\u{80}"); // stray continuation
-        assert_eq!(decode_string(&[0xf8, 0x80]), "\u{f8}\u{80}"); // 5-byte lead
-        // Surrogate (ED A0 80): not representable, falls back byte by byte.
-        assert_eq!(decode_string(&[0xed, 0xa0, 0x80]), "\u{ed}\u{a0}\u{80}");
-        // Beyond U+10FFFF (F4 90 80 80) is rejected.
-        assert_eq!(decode_string(&[0xf4, 0x90, 0x80, 0x80]), "\u{f4}\u{90}\u{80}\u{80}");
     }
 }

@@ -45,14 +45,16 @@ pub fn analyze_script(spec: &AnalysisSpec, ast: &mut Ast, root: Id) -> AnalysisR
 }
 
 /// `checkers spec params`
-// Checks/ControlFlow.hs (Phase 3) is not ported and Checks/Custom.hs is an
-// empty checker (`nullCheck`); neither contributes anything yet.
+// Checks/ControlFlow.hs and Checks/Custom.hs contribute no checks at
+// e11f964 (an empty `controlFlowEffectChecks` and a `nullCheck`), so they
+// are intentionally omitted.
 fn checkers(spec: &AnalysisSpec, params: &Params<'_>) -> Checker {
     Checker::mconcat([analytics_checker(spec), commands_checker(spec), shell_support_checker(params)])
 }
 
 /// `optionalChecks`
-// Checks/ControlFlow.hs `optionalChecks` is not ported yet (Phase 3).
+// Checks/ControlFlow.hs `optionalChecks = []` at e11f964, so it is
+// intentionally omitted.
 pub fn optional_checks() -> Vec<CheckDescription> {
     let mut v = analytics_optional_checks();
     v.extend(commands_optional_checks());
@@ -131,19 +133,26 @@ pub const CHECK_STACK_BYTES: usize = 512 * 1024 * 1024;
 // cannot overflow; nesting beyond ~10000 levels still aborts the process.
 // This is why `SystemInterface` requires `Sync`.
 pub fn check_script(sys: &dyn SystemInterface, spec: &CheckSpec) -> CheckResult {
+    check_script_owned(sys, spec.clone())
+}
+
+/// `check_script` taking the spec by value, so the script is moved into the
+/// parser instead of copied.
+pub fn check_script_owned(sys: &dyn SystemInterface, mut spec: CheckSpec) -> CheckResult {
     shellcheck_parser::engine::with_stack(CHECK_STACK_BYTES, || {
-        let results = check_script_contents(sys, spec, &spec.script);
+        let contents = std::mem::take(&mut spec.script);
+        let results = check_script_contents(sys, &spec, contents);
         CheckResult { filename: spec.filename.clone(), comments: results, ..empty_check_result() }
     })
 }
 
 /// The `where`-bound `checkScript contents` of `checkScript`.
-fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: &str) -> Vec<PositionedComment> {
+fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: String) -> Vec<PositionedComment> {
     let mut result = parse_script(
         sys,
         &ParseSpec {
             filename: spec.filename.clone(),
-            script: contents.to_string(),
+            script: contents,
             check_sourced: spec.check_sourced,
             ignore_rc: spec.ignore_rc,
             shell_type_override: spec.shell_type_override,
@@ -233,7 +242,7 @@ pub fn check_script_codes(script: &str, shell: Option<Shell>) -> Vec<Code> {
         optional_checks: vec!["all".to_string()],
         ..empty_check_spec()
     };
-    check_script(&mocked_system_interface(vec![]), &spec).comments.into_iter().map(|pc| pc.comment.code).collect()
+    check_script_owned(&mocked_system_interface(vec![]), spec).comments.into_iter().map(|pc| pc.comment.code).collect()
 }
 
 // ---- shellcheck.hs -----------------------------------------------------------
