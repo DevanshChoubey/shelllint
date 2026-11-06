@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Pinned real-world shell repositories for bench/fetch.sh and bench/run_real.sh.
+# Every commit is a full 40-hex SHA resolved from the default-branch HEAD on
+# 2026-11-06. To re-pin, change `commit` and rerun bench/fetch.sh.
+#
+# Only sh/bash/dash/ksh files are checked (by extension or shebang), so
+# zsh-only projects such as ohmyzsh are left out: both tools would report
+# "unsupported shell" for nearly every file and the comparison would be empty.
+#
+# `exclude` is a list of path prefixes relative to the repo root.
+
+[[repo]]
+name = "nvm"
+url = "https://github.com/nvm-sh/nvm.git"
+commit = "4e8758a801eea9479b32a904f31093e410ddaba4"
+exclude = []
+
+[[repo]]
+name = "neofetch"
+url = "https://github.com/dylanaraps/neofetch.git"
+commit = "ccd5d9f52609bbdcd5d8fa78c4fdb0f12954125f"
+exclude = []
+
+[[repo]]
+name = "acme.sh"
+url = "https://github.com/acmesh-official/acme.sh.git"
+commit = "37d064f7b580055d3f2ddf9a9c960f754f3694d6"
+exclude = []
+
+[[repo]]
+name = "bats-core"
+url = "https://github.com/bats-core/bats-core.git"
+commit = "dd43d25dac55fa30e779381a257d26fb8f21588f"
+# Test fixtures that are deliberately broken or use bats-specific syntax.
+exclude = ["test/bats/"]
+
+[[repo]]
+name = "asdf"
+url = "https://github.com/asdf-vm/asdf.git"
+commit = "ae14f6e673cc45d29e4977c4e9a70c70bef48196"
+exclude = []
+
+[[repo]]
+name = "rbenv"
+url = "https://github.com/rbenv/rbenv.git"
+commit = "07e9b1e297a5977298c6aadc9971ae0e9eb7f0dc"
+exclude = []
+
+[[repo]]
+name = "pyenv"
+url = "https://github.com/pyenv/pyenv.git"
+commit = "0dd55f83b6a85ed5b460311ec60439c66e257208"
+exclude = []
