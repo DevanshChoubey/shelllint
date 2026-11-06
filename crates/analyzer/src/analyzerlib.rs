@@ -32,6 +32,7 @@ use shellcheck_core::regex::{match_all_submatches, matches, mk_regex};
 use shellcheck_parser::{ParseResult, parse_script};
 
 use crate::astlib::*;
+use crate::cfg::CfgParameters;
 
 /// `type Analysis = AnalyzerM ()`: a check run on one token.
 pub type Analysis = dyn Fn(&Params<'_>, Id, &mut Comments);
@@ -82,10 +83,8 @@ impl Checker {
     }
 }
 
-/// `CF.CFGAnalysis`.
-// Phase 3 fills this in (CFGAnalysis.hs); for now it carries no data.
-#[derive(Clone, Debug, Default)]
-pub struct CfgAnalysis {}
+/// `CF.CFGAnalysis`; see `crate::cfg_analysis` for the query API.
+pub use crate::cfg_analysis::CfgAnalysis;
 
 /// `data Parameters`
 #[derive(Clone, Debug)]
@@ -116,7 +115,10 @@ pub struct Params<'a> {
     /// True if shell type was forced via flags
     pub shell_type_specified: bool,
     /// Result from Control Flow Graph analysis (including data flow analysis)
-    pub cfg_analysis: Option<CfgAnalysis>,
+    // DIVERGENCE: behind an `Rc` so that cloning `Params` (e.g.
+    // `Scratch::params`) does not copy the analysis. Use
+    // `params.cfg_analysis.as_deref()` for Haskell's `cfgAnalysis params`.
+    pub cfg_analysis: Option<std::rc::Rc<CfgAnalysis>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -344,9 +346,12 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
         cfg_analysis: None,
     };
     params.variable_flow = get_variable_flow(&params, root);
-    // Phase 3: `CF.analyzeControlFlow cfParams root` with
-    // cfParams = { cfLastpipe = hasLastpipe, cfPipefail = hasPipefail }.
-    params.cfg_analysis = if extended_analysis { Some(CfgAnalysis::default()) } else { None };
+    // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`
+    // TEMPORARY: the engine bodies are not ported yet, so an empty analysis
+    // (every query answers `None`/`false`) stands in for the real one.
+    let _cf_params = CfgParameters { cf_lastpipe: params.has_lastpipe, cf_pipefail: params.has_pipefail };
+    params.cfg_analysis =
+        if extended_analysis { Some(std::rc::Rc::new(CfgAnalysis::default())) } else { None };
     params
 }
 
