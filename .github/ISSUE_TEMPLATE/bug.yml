@@ -1,0 +1,71 @@
+name: Bug report
+description: A crash, wrong exit code, CLI or configuration problem, a broken output format, or a build or install failure.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the problem is *which warnings* appear, use the **Output differs from ShellCheck** template.
+        This port is unofficial. Please do not report its bugs to the ShellCheck project.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: script
+    attributes:
+      label: Script or input
+      description: The script, or the smallest input that reproduces the problem. Remove anything private. Write "n/a" if no script is involved.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command line
+      placeholder: shellcheck-rust -f json1 script.sh
+    validations:
+      required: true
+  - type: textarea
+    id: ours
+    attributes:
+      label: shellcheck-rust output
+      description: The full output, including any panic message, and the exit code (`echo $?`).
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: upstream
+    attributes:
+      label: Upstream ShellCheck output
+      description: What upstream ShellCheck prints for the same command, if it applies. For example `docker run --rm -i koalaman/shellcheck:latest ... - < script.sh`.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: shellcheck-rust version
+      description: Output of `shellcheck-rust --version`, or the commit hash.
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: Ubuntu 24.04 x86_64 / macOS 15 arm64 / Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you installed it
+      options:
+        - Built from source (cargo install --path)
+        - cargo install from crates.io
+        - Prebuilt release binary
+        - Other (please describe above)
+    validations:
+      required: true
