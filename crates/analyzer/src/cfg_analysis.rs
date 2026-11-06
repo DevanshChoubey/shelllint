@@ -15,8 +15,13 @@
 // DIVERGENCE: `ProgramState.variablesInScope` is a `Map String
 // VariableState` built per node with `M.unions`. Storing that map for every
 // node is quadratic in memory, so `ProgramState` keeps the three scopes
-// (shared, reference counted) and `variables_in_scope` /
-// `variable_in_scope` compute the union on demand. The result is the same.
+// (persistent maps shared with the DFA and other nodes) and
+// `variables_in_scope` / `variable_in_scope` compute the union on demand.
+// Each scope is kept as two layers, the node's state and its invocation's
+// base state, so `patchState base` isn't materialized per node either.
+// Haskell censors `literalValue` with `M.map censor`, another full copy per
+// node; here the accessors censor the values they return instead. The
+// results are the same.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
@@ -61,15 +66,61 @@ impl CfgAnalysis {
     }
 }
 
-/// A variable scope as stored in a `ProgramState`.
-pub(crate) type VarMap = Rc<BTreeMap<Rc<str>, VariableState>>;
+/// The persistent (structurally shared) map used for all DFA state maps.
+pub(crate) type PMap<V> = rpds::RedBlackTreeMap<Rc<str>, V>;
+
+/// A variable scope (or one layer of it) as stored in a `ProgramState`.
+#[derive(Clone, Debug)]
+pub(crate) enum Layer {
+    /// A DFA state map, shared with the DFA and other nodes.
+    Map(Rc<PMap<VariableState>>),
+    /// A compact sorted map, for the per-invocation states built from the
+    /// dependencies (one per function invocation, never modified).
+    Sorted(Rc<[(Rc<str>, VariableState)]>),
+}
+
+impl Layer {
+    fn get(&self, name: &str) -> Option<&VariableState> {
+        match self {
+            Layer::Map(m) => m.get(name),
+            Layer::Sorted(v) => v.binary_search_by(|(k, _)| (**k).cmp(name)).ok().map(|i| &v[i].1),
+        }
+    }
+    /// The address of the shared storage (an identity for deduplication).
+    pub(crate) fn addr(&self) -> usize {
+        match self {
+            Layer::Map(m) => Rc::as_ptr(m) as *const u8 as usize,
+            Layer::Sorted(v) => Rc::as_ptr(v) as *const u8 as usize,
+        }
+    }
+    fn for_each(&self, mut f: impl FnMut(&Rc<str>, &VariableState)) {
+        match self {
+            Layer::Map(m) => m.iter().for_each(|(k, v)| f(k, v)),
+            Layer::Sorted(v) => v.iter().for_each(|(k, v)| f(k, v)),
+        }
+    }
+}
+
+/// `censor`: drop the literal value (it's just for debugging).
+fn censor(v: &VariableState) -> VariableState {
+    let mut v = v.clone();
+    v.variable_value.literal_value = None;
+    v
+}
 
 /// The program state we expose externally (`data ProgramState`).
+// Shared: most nodes have the same state as a neighbour, and the DFA
+// deduplicates them (see `Externalizer` in dfa.rs).
 #[derive(Clone, Debug)]
-pub struct ProgramState {
-    /// `[sPrefixValues, sLocalValues, sGlobalValues]`, with literal values
-    /// already censored. `variablesInScope` is their left-biased union.
-    pub(crate) scopes: [VarMap; 3],
+pub struct ProgramState(pub(crate) Rc<StateData>);
+
+#[derive(Debug)]
+pub(crate) struct StateData {
+    /// `[sPrefixValues, sLocalValues, sGlobalValues]`, uncensored, each as
+    /// two layers (a node's state, then the base state of its invocation;
+    /// `patchState` is their left-biased union). `variablesInScope` is the
+    /// left-biased union of all six, censored.
+    pub(crate) scopes: [Layer; 6],
     pub(crate) exit_codes: Rc<BTreeSet<Id>>,
     pub(crate) state_is_reachable: bool,
 }
@@ -79,32 +130,32 @@ impl ProgramState {
     /// Prefer `variable_in_scope` for a single lookup.
     pub fn variables_in_scope(&self) -> BTreeMap<String, VariableState> {
         let mut out = BTreeMap::new();
-        for m in &self.scopes {
-            for (k, v) in m.iter() {
-                out.entry(k.to_string()).or_insert_with(|| v.clone());
-            }
+        for m in &self.0.scopes {
+            m.for_each(|k, v| {
+                out.entry(k.to_string()).or_insert_with(|| censor(v));
+            });
         }
         out
     }
     /// `M.lookup name (variablesInScope state)`
     pub fn variable_in_scope(&self, name: &str) -> Option<VariableState> {
-        self.scopes.iter().find_map(|m| m.get(name)).cloned()
+        self.0.scopes.iter().find_map(|m| m.get(name)).map(censor)
     }
     /// `exitCodes`: the set of commands that could have provided `$?`.
     pub fn exit_codes(&self) -> &BTreeSet<Id> {
-        &self.exit_codes
+        &self.0.exit_codes
     }
     /// `stateIsReachable`
     pub fn state_is_reachable(&self) -> bool {
-        self.state_is_reachable
+        self.0.state_is_reachable
     }
 }
 
 impl PartialEq for ProgramState {
     fn eq(&self, other: &Self) -> bool {
         self.variables_in_scope() == other.variables_in_scope()
-            && self.exit_codes == other.exit_codes
-            && self.state_is_reachable == other.state_is_reachable
+            && self.0.exit_codes == other.0.exit_codes
+            && self.0.state_is_reachable == other.0.state_is_reachable
     }
 }
 impl Eq for ProgramState {}
