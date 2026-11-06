@@ -1508,3 +1508,33 @@ fn glob_classes_with_regex_set_syntax_do_not_panic() {
     // A section header with such a class goes through the whole parse.
     assert_eq!(parse_editor_config("[foo[[].sh]\nshellcheck.shell=sh\n", "foo[.sh"), "\nshell=sh\n");
 }
+
+// ---- fix round 2 (oracle review 2) ------------------------------------------
+
+/// (code, line, column, end line, end column) of each comment for
+/// `shellcheck -f json1 --norc -o all` on `script`.
+fn oracle_positions(script: &str) -> Vec<(Code, i64, i64, i64, i64)> {
+    positioned(&mocked_system_interface(vec![]), oracle_spec("t.sh", script))
+        .into_iter()
+        .map(|(c, l, col, el, ec, _)| (c, l, col, el, ec))
+        .collect()
+}
+
+#[test]
+fn shebang_words_do_not_split_on_unicode_line_separators() {
+    // U+0085, U+2028 and U+2029 are White_Space in Rust but not isSpace in
+    // GHC, so `words` keeps them inside a word.
+    // oracle: a.sh 1:1 1008, 2:4-2:5 2078 (the shell is not recognised)
+    for sep in ["\u{85}", "\u{2028}", "\u{2029}"] {
+        let r = oracle_positions(&format!("#!/usr/bin/env{sep}sh\n[[ a ]]\n"));
+        assert_eq!(r, vec![(1008, 1, 1, 1, 1), (2078, 2, 4, 2, 5)], "{sep:?}");
+        let r = oracle_positions(&format!("#!/usr/bin/env -S{sep}bash\n[[ a ]]\n"));
+        assert_eq!(r, vec![(1008, 1, 1, 1, 1), (2078, 2, 4, 2, 5)], "{sep:?}");
+        // oracle: b.sh no comments (one parameter, so no SC2096)
+        assert_eq!(oracle_positions(&format!("#!/bin/bash -e{sep}-u\necho\n")), vec![], "{sep:?}");
+        // oracle: c.sh 1:1 1008 (no SC2246: the first word is not a directory)
+        assert_eq!(oracle_positions(&format!("#!/bin/{sep}bash\necho\n")), vec![(1008, 1, 1, 1, 1)], "{sep:?}");
+    }
+    // oracle: e.sh no comments
+    assert_eq!(oracle_positions("#!/bin/bash \u{85}/x\necho\n"), vec![]);
+}

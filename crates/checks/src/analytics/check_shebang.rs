@@ -6,6 +6,7 @@ use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
 use shellcheck_core::ast::{Annotation, Id, Token};
 use shellcheck_core::astlib::executable_from_shebang;
 use shellcheck_core::interface::TokenComment;
+use shellcheck_core::unicode::words;
 
 #[linkme::distributed_slice(CHECKS)]
 static ENTRY: CheckEntry = CheckEntry {
@@ -57,12 +58,7 @@ fn check_shebang(params: &Params<'_>, t: Id) -> Vec<TokenComment> {
                         "Ensure the shebang uses an absolute path to the interpreter.",
                     );
                 }
-                // Haskell `words` splits on `isSpace`, as `split_whitespace` does.
-                if sb
-                    .split_whitespace()
-                    .next()
-                    .is_some_and(|w| w.ends_with('/'))
-                {
+                if words(sb).first().is_some_and(|w| w.ends_with('/')) {
                     c.err(
                         id,
                         2246,

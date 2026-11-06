@@ -1173,13 +1173,12 @@ pub fn executable_from_shebang(s: &str) -> String {
     if matches(s, &ENV_RE) {
         return match match_regex(&ENV_RE, s) {
             Some(g) if g.len() == 2 => {
-                let words: Vec<&str> = g[1].split_whitespace().collect();
-                from_env_args(&words)
+                from_env_args(&crate::unicode::words(&g[1]))
             }
             _ => String::new(),
         };
     }
-    let words: Vec<&str> = s.split_whitespace().collect();
+    let words = crate::unicode::words(s);
     match words.as_slice() {
         [] => String::new(),
         [x] => basename(x),

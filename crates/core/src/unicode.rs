@@ -75,6 +75,12 @@ pub fn is_space(c: char) -> bool {
     )
 }
 
+/// `words`: split on runs of `isSpace`, dropping empty words. Unlike
+/// `str::split_whitespace`, U+0085, U+2028 and U+2029 are not separators.
+pub fn words(s: &str) -> Vec<&str> {
+    s.split(is_space).filter(|w| !w.is_empty()).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -113,5 +119,17 @@ mod tests {
         }
         assert!(is_upper('Ж') && is_lower('ж'));
         assert!(!is_alpha('\u{10FFFF}') && !is_alpha_num('\u{E000}'));
+    }
+
+    #[test]
+    fn words_splits_on_is_space_only() {
+        assert_eq!(words("  a\tb\u{A0}c\u{3000}d \n"), ["a", "b", "c", "d"]);
+        assert_eq!(words(""), Vec::<&str>::new());
+        // Not isSpace in GHC, although Rust's White_Space includes them.
+        for c in ['\u{85}', '\u{2028}', '\u{2029}', '\u{200B}'] {
+            assert!(!is_space(c), "{c:?}");
+            let s = format!("a{c}b c");
+            assert_eq!(words(&s), [&s[..s.len() - 2], "c"]);
+        }
     }
 }
