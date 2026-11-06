@@ -116,11 +116,6 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
     let format = get_option(flags, "format").unwrap_or("tty");
     let formatter = match by_name(format, options.formatter_options.clone()) {
         Some(f) => f,
-        None if format == "diff" => {
-            // DIVERGENCE: the diff formatter (Formatter/Diff.hs) is out of scope for Phase 1.
-            print_err("The diff format is not implemented in shellcheck-rust yet.");
-            return Err(Status::SupportFailure);
-        }
         None => {
             print_err(&format!("Unknown format {}", format));
             print_err("Supported formats:");
