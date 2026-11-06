@@ -111,9 +111,9 @@ fn pilot_codes() {
 #[test]
 fn analytics_checker_runs_node_and_tree_checks() {
     let c = analytics_checker(&spec());
-    assert_eq!(run_module(&c, "#!/bin/bash -x -e\nn=$(echo $foo | wc -c)", &spec()), [2000, 2096]);
+    assert_eq!(run_module(&c, "#!/bin/bash -x -e\nn=$(echo $foo | wc -c)", &spec()), [2000, 2034, 2096, 2154]);
     // "unregistered" entries are never run by the module checker.
-    assert_eq!(run_module(&c, "#!/bin/bash\n((3.14*c))", &spec()), Vec::<Code>::new());
+    assert_eq!(run_module(&c, "#!/bin/bash\n((3.14*c))", &spec()), [2154]); // no 2079
 }
 
 #[test]
@@ -129,7 +129,7 @@ fn commands_checker_dispatches_by_basename() {
 #[test]
 fn shell_support_checker_honours_shell_list() {
     let s = "((3.14*c))";
-    for (shebang, want) in [("#!/bin/sh", vec![2079]), ("#!/bin/bash", vec![2079]), ("#!/bin/ksh", vec![])] {
+    for (shebang, want) in [("#!/bin/sh", vec![2079, 3006]), ("#!/bin/bash", vec![2079]), ("#!/bin/ksh", vec![])] {
         let p = parse(&format!("{shebang}\n{s}"));
         let params = p.params(&spec());
         assert_eq!(codes(&run_checker(&params, &shell_support_checker(&params))), want, "{shebang}");
@@ -186,8 +186,10 @@ static OPT_CMD: CheckEntry = CheckEntry {
 fn selected_optionals_all_versus_keys() {
     let with = |keys: &[&str]| AnalysisSpec { optional_checks: keys.iter().map(|k| k.to_string()).collect(), ..spec() };
     let script = "tr x y";
-    let analytics = |keys: &[&str]| run_module(&analytics_checker(&with(keys)), script, &with(keys));
-    let commands = |keys: &[&str]| run_module(&commands_checker(&with(keys)), script, &with(keys));
+    // Only the test-only optional codes (9001..=9003); real registered checks also fire.
+    let test_only = |v: Vec<Code>| v.into_iter().filter(|c| (9001..=9003).contains(c)).collect::<Vec<Code>>();
+    let analytics = |keys: &[&str]| test_only(run_module(&analytics_checker(&with(keys)), script, &with(keys)));
+    let commands = |keys: &[&str]| test_only(run_module(&commands_checker(&with(keys)), script, &with(keys)));
     assert_eq!(analytics(&[]), Vec::<Code>::new());
     assert_eq!(analytics(&["opt-b"]), [9002]);
     assert_eq!(analytics(&["opt-b", "nope", "opt-a"]), [9001, 9002]);
@@ -196,9 +198,10 @@ fn selected_optionals_all_versus_keys() {
     assert_eq!(commands(&[]), Vec::<Code>::new());
     assert_eq!(commands(&["opt-cmd"]), [9003]);
     assert_eq!(commands(&["all"]), [9003]);
-    let names: Vec<String> = analytics_optional_checks().into_iter().map(|d| d.name).collect();
+    let names: Vec<String> =
+        analytics_optional_checks().into_iter().map(|d| d.name).filter(|n| n.starts_with("opt-")).collect();
     assert_eq!(names, ["opt-a", "opt-b"]);
-    assert_eq!(commands_optional_checks().len(), 1);
+    assert_eq!(commands_optional_checks().into_iter().filter(|d| d.name.starts_with("opt-")).count(), 1);
 }
 
 // ---- support.rs ----
