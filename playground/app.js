@@ -290,7 +290,7 @@ function renderOptionalChecks() {
 async function main() {
   el.status.textContent = "Loading...";
   await init();
-  el.ver.textContent = `v${version()}`;
+  el.ver.textContent = `· port of ShellCheck v${version()}`;
 
   const hash = readHash();
   el.src.value = hash.script ?? SAMPLE;
