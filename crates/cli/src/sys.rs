@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use shellcheck_checker::decode_string;
 use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
@@ -51,6 +52,9 @@ pub fn show_io_error(file: &str, e: &std::io::Error) -> String {
 
 pub fn show_io_error_in(func: &str, file: &str, e: &std::io::Error) -> String {
     use std::io::ErrorKind::*;
+    if let Some(closed) = e.get_ref().and_then(|x| x.downcast_ref::<StdinClosed>()) {
+        return closed.to_string();
+    }
     let desc = match e.kind() {
         NotFound => "does not exist (No such file or directory)".to_string(),
         PermissionDenied => "permission denied (Permission denied)".to_string(),
@@ -60,11 +64,44 @@ pub fn show_io_error_in(func: &str, file: &str, e: &std::io::Error) -> String {
     format!("{}: {}: {}", file, func, desc)
 }
 
+/// Whether stdin has been read to the end. Haskell's `getContents` and
+/// `hGetContents stdin` close it (`getContents` semi-closes it until the
+/// lazy string is forced), so stdin can only be read once.
+static STDIN_CONSUMED: AtomicBool = AtomicBool::new(false);
+
+/// The IOException a read of an already consumed stdin raises:
+/// `<stdin>: hGetContents: illegal operation (handle is closed)`, or
+/// `semi-closed` while a `getContents` string is still unforced.
+#[derive(Debug)]
+pub struct StdinClosed {
+    pub semi: bool,
+}
+
+impl std::fmt::Display for StdinClosed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let state = if self.semi { "semi-closed" } else { "closed" };
+        write!(f, "<stdin>: hGetContents: illegal operation (handle is {})", state)
+    }
+}
+
+impl std::error::Error for StdinClosed {}
+
+/// Read all of stdin once; a later call fails like Haskell's
+/// `hGetContents` on a closed (`semi`: semi-closed) handle.
+pub fn read_stdin(semi: bool) -> Result<Vec<u8>, std::io::Error> {
+    if STDIN_CONSUMED.swap(true, Ordering::SeqCst) {
+        return Err(std::io::Error::other(StdinClosed { semi }));
+    }
+    let mut bytes = vec![];
+    std::io::stdin().lock().read_to_end(&mut bytes)?;
+    Ok(bytes)
+}
+
 /// `inputFile`: returns (contents, shouldCache).
 pub fn input_file(file: &str) -> Result<(String, bool), std::io::Error> {
     let mut bytes = vec![];
     let should_cache = if file == "-" {
-        std::io::stdin().lock().read_to_end(&mut bytes)?;
+        bytes = read_stdin(false)?;
         true
     } else {
         let mut f = std::fs::File::open(file)?;

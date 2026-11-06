@@ -378,3 +378,27 @@ fn encoded_surrogate_is_one_column() {
          s.sh:2:10: note: Double quote to prevent globbing and word splitting. [SC2086]\n"
     );
 }
+
+// stdin can be read once: `getContents` (--files-from=-) and `inputFile "-"`
+// close it, so a later read fails as in the oracle. Failed reads are not
+// cached, so each later '-' fails.
+#[test]
+fn stdin_is_read_only_once() {
+    let a = tmpfile("once.sh", CLEAN);
+    let o = run(&["--norc", "-f", "gcc", "--files-from=-"], &format!("{}\n-\n", a));
+    assert_eq!(o.code, 2);
+    assert_eq!(o.stdout, "");
+    assert_eq!(o.stderr, "-: <stdin>: hGetContents: illegal operation (handle is closed)\n");
+    let o = run(&["--norc", "-f", "gcc", "--files-from=-", "-", "-"], &format!("{}\n", a));
+    assert_eq!(o.code, 2);
+    assert_eq!(o.stderr, "-: <stdin>: hGetContents: illegal operation (handle is closed)\n".repeat(2));
+    // A second getContents is an uncaught exception.
+    let o = run(&["--norc", "-f", "gcc", "--files-from=-", "--files-from=-"], &format!("{}\n", a));
+    assert_eq!(o.code, 1);
+    assert_eq!(o.stdout, "");
+    assert_eq!(o.stderr, "shellcheck-rust: <stdin>: hGetContents: illegal operation (handle is semi-closed)\n");
+    // Reading '-' twice as a script uses the cached contents.
+    let o = run(&["--norc", "-f", "gcc", "-", "-"], "#!/bin/sh\necho $x\n");
+    assert_eq!(o.code, 1);
+    assert_eq!(o.stdout.matches("[SC2154]").count(), 2, "{}", o.stdout);
+}

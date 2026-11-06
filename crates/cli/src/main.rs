@@ -85,6 +85,24 @@ fn main() {
     exit(status_to_code(status));
 }
 
+/// The program name, as GHC's `getProgName` gives it (the basename of argv[0]).
+fn prog_name() -> String {
+    std::env::args_os()
+        .next()
+        .map(|a| {
+            let p = std::path::PathBuf::from(a);
+            p.file_name().unwrap_or(p.as_os_str()).to_string_lossy().into_owned()
+        })
+        .unwrap_or_else(|| "shellcheck".to_string())
+}
+
+/// An uncaught Haskell exception: `<prog>: <message>` on stderr, exit 1.
+fn die(msg: &str) -> ! {
+    let _ = std::io::stdout().flush();
+    eprintln!("{}: {}", prog_name(), msg);
+    exit(1)
+}
+
 fn status_to_code(status: Status) -> i32 {
     match status {
         Status::NoProblems => 0,
@@ -134,9 +152,11 @@ fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
     if path == "-" {
         // DIVERGENCE: stdin is read as UTF-8 here (invalid input yields an empty
         // list); Haskell's getContents uses the locale encoding.
-        let mut bytes = String::new();
-        let _ = std::io::Read::read_to_string(&mut std::io::stdin().lock(), &mut bytes);
-        return Ok(parse_file_list_lines(&bytes));
+        return match sys::read_stdin(true) {
+            Ok(bytes) => Ok(parse_file_list_lines(&String::from_utf8(bytes).unwrap_or_default())),
+            // A second `getContents` throws an IOException nothing catches.
+            Err(e) => die(&e.to_string()),
+        };
     }
     match sys::input_file(path) {
         Err(e) => {
