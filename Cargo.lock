@@ -147,6 +147,10 @@ dependencies = [
 [[package]]
 name = "shellcheck-formatter"
 version = "0.0.1"
+dependencies = [
+ "serde_json",
+ "shellcheck-core",
+]
 
 [[package]]
 name = "shellcheck-parser"

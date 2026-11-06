@@ -1,0 +1,4 @@
+c.sh:2:1: error: Couldn't find 'fi' for this 'if'. [SC1046]
+c.sh:2:1: error: Couldn't parse this if expression. Fix to allow more checks. [SC1073]
+c.sh:4:1: error: Expected 'fi' matching previously mentioned 'if'. [SC1047]
+c.sh:4:1: error: Expected 'fi'. Fix any mentioned problems and try again. [SC1072]
