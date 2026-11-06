@@ -12,6 +12,7 @@ pub mod document;
 pub mod position;
 pub mod server;
 pub mod sys;
+pub mod transport;
 
 /// The binary name. Editors launch this; keep it in one place.
 pub const SERVER_NAME: &str = "shellcheck-rust-lsp";
