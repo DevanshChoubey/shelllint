@@ -173,3 +173,170 @@ fn unparsable_line_gets_parse_error_and_server_keeps_going() {
     assert_eq!(lines[0]["error"]["code"], -32700);
     assert_eq!(lines[1]["id"], 9);
 }
+
+/// A tiny deterministic generator (xorshift), so the fuzz test needs no crate
+/// and every run sends the same messages.
+struct Rng(u64);
+
+impl Rng {
+    fn next(&mut self) -> u64 {
+        self.0 ^= self.0 << 13;
+        self.0 ^= self.0 >> 7;
+        self.0 ^= self.0 << 17;
+        self.0
+    }
+    fn pick<'a, T>(&mut self, xs: &'a [T]) -> &'a T {
+        &xs[(self.next() % xs.len() as u64) as usize]
+    }
+}
+
+const NASTY_STRINGS: &[&str] = &[
+    "",
+    " ",
+    "a\u{e9}",
+    "\u{e9}",
+    "\u{1F600}",
+    "S\u{e9}2086",
+    "sc\u{1F600}",
+    "SC\u{663}\u{664}",
+    "\u{FF33}\u{FF23}2086",
+    "SC",
+    "SC-1",
+    "SC99999999999999999999",
+    "2086,\u{e9},SC2034",
+    "\u{0}",
+    "\u{FEFF}#!/bin/sh\necho $1",
+    "\t\u{85}\u{2028}",
+    "echo \"\u{1F600}\" $x\n\tcat <<EOF\n\u{e9}\nEOF",
+    "all",
+    "../../../../etc/passwd",
+    "/nonexistent/\u{e9}.sh",
+    "/dev/null",
+    "/",
+    "sh",
+    "bash\u{e9}",
+    "style",
+    "\u{d7ff}\u{e000}\u{10ffff}",
+];
+
+fn nasty_value(rng: &mut Rng, depth: u32) -> Value {
+    match rng.next() % if depth > 2 { 5 } else { 8 } {
+        0 | 1 | 2 => json!(rng.pick(NASTY_STRINGS)),
+        3 => json!(null),
+        4 => rng.pick(&[json!(true), json!(-1), json!(1.5e300), json!(u64::MAX), json!(0)]).clone(),
+        5 => Value::Array((0..rng.next() % 4).map(|_| nasty_value(rng, depth + 1)).collect()),
+        6 => json!([rng.pick(NASTY_STRINGS), rng.pick(NASTY_STRINGS)]),
+        _ => json!({ *rng.pick(NASTY_STRINGS): nasty_value(rng, depth + 1) }),
+    }
+}
+
+/// Many malformed or unicode tool arguments (and raw junk lines) over stdio:
+/// the server must answer every request and stay alive to answer a final ping.
+#[test]
+fn fuzzed_malformed_and_unicode_arguments_never_kill_the_server() {
+    const TOOLS: &[&str] = &["check_script", "check_file", "explain", "list_checks", "fix_script"];
+    const KEYS: &[&str] = &["script", "path", "code", "exclude", "enable", "shell", "severity", "filter", "optional"];
+    let mut rng = Rng(0x9e37_79b9_7f4a_7c15);
+    let mut input: Vec<u8> = Vec::new();
+    let mut ids = Vec::new();
+    for id in 1..=400i64 {
+        let name = *rng.pick(TOOLS);
+        let mut args = serde_json::Map::new();
+        for _ in 0..rng.next() % 4 {
+            args.insert(rng.pick(KEYS).to_string(), nasty_value(&mut rng, 0));
+        }
+        // Keep the required argument present (and a string) half the time so the
+        // option parsing is reached, not only the "missing argument" path.
+        if rng.next() % 2 == 0 {
+            let key = match name {
+                "check_script" | "fix_script" => "script",
+                "check_file" => "path",
+                "explain" => "code",
+                _ => "filter",
+            };
+            args.insert(key.into(), json!(rng.pick(NASTY_STRINGS)));
+        }
+        let arguments = match rng.next() % 10 {
+            0 => nasty_value(&mut rng, 0),
+            _ => Value::Object(args),
+        };
+        let msg = json!({"jsonrpc": "2.0", "id": id, "method": "tools/call",
+                         "params": {"name": name, "arguments": arguments}});
+        input.extend(msg.to_string().as_bytes());
+        input.push(b'\n');
+        ids.push(id);
+        // Interleave raw junk: invalid UTF-8, bad JSON, truncated messages.
+        match rng.next() % 8 {
+            0 => input.extend(b"\xff\xfe\xc3\x28 junk\n"),
+            1 => input.extend(b"{\"jsonrpc\":\"2.0\",\"id\":\n"),
+            2 => input.extend("[\"\u{1F600}\"]\n".as_bytes()),
+            _ => {}
+        }
+    }
+    input.extend(json!({"jsonrpc": "2.0", "id": 100_000, "method": "ping"}).to_string().as_bytes());
+    input.push(b'\n');
+
+    let mut child = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust-mcp"))
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let mut stdin = child.stdin.take().unwrap();
+    let writer = std::thread::spawn(move || {
+        let _ = stdin.write_all(&input);
+    });
+    let out = child.wait_with_output().unwrap();
+    writer.join().unwrap();
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(out.status.success(), "server died: {:?}\n{stderr}", out.status);
+    // The server catches handler panics, but none should happen at all.
+    assert!(!stderr.contains("panicked"), "a handler panicked:\n{stderr}");
+    let replies: Vec<Value> =
+        String::from_utf8(out.stdout).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
+    for id in ids {
+        let r = reply(&replies, id);
+        assert!(r["result"]["isError"].is_boolean(), "id {id} is not a tool result: {r}");
+    }
+    assert_eq!(reply(&replies, 100_000)["result"], json!({}));
+}
+
+/// SC1091 uses the CLI's wording (`shellcheck --norc` without -x), not the
+/// test mock's "File not included in mock.".
+#[test]
+fn sc1091_message_matches_the_cli() {
+    let dir = std::path::Path::new(env!("CARGO_TARGET_TMPDIR")).join("mcp-sc1091");
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("m2.sh");
+    std::fs::write(&path, "#!/bin/sh\n. ./lib.sh\n").unwrap();
+    let replies = session(&[
+        call(1, "check_file", json!({"path": path.to_str().unwrap()})),
+        call(2, "check_script", json!({"script": "#!/bin/sh\n. ./lib.sh\n"})),
+    ]);
+    for id in [1, 2] {
+        let diags = reply(&replies, id)["result"]["structuredContent"]["diagnostics"].as_array().unwrap().clone();
+        let d = diags.iter().find(|d| d["code"] == "SC1091").unwrap_or_else(|| panic!("no SC1091: {diags:?}"));
+        assert_eq!(d["message"], "Not following: ./lib.sh was not specified as input (see shellcheck -x).");
+    }
+}
+
+#[test]
+fn fix_script_without_final_newline_matches_diff_format() {
+    let replies = session(&[call(1, "fix_script", json!({"script": "date +`echo \"$format\"`"}))]);
+    let s = &reply(&replies, 1)["result"]["structuredContent"];
+    // As `shellcheck -f diff`: marker on the old side, final newline added.
+    assert_eq!(
+        s["diff"],
+        "--- a/script.sh\n+++ b/script.sh\n@@ -1,1 +1,1 @@\n-date +`echo \"$format\"`\n\\ No newline at end of file\n+date +$(echo \"$format\")\n\n"
+    );
+    assert_eq!(s["fixed_script"], "date +$(echo \"$format\")\n");
+}
+
+#[test]
+fn fix_script_keeps_missing_newline_when_last_line_unchanged() {
+    let replies = session(&[call(1, "fix_script", json!({"script": "x=`date`\necho hi"}))]);
+    let s = &reply(&replies, 1)["result"]["structuredContent"];
+    assert_eq!(s["fixed_script"], "x=$(date)\necho hi");
+    let diff = s["diff"].as_str().unwrap();
+    assert!(diff.contains("\n echo hi\n\\ No newline at end of file\n"), "diff: {diff}");
+}

@@ -54,7 +54,11 @@ pub fn optional_names() -> Vec<String> {
 /// Accepts "SC2086", "sc2086" or "2086".
 pub fn parse_code(s: &str) -> Option<u32> {
     let t = s.trim();
-    let digits = if t.len() >= 2 && t[..2].eq_ignore_ascii_case("sc") { &t[2..] } else { t };
+    // `get` (not `[..2]`): byte 2 may fall inside a multi-byte char.
+    let digits = match t.get(..2) {
+        Some(p) if p.eq_ignore_ascii_case("sc") => &t[2..],
+        _ => t,
+    };
     if digits.is_empty() || !digits.bytes().all(|b| b.is_ascii_digit()) {
         return None;
     }
@@ -122,6 +126,13 @@ mod tests {
         assert_eq!(parse_code("2086"), Some(2086));
         assert_eq!(parse_code("SC"), None);
         assert_eq!(parse_code("foo"), None);
+    }
+
+    #[test]
+    fn parse_code_rejects_non_ascii_without_panicking() {
+        for s in ["a\u{e9}", "\u{e9}", "\u{1F600}", "S\u{e9}2086", "sc\u{e9}", "\u{1F600}2086", "SC\u{663}", "\u{FF33}\u{FF23}1"] {
+            assert_eq!(parse_code(s), None, "{s:?}");
+        }
     }
 
     #[test]

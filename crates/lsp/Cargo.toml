@@ -22,6 +22,7 @@ path = "src/main.rs"
 [dependencies]
 shellcheck-core.workspace = true
 shellcheck-checker.workspace = true
+shellcheck-parser.workspace = true
 lsp-server = "0.7"
 lsp-types = "0.95"
 crossbeam-channel = "0.5"

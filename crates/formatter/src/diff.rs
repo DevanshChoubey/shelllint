@@ -389,7 +389,9 @@ fn normalize_path(path: &str) -> String {
     path.chars().map(|c| if c == std::path::MAIN_SEPARATOR { '/' } else { c }).collect()
 }
 
-fn format_doc(color: bool, doc: &DiffDoc<String>) -> String {
+/// Render a diff document exactly as the `-f diff` formatter prints it
+/// (without the extra blank line `putStrLn` adds after it).
+pub fn format_doc(color: bool, doc: &DiffDoc<String>) -> String {
     let a_join = if doc.name.starts_with('/') { doc.name.clone() } else { format!("a/{}", doc.name) };
     let a = normalize_path(&a_join);
     let b_join = if doc.name.starts_with('/') { doc.name.clone() } else { format!("b/{}", doc.name) };

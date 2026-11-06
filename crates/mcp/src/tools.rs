@@ -9,16 +9,16 @@ use serde_json::{Value, json};
 use shellcheck_checker::{check_script, decode_string};
 use shellcheck_core::data::shell_for_executable;
 use shellcheck_core::interface::{
-    CheckSpec, Code, PositionedComment, Severity, Shell, empty_check_spec, mocked_system_interface,
+    CheckResult, CheckSpec, Code, PositionedComment, Severity, Shell, empty_check_spec,
 };
-use shellcheck_formatter::diff::{Diff, get_diff};
-use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
+use shellcheck_formatter::diff::{apply_fix_to_contents, fixes_by_file, format_doc, make_diff};
 use shellcheck_formatter::tty::WIKI_LINK;
 use shellcheck_formatter::{
-    code_no, col_no, end_col_no, end_line_no, haskell_lines, line_no, make_non_virtual, message_text, severity_text,
+    code_no, col_no, end_col_no, end_line_no, line_no, make_non_virtual, message_text, severity_text,
 };
 
 use crate::catalog;
+use crate::sys::McpSystem;
 
 /// Largest script accepted, in bytes.
 pub const MAX_BYTES: usize = 1024 * 1024;
@@ -37,7 +37,7 @@ impl ToolOutput {
     fn ok(text: String, structured: Value) -> Self {
         ToolOutput { text, structured: Some(structured), is_error: false }
     }
-    fn error(text: impl Into<String>) -> Self {
+    pub fn error(text: impl Into<String>) -> Self {
         ToolOutput { text: text.into(), structured: None, is_error: true }
     }
     pub fn to_json(&self) -> Value {
@@ -177,7 +177,7 @@ pub fn exists(name: &str) -> bool {
 pub fn call(name: &str, args: &Value) -> ToolOutput {
     match name {
         "check_script" => match required_str(args, "script") {
-            Ok(script) => check_text(script, DEFAULT_NAME, args),
+            Ok(script) => check_text(script, DEFAULT_NAME, false, args),
             Err(e) => ToolOutput::error(e),
         },
         "check_file" => match required_str(args, "path") {
@@ -272,8 +272,9 @@ fn split_commas(s: &str) -> Vec<String> {
 // ---- linting -----------------------------------------------------------------
 
 /// Run the full pipeline. The comments keep the checker's own (tab-stop 8)
-/// positions, which `apply_fix` needs.
-fn lint(script: &str, filename: &str, opts: &LintOptions) -> Vec<PositionedComment> {
+/// positions, which `apply_fix` needs. `is_file`: `filename` is the file on
+/// disk the script came from, so it counts as an input (as on the CLI).
+fn lint(script: &str, filename: &str, is_file: bool, opts: &LintOptions) -> Vec<PositionedComment> {
     let spec = CheckSpec {
         filename: filename.to_string(),
         script: script.to_string(),
@@ -284,10 +285,12 @@ fn lint(script: &str, filename: &str, opts: &LintOptions) -> Vec<PositionedComme
         optional_checks: opts.enable.clone(),
         ..empty_check_spec()
     };
-    check_script(&mocked_system_interface(vec![]), &spec).comments
+    let inputs: &[&str] = if is_file { &[filename] } else { &[] };
+    let sys = McpSystem::new(inputs);
+    check_script(&sys, &spec).comments
 }
 
-fn check_text(script: &str, filename: &str, args: &Value) -> ToolOutput {
+fn check_text(script: &str, filename: &str, is_file: bool, args: &Value) -> ToolOutput {
     if script.len() > MAX_BYTES {
         return ToolOutput::error("Script is larger than 1 MiB; split it or lint the file with check_file.");
     }
@@ -295,7 +298,7 @@ fn check_text(script: &str, filename: &str, args: &Value) -> ToolOutput {
         Ok(o) => o,
         Err(e) => return ToolOutput::error(e),
     };
-    let comments = lint(script, filename, &opts);
+    let comments = lint(script, filename, is_file, &opts);
     report(filename, script, &comments)
 }
 
@@ -315,7 +318,7 @@ fn check_path(path: &str, args: &Value) -> ToolOutput {
         Err(e) => return ToolOutput::error(format!("Cannot read {path}: {e}")),
     };
     let script = decode_string(&bytes);
-    check_text(&script, path, args)
+    check_text(&script, path, true, args)
 }
 
 /// Build the diagnostics output for a lint run.
@@ -415,31 +418,28 @@ fn fix_text(script: &str, args: &Value) -> ToolOutput {
         Ok(o) => o,
         Err(e) => return ToolOutput::error(e),
     };
-    let raw = lint(script, DEFAULT_NAME, &opts);
-    let fixes: Vec<_> = raw.iter().filter_map(|c| c.fix.clone()).collect();
-    let applied = fixes.len();
+    let raw = lint(script, DEFAULT_NAME, false, &opts);
+    let applied = raw.iter().filter(|c| c.fix.is_some()).count();
 
-    let old_lines: Vec<String> = haskell_lines(script).into_iter().map(String::from).collect();
-    let fixed = if fixes.is_empty() {
-        script.to_string()
-    } else {
-        let refs: Vec<&str> = old_lines.iter().map(String::as_str).collect();
-        let new_lines = apply_fix(&merge_fixes(&fixes), &refs);
-        let mut out = new_lines.join("\n");
-        if script.ends_with('\n') && !new_lines.is_empty() {
-            out.push('\n');
+    // Same code as `-f diff`: the fixes merged per file, the patched contents
+    // (with the final newline the patch would give) and the unified diff.
+    let result = CheckResult { filename: DEFAULT_NAME.to_string(), comments: raw.clone() };
+    let mut fixed = script.to_string();
+    let mut diff = String::new();
+    for fix in fixes_by_file(&result).values() {
+        if let Some(contents) = apply_fix_to_contents(script, fix) {
+            fixed = contents;
+            let doc = make_diff(DEFAULT_NAME, script, fix);
+            if !doc.regions.is_empty() {
+                // `-f diff` prints the document with putStrLn.
+                diff = format!("{}\n", format_doc(false, &doc));
+            }
         }
-        out
-    };
+    }
 
     // Re-check the fixed script so `remaining` reflects what is left after the fixes.
-    let remaining = if fixes.is_empty() { raw.clone() } else { lint(&fixed, DEFAULT_NAME, &opts) };
+    let remaining = if fixed == script { raw.clone() } else { lint(&fixed, DEFAULT_NAME, false, &opts) };
     let remaining_comments = make_non_virtual(&remaining, &fixed);
-    let diff = unified_diff(
-        DEFAULT_NAME,
-        &old_lines,
-        &haskell_lines(&fixed).into_iter().map(String::from).collect::<Vec<_>>(),
-    );
 
     let mut text = if applied == 0 {
         "No automatic fixes apply to this script.".to_string()
@@ -464,52 +464,6 @@ fn fix_text(script: &str, args: &Value) -> ToolOutput {
         "remaining": remaining_comments.iter().map(diagnostic_json).collect::<Vec<_>>(),
     });
     ToolOutput::ok(text, structured)
-}
-
-/// Unified diff with three lines of context; empty when nothing changed.
-pub fn unified_diff(name: &str, old: &[String], new: &[String]) -> String {
-    const CONTEXT: usize = 3;
-    // Each op: (tag, text). Tags: ' ', '-', '+'.
-    let mut ops: Vec<(char, &str)> = Vec::new();
-    let diffs = get_diff(old, new);
-    for d in &diffs {
-        match d {
-            Diff::Both(a, _) => ops.push((' ', a.as_str())),
-            Diff::First(a) => ops.push(('-', a.as_str())),
-            Diff::Second(b) => ops.push(('+', b.as_str())),
-        }
-    }
-    let changes: Vec<usize> = ops.iter().enumerate().filter(|(_, (t, _))| *t != ' ').map(|(i, _)| i).collect();
-    if changes.is_empty() {
-        return String::new();
-    }
-
-    // Group changes whose contexts overlap into hunks.
-    let mut hunks: Vec<(usize, usize)> = Vec::new();
-    for &i in &changes {
-        let start = i.saturating_sub(CONTEXT);
-        let end = (i + CONTEXT + 1).min(ops.len());
-        match hunks.last_mut() {
-            Some(last) if start <= last.1 => last.1 = end.max(last.1),
-            _ => hunks.push((start, end)),
-        }
-    }
-
-    let mut out = format!("--- a/{name}\n+++ b/{name}\n");
-    for (start, end) in hunks {
-        let before_old = ops[..start].iter().filter(|(t, _)| *t != '+').count();
-        let before_new = ops[..start].iter().filter(|(t, _)| *t != '-').count();
-        let slice = &ops[start..end];
-        let count_old = slice.iter().filter(|(t, _)| *t != '+').count();
-        let count_new = slice.iter().filter(|(t, _)| *t != '-').count();
-        let line_old = if count_old == 0 { before_old } else { before_old + 1 };
-        let line_new = if count_new == 0 { before_new } else { before_new + 1 };
-        let _ = writeln!(out, "@@ -{line_old},{count_old} +{line_new},{count_new} @@");
-        for (t, text) in slice {
-            let _ = writeln!(out, "{t}{text}");
-        }
-    }
-    out
 }
 
 // ---- explain / list ----------------------------------------------------------
@@ -616,24 +570,4 @@ fn list_checks(args: &Value) -> ToolOutput {
         })
         .collect();
     ToolOutput::ok(text.trim_end().to_string(), json!({"count": matches.len(), "checks": checks}))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn unified_diff_shows_one_hunk_with_context() {
-        let old: Vec<String> = ["a", "b", "c", "d", "e", "f", "g", "h"].iter().map(|s| s.to_string()).collect();
-        let mut new = old.clone();
-        new[3] = "D".to_string();
-        let d = unified_diff("x.sh", &old, &new);
-        assert_eq!(d, "--- a/x.sh\n+++ b/x.sh\n@@ -1,7 +1,7 @@\n a\n b\n c\n-d\n+D\n e\n f\n g\n");
-    }
-
-    #[test]
-    fn unified_diff_is_empty_when_unchanged() {
-        let old = vec!["x".to_string()];
-        assert_eq!(unified_diff("x.sh", &old, &old), "");
-    }
 }

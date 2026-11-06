@@ -317,3 +317,82 @@ fn unknown_request_gets_method_not_found() {
     assert_eq!(resp["error"]["code"], -32601);
     lsp.shutdown();
 }
+
+impl Lsp {
+    fn send_raw(&mut self, bytes: &[u8]) {
+        self.stdin.write_all(bytes).unwrap();
+        self.stdin.flush().unwrap();
+    }
+
+    /// Wait for the JSON-RPC error with a null id and return its code.
+    fn null_id_error(&mut self) -> i64 {
+        let deadline = Instant::now() + TIMEOUT;
+        loop {
+            let m = self.recv_until(deadline);
+            if m.get("id") == Some(&Value::Null) && m.get("error").is_some() {
+                return m["error"]["code"].as_i64().unwrap();
+            }
+            self.stash.push(m);
+        }
+    }
+
+    fn still_serving(&mut self) {
+        let resp = self.request("textDocument/completion", json!({}));
+        assert_eq!(resp["error"]["code"], -32601);
+    }
+}
+
+fn framed(body: &[u8]) -> Vec<u8> {
+    let mut v = format!("Content-Length: {}\r\n\r\n", body.len()).into_bytes();
+    v.extend_from_slice(body);
+    v
+}
+
+#[test]
+fn bad_json_gets_parse_error_and_server_keeps_serving() {
+    let mut lsp = Lsp::start(json!({}));
+    lsp.send_raw(&framed(b"{oops"));
+    assert_eq!(lsp.null_id_error(), -32700);
+    lsp.still_serving();
+    lsp.shutdown();
+}
+
+#[test]
+fn invalid_utf8_gets_parse_error_and_server_keeps_serving() {
+    let mut lsp = Lsp::start(json!({}));
+    lsp.send_raw(&framed(b"{\"jsonrpc\":\"2.0\",\"method\":\"x\xff\"}"));
+    assert_eq!(lsp.null_id_error(), -32700);
+    lsp.still_serving();
+    lsp.shutdown();
+}
+
+#[test]
+fn json_array_gets_parse_error_and_server_keeps_serving() {
+    let mut lsp = Lsp::start(json!({}));
+    lsp.send_raw(&framed(b"[1,2,3]"));
+    assert_eq!(lsp.null_id_error(), -32700);
+    lsp.still_serving();
+    lsp.shutdown();
+}
+
+#[test]
+fn bad_header_gets_parse_error_and_server_keeps_serving() {
+    let mut lsp = Lsp::start(json!({}));
+    lsp.send_raw(b"Content-Length: abc\r\n\r\n");
+    assert_eq!(lsp.null_id_error(), -32700);
+    lsp.send_raw(b"Bogus header line\r\n\r\n");
+    assert_eq!(lsp.null_id_error(), -32700);
+    lsp.send_raw(b"Content-Type: x\r\n\r\n");
+    assert_eq!(lsp.null_id_error(), -32700);
+    lsp.still_serving();
+    lsp.shutdown();
+}
+
+#[test]
+fn valid_json_that_is_not_a_message_gets_invalid_request() {
+    let mut lsp = Lsp::start(json!({}));
+    lsp.send_raw(&framed(b"{\"hello\":1}"));
+    assert_eq!(lsp.null_id_error(), -32600);
+    lsp.still_serving();
+    lsp.shutdown();
+}

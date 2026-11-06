@@ -28,7 +28,6 @@ use lsp_types::{
 use crate::check::{Finding, WIKI_LINK, disable_edits, run_check};
 use crate::config::Settings;
 use crate::document::Document;
-use crate::position::split_lines;
 
 /// Quiet period after the last edit before a check runs.
 pub const DEBOUNCE: Duration = Duration::from_millis(250);
@@ -71,9 +70,11 @@ pub fn server_capabilities() -> ServerCapabilities {
 
 /// Serve LSP on stdin/stdout until the client shuts down.
 pub fn run_stdio() -> Result<(), BoxErr> {
-    let (connection, io_threads) = Connection::stdio();
+    let input = std::io::BufReader::new(std::io::stdin());
+    let (connection, writer) = crate::transport::connection(input, std::io::stdout());
     serve(connection)?;
-    io_threads.join()?;
+    // The reader thread may be blocked on stdin; it ends with the process.
+    let _ = writer.join();
     Ok(())
 }
 
@@ -272,7 +273,6 @@ impl Server {
     fn code_actions(&mut self, uri: &Url, range: Range) -> Vec<CodeActionOrCommand> {
         let findings = self.findings(uri);
         let Some(doc) = self.docs.get(uri) else { return vec![] };
-        let lines = split_lines(&doc.text);
         let mut out = vec![];
         let mut disabled: Vec<(u32, i64)> = vec![];
         for f in findings.iter().filter(|f| f.range.start <= range.end && range.start <= f.range.end) {
@@ -287,13 +287,14 @@ impl Server {
                     true,
                 ));
             }
-            let key = (f.range.start.line, f.code);
-            if disabled.contains(&key) {
-                continue;
-            }
-            disabled.push(key);
-            let edits: Vec<TextEdit> = disable_edits(&lines, f.range.start.line, f.code);
-            if !edits.is_empty() {
+            let edits: Vec<TextEdit> =
+                disable_edits(&doc.text, &doc.filename, self.settings.dialect, f.range.start, f.code);
+            if let Some(first) = edits.first() {
+                let key = (first.range.start.line, f.code);
+                if disabled.contains(&key) {
+                    continue;
+                }
+                disabled.push(key);
                 let mut changes = HashMap::new();
                 changes.insert(uri.clone(), edits);
                 out.push(action(

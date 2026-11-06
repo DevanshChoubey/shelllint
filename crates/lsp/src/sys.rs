@@ -8,6 +8,7 @@
 use std::path::{Path, PathBuf};
 
 use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
+use shellcheck_checker::decode_string;
 use shellcheck_core::interface::SystemInterface;
 
 #[derive(Default)]
@@ -60,6 +61,22 @@ fn rc_candidates(filename: &str) -> Vec<String> {
     out
 }
 
+/// Haskell `show` of the IOException `openBinaryFile` raises, as the CLI
+/// prints it in SC1091 ("does not exist (No such file or directory)").
+///
+/// Copied from `show_io_error_in` in crates/cli/src/sys.rs (the CLI's table is
+/// the reference and is being extended to more errnos; keep the two in step).
+pub fn show_io_error(file: &str, e: &std::io::Error) -> String {
+    use std::io::ErrorKind::*;
+    let desc = match e.kind() {
+        NotFound => "does not exist (No such file or directory)".to_string(),
+        PermissionDenied => "permission denied (Permission denied)".to_string(),
+        _ if e.raw_os_error() == Some(21) => "inappropriate type (is a directory)".to_string(),
+        _ => format!("failed ({})", e),
+    };
+    format!("{}: openBinaryFile: {}", file, desc)
+}
+
 impl EditorConfigFs for LspSystem {
     fn normalize(&self, path: &str) -> String {
         std::fs::canonicalize(path).map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| path.to_string())
@@ -79,9 +96,7 @@ impl SystemInterface for LspSystem {
     /// rc to say `external-sources`, as on the CLI.
     fn read_file(&self, external: Option<bool>, path: &str) -> Result<String, String> {
         if external == Some(true) {
-            return std::fs::read(path)
-                .map(|b| String::from_utf8_lossy(&b).into_owned())
-                .map_err(|e| format!("{}: openBinaryFile: {}", path, e));
+            return std::fs::read(path).map(|b| decode_string(&b)).map_err(|e| show_io_error(path, &e));
         }
         if external == Some(false) {
             Err(format!("{} was not specified as input, and external files were disabled via directive.", path))
@@ -114,5 +129,24 @@ impl SystemInterface for LspSystem {
         let rc = rc_candidates(filename).iter().find_map(|p| read_config(p));
         let ec = get_editor_config(self, filename);
         merge_configs(rc, ec)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn read_errors_use_the_cli_wording() {
+        assert_eq!(
+            LspSystem.read_file(Some(true), "/nonexistent/lib.sh"),
+            Err("/nonexistent/lib.sh: openBinaryFile: does not exist (No such file or directory)".to_string())
+        );
+        let dir = std::env::temp_dir();
+        let d = dir.to_string_lossy();
+        assert_eq!(
+            LspSystem.read_file(Some(true), &d),
+            Err(format!("{d}: openBinaryFile: inappropriate type (is a directory)"))
+        );
     }
 }
