@@ -2,15 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkReadExpansions`, lines 881-909 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{arguments, get_gnu_opts, get_word_parts, is_variable_name};
 use shellcheck_core::data::FLAGS_FOR_READ;
 
 use crate::support::get_single_unmodified_braced_string;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkReadExpansions",
     registry: "command",

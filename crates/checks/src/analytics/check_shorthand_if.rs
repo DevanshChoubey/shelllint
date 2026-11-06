@@ -3,12 +3,11 @@
 
 use crate::support::is_condition;
 use shellcheck_analyzer::analyzerlib::{Comments, Params, is_test_command};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_command_basename, get_path, is_assignment};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkShorthandIf",
     registry: "node",

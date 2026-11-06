@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkLetUsage`, lines 1209-1214 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, when_shell};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::Id;
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkLetUsage",
     registry: "command",

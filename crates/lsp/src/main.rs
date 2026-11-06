@@ -1,7 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Linked only so the linkme-registered checks end up in the binary.
-use shellcheck_checks as _;
-
 fn main() {
     let arg = std::env::args().nth(1);
     match arg.as_deref() {

@@ -2,15 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkCommandIsUnreachable`, lines 5246-5272 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_analyzer::cfg_analysis::get_incoming_state;
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::get_path;
 
 use crate::support::is_sourced;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkCommandIsUnreachable",
     registry: "node",

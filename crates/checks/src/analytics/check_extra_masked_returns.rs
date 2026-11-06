@@ -2,7 +2,7 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkExtraMaskedReturns`, lines 5125-5201 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, parents};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Ast, Id, Token};
 use shellcheck_core::astlib::{
     basename, get_all_flags, get_bsd_opts, get_command, get_command_basename, get_literal_string, is_flag,
@@ -12,8 +12,7 @@ use shellcheck_core::interface::TokenComment;
 
 use crate::support::run_node_analysis;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkExtraMaskedReturns",
     registry: "optional-tree",

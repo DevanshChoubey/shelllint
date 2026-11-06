@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnnecessarilyInvertedTest`, lines 4183-4239 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, is_command};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::astlib::get_literal_string;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnnecessarilyInvertedTest",
     registry: "optional-tree",

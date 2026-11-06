@@ -8,5 +8,4 @@ build = "build.rs"
 [dependencies]
 shellcheck-core = { path = "../core" }
 shellcheck-analyzer = { path = "../analyzer" }
-linkme = "0.3"
 regex = "1"

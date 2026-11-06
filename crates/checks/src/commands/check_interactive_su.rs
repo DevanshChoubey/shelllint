@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkInteractiveSu`, lines 689-703 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_path_m};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::arguments;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkInteractiveSu",
     registry: "command",

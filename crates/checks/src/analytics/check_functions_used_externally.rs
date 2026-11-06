@@ -4,15 +4,14 @@
 use std::collections::BTreeMap;
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, is_unqualified_command};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{basename, get_command_name_and_token, get_unquoted_literal, only_literal_string};
 use shellcheck_core::interface::TokenComment;
 
 use crate::support::{analyse, functions, run_node_analysis};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkFunctionsUsedExternally",
     registry: "tree",

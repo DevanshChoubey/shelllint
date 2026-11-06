@@ -60,10 +60,8 @@ use std::io;
 use std::path::Path;
 use std::sync::OnceLock;
 
-// Linked only so the linkme-registered checks end up in the binary.
-use shellcheck_checks as _;
-
-use shellcheck_analyzer::api::{CHECKS, CheckEntry};
+use shellcheck_analyzer::api::CheckEntry;
+use shellcheck_checks::CHECKS;
 use shellcheck_checker::{check_script, decode_string};
 use shellcheck_core::interface::{
     CheckSpec, Fix as CoreFix, InsertionPoint as CoreInsertionPoint, NewSystemInterface, PositionedComment,
@@ -354,7 +352,7 @@ pub struct CheckInfo {
 pub fn list_checks() -> &'static [CheckInfo] {
     static LIST: OnceLock<Vec<CheckInfo>> = OnceLock::new();
     LIST.get_or_init(|| {
-        let mut entries: Vec<&CheckEntry> = CHECKS.iter().filter(|e| e.optional.is_some()).collect();
+        let mut entries: Vec<&CheckEntry> = CHECKS.iter().copied().filter(|e| e.optional.is_some()).collect();
         entries.sort_by(|a, b| a.optional.unwrap().name.cmp(b.optional.unwrap().name));
         let mut seen = HashSet::new();
         entries

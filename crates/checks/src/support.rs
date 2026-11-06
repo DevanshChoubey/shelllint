@@ -482,16 +482,19 @@ impl Scratch {
 /// command with `CommandName::<kind>(cmd)`, all at `order`. `check` is
 /// called as `check(cmd, params, t, comments)`.
 ///
+/// The entries go in a `pub(crate) static ENTRIES: [CheckEntry; N]`, in list
+/// order; `build.rs` adds `&ENTRIES[0]`, ..., `&ENTRIES[N - 1]` to
+/// `crate::CHECKS`, so a file may invoke this at most once.
+///
 /// ```ignore
 /// parametrised_command_checks!("checkArgComparison", 45, Exactly, check_arg_comparison,
 ///     ["alias", "local", "declare"]);
 /// ```
 macro_rules! parametrised_command_checks {
     ($name:literal, $order:literal, $kind:ident, $check:path, [$($cmd:literal),+ $(,)?]) => {
-        $(
-            const _: () = {
-                #[linkme::distributed_slice(::shellcheck_analyzer::api::CHECKS)]
-                static ENTRY: ::shellcheck_analyzer::api::CheckEntry = ::shellcheck_analyzer::api::CheckEntry {
+        pub(crate) static ENTRIES: [::shellcheck_analyzer::api::CheckEntry; [$($cmd),+].len()] = [
+            $(
+                ::shellcheck_analyzer::api::CheckEntry {
                     module: "Checks/Commands.hs",
                     name: concat!($name, " \"", $cmd, "\""),
                     registry: "command",
@@ -499,19 +502,20 @@ macro_rules! parametrised_command_checks {
                     optional: None,
                     kind: ::shellcheck_analyzer::api::CheckKind::Command(
                         ::shellcheck_analyzer::api::CommandName::$kind($cmd),
-                        run,
+                        {
+                            fn run(
+                                p: &::shellcheck_analyzer::analyzerlib::Params<'_>,
+                                t: ::shellcheck_core::ast::Id,
+                                c: &mut ::shellcheck_analyzer::analyzerlib::Comments,
+                            ) {
+                                $check($cmd, p, t, c)
+                            }
+                            run
+                        },
                     ),
-                };
-
-                fn run(
-                    p: &::shellcheck_analyzer::analyzerlib::Params<'_>,
-                    t: ::shellcheck_core::ast::Id,
-                    c: &mut ::shellcheck_analyzer::analyzerlib::Comments,
-                ) {
-                    $check($cmd, p, t, c)
-                }
-            };
-        )+
+                },
+            )+
+        ];
     };
 }
 pub(crate) use parametrised_command_checks;

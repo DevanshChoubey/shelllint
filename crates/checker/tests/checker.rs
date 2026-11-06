@@ -1032,16 +1032,11 @@ fn same_position_order() {
 
 #[test]
 fn checks_crate_is_linked() {
-    // linkme drops entries unless the checks crate is linked; the checker
-    // links it. Once Task 14's pilots are registered, checkEchoWc must be
-    // visible and run through the pipeline (oracle: wc.sh 2:5-2:22 2000).
-    let entries = shellcheck_analyzer::api::registered("node");
-    if let Some(_e) = entries.iter().find(|e| e.module == "Analytics.hs" && e.name == "checkEchoWc") {
-        assert!(check_script_codes("#!/bin/bash\nn=$(echo $foo | wc -c)\n", None).contains(&2000));
-    } else {
-        // Task 14 not merged yet: the slice is reachable (possibly empty).
-        let _ = shellcheck_analyzer::api::CHECKS.len();
-    }
+    // checkEchoWc is in the registry and runs through the pipeline
+    // (oracle: wc.sh 2:5-2:22 2000).
+    let entries = shellcheck_analyzer::api::registered(shellcheck_checks::CHECKS, "node");
+    assert!(entries.iter().any(|e| e.module == "Analytics.hs" && e.name == "checkEchoWc"));
+    assert!(check_script_codes("#!/bin/bash\nn=$(echo $foo | wc -c)\n", None).contains(&2000));
 }
 
 #[test]

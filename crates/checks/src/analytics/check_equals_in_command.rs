@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     get_braced_modifier, get_braced_reference, get_literal_string_ext, get_unquoted_literal,
@@ -16,8 +16,7 @@ use shellcheck_core::regex::{matches, mk_regex};
 
 use crate::support::{fix_with, replace_end, replace_start, replace_token};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkEqualsInCommand",
     registry: "node",

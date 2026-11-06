@@ -11,10 +11,9 @@ pub mod editorconfig;
 
 use std::collections::HashMap;
 
-// The checks register into the analyzer's `CHECKS` slice via linkme; nothing
-// references the checks crate by name, so without this it is not linked and
-// no check ever runs.
-use shellcheck_checks as _;
+// The check registry: every `CheckEntry`, passed to the analyzer's module
+// checkers.
+use shellcheck_checks::CHECKS;
 
 use shellcheck_analyzer::analyzerlib::{Checker, Params, filter_by_annotation, make_parameters, run_checker};
 use shellcheck_analyzer::api::{
@@ -49,15 +48,19 @@ pub fn analyze_script(spec: &AnalysisSpec, ast: &mut Ast, root: Id) -> AnalysisR
 // e11f964 (an empty `controlFlowEffectChecks` and a `nullCheck`), so they
 // are intentionally omitted.
 fn checkers(spec: &AnalysisSpec, params: &Params<'_>) -> Checker {
-    Checker::mconcat([analytics_checker(spec), commands_checker(spec), shell_support_checker(params)])
+    Checker::mconcat([
+        analytics_checker(CHECKS, spec),
+        commands_checker(CHECKS, spec),
+        shell_support_checker(CHECKS, params),
+    ])
 }
 
 /// `optionalChecks`
 // Checks/ControlFlow.hs `optionalChecks = []` at e11f964, so it is
 // intentionally omitted.
 pub fn optional_checks() -> Vec<CheckDescription> {
-    let mut v = analytics_optional_checks();
-    v.extend(commands_optional_checks());
+    let mut v = analytics_optional_checks(CHECKS);
+    v.extend(commands_optional_checks(CHECKS));
     v
 }
 

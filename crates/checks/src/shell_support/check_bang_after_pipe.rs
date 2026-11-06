@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/ShellSupport.hs `checkBangAfterPipe`, lines 703-714 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/ShellSupport.hs",
     name: "checkBangAfterPipe",
     registry: "shell-support",

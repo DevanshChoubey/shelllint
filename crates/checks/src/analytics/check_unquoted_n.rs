@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnquotedN`, lines 1238-1242 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{ConditionType, Id, Token};
 use shellcheck_core::astlib::{get_word_parts, is_array_expansion, will_split};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnquotedN",
     registry: "node",

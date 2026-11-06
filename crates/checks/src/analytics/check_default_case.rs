@@ -2,14 +2,13 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkDefaultCase`, lines 4303-4315 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     PseudoGlob, pseudo_glob_is_superset_of, word_to_exact_pseudo_glob,
 };
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkDefaultCase",
     registry: "optional-tree",

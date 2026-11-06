@@ -10,8 +10,7 @@ use shellcheck_analyzer::analyzerlib::*;
 use shellcheck_analyzer::api::entry_test_checker;
 use shellcheck_analyzer::testing::find_entries;
 use shellcheck_core::interface::{AnalysisSpec, Shell, TokenComment};
-// Link the check registrations (linkme statics) into this test binary.
-extern crate shellcheck_checks;
+use shellcheck_checks::CHECKS;
 
 /// A comment as the oracle reports it: code, start (line, column), end
 /// (line, column), message.
@@ -21,7 +20,7 @@ type Reported = (i64, (u32, u32), (u32, u32), String);
 /// does, and return every comment it writes, positioned by its token's span
 /// and in the order written.
 fn report(module: &str, name: &str, script: &str) -> Vec<Reported> {
-    let entries = find_entries(module, name);
+    let entries = find_entries(CHECKS, module, name);
     assert!(!entries.is_empty(), "{module}:{name} is registered");
     let checker = entry_test_checker(&entries);
     let mut pr = p_script(script);

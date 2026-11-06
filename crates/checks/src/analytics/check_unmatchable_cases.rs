@@ -2,15 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnmatchableCases`, lines 3687-3729 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{CaseType, Id, Token};
 use shellcheck_core::astlib::{
     is_constant, pseudo_glob_is_superset_of, pseudo_globs_can_overlap, word_to_exact_pseudo_glob,
     word_to_pseudo_glob,
 };
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnmatchableCases",
     registry: "node",

@@ -2,7 +2,7 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkPlusEqualsNumber`, lines 5376-5406 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_analyzer::cfg_analysis::{
     ProgramState, get_incoming_state, variable_may_be_assigned_integer,
     variable_may_be_declared_integer,
@@ -10,8 +10,7 @@ use shellcheck_analyzer::cfg_analysis::{
 use shellcheck_core::ast::{AssignmentMode, Id, Token};
 use shellcheck_core::astlib::{get_unmodified_parameter_expansion, get_unquoted_literal};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkPlusEqualsNumber",
     registry: "node",
@@ -62,7 +61,7 @@ mod tests {
     use shellcheck_analyzer::testing::run_check;
 
     fn fires(script: &str) -> bool {
-        let codes = run_check("Analytics.hs", "checkPlusEqualsNumber", "node", script).unwrap();
+        let codes = run_check(crate::CHECKS, "Analytics.hs", "checkPlusEqualsNumber", "node", script).unwrap();
         codes.contains(&2324)
     }
 

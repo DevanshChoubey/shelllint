@@ -8,5 +8,4 @@ license.workspace = true
 shellcheck-core = { path = "../core" }
 regex = "1"
 shellcheck-parser = { path = "../parser" }
-linkme = "0.3"
 rpds = { version = "1.2.1", default-features = false, features = ["std"] }

@@ -20,8 +20,6 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
 
-// Linked only so the linkme-registered checks end up in the binary.
-use shellcheck_checks as _;
 
 use shellcheck_checker::{check_script, optional_checks};
 use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};

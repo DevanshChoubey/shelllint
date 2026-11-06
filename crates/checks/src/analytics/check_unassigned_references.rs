@@ -6,7 +6,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{Params, StackData, make_comment};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
     get_braced_modifier, get_braced_reference, get_path, is_variable_char, is_variable_name, oversimplify,
@@ -15,8 +15,7 @@ use shellcheck_core::data::{COMMON_COMMANDS, INTERNAL_VARIABLES};
 use shellcheck_core::interface::{Severity, TokenComment};
 use shellcheck_core::regex::{matches, mk_regex};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnassignedReferences",
     registry: "tree",
@@ -25,8 +24,7 @@ static ENTRY: CheckEntry = CheckEntry {
     kind: CheckKind::Tree(check_unassigned_references),
 };
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_TRUE: CheckEntry = CheckEntry {
+pub(crate) static ENTRY_TRUE: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnassignedReferences' True",
     registry: "optional-tree",

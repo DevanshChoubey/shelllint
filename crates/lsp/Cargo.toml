@@ -16,8 +16,6 @@ path = "src/main.rs"
 [dependencies]
 shellcheck-core = { path = "../core" }
 shellcheck-checker = { path = "../checker" }
-# Linked only so the linkme-registered checks end up in the binary.
-shellcheck-checks = { path = "../checks" }
 lsp-server = "0.7"
 lsp-types = "0.95"
 crossbeam-channel = "0.5"

@@ -2,13 +2,12 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkTimeParameters`, lines 987-996 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, when_shell};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::oversimplify;
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkTimeParameters",
     registry: "command",

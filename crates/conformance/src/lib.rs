@@ -6,12 +6,6 @@
 
 pub mod runner;
 
-// The checks register into the analyzer's `CHECKS` slice via linkme; nothing
-// references the checks crate by name, so without this it is not linked and
-// every check reads as `unported`.
-#[cfg(feature = "analyzer")]
-use shellcheck_checks as _;
-
 use serde::Deserialize;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};

@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSpuriousExec`, lines 2038-2074 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, is_command_match};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Ast, Id, Token};
 use shellcheck_core::astlib::{get_literal_string, is_assignment};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkSpuriousExec",
     registry: "node",

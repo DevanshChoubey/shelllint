@@ -19,6 +19,7 @@ fn analyzer_codes(rec: &Record, kind: &str, script: &str) -> Option<Vec<i64>> {
     #[cfg(feature = "analyzer")]
     {
         return shellcheck_analyzer::testing::run_check(
+            shellcheck_checks::CHECKS,
             &rec.module,
             &rec.check_expr()?,
             kind,

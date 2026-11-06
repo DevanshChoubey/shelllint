@@ -8,7 +8,7 @@ use regex::Regex;
 use shellcheck_analyzer::analyzerlib::{
     DataSource, DataType, Params, is_param_to, is_quote_free, make_comment, supports_arrays,
 };
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::oversimplify;
 use shellcheck_core::interface::{Severity, TokenComment};
@@ -16,8 +16,7 @@ use shellcheck_core::regex::{matches, mk_regex};
 
 use crate::support::do_variable_flow_analysis;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkQuotesInLiterals",
     registry: "tree",

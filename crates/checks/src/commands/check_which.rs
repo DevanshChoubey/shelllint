@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkWhich`, lines 1267-1269 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName, StaticCheckDescription};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::get_command_token_or_this;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkWhich",
     registry: "optional-command",

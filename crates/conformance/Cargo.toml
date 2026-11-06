@@ -9,8 +9,7 @@ publish = false
 default = ["parser", "analyzer", "checker"]
 # Each hook task (3, 13, 15) flipped its feature on.
 parser = ["dep:shellcheck-parser"]
-# The checks register themselves into the analyzer's CHECKS slice (linkme),
-# so the crate holding them must be linked too.
+# The check hooks run entries of the checks crate's CHECKS registry.
 analyzer = ["dep:shellcheck-analyzer", "dep:shellcheck-checks"]
 checker = ["dep:shellcheck-checker", "dep:shellcheck-core", "dep:shellcheck-formatter"]
 

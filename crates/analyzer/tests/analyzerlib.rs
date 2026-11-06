@@ -140,8 +140,10 @@ fn empty_fix_is_none() {
 
 fn noop(_: &Params<'_>, _: Id, _: &mut Comments) {}
 
-// Registered from this (separate) crate: exercises linkme across crates.
-#[linkme::distributed_slice(CHECKS)]
+/// The registry the registry tests pass to the analyzer.
+static TEST_CHECKS: &[&CheckEntry] = &[&SORT_FIVE, &SORT_TWO, &SHELL_ENTRY, &RUN_CHECK_ENTRY];
+
+// Entries of this file's test registry, `TEST_CHECKS`.
 static SORT_FIVE: CheckEntry = CheckEntry {
     module: "Test.hs",
     name: "checkFive",
@@ -151,7 +153,6 @@ static SORT_FIVE: CheckEntry = CheckEntry {
     kind: CheckKind::Node(noop),
 };
 
-#[linkme::distributed_slice(CHECKS)]
 static SORT_TWO: CheckEntry = CheckEntry {
     module: "Test.hs",
     name: "checkTwo",
@@ -163,9 +164,9 @@ static SORT_TWO: CheckEntry = CheckEntry {
 
 #[test]
 fn registry_sorts_by_order() {
-    let orders: Vec<u32> = registered("test-sort").iter().map(|e| e.order).collect();
+    let orders: Vec<u32> = registered(TEST_CHECKS, "test-sort").iter().map(|e| e.order).collect();
     assert_eq!(orders, [2, 5]);
-    assert!(registered("no-such-registry").is_empty());
+    assert!(registered(TEST_CHECKS, "no-such-registry").is_empty());
 }
 
 fn warn_on_command(p: &Params<'_>, t: Id, c: &mut Comments) {
@@ -244,7 +245,6 @@ fn ksh_only(_: &Params<'_>, t: Id, c: &mut Comments) {
     c.warn(t, 3000, "ksh");
 }
 
-#[linkme::distributed_slice(CHECKS)]
 static SHELL_ENTRY: CheckEntry = CheckEntry {
     module: "Test.hs",
     name: "kshOnly",
@@ -282,10 +282,10 @@ fn make_parameters_from_shebang_and_spec() {
 fn shell_support_filters_by_shell() {
     let (ast, root) = B::new().script("/bin/ksh", &[&["x"]]);
     let p = make_parameters(&spec(), &ast, root);
-    let entries = registered("test-shell");
+    let entries = registered(TEST_CHECKS, "test-shell");
     // The module checker reads "shell-support" only; build the same from our entry.
-    let ksh = shell_support_checker(&p);
-    assert!(ksh.per_token.len() == registered("shell-support").len());
+    let ksh = shell_support_checker(TEST_CHECKS, &p);
+    assert!(ksh.per_token.len() == registered(TEST_CHECKS, "shell-support").len());
     let test = entry_test_checker(&entries);
     assert!(!run_checker(&p, &test).is_empty());
     let s = AnalysisSpec { shell_type: Some(Shell::Bash), ..spec() };
@@ -346,7 +346,6 @@ fn filter_by_annotation_drops_disabled_codes() {
     assert!(!should_ignore_code(&p, 2000, root));
 }
 
-#[linkme::distributed_slice(CHECKS)]
 static RUN_CHECK_ENTRY: CheckEntry = CheckEntry {
     module: "Test.hs",
     name: "checkRunCheck",
@@ -358,21 +357,21 @@ static RUN_CHECK_ENTRY: CheckEntry = CheckEntry {
 
 #[test]
 fn run_check_lookup() {
-    assert_eq!(run_check("Test.hs", "checkMissing", "node", "true"), None);
-    assert_eq!(run_check("Other.hs", "checkRunCheck", "node", "true"), None);
-    assert_eq!(find_entries("Test.hs", "checkRunCheck \"sudo\"").len(), 1);
-    assert!(find_entries("Test.hs", "checkRunCheck \"doas\"").is_empty());
-    assert_eq!(run_check("Test.hs", "checkRunCheck", "node", "sudo x"), Some(vec![1002]));
+    assert_eq!(run_check(TEST_CHECKS, "Test.hs", "checkMissing", "node", "true"), None);
+    assert_eq!(run_check(TEST_CHECKS, "Other.hs", "checkRunCheck", "node", "true"), None);
+    assert_eq!(find_entries(TEST_CHECKS, "Test.hs", "checkRunCheck \"sudo\"").len(), 1);
+    assert!(find_entries(TEST_CHECKS, "Test.hs", "checkRunCheck \"doas\"").is_empty());
+    assert_eq!(run_check(TEST_CHECKS, "Test.hs", "checkRunCheck", "node", "sudo x"), Some(vec![1002]));
 }
 
 #[test]
 #[should_panic(expected = "wrong CheckKind")]
 fn run_check_rejects_kind_mismatch() {
-    run_check("Test.hs", "checkRunCheck", "tree", "sudo x");
+    run_check(TEST_CHECKS, "Test.hs", "checkRunCheck", "tree", "sudo x");
 }
 
 #[test]
 fn run_check_runs_command_check() {
-    assert_eq!(run_check("Test.hs", "checkRunCheck", "node", "sudo x"), Some(vec![1002]));
-    assert_eq!(run_check("Test.hs", "checkRunCheck \"sudo\"", "node", "ls"), Some(vec![]));
+    assert_eq!(run_check(TEST_CHECKS, "Test.hs", "checkRunCheck", "node", "sudo x"), Some(vec![1002]));
+    assert_eq!(run_check(TEST_CHECKS, "Test.hs", "checkRunCheck \"sudo\"", "node", "ls"), Some(vec![]));
 }

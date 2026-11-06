@@ -2,15 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkBadParameterSubstitution`, lines 1885-1945 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Ast, Id, Token};
 use shellcheck_core::astlib::{
     e4m, is_command_substitution, is_special_variable_char, is_unmodified_parameter_expansion,
     is_variable_char, is_variable_name, is_variable_start_char,
 };
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkBadParameterSubstitution",
     registry: "node",

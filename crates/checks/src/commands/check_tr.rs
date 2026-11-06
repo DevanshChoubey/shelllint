@@ -2,12 +2,11 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkTr`, lines 236-255 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::{arguments, get_literal_string, is_glob};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
     name: "checkTr",
     registry: "command",
@@ -60,7 +59,7 @@ mod tests {
     use shellcheck_analyzer::testing::run_check;
 
     fn codes(script: &str) -> Vec<u32> {
-        run_check("Checks/Commands.hs", "checkTr", "node", script)
+        run_check(crate::CHECKS, "Checks/Commands.hs", "checkTr", "node", script)
             .expect("registered")
             .into_iter()
             .map(|c| c as u32)

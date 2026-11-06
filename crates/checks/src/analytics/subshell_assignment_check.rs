@@ -6,12 +6,11 @@ use std::collections::HashMap;
 use shellcheck_analyzer::analyzerlib::{
     Comments, Params, Scope, StackData, VariableState, is_true_assignment_source,
 };
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{AssignmentMode, Id, Token};
 use shellcheck_core::interface::TokenComment;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "subshellAssignmentCheck",
     registry: "tree",

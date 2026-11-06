@@ -6,13 +6,12 @@ use std::collections::BTreeMap;
 use shellcheck_analyzer::analyzerlib::{
     Comments, Params, StackData, get_variable_flow, should_ignore_code,
 };
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{e4m, get_braced_modifier, get_literal_string, get_path, oversimplify};
 use shellcheck_core::interface::TokenComment;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnpassedInFunctions",
     registry: "tree",

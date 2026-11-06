@@ -2,15 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkVariableBraces`, lines 2352-2362 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_braced_reference, oversimplify};
 use shellcheck_core::data::UNBRACED_VARIABLES;
 
 use crate::support::{fix_with, quotes_may_conflict_with_sc2281, replace_end, replace_start};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkVariableBraces",
     registry: "optional-tree",

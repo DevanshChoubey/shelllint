@@ -18,5 +18,3 @@ shellcheck-core = { path = "../core" }
 shellcheck-analyzer = { path = "../analyzer" }
 shellcheck-checker = { path = "../checker" }
 shellcheck-formatter = { path = "../formatter" }
-# Linked only so the linkme-registered checks end up in the binary.
-shellcheck-checks = { path = "../checks" }

@@ -2,14 +2,13 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkBlatantRecursion`, lines 4481-4509 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
+use shellcheck_analyzer::api::{CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{get_command_name_and_token, get_command_sequences};
 
 use crate::support::{fix_with, replace_start};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY: CheckEntry = CheckEntry {
+pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkBlatantRecursion",
     registry: "node",
