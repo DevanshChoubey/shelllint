@@ -59,12 +59,18 @@ fn check(name: &str, script: impl FnOnce() -> String) {
         .unwrap();
     let mut stdout = child.stdout.take().unwrap();
     let mut stderr = child.stderr.take().unwrap();
+    // stderr is drained on its own thread so a full stderr pipe cannot
+    // block the child while stdout is being read.
+    let err_reader = std::thread::spawn(move || {
+        let mut err = String::new();
+        let _ = stderr.read_to_string(&mut err);
+        err
+    });
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
         let mut out = String::new();
-        let mut err = String::new();
         let _ = stdout.read_to_string(&mut out);
-        let _ = stderr.read_to_string(&mut err);
+        let err = err_reader.join().unwrap_or_default();
         let _ = tx.send((out, err));
     });
     let (out, err) = match rx.recv_timeout(TIME_LIMIT) {

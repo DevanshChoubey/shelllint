@@ -273,10 +273,29 @@ fn go(s: &[char]) -> String {
     }
 }
 
+// DIVERGENCE: the Haskell only escapes '\\' and hands the class to
+// regex-tdfa. The `regex` crate also treats '[' (nested class), "&&", "~~"
+// and "--" (set operations) specially, so '[', '&', '~' and any '-' that
+// cannot be a range ('-' first, last, or next to another '-') are escaped.
+// An empty class ("[]" / "[!]"), which tdfa rejects (an `error` call in
+// ShellCheck), becomes a class matching nothing / any character instead of
+// a panic.
 fn translate_class(cls: &[char]) -> String {
-    let escape_class =
-        |cs: &[char]| cs.iter().map(|&c| if c == '\\' { "\\\\".to_string() } else { c.to_string() }).collect::<String>();
+    let escape_class = |cs: &[char]| {
+        let mut out = String::new();
+        for (i, &c) in cs.iter().enumerate() {
+            let literal_dash = c == '-'
+                && (i == 0 || i + 1 == cs.len() || cs[i - 1] == '-' || cs[i + 1] == '-');
+            if matches!(c, '\\' | '[' | '&' | '~') || literal_dash {
+                out.push('\\');
+            }
+            out.push(c);
+        }
+        out
+    };
     match cls {
+        [] => "^\\x00-\\x{10FFFF}".to_string(),
+        ['!'] => "\\x00-\\x{10FFFF}".to_string(),
         ['!', cs @ ..] => "^".to_string() + &escape_class(cs),
         cs => escape_class(cs),
     }
@@ -357,7 +376,8 @@ fn split_top_level_commas(s: &[char]) -> Vec<Vec<char>> {
 /// `reads s :: [(Int, String)]` with nothing left over.
 // DIVERGENCE: Haskell's `reads` also accepts parenthesised numbers and
 // whitespace between '-' and the digits; only `[ws]['-']digits` is accepted
-// here.
+// here. A number that overflows `i64` gives `None` (no range expansion),
+// where `reads :: Int` silently wraps.
 fn read_int(s: &[char]) -> Option<i64> {
     let s: String = s.iter().collect();
     let t = s.trim_start_matches(is_space);

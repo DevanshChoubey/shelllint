@@ -1534,3 +1534,37 @@ fn fix_replacements_get_the_comment_file() {
     let pc = shellcheck_checker::token_to_position(&pr, tc(find_literal(&pr, "mainword"), vec![rep("", 3, 6)]));
     assert_eq!(files_of(pc), vec![("main".into(), "main".into())]);
 }
+
+#[test]
+fn include_exclude_with_parser_codes() {
+    let run = |included: Option<Vec<Code>>, excluded: Vec<Code>| {
+        get_errors(
+            &mocked_system_interface(vec![]),
+            CheckSpec { included_warnings: included, excluded_warnings: excluded, ..spec("#!/bin/sh\necho \"$12\"") },
+        )
+    };
+    assert_eq!(run(None, vec![]), vec![1037]);
+    assert_eq!(run(Some(vec![1037]), vec![]), vec![1037]);
+    assert_eq!(run(Some(vec![1000]), vec![]), none());
+    assert_eq!(run(None, vec![1037]), none());
+    // An include list wins over the exclude list, as in Haskell.
+    assert_eq!(run(Some(vec![1037]), vec![1037]), vec![1037]);
+}
+
+#[test]
+fn glob_classes_with_regex_set_syntax_do_not_panic() {
+    assert!(matches_glob("foo[[].sh", "foo[.sh"));
+    assert!(!matches_glob("foo[[].sh", "foox.sh"));
+    assert!(matches_glob("a[&&b]", "a&"));
+    assert!(matches_glob("a[~~b]", "a~"));
+    assert!(matches_glob("a[--b]", "a-"));
+    assert!(matches_glob("a[-b]", "a-"));
+    assert!(matches_glob("a[b-]", "a-"));
+    assert!(matches_glob("a[a-c]", "ab"));
+    assert!(!matches_glob("a[a-c]", "a-"));
+    assert!(matches_glob("a[\\]", "a\\"));
+    assert!(!matches_glob("a[]", "a"));
+    assert!(matches_glob("a[!]", "ax"));
+    // A section header with such a class goes through the whole parse.
+    assert_eq!(parse_editor_config("[foo[[].sh]\nshellcheck.shell=sh\n", "foo[.sh"), "\nshell=sh\n");
+}
