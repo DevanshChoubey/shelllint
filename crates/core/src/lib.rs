@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 
 pub mod ast;
+pub mod astlib;
 pub mod data;
 pub mod interface;
 pub mod prelude;
