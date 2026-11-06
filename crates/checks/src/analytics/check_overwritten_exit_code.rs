@@ -84,42 +84,34 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code1() {
         assert_eq!(codes("x; [ $? -eq 1 ] || [ $? -eq 2 ]"), [2319]);
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code2() {
         assert!(codes("x; [ $? -eq 1 ]").is_empty());
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code3() {
         assert_eq!(codes("x; echo \"Exit is $?\"; [ $? -eq 0 ]"), [2320]);
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code4() {
         assert!(codes("x; [ $? -eq 0 ] && echo Success").is_empty());
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code5() {
         assert_eq!(codes("x; if [ $? -eq 0 ]; then var=$?; fi"), [2319]);
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code6() {
         assert_eq!(codes("x; [ $? -gt 0 ] && fail=$?"), [2319]);
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code7() {
         assert!(codes("[ 1 -eq 2 ]; status=$?").is_empty());
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_overwritten_exit_code8() {
         assert!(codes("[ 1 -eq 2 ]; exit $?").is_empty());
     }

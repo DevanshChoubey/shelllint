@@ -120,7 +120,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_spacefulness_cfg37v() {
         assert!(!codes("@test 'status' {\n [ $status -eq 0 ]\n}").is_empty());
     }

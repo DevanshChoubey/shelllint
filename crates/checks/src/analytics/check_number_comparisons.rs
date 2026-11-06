@@ -238,7 +238,6 @@ mod tests {
     macro_rules! t {
         ($name:ident, $fires:expr, $script:expr) => {
             #[test]
-            #[ignore = "needs cfg engine bodies"]
             fn $name() {
                 assert_eq!(fires($script), $fires, "{}", $script);
             }

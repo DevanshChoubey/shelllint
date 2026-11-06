@@ -194,43 +194,36 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_backreferencing_declaration1() {
         assert!(fires("declare", "declare x=1 y=foo$x"));
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_backreferencing_declaration2() {
         assert!(fires("readonly", "readonly x=1 y=$((1+x))"));
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_backreferencing_declaration3() {
         assert!(fires("local", "local x=1 y=$(echo $x)"));
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_backreferencing_declaration4() {
         assert!(fires("local", "local x=1 y[$x]=z"));
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_backreferencing_declaration5() {
         assert!(fires("declare", "declare x=var $x=1"));
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_backreferencing_declaration6() {
         assert!(fires("declare", "declare x=var $x=1"));
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_backreferencing_declaration7() {
         assert!(fires("declare", "declare x=var $k=$x"));
     }

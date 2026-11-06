@@ -92,26 +92,15 @@ mod tests {
     }
 
 
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t1() { yes("f; f() { true; }"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t2() { no("f() { true; }; f"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t3() { no("if ! mycmd --version; then mycmd() { true; }; fi"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t4() { no("mycmd || mycmd() { f; }"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t5() { yes("false || mycmd; mycmd() { f; }"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t6() { no("f() { one; }; f; f() { two; }; f"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t7() { no("f() { true; }\nreturn\necho \"$(f)\"\necho \"$(f)\""); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t8() { no("#!/usr/bin/env bats\n@test 'foo' { f; }\nf() { true; }"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t9() { no("#!/usr/bin/env bats\n@test 'foo' { f; }\nsetup() { f() { true; }; }"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t10() { yes("#!/usr/bin/env bats\n@test 'foo' {\n f\n f() { true; }\n}"); }
-    #[test] #[ignore = "needs cfg engine bodies"]
     fn t11() { yes("#!/usr/bin/env bats\nf\n@test 'foo' { true; }\nf() { true; }"); }
 }

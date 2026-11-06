@@ -67,47 +67,38 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number1() {
         assert!(fires("x+=1"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number2() {
         assert!(fires("x+=42"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number3() {
         assert!(!fires("(( x += 1 ))"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number4() {
         assert!(!fires("declare -i x=0; x+=1"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number5() {
         assert!(!fires("x+='1'"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number6() {
         assert!(!fires("n=foo; x+=n"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number7() {
         assert!(fires("n=4; x+=n"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number8() {
         assert!(fires("n=4; x+=$n"));
     }
     #[test]
-    #[ignore = "needs cfg engine bodies"]
     fn prop_check_plus_equals_number9() {
         assert!(!fires("declare -ia var; var[x]+=1"));
     }
