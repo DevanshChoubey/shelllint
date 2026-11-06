@@ -319,3 +319,24 @@ fn sc1091_message_matches_the_cli() {
         assert_eq!(d["message"], "Not following: ./lib.sh was not specified as input (see shellcheck -x).");
     }
 }
+
+#[test]
+fn fix_script_without_final_newline_matches_diff_format() {
+    let replies = session(&[call(1, "fix_script", json!({"script": "date +`echo \"$format\"`"}))]);
+    let s = &reply(&replies, 1)["result"]["structuredContent"];
+    // As `shellcheck -f diff`: marker on the old side, final newline added.
+    assert_eq!(
+        s["diff"],
+        "--- a/script.sh\n+++ b/script.sh\n@@ -1,1 +1,1 @@\n-date +`echo \"$format\"`\n\\ No newline at end of file\n+date +$(echo \"$format\")\n\n"
+    );
+    assert_eq!(s["fixed_script"], "date +$(echo \"$format\")\n");
+}
+
+#[test]
+fn fix_script_keeps_missing_newline_when_last_line_unchanged() {
+    let replies = session(&[call(1, "fix_script", json!({"script": "x=`date`\necho hi"}))]);
+    let s = &reply(&replies, 1)["result"]["structuredContent"];
+    assert_eq!(s["fixed_script"], "x=$(date)\necho hi");
+    let diff = s["diff"].as_str().unwrap();
+    assert!(diff.contains("\n echo hi\n\\ No newline at end of file\n"), "diff: {diff}");
+}
