@@ -395,6 +395,7 @@ dependencies = [
  "shellcheck-checker",
  "shellcheck-checks",
  "shellcheck-core",
+ "shellcheck-formatter",
  "shellcheck-parser",
 ]
 

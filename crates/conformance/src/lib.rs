@@ -112,6 +112,38 @@ pub fn load_baseline(path: &Path) -> Result<std::collections::BTreeMap<String, b
     serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
 }
 
+/// One line of corpus/oracle-full.jsonl (written by tools/oracle_full.py):
+/// the oracle's complete json1 comment list for one runnable script.
+#[derive(Debug, Clone, Deserialize)]
+pub struct OracleFull {
+    pub key: String,
+    #[serde(default)]
+    pub shell: Option<String>,
+    /// json1 comments in output order. `None` when the oracle failed.
+    #[serde(default)]
+    pub comments: Option<Vec<serde_json::Value>>,
+    #[serde(default)]
+    pub error: Option<String>,
+}
+
+/// Loads oracle-full.jsonl keyed by `Record::key`. A duplicate key is an
+/// error, since the comparison could otherwise pick the wrong script.
+pub fn load_oracle_full(
+    path: &Path,
+) -> Result<std::collections::BTreeMap<String, OracleFull>, String> {
+    let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let mut map = std::collections::BTreeMap::new();
+    for (i, l) in text.lines().enumerate().filter(|(_, l)| !l.trim().is_empty()) {
+        let r: OracleFull = serde_json::from_str(l)
+            .map_err(|e| format!("{}:{}: {e}", path.display(), i + 1))?;
+        if map.contains_key(&r.key) {
+            return Err(format!("{}:{}: duplicate key {}", path.display(), i + 1, r.key));
+        }
+        map.insert(r.key.clone(), r);
+    }
+    Ok(map)
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Outcome {
     Pass,
@@ -169,6 +201,29 @@ mod tests {
         assert_eq!(recs.len(), 2334);
         assert_eq!(recs.iter().filter(|r| r.kind == "node").count(), 1386);
         assert_eq!(recs.iter().filter(|r| r.oracle_codes.is_some()).count(), 2105);
+    }
+
+    #[test]
+    fn oracle_full_covers_every_parity_script() {
+        let recs = load_corpus(&default_corpus_dir().join("tests.jsonl")).unwrap();
+        let full = load_oracle_full(&default_corpus_dir().join("oracle-full.jsonl")).unwrap();
+        assert_eq!(full.len(), 2105);
+        for r in recs.iter().filter(|r| r.oracle_codes.is_some()) {
+            let o = full.get(&r.key()).unwrap_or_else(|| panic!("no oracle-full entry for {}", r.key()));
+            assert_eq!(o.shell, r.oracle_shell, "{}", r.key());
+            let comments = o.comments.as_ref().unwrap();
+            // the full record agrees with the code-set record it extends
+            let mut codes: Vec<i64> = comments.iter().map(|c| c["code"].as_i64().unwrap()).collect();
+            codes.sort_unstable();
+            codes.dedup();
+            assert_eq!(&codes, r.oracle_codes.as_ref().unwrap(), "{}", r.key());
+        }
+        let dir = std::env::temp_dir().join(format!("sc-oracle-full-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let dup = dir.join("dup.jsonl");
+        std::fs::write(&dup, "{\"key\":\"a\",\"comments\":[]}\n{\"key\":\"a\",\"comments\":[]}\n").unwrap();
+        assert!(load_oracle_full(&dup).is_err());
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
