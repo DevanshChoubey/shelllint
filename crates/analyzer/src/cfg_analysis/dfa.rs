@@ -11,8 +11,11 @@
 // * The shared STRefs (`cCounter`, `cCache`, `cEnableCache`,
 //   `cInvocations`) are fields too.
 //
-// Maps are `Rc<BTreeMap>` with copy-on-write instead of Haskell's persistent
-// `Data.Map`; iteration order, versions and merge order follow Haskell.
+// Maps are persistent red-black trees (`rpds::RedBlackTreeMap`, behind an
+// `Rc` for a cheap identity) standing in for Haskell's `Data.Map`: a copy is
+// O(1) and an insert copies only the O(log n) path to the key, so the many
+// near-identical per-node states share structure as they do in Haskell.
+// Iteration order, versions and merge order follow Haskell.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::rc::Rc;
@@ -24,7 +27,7 @@ use shellcheck_core::prelude::please_report;
 use super::NumericalStatus::*;
 use super::SpaceStatus::*;
 use super::{
-    CFVariableProp, CfgAnalysis, CfgParameters, NumericalStatus, ProgramState, SpaceStatus, VarMap,
+    CFVariableProp, CfgAnalysis, CfgParameters, Layer, NumericalStatus, PMap, ProgramState, SpaceStatus, StateData,
     VariableProperties, VariableState, VariableValue,
 };
 use crate::cfg::{
@@ -194,13 +197,31 @@ fn literal_to_numerical_status(s: &str) -> NumericalStatus {
 #[derive(Clone, Debug)]
 struct VMap<V> {
     version: i64,
-    storage: Rc<BTreeMap<Str, V>>,
+    /// `Rc` so a map has an identity (for `ptr_eq` and memo tables); cloning
+    /// the inner persistent map for copy-on-write is O(1).
+    storage: Rc<PMap<V>>,
+}
+
+/// Insert into a persistent map, keeping the tree (and the key allocation)
+/// shared when the key already holds an equal value.
+fn pmap_insert<V: Clone + PartialEq>(map: &mut Rc<PMap<V>>, k: &str, v: V) {
+    let key = match map.get_key_value(k) {
+        Some((_, old)) if *old == v => return,
+        Some((key, _)) => key.clone(),
+        None => Rc::from(k),
+    };
+    Rc::make_mut(map).insert_mut(key, v);
+}
+
+/// `Data.Map` equality: a single in-order walk (rpds' `==` does a lookup per key).
+fn pmap_eq<V: PartialEq>(a: &PMap<V>, b: &PMap<V>) -> bool {
+    a.ptr_eq(b) || (a.size() == b.size() && a.iter().zip(b.iter()).all(|(x, y)| x == y))
 }
 
 impl<V: Clone + PartialEq> VMap<V> {
     /// `vmEmpty`
     fn empty() -> Self {
-        VMap { version: 0, storage: Rc::new(BTreeMap::new()) }
+        VMap { version: 0, storage: Rc::new(PMap::new()) }
     }
     /// `vmLookup`
     fn lookup(&self, k: &str) -> Option<&V> {
@@ -209,7 +230,11 @@ impl<V: Clone + PartialEq> VMap<V> {
     /// `vmInsert`
     fn insert(&mut self, k: &str, v: V) {
         self.version = -1;
-        Rc::make_mut(&mut self.storage).insert(Rc::from(k), v);
+        pmap_insert(&mut self.storage, k, v);
+    }
+    /// Same storage (cheap identity check).
+    fn same_storage(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.storage, &other.storage) || self.storage.ptr_eq(&other.storage)
     }
     /// `vmIsQuickEqual`
     fn quick_eq(&self, other: &Self) -> bool {
@@ -217,9 +242,10 @@ impl<V: Clone + PartialEq> VMap<V> {
     }
     /// `instance Eq VersionedMap`
     fn equals(&self, other: &Self) -> bool {
-        self.quick_eq(other) || Rc::ptr_eq(&self.storage, &other.storage) || *self.storage == *other.storage
+        self.quick_eq(other) || pmap_eq(&self.storage, &other.storage)
     }
     /// `vmPatch`: overwrite all keys in the first map with values from the second
+    /// (`M.union diff base`, inserting the smaller map into the larger).
     fn patch(base: &Self, diff: &Self) -> Self {
         if base.version == 0 {
             diff.clone()
@@ -227,21 +253,23 @@ impl<V: Clone + PartialEq> VMap<V> {
             base.clone()
         } else if base.quick_eq(diff) {
             diff.clone()
-        } else if Rc::ptr_eq(&base.storage, &diff.storage) {
+        } else if base.same_storage(diff) {
             // M.union m m == m
             VMap { version: -1, storage: diff.storage.clone() }
-        } else if diff.storage.len() <= base.storage.len() {
-            let mut storage = (*base.storage).clone();
+        } else if diff.storage.size() <= base.storage.size() {
+            let mut storage = base.storage.clone();
             for (k, v) in diff.storage.iter() {
-                storage.insert(k.clone(), v.clone());
+                pmap_insert(&mut storage, k, v.clone());
             }
-            VMap { version: -1, storage: Rc::new(storage) }
+            VMap { version: -1, storage }
         } else {
-            let mut storage = (*diff.storage).clone();
+            let mut storage = diff.storage.clone();
             for (k, v) in base.storage.iter() {
-                storage.entry(k.clone()).or_insert_with(|| v.clone());
+                if !storage.contains_key(k) {
+                    Rc::make_mut(&mut storage).insert_mut(k.clone(), v.clone());
+                }
             }
-            VMap { version: -1, storage: Rc::new(storage) }
+            VMap { version: -1, storage }
         }
     }
 }
@@ -389,10 +417,16 @@ enum StateDependency {
 }
 use StateDependency::*;
 
-type Deps = Rc<BTreeSet<StateDependency>>;
+/// A set of dependencies. The same dependency is added to every stack frame
+/// a lookup visits, so the elements are shared (`Rc`) between the sets.
+type DepSet = BTreeSet<Rc<StateDependency>>;
+type Deps = Rc<DepSet>;
 
 /// Create an InternalState that fulfills the given dependencies
-fn deps_to_state(set: &BTreeSet<StateDependency>) -> IState {
+// DIVERGENCE (performance only): `DepFunction`s are skipped. The result is
+// only used to build the externalized states of `analyzeControlFlow`, which
+// never expose function targets.
+fn deps_to_state(set: &DepSet) -> IState {
     let mut state = new_internal_state();
     fn insert_in(state: &mut IState, overwrite: bool, scope: Scope, name: &str, val: VariableState) {
         let map = match scope {
@@ -410,8 +444,8 @@ fn deps_to_state(set: &BTreeSet<StateDependency>) -> IState {
         }
     }
     for dep in set {
-        match dep {
-            DepFunction(name, val) => state.insert_function(name, val.clone()),
+        match &**dep {
+            DepFunction(..) => {}
             DepState(scope, name, val) => insert_in(&mut state, true, *scope, name, val.clone()),
             // State includes properties and more, so don't overwrite a state with properties
             DepProperties(scope, name, props) => insert_in(
@@ -428,6 +462,41 @@ fn deps_to_state(set: &BTreeSet<StateDependency>) -> IState {
     state
 }
 
+/// `deps_to_state`'s variables and exit codes, as compact `ProgramState`
+/// layers (`[prefix, locals, globals]`). Same contents as the maps of
+/// `deps_to_state(set)`; its `sIsReachable` is always `Nothing`.
+struct BaseLayers {
+    scopes: [Layer; 3],
+    exit_codes: Option<Rc<BTreeSet<Id>>>,
+}
+
+fn deps_to_layers(set: &DepSet) -> BaseLayers {
+    let mut maps: [BTreeMap<Str, VariableState>; 3] = Default::default();
+    let idx = |scope: Scope| match scope {
+        Scope::PrefixScope => 0,
+        Scope::LocalScope => 1,
+        Scope::GlobalScope => 2,
+    };
+    let mut exit_codes = None;
+    for dep in set {
+        match &**dep {
+            DepState(scope, name, val) => {
+                maps[idx(*scope)].insert(name.clone(), val.clone());
+            }
+            // State includes properties and more, so don't overwrite a state with properties
+            DepProperties(scope, name, props) => {
+                maps[idx(*scope)]
+                    .entry(name.clone())
+                    .or_insert_with(|| VariableState { variable_properties: *props, ..unknown_variable_state() });
+            }
+            DepFunction(..) | DepIsRecursive(..) => {}
+            DepExitCodes(s) => exit_codes = Some(s.clone()),
+        }
+    }
+    let scopes = maps.map(|m| Layer::Sorted(m.into_iter().collect::<Vec<_>>().into()));
+    BaseLayers { scopes, exit_codes }
+}
+
 // ---- Ctx ----
 
 /// Whenever a function (or subshell) is invoked, a value like this is pushed onto the stack
@@ -439,7 +508,7 @@ struct StackEntry {
     /// The node where this entry point was invoked
     call_site: Node,
     /// A mutable set of dependencies we fetched from here or higher in the stack
-    dependencies: BTreeSet<StateDependency>,
+    dependencies: DepSet,
     /// The original input state for this stack entry
     stack_state: IState,
 }
@@ -551,7 +620,7 @@ impl<'g> Ctx<'g> {
         }
         let res = res.unwrap_or(def);
         if visited > 0 {
-            let d = dep(&res);
+            let d = Rc::new(dep(&res));
             let len = self.stack.len();
             for s in &mut self.stack[len - visited..] {
                 s.dependencies.insert(d.clone());
@@ -789,47 +858,60 @@ impl<'g> Ctx<'g> {
         }
         // DIVERGENCE (performance only): merging a map with itself walks every
         // key with `merger v v`, which is the identity for both mergers.
-        if Rc::ptr_eq(&a.storage, &b.storage) {
+        if a.same_storage(b) {
             return VMap { version: -1, storage: a.storage.clone() };
         }
-        let mut out = BTreeMap::new();
+        // Haskell builds a fresh map with `fromDistinctAscList`. Here the
+        // result starts as `a` and only keys whose merged value differs from
+        // `a`'s are inserted, so it shares structure with `a`. The reader is
+        // called for the same keys in the same order.
+        let mut out = a.storage.clone();
         let mut i1 = a.storage.iter().peekable();
         let mut i2 = b.storage.iter().peekable();
         loop {
-            match (i1.peek(), i2.peek()) {
+            match (i1.peek().copied(), i2.peek().copied()) {
                 (None, None) => break,
-                (Some((k, v)), None) | (None, Some((k, v))) => {
-                    let (k, v) = ((*k).clone(), (*v).clone());
-                    let other = reader(self, &k);
-                    out.insert(k, merger(&v, &other));
-                    if i1.peek().is_some() {
-                        i1.next();
-                    } else {
-                        i2.next();
+                // Only in `a`
+                (Some((k, v)), None) => {
+                    let other = reader(self, k);
+                    let merged = merger(v, &other);
+                    if merged != *v {
+                        Rc::make_mut(&mut out).insert_mut(k.clone(), merged);
                     }
+                    i1.next();
+                }
+                // Only in `b` (`f l [] b = f l b []`: b's value goes first)
+                (None, Some((k, v))) => {
+                    let other = reader(self, k);
+                    Rc::make_mut(&mut out).insert_mut(k.clone(), merger(v, &other));
+                    i2.next();
                 }
                 (Some((k1, v1)), Some((k2, v2))) => match k1.cmp(k2) {
                     std::cmp::Ordering::Equal => {
-                        out.insert((*k1).clone(), merger(v1, v2));
+                        let merged = merger(v1, v2);
+                        if merged != *v1 {
+                            Rc::make_mut(&mut out).insert_mut(k1.clone(), merged);
+                        }
                         i1.next();
                         i2.next();
                     }
                     std::cmp::Ordering::Less => {
-                        let (k, v) = ((*k1).clone(), (*v1).clone());
-                        let nv2 = reader(self, &k);
-                        out.insert(k, merger(&v, &nv2));
+                        let nv2 = reader(self, k1);
+                        let merged = merger(v1, &nv2);
+                        if merged != *v1 {
+                            Rc::make_mut(&mut out).insert_mut(k1.clone(), merged);
+                        }
                         i1.next();
                     }
                     std::cmp::Ordering::Greater => {
-                        let (k, v) = ((*k2).clone(), (*v2).clone());
-                        let nv1 = reader(self, &k);
-                        out.insert(k, merger(&nv1, &v));
+                        let nv1 = reader(self, k2);
+                        Rc::make_mut(&mut out).insert_mut(k2.clone(), merger(&nv1, v2));
                         i2.next();
                     }
                 },
             }
         }
-        VMap { version: -1, storage: Rc::new(out) }
+        VMap { version: -1, storage: out }
     }
 
     /// Give a VersionedMap a version if it does not already have one.
@@ -882,8 +964,9 @@ impl<'g> Ctx<'g> {
             Some(i) => (i, true),
             None => (0, false),
         };
+        let d = Rc::new(DepIsRecursive(node, res));
         for s in &mut self.stack[from..] {
-            s.dependencies.insert(DepIsRecursive(node, res));
+            s.dependencies.insert(d.clone());
         }
         res
     }
@@ -1025,7 +1108,7 @@ impl<'g> Ctx<'g> {
     }
 
     /// Check if the current context fulfills all StateDependencies
-    fn fulfills_dependencies(&self, entry: Node, deps: &BTreeSet<StateDependency>) -> bool {
+    fn fulfills_dependencies(&self, entry: Node, deps: &DepSet) -> bool {
         deps.iter().all(|d| self.fulfills_dependency(entry, d))
     }
 
@@ -1282,40 +1365,143 @@ fn get_function_targets(state: &IState) -> BTreeMap<Node, FunctionDefinition> {
     out
 }
 
-/// `internalToExternal`, sharing the censored maps between nodes.
+/// `internalToExternal`, sharing the maps. Censoring is done by the
+/// `ProgramState` accessors.
 struct Externalizer {
-    censored: HashMap<*const BTreeMap<Str, VariableState>, VarMap>,
+    empty_map: Rc<PMap<VariableState>>,
     empty_codes: Rc<BTreeSet<Id>>,
+    /// Identical states (same shared parts) are stored once.
+    dedup: HashMap<([usize; 7], bool), ProgramState>,
 }
 
 impl Externalizer {
-    fn censor(&mut self, m: &VarMap) -> VarMap {
-        if let Some(c) = self.censored.get(&Rc::as_ptr(m)) {
-            return c.clone();
-        }
-        // Censor the literal value to avoid introducing dependencies on it.
-        let c = if m.values().all(|v| v.variable_value.literal_value.is_none()) {
-            m.clone()
-        } else {
-            Rc::new(
-                m.iter()
-                    .map(|(k, v)| {
-                        let mut v = v.clone();
-                        v.variable_value.literal_value = None;
-                        (k.clone(), v)
-                    })
-                    .collect(),
-            )
-        };
-        self.censored.insert(Rc::as_ptr(m), c.clone());
-        c
+    fn make(&mut self, scopes: [Layer; 6], exit_codes: Rc<BTreeSet<Id>>, state_is_reachable: bool) -> ProgramState {
+        let key = (
+            [
+                scopes[0].addr(),
+                scopes[1].addr(),
+                scopes[2].addr(),
+                scopes[3].addr(),
+                scopes[4].addr(),
+                scopes[5].addr(),
+                Rc::as_ptr(&exit_codes) as usize,
+            ],
+            state_is_reachable,
+        );
+        // The stored states keep the keyed allocations alive, so an
+        // address can't be reused for different contents.
+        self.dedup
+            .entry(key)
+            .or_insert_with(|| ProgramState(Rc::new(StateData { scopes, exit_codes, state_is_reachable })))
+            .clone()
     }
 
     fn convert(&mut self, s: &IState) -> ProgramState {
-        ProgramState {
-            scopes: [self.censor(&s.prefix.storage), self.censor(&s.locals.storage), self.censor(&s.globals.storage)],
-            exit_codes: s.exit_codes.clone().unwrap_or_else(|| self.empty_codes.clone()),
-            state_is_reachable: s.is_reachable.unwrap_or(true),
+        let e = Layer::Map(self.empty_map.clone());
+        let scopes = [
+            Layer::Map(s.prefix.storage.clone()),
+            e.clone(),
+            Layer::Map(s.locals.storage.clone()),
+            e.clone(),
+            Layer::Map(s.globals.storage.clone()),
+            e,
+        ];
+        let exit_codes = s.exit_codes.clone().unwrap_or_else(|| self.empty_codes.clone());
+        self.make(scopes, exit_codes, s.is_reachable.unwrap_or(true))
+    }
+
+    /// `internalToExternal (patchState base diff)` without building the
+    /// patched maps: each scope is looked up in `diff`, then in `base`.
+    fn convert_patched(&mut self, base: &BaseLayers, diff: &IState) -> ProgramState {
+        let [bp, bl, bg] = &base.scopes;
+        let scopes = [
+            Layer::Map(diff.prefix.storage.clone()),
+            bp.clone(),
+            Layer::Map(diff.locals.storage.clone()),
+            bl.clone(),
+            Layer::Map(diff.globals.storage.clone()),
+            bg.clone(),
+        ];
+        let exit_codes = diff
+            .exit_codes
+            .clone()
+            .or_else(|| base.exit_codes.clone())
+            .unwrap_or_else(|| self.empty_codes.clone());
+        // the base's sIsReachable is Nothing
+        self.make(scopes, exit_codes, diff.is_reachable.unwrap_or(true))
+    }
+}
+
+/// `vmPatch base` for one fixed `base`, memoized on the identity (and
+/// version) of the diff map. Consecutive nodes usually share a map (a node's
+/// input is its predecessor's output), so this computes and stores each
+/// patched map once instead of once per node.
+struct PatchMemo<V> {
+    /// (storage address, version) -> (the diff storage, kept alive so the
+    /// address can't be reused; the patched map)
+    memo: HashMap<(usize, i64), (Rc<PMap<V>>, VMap<V>)>,
+}
+
+impl<V: Clone + PartialEq> PatchMemo<V> {
+    fn new() -> Self {
+        PatchMemo { memo: HashMap::new() }
+    }
+    fn patch(&mut self, base: &VMap<V>, diff: &VMap<V>) -> VMap<V> {
+        let key = (Rc::as_ptr(&diff.storage) as usize, diff.version);
+        if let Some((_, v)) = self.memo.get(&key) {
+            return v.clone();
+        }
+        let v = VMap::patch(base, diff);
+        self.memo.insert(key, (diff.storage.clone(), v.clone()));
+        v
+    }
+}
+
+/// `patchState base` for one fixed `base` (see `PatchMemo`).
+struct StatePatcher {
+    base: IState,
+    built: bool,
+    deps: Deps,
+    globals: PatchMemo<VariableState>,
+    locals: PatchMemo<VariableState>,
+    prefix: PatchMemo<VariableState>,
+    funcs: PatchMemo<FunctionValue>,
+}
+
+impl StatePatcher {
+    /// `deps_to_state(deps)` is built on first use.
+    fn new(deps: Deps) -> Self {
+        StatePatcher {
+            base: new_internal_state(),
+            built: false,
+            deps,
+            globals: PatchMemo::new(),
+            locals: PatchMemo::new(),
+            prefix: PatchMemo::new(),
+            funcs: PatchMemo::new(),
+        }
+    }
+    /// Same as `patch_state(&self.base, diff)`.
+    fn patch(&mut self, diff: &IState) -> IState {
+        if !self.built {
+            self.base = deps_to_state(&self.deps);
+            self.built = true;
+        }
+        let base = &self.base;
+        if diff.version == 0 {
+            base.clone()
+        } else if base.version == 0 || base.quick_eq(diff) {
+            diff.clone()
+        } else {
+            IState {
+                version: -1,
+                globals: self.globals.patch(&base.globals, &diff.globals),
+                locals: self.locals.patch(&base.locals, &diff.locals),
+                prefix: self.prefix.patch(&base.prefix, &diff.prefix),
+                funcs: self.funcs.patch(&base.funcs, &diff.funcs),
+                exit_codes: diff.exit_codes.clone().or_else(|| base.exit_codes.clone()),
+                is_reachable: diff.is_reachable.or(base.is_reachable),
+            }
         }
     }
 }
@@ -1365,34 +1551,60 @@ pub(super) fn analyze_control_flow(params: &CfgParameters, ast: &Ast, root: Id) 
         // groupByNode: `M.fromListWith (++)`, so each list is in reverse
         // order of occurrence.
         let invocations = std::mem::take(&mut ctx.invocations);
-        let mut grouped: BTreeMap<Node, Vec<(IState, IState)>> = BTreeMap::new();
-        for (_, (deps, states)) in invocations {
-            // Include the dependencies in the state of each function, e.g. if
-            // it depends on `x=foo` then add that.
-            let base = deps_to_state(&deps);
-            for (node, (a, b)) in states {
-                grouped.entry(node).or_default().push((patch_state(&base, &a), patch_state(&base, &b)));
+        //
+        // Include the dependencies in the state of each function, e.g. if it
+        // depends on `x=foo` then add that (`patchState base`). The patch is
+        // deferred: a node reached by a single invocation (the usual case)
+        // is externalized as the two layers, and only nodes that need a merge
+        // get patched maps.
+        let size = (hi - lo) as usize + 1;
+        let index = |node: Node| (node - lo) as usize;
+        // How many invocations reached each node
+        let mut count = vec![0u32; size];
+        for (_, states) in invocations.values() {
+            for node in states.keys() {
+                count[index(*node)] += 1;
             }
         }
 
         // flattenByNode: merge all the pre/post states for each node.
-        let mut ext = Externalizer { censored: HashMap::new(), empty_codes: Rc::new(BTreeSet::new()) };
-        let unreachable = ext.convert(&unreachable_state());
-        let mut merged: BTreeMap<Node, (ProgramState, ProgramState)> = BTreeMap::new();
-        for (node, mut list) in grouped {
+        let mut ext = Externalizer {
+            empty_map: Rc::new(PMap::new()),
+            empty_codes: Rc::new(BTreeSet::new()),
+            dedup: HashMap::new(),
+        };
+        let mut out: Vec<Option<(ProgramState, ProgramState)>> = (0..size).map(|_| None).collect();
+        let mut patchers: Vec<StatePatcher> = Vec::with_capacity(invocations.len());
+        let mut multi: BTreeMap<Node, Vec<(usize, IState, IState)>> = BTreeMap::new();
+        for (i, (_, (deps, states))) in invocations.into_iter().enumerate() {
+            let base = deps_to_layers(&deps);
+            for (node, (a, b)) in states {
+                if count[index(node)] == 1 {
+                    // mergeStates of a single state is that state
+                    out[index(node)] = Some((ext.convert_patched(&base, &a), ext.convert_patched(&base, &b)));
+                } else {
+                    multi.entry(node).or_default().push((i, a, b));
+                }
+            }
+            patchers.push(StatePatcher::new(deps));
+        }
+        for (node, mut list) in multi {
             list.reverse();
-            let (pres, posts): (Vec<IState>, Vec<IState>) = list.into_iter().unzip();
-            // The lists are never empty ("Null node states").
+            let mut pres = Vec::with_capacity(list.len());
+            let mut posts = Vec::with_capacity(list.len());
+            for (i, a, b) in &list {
+                pres.push(patchers[*i].patch(a));
+                posts.push(patchers[*i].patch(b));
+            }
             let none = new_internal_state();
             let pre = ctx.merge_states(&none, &pres);
             let post = ctx.merge_states(&none, &posts);
-            merged.insert(node, (ext.convert(&pre), ext.convert(&post)));
+            out[index(node)] = Some((ext.convert(&pre), ext.convert(&post)));
         }
         // Fill in unreachable states for anything we didn't get to
         // (`baseStates` covers the whole `nodeRange`).
-        (lo..=hi)
-            .map(|n| merged.remove(&n).unwrap_or_else(|| (unreachable.clone(), unreachable.clone())))
-            .collect::<Vec<_>>()
+        let unreachable = ext.convert(&unreachable_state());
+        out.into_iter().map(|s| s.unwrap_or_else(|| (unreachable.clone(), unreachable.clone()))).collect::<Vec<_>>()
     };
 
     CfgAnalysis { cfg, node_to_data, data_base: lo }
