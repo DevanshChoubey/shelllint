@@ -443,6 +443,7 @@ fn internal_error_exits_1() {
 
 // --rcfile accepts anything `doesFileExist` does, such as a fifo (or a
 // process substitution's /proc/self/fd/N). Oracle: SC2148 and SC2154 only.
+#[cfg(unix)]
 #[test]
 fn rcfile_may_be_a_fifo() {
     let d = tmpdir("rc-fifo");
@@ -456,7 +457,7 @@ fn rcfile_may_be_a_fifo() {
     // If the fifo was never opened, unblock the writer instead of hanging.
     {
         use std::os::unix::fs::OpenOptionsExt;
-        let _r = std::fs::OpenOptions::new().read(true).custom_flags(0o4000 /* O_NONBLOCK */).open(&fifo);
+        let _r = std::fs::OpenOptions::new().read(true).custom_flags(libc::O_NONBLOCK).open(&fifo);
         writer.join().unwrap();
     }
     assert_eq!(o.stderr, "");
@@ -521,7 +522,8 @@ fn relative_or_empty_xdg_config_home_falls_back_to_home_config() {
     );
 }
 
-#[cfg(unix)]
+// The expected strerror texts are musl's, which only the Linux build uses.
+#[cfg(target_os = "linux")]
 #[test]
 fn file_open_errors_use_ghc_io_error_text() {
     let d = std::env::temp_dir().join(format!("sc-ioerr-{}", std::process::id()));
