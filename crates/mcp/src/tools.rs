@@ -37,7 +37,7 @@ impl ToolOutput {
     fn ok(text: String, structured: Value) -> Self {
         ToolOutput { text, structured: Some(structured), is_error: false }
     }
-    fn error(text: impl Into<String>) -> Self {
+    pub fn error(text: impl Into<String>) -> Self {
         ToolOutput { text: text.into(), structured: None, is_error: true }
     }
     pub fn to_json(&self) -> Value {

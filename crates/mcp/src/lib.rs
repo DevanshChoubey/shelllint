@@ -9,7 +9,7 @@
 pub mod catalog;
 pub mod tools;
 
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, Read, Write};
 
 use serde_json::{Value, json};
 
@@ -37,6 +37,7 @@ const PARSE_ERROR: i64 = -32700;
 const INVALID_REQUEST: i64 = -32600;
 const METHOD_NOT_FOUND: i64 = -32601;
 const INVALID_PARAMS: i64 = -32602;
+const INTERNAL_ERROR: i64 = -32603;
 const UNSUPPORTED_PROTOCOL_VERSION: i64 = -32022;
 
 /// A JSON-RPC error response, minus the id.
@@ -53,27 +54,77 @@ impl RpcError {
     }
 }
 
+/// Longest accepted line, in bytes. A script is at most 1 MiB, which JSON
+/// escaping can grow to about 6 MiB; anything far beyond that is refused.
+pub const MAX_LINE_BYTES: usize = 16 * 1024 * 1024;
+
 /// Read JSON-RPC messages from `input` and write responses to `output` until
-/// `input` ends. Notifications get no response.
-pub fn serve<R: BufRead, W: Write>(input: R, mut output: W) -> io::Result<()> {
-    for line in input.lines() {
-        let line = line?;
-        if line.trim().is_empty() {
-            continue;
+/// `input` ends. Notifications get no response. A line that is not valid
+/// UTF-8 or is too long gets a parse error, like any other malformed line;
+/// only an I/O error on the streams themselves ends the loop.
+pub fn serve<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> {
+    let mut buf = Vec::new();
+    loop {
+        buf.clear();
+        let n = input.by_ref().take(MAX_LINE_BYTES as u64 + 1).read_until(b'\n', &mut buf)?;
+        if n == 0 {
+            return Ok(());
         }
-        if let Some(reply) = handle_line(&line) {
+        let reply = if buf.len() > MAX_LINE_BYTES && buf.last() != Some(&b'\n') {
+            skip_rest_of_line(&mut input)?;
+            Some(parse_error(format!("Parse error: message longer than {MAX_LINE_BYTES} bytes")))
+        } else {
+            match std::str::from_utf8(&buf) {
+                Ok(line) if line.trim().is_empty() => None,
+                Ok(line) => handle_line(line),
+                Err(e) => Some(parse_error(format!("Parse error: invalid UTF-8: {e}"))),
+            }
+        };
+        if let Some(reply) = reply {
             writeln!(output, "{reply}")?;
             output.flush()?;
         }
     }
-    Ok(())
 }
 
-/// Handle one raw line. Returns the reply to send, if any.
+/// Discard input up to and including the next newline (or the end).
+fn skip_rest_of_line<R: BufRead>(input: &mut R) -> io::Result<()> {
+    loop {
+        let chunk = input.fill_buf()?;
+        if chunk.is_empty() {
+            return Ok(());
+        }
+        match chunk.iter().position(|&b| b == b'\n') {
+            Some(i) => {
+                input.consume(i + 1);
+                return Ok(());
+            }
+            None => {
+                let len = chunk.len();
+                input.consume(len);
+            }
+        }
+    }
+}
+
+fn parse_error(message: String) -> Value {
+    error_reply(Value::Null, RpcError::new(PARSE_ERROR, message))
+}
+
+/// Handle one raw line. Returns the reply to send, if any. A panic while
+/// handling it (a bug) becomes an internal error reply, so one bad request
+/// never takes the server down.
 pub fn handle_line(line: &str) -> Option<Value> {
-    match serde_json::from_str::<Value>(line) {
-        Ok(msg) => handle_message(&msg),
-        Err(e) => Some(error_reply(Value::Null, RpcError::new(PARSE_ERROR, format!("Parse error: {e}")))),
+    let msg = match serde_json::from_str::<Value>(line) {
+        Ok(msg) => msg,
+        Err(e) => return Some(parse_error(format!("Parse error: {e}"))),
+    };
+    match std::panic::catch_unwind(|| handle_message(&msg)) {
+        Ok(reply) => reply,
+        Err(_) => {
+            let id = msg.get("id").cloned().unwrap_or(Value::Null);
+            Some(error_reply(id, RpcError::new(INTERNAL_ERROR, "Internal error while handling the request")))
+        }
     }
 }
 
@@ -171,8 +222,17 @@ fn tools_call(params: &Value) -> Result<Value, RpcError> {
     if !tools::exists(name) {
         return Err(RpcError::new(INVALID_PARAMS, format!("Unknown tool: {name}")));
     }
-    let args = params.get("arguments").cloned().unwrap_or_else(|| json!({}));
-    Ok(tools::call(name, &args).to_json())
+    let args = match params.get("arguments") {
+        None | Some(Value::Null) => json!({}),
+        Some(a @ Value::Object(_)) => a.clone(),
+        Some(_) => return Ok(tools::ToolOutput::error("'arguments' must be an object").to_json()),
+    };
+    // A panic inside a tool (a checker bug on some input) is reported as a
+    // failed call the model can read, not a dead server.
+    let out = std::panic::catch_unwind(|| tools::call(name, &args)).unwrap_or_else(|_| {
+        tools::ToolOutput::error(format!("Internal error: the {name} tool crashed on this input. Please report it."))
+    });
+    Ok(out.to_json())
 }
 
 #[cfg(test)]
@@ -194,8 +254,27 @@ mod tests {
         assert!(handle_line(r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#).is_none());
         assert_eq!(handle_line("{oops").unwrap()["error"]["code"], PARSE_ERROR);
         assert_eq!(handle_line("[]").unwrap()["error"]["code"], INVALID_REQUEST);
+        // Non-object arguments are a failed tool call, not a protocol error.
+        let r = handle_line(r#"{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"explain","arguments":[1]}}"#);
+        assert_eq!(r.unwrap()["result"]["isError"], true);
         let r = handle_line(r#"{"jsonrpc":"2.0","id":7,"method":"nope"}"#).unwrap();
         assert_eq!((r["id"].clone(), r["error"]["code"].clone()), (json!(7), json!(METHOD_NOT_FOUND)));
+    }
+
+    #[test]
+    fn serve_survives_invalid_utf8_and_overlong_lines() {
+        let mut input = b"\xff\xfe{}\n".to_vec();
+        input.extend(std::iter::repeat_n(b'x', MAX_LINE_BYTES + 10));
+        input.extend(b"\n{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"ping\"}\n");
+        let mut out = Vec::new();
+        serve(&input[..], &mut out).unwrap();
+        let replies: Vec<Value> =
+            String::from_utf8(out).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
+        assert_eq!(replies.len(), 3, "{replies:?}");
+        assert_eq!(replies[0]["error"]["code"], PARSE_ERROR);
+        assert_eq!(replies[1]["error"]["code"], PARSE_ERROR);
+        assert_eq!(replies[2]["id"], 3);
+        assert!(replies[2]["result"].is_object());
     }
 
     #[test]

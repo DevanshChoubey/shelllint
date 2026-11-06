@@ -40,7 +40,9 @@ pub fn lsp_severity(s: Severity) -> DiagnosticSeverity {
 
 /// Run the full pipeline on `text`. `filename` picks the shell from its
 /// extension and the rc files from its directory; with `ignore_rc` no rc or
-/// editorconfig is read.
+/// editorconfig is read. A panic in the checker (a bug on some input) gives no
+/// findings instead of killing the worker thread, which would silently stop
+/// all further diagnostics.
 pub fn run_check(text: &str, filename: &str, ignore_rc: bool, s: &Settings) -> Vec<Finding> {
     let spec = CheckSpec {
         filename: filename.to_string(),
@@ -52,7 +54,9 @@ pub fn run_check(text: &str, filename: &str, ignore_rc: bool, s: &Settings) -> V
         optional_checks: s.enable.clone(),
         ..empty_check_spec()
     };
-    let result = check_script(&LspSystem, &spec);
+    let Ok(result) = std::panic::catch_unwind(|| check_script(&LspSystem, &spec)) else {
+        return vec![];
+    };
     let lines = split_lines(text);
     result.comments.iter().map(|pc| to_finding(pc, &lines)).collect()
 }
