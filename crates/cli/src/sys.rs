@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// Port of ShellCheck shellcheck.hs `ioInterface`, `inputFile`, `decodeString` (e11f964)
+// Port of ShellCheck shellcheck.hs `ioInterface` and `inputFile` (e11f964);
+// `decodeString` is shellcheck_checker::decode_string.
 //
 // EditorConfig lookup lives in shellcheck_checker::editorconfig; this file
 // supplies its filesystem (`EditorConfigFs`) and merges the results.
@@ -11,6 +12,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
+use shellcheck_checker::decode_string;
 use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
 use shellcheck_core::interface::{ErrorMessage, SystemInterface};
 
@@ -72,56 +74,6 @@ pub fn input_file(file: &str) -> Result<(String, bool), std::io::Error> {
         !meta.is_file()
     };
     Ok((decode_string(&bytes), should_cache))
-}
-
-/// Decode a char8 string into a utf8 string, with fallback on ISO-8859-1.
-pub fn decode_string(bytes: &[u8]) -> String {
-    let mut out = String::with_capacity(bytes.len());
-    let mut i = 0;
-    while i < bytes.len() {
-        let c = bytes[i];
-        i += 1;
-        if c < 0x80 {
-            out.push(c as char);
-            continue;
-        }
-        let num = c as u32;
-        let (init, n) = if num >= 0xF8 {
-            (None, 0)
-        } else if num >= 0xF0 {
-            (Some(num & 0x07), 3)
-        } else if num >= 0xE0 {
-            (Some(num & 0x0F), 2)
-        } else if num >= 0xC0 {
-            (Some(num & 0x1F), 1)
-        } else {
-            (None, 0)
-        };
-        let decoded = init.and_then(|x| construct(x, n, &bytes[i..]));
-        match decoded {
-            // DIVERGENCE: Haskell's `chr` accepts surrogates; Rust's `char` cannot
-            // represent them, so such a sequence falls back to Latin-1 like an
-            // invalid one (`c : decode rest`).
-            Some((n, used)) if char::from_u32(n).is_some() => {
-                out.push(char::from_u32(n).unwrap());
-                i += used;
-            }
-            _ => out.push(c as char),
-        }
-    }
-    out
-}
-
-fn construct(mut x: u32, n: usize, rest: &[u8]) -> Option<(u32, usize)> {
-    for k in 0..n {
-        let b = *rest.get(k)? as u32;
-        if (0x80..=0xBF).contains(&b) {
-            x = (x << 6) | (b & 0x3f);
-        } else {
-            return None;
-        }
-    }
-    if x <= 0x10FFFF { Some((x, n)) } else { None }
 }
 
 fn dir_of(path: &str) -> String {
@@ -500,21 +452,5 @@ mod tests {
         assert_eq!(x.read_file(Some(false), &lib).unwrap_err().contains("disabled via directive"), true);
         let e = x.read_file(None, "/nonexistent/q.sh").unwrap_err();
         assert_eq!(e, "/nonexistent/q.sh: openBinaryFile: does not exist (No such file or directory)");
-    }
-
-    #[test]
-    fn decode_string_utf8_and_latin1_fallback() {
-        assert_eq!(decode_string(b"abc"), "abc");
-        assert_eq!(decode_string("h\u{e9}\u{20ac}\u{1f600}".as_bytes()), "h\u{e9}\u{20ac}\u{1f600}");
-        // Invalid UTF-8 bytes become the Latin-1 characters of the same value.
-        assert_eq!(decode_string(&[0x68, 0xe9, 0x21]), "h\u{e9}!");
-        assert_eq!(decode_string(&[0xc3]), "\u{c3}"); // truncated sequence
-        assert_eq!(decode_string(&[0xc3, 0x41]), "\u{c3}A"); // bad continuation
-        assert_eq!(decode_string(&[0x80]), "\u{80}"); // stray continuation
-        assert_eq!(decode_string(&[0xf8, 0x80]), "\u{f8}\u{80}"); // 5-byte lead
-        // Surrogate (ED A0 80): not representable, falls back byte by byte.
-        assert_eq!(decode_string(&[0xed, 0xa0, 0x80]), "\u{ed}\u{a0}\u{80}");
-        // Beyond U+10FFFF (F4 90 80 80) is rejected.
-        assert_eq!(decode_string(&[0xf4, 0x90, 0x80, 0x80]), "\u{f4}\u{90}\u{80}\u{80}");
     }
 }

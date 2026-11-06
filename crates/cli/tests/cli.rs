@@ -363,3 +363,18 @@ fn sourced_file_groups_use_their_own_contents() {
 }
 
 const TTY_GROUPS: &str = "\nIn ./lib.sh line 2:\nfoo=1\n^-^ SC2034 (warning): foo appears unused. Verify use (or export if used externally).\n\n\nIn ./lib.sh line 3:\necho $bar\n     ^--^ SC2154 (warning): bar is referenced but not assigned.\n     ^--^ SC2086 (info): Double quote to prevent globbing and word splitting.\n\nDid you mean:\necho \"$bar\"\n\n\nIn main.sh line 3:\necho \"$y\"\n      ^-- SC2154 (warning): y is referenced but not assigned.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC2034 -- foo appears unused. Verify use (o...\n  https://www.shellcheck.net/wiki/SC2154 -- bar is referenced but not assigned.\n  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ...\n";
+
+// The CLI decodes input with shellcheck_checker::decode_string: a UTF-8
+// encoded surrogate is one character, as Haskell's `chr` makes it, so later
+// columns match the oracle's (2:10, not 2:12).
+#[test]
+fn encoded_surrogate_is_one_column() {
+    let d = tmpdir("surrogate");
+    std::fs::write(d.join("s.sh"), b"#!/bin/sh\necho \"\xed\xa0\x80\" $x\n").unwrap();
+    let o = run_in(&d, &["--norc", "-f", "gcc", "s.sh"]);
+    assert_eq!(
+        o.stdout,
+        "s.sh:2:10: warning: x is referenced but not assigned. [SC2154]\n\
+         s.sh:2:10: note: Double quote to prevent globbing and word splitting. [SC2086]\n"
+    );
+}
