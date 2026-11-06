@@ -2,23 +2,23 @@
 name = "shellcheck-rust"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 description = "A Rust port of ShellCheck (work in progress)"
-license = "GPL-3.0-or-later"
-repository = "https://github.com/OWNER/shellcheck-rust"
-homepage = "https://github.com/OWNER/shellcheck-rust"
-documentation = "https://github.com/OWNER/shellcheck-rust/blob/main/docs/install.md"
-readme = "../../README.md"
-keywords = ["shell", "shellcheck", "bash", "lint", "static-analysis"]
-categories = ["command-line-utilities", "development-tools"]
+documentation = "https://github.com/DevanshChoubey/shellcheck-rust/blob/main/docs/install.md"
 
 [[bin]]
 name = "shellcheck-rust"
 path = "src/main.rs"
 
 [dependencies]
-shellcheck-core = { path = "../core" }
-shellcheck-analyzer = { path = "../analyzer" }
-shellcheck-formatter = { path = "../formatter" }
-# Linked only so the linkme-registered checks end up in the binary.
-shellcheck-checks = { path = "../checks" }
-shellcheck-checker = { path = "../checker" }
+shellcheck-core.workspace = true
+shellcheck-analyzer.workspace = true
+shellcheck-formatter.workspace = true
+shellcheck-checks.workspace = true
+shellcheck-checker.workspace = true

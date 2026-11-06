@@ -2,7 +2,14 @@
 name = "shellcheck-parser"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Shell script parser for shellcheck-rust, a Rust port of ShellCheck's Parsec parser"
 
 [dependencies]
-shellcheck-core = { path = "../core" }
+shellcheck-core.workspace = true

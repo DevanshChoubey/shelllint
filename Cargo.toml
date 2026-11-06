@@ -14,6 +14,16 @@ keywords = ["shellcheck", "shell", "bash", "linter", "static-analysis"]
 categories = ["command-line-utilities", "development-tools"]
 rust-version = "1.88"
 
+# The internal crates, with the version crates.io needs to resolve them
+# once published (bump together with workspace.package.version).
+[workspace.dependencies]
+shellcheck-core = { path = "crates/core", version = "0.0.1" }
+shellcheck-parser = { path = "crates/parser", version = "0.0.1" }
+shellcheck-analyzer = { path = "crates/analyzer", version = "0.0.1" }
+shellcheck-checks = { path = "crates/checks", version = "0.0.1" }
+shellcheck-checker = { path = "crates/checker", version = "0.0.1" }
+shellcheck-formatter = { path = "crates/formatter", version = "0.0.1" }
+
 [profile.release]
 lto = true
 codegen-units = 1

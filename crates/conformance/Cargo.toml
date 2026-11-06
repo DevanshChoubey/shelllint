@@ -2,7 +2,14 @@
 name = "shellcheck-conformance"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Conformance harness comparing shellcheck-rust against ShellCheck's own tests and outputs"
 publish = false
 
 [features]
@@ -16,9 +23,9 @@ checker = ["dep:shellcheck-checker", "dep:shellcheck-core", "dep:shellcheck-form
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-shellcheck-parser = { path = "../parser", optional = true }
-shellcheck-analyzer = { path = "../analyzer", optional = true }
-shellcheck-checks = { path = "../checks", optional = true }
-shellcheck-checker = { path = "../checker", optional = true }
-shellcheck-core = { path = "../core", optional = true }
-shellcheck-formatter = { path = "../formatter", optional = true }
+shellcheck-parser = { workspace = true, optional = true }
+shellcheck-analyzer = { workspace = true, optional = true }
+shellcheck-checks = { workspace = true, optional = true }
+shellcheck-checker = { workspace = true, optional = true }
+shellcheck-core = { workspace = true, optional = true }
+shellcheck-formatter = { workspace = true, optional = true }

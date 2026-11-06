@@ -2,7 +2,13 @@
 name = "shellcheck-lsp"
 version.workspace = true
 edition.workspace = true
-license = "GPL-3.0-or-later"
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
 description = "Language Server (LSP over stdio) for shellcheck-rust"
 
 [lib]
@@ -14,8 +20,8 @@ name = "shellcheck-rust-lsp"
 path = "src/main.rs"
 
 [dependencies]
-shellcheck-core = { path = "../core" }
-shellcheck-checker = { path = "../checker" }
+shellcheck-core.workspace = true
+shellcheck-checker.workspace = true
 lsp-server = "0.7"
 lsp-types = "0.95"
 crossbeam-channel = "0.5"
