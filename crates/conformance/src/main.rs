@@ -8,7 +8,7 @@ use std::process::ExitCode;
 fn usage() -> ExitCode {
     eprintln!(
         "usage: shellcheck-conformance report [--module M] [--kind K] [--target T] [--json]\n       \
-         shellcheck-conformance parity [--update-baseline]"
+         shellcheck-conformance parity [--update-baseline] [--verbose]"
     );
     ExitCode::from(2)
 }
@@ -72,7 +72,8 @@ fn main() -> ExitCode {
         }
         "parity" => {
             let update = args[1..].iter().any(|a| a == "--update-baseline");
-            if args[1..].iter().any(|a| a != "--update-baseline") {
+            let verbose = args[1..].iter().any(|a| a == "--verbose");
+            if args[1..].iter().any(|a| a != "--update-baseline" && a != "--verbose") {
                 return usage();
             }
             let res = run_parity(&recs);
@@ -86,6 +87,11 @@ fn main() -> ExitCode {
                 res.total,
                 100.0 * res.matched as f64 / res.total.max(1) as f64
             );
+            if verbose {
+                for (k, g, o) in &res.mismatches {
+                    println!("MISMATCH {k} ours={g:?} oracle={o:?}");
+                }
+            }
             let path = corpus_dir.join("parity-baseline.json");
             if update {
                 let s = serde_json::to_string_pretty(&res.matches).unwrap();
