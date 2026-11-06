@@ -379,6 +379,18 @@ impl shellcheck_core::interface::SystemInterface for OracleRunInterface {
     }
 }
 
+/// What the formatter reads back for the checked file: the corpus script
+/// itself, as the CLI's formatter would re-read `script.sh` from disk.
+#[cfg(feature = "checker")]
+struct ScriptContents<'a>(&'a str);
+
+#[cfg(feature = "checker")]
+impl shellcheck_core::interface::SystemInterface for ScriptContents<'_> {
+    fn read_file(&self, _external: Option<bool>, file: &str) -> Result<String, String> {
+        if file == "script.sh" { Ok(self.0.to_string()) } else { OracleRunInterface.read_file(None, file) }
+    }
+}
+
 /// The json1 comments our pipeline produces for a corpus script, run as the
 /// oracle was (`-f json1 --norc -o all [-s shell]`), through our Json1
 /// formatter, with `file` removed.
@@ -406,7 +418,7 @@ pub fn pipeline_json1(rec: &Record) -> Option<Vec<Value>> {
             let result = shellcheck_checker::check_script(&OracleRunInterface, &spec);
             let mut f = shellcheck_formatter::json1::format();
             let mut buf: Vec<u8> = vec![];
-            f.on_result(&result, script, &mut buf);
+            f.on_result(&result, &ScriptContents(script), &mut buf);
             f.footer(&mut buf);
             buf
         };
