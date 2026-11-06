@@ -151,7 +151,11 @@ impl Collector<'_> {
 
     /// Furthest end of the token or any descendant: a heredoc body lies
     /// beyond the span of the command that owns it.
-    fn subtree_end(&self, id: shellcheck_core::ast::Id, mut end: shellcheck_core::ast::Pos) -> shellcheck_core::ast::Pos {
+    fn subtree_end(
+        &self,
+        id: shellcheck_core::ast::Id,
+        mut end: shellcheck_core::ast::Pos,
+    ) -> shellcheck_core::ast::Pos {
         let mut stack = vec![id];
         while let Some(i) = stack.pop() {
             end = end.max(self.ast.span(i).1);
@@ -360,7 +364,8 @@ mod tests {
 
     #[test]
     fn elif_goes_above_if() {
-        disable_ok("#!/bin/bash\nif true; then :\nelif [ $x == 1 ]; then :; fi\n", 2086, 1, "# shellcheck disable=SC2086\n");
+        let t = "#!/bin/bash\nif true; then :\nelif [ $x == 1 ]; then :; fi\n";
+        disable_ok(t, 2086, 1, "# shellcheck disable=SC2086\n");
     }
 
     #[test]

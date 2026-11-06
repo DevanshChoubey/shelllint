@@ -70,7 +70,8 @@ pub fn server_capabilities() -> ServerCapabilities {
 
 /// Serve LSP on stdin/stdout until the client shuts down.
 pub fn run_stdio() -> Result<(), BoxErr> {
-    let (connection, writer) = crate::transport::connection(std::io::BufReader::new(std::io::stdin()), std::io::stdout());
+    let input = std::io::BufReader::new(std::io::stdin());
+    let (connection, writer) = crate::transport::connection(input, std::io::stdout());
     serve(connection)?;
     // The reader thread may be blocked on stdin; it ends with the process.
     let _ = writer.join();
@@ -286,7 +287,8 @@ impl Server {
                     true,
                 ));
             }
-            let edits: Vec<TextEdit> = disable_edits(&doc.text, &doc.filename, self.settings.dialect, f.range.start, f.code);
+            let edits: Vec<TextEdit> =
+                disable_edits(&doc.text, &doc.filename, self.settings.dialect, f.range.start, f.code);
             if let Some(first) = edits.first() {
                 let key = (first.range.start.line, f.code);
                 if disabled.contains(&key) {
