@@ -140,6 +140,22 @@ def read_string(src, i):
                 raise ParseError(f"unknown escape \\{c}")
 
 
+def last_string_literal(src):
+    """Value of the last top-level Haskell string literal in src."""
+    i, last = 0, None
+    while i < len(src):
+        if src[i] == '"':
+            last, i = read_string(src, i)
+        elif src.startswith("--", i):
+            nl = src.find("\n", i)
+            i = len(src) if nl < 0 else nl
+        else:
+            i += 1
+    if last is None:
+        raise ParseError("no string literal")
+    return last
+
+
 def skip_ws(src, i):
     while i < len(src) and src[i].isspace():
         i += 1
@@ -272,6 +288,11 @@ def main():
                             codes = [int(c) for c in re.findall(r"\d+", lm.group(1))]
                             rest = rest[lm.end():]
                         script, _ = read_string_expr(rest, 0)
+                        if target.startswith("("):
+                            # Argful target, e.g. `(checkSudoArgs "x")`: the regex
+                            # stops inside the parens, so `rest` starts at the
+                            # check's argument. The script is the last literal.
+                            script = last_string_literal(body)
                         rec.update(kind=kind, helper=helper, target=target,
                                    script=script)
                         if kind == "codes":
