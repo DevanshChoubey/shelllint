@@ -347,11 +347,12 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
     };
     params.variable_flow = get_variable_flow(&params, root);
     // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`
-    // TEMPORARY: the engine bodies are not ported yet, so an empty analysis
-    // (every query answers `None`/`false`) stands in for the real one.
-    let _cf_params = CfgParameters { cf_lastpipe: params.has_lastpipe, cf_pipefail: params.has_pipefail };
-    params.cfg_analysis =
-        if extended_analysis { Some(std::rc::Rc::new(CfgAnalysis::default())) } else { None };
+    let cf_params = CfgParameters { cf_lastpipe: params.has_lastpipe, cf_pipefail: params.has_pipefail };
+    params.cfg_analysis = if extended_analysis {
+        Some(std::rc::Rc::new(crate::cfg_analysis::analyze_control_flow(&cf_params, ast, root)))
+    } else {
+        None
+    };
     params
 }
 
