@@ -10,6 +10,7 @@
      "module": "Analytics.hs",
      "check": "checkEchoWc",
      "registry": "node",
+     "order": 21,
      "source_lines": [
       483,
       494
@@ -29,6 +30,7 @@
      "module": "Analytics.hs",
      "check": "checkPipedAssignment",
      "registry": "node",
+     "order": 23,
      "source_lines": [
       498,
       501
@@ -63,6 +65,7 @@
      "module": "Analytics.hs",
      "check": "checkAssignAteCommand",
      "registry": "node",
+     "order": 24,
      "source_lines": [
       509,
       525
@@ -102,6 +105,7 @@
      "module": "Analytics.hs",
      "check": "checkArithmeticOpCommand",
      "registry": "node",
+     "order": 44,
      "source_lines": [
       529,
       537
@@ -135,6 +139,7 @@
      "module": "Analytics.hs",
      "check": "checkWrongArithmeticAssignment",
      "registry": "node",
+     "order": 52,
      "source_lines": [
       540,
       561
@@ -167,6 +172,7 @@
      "module": "Analytics.hs",
      "check": "checkUuoc",
      "registry": "optional-tree",
+     "order": 10,
      "source_lines": [
       570,
       578
@@ -205,6 +211,7 @@
      "module": "Analytics.hs",
      "check": "checkPipePitfalls",
      "registry": "node",
+     "order": 0,
      "source_lines": [
       600,
       656
@@ -266,6 +273,7 @@
      "module": "Analytics.hs",
      "check": "checkShebangParameters",
      "registry": "tree",
+     "order": 1,
      "source_lines": [
       675,
       681
@@ -300,6 +308,7 @@
      "module": "Analytics.hs",
      "check": "checkShebang",
      "registry": "tree",
+     "order": 6,
      "source_lines": [
       700,
       717
@@ -354,6 +363,7 @@
      "module": "Analytics.hs",
      "check": "checkForInQuoted",
      "registry": "node",
+     "order": 1,
      "source_lines": [
       730,
       751
@@ -404,6 +414,7 @@
      "module": "Analytics.hs",
      "check": "checkForInCat",
      "registry": "node",
+     "order": 27,
      "source_lines": [
       757,
       767
@@ -439,6 +450,7 @@
      "module": "Analytics.hs",
      "check": "checkForInLs",
      "registry": "node",
+     "order": 2,
      "source_lines": [
       771,
       786
@@ -474,6 +486,7 @@
      "module": "Analytics.hs",
      "check": "checkFindExec",
      "registry": "node",
+     "order": 28,
      "source_lines": [
       793,
       828
@@ -512,6 +525,7 @@
      "module": "Analytics.hs",
      "check": "checkUnquotedExpansions",
      "registry": "node",
+     "order": 46,
      "source_lines": [
       842,
       857
@@ -555,6 +569,7 @@
      "module": "Analytics.hs",
      "check": "checkRedirectToSame",
      "registry": "node",
+     "order": 48,
      "source_lines": [
       868,
       920
@@ -595,6 +610,7 @@
      "module": "Analytics.hs",
      "check": "checkShorthandIf",
      "registry": "node",
+     "order": 3,
      "source_lines": [
       932,
       943
@@ -636,6 +652,7 @@
      "module": "Analytics.hs",
      "check": "checkDollarStar",
      "registry": "node",
+     "order": 4,
      "source_lines": [
       954,
       964
@@ -664,6 +681,7 @@
      "module": "Analytics.hs",
      "check": "checkUnquotedDollarAt",
      "registry": "node",
+     "order": 5,
      "source_lines": [
       976,
       982
@@ -706,6 +724,7 @@
      "module": "Analytics.hs",
      "check": "checkConcatenatedDollarAt",
      "registry": "node",
+     "order": 63,
      "source_lines": [
       988,
       997
@@ -741,6 +760,7 @@
      "module": "Analytics.hs",
      "check": "checkArrayAsString",
      "registry": "node",
+     "order": 57,
      "source_lines": [
       1005,
       1015
@@ -780,6 +800,7 @@
      "module": "Analytics.hs",
      "check": "checkArrayWithoutIndex",
      "registry": "tree",
+     "order": 5,
      "source_lines": [
       1028,
       1061
@@ -826,6 +847,7 @@
      "module": "Analytics.hs",
      "check": "checkStderrRedirect",
      "registry": "node",
+     "order": 6,
      "source_lines": [
       1069,
       1090
@@ -863,6 +885,7 @@
      "module": "Analytics.hs",
      "check": "checkSingleQuotedVariables",
      "registry": "node",
+     "order": 47,
      "source_lines": [
       1137,
       1232
@@ -933,6 +956,7 @@
      "module": "Analytics.hs",
      "check": "checkUnquotedN",
      "registry": "node",
+     "order": 7,
      "source_lines": [
       1238,
       1242
@@ -968,6 +992,7 @@
      "module": "Analytics.hs",
      "check": "checkNumberComparisons",
      "registry": "node",
+     "order": 8,
      "source_lines": [
       1268,
       1386
@@ -1032,6 +1057,7 @@
      "module": "Analytics.hs",
      "check": "checkSingleBracketOperators",
      "registry": "node",
+     "order": 9,
      "source_lines": [
       1388,
       1392
@@ -1051,6 +1077,7 @@
      "module": "Analytics.hs",
      "check": "checkDoubleBracketOperators",
      "registry": "node",
+     "order": 10,
      "source_lines": [
       1395,
       1399
@@ -1084,6 +1111,7 @@
      "module": "Analytics.hs",
      "check": "checkConditionalAndOrs",
      "registry": "node",
+     "order": 53,
      "source_lines": [
       1405,
       1422
@@ -1127,6 +1155,7 @@
      "module": "Analytics.hs",
      "check": "checkQuotedCondRegex",
      "registry": "node",
+     "order": 26,
      "source_lines": [
       1429,
       1445
@@ -1163,6 +1192,7 @@
      "module": "Analytics.hs",
      "check": "checkGlobbedRegex",
      "registry": "node",
+     "order": 30,
      "source_lines": [
       1454,
       1460
@@ -1201,6 +1231,7 @@
      "module": "Analytics.hs",
      "check": "checkConstantIfs",
      "registry": "node",
+     "order": 22,
      "source_lines": [
       1474,
       1488
@@ -1246,6 +1277,7 @@
      "module": "Analytics.hs",
      "check": "checkLiteralBreakingTest",
      "registry": "node",
+     "order": 11,
      "source_lines": [
       1498,
       1520
@@ -1287,6 +1319,7 @@
      "module": "Analytics.hs",
      "check": "checkConstantNullary",
      "registry": "node",
+     "order": 12,
      "source_lines": [
       1528,
       1539
@@ -1316,6 +1349,7 @@
      "module": "Analytics.hs",
      "check": "checkDivBeforeMult",
      "registry": "node",
+     "order": 13,
      "source_lines": [
       1553,
       1557
@@ -1354,6 +1388,7 @@
      "module": "Analytics.hs",
      "check": "checkArithmeticDeref",
      "registry": "node",
+     "order": 14,
      "source_lines": [
       1575,
       1593
@@ -1401,6 +1436,7 @@
      "module": "Analytics.hs",
      "check": "checkArithmeticBadOctal",
      "registry": "node",
+     "order": 15,
      "source_lines": [
       1597,
       1604
@@ -1434,6 +1470,7 @@
      "module": "Analytics.hs",
      "check": "checkComparisonAgainstGlob",
      "registry": "node",
+     "order": 16,
      "source_lines": [
       1612,
       1628
@@ -1475,6 +1512,7 @@
      "module": "Analytics.hs",
      "check": "checkCaseAgainstGlob",
      "registry": "node",
+     "order": 17,
      "source_lines": [
       1632,
       1643
@@ -1508,6 +1546,7 @@
      "module": "Analytics.hs",
      "check": "checkCommarrays",
      "registry": "node",
+     "order": 18,
      "source_lines": [
       1651,
       1662
@@ -1545,6 +1584,7 @@
      "module": "Analytics.hs",
      "check": "checkOrNeq",
      "registry": "node",
+     "order": 19,
      "source_lines": [
       1675,
       1712
@@ -1588,6 +1628,7 @@
      "module": "Analytics.hs",
      "check": "checkAndEq",
      "registry": "node",
+     "order": 20,
      "source_lines": [
       1733,
       1770
@@ -1634,6 +1675,7 @@
      "module": "Analytics.hs",
      "check": "checkValidCondOps",
      "registry": "node",
+     "order": 29,
      "source_lines": [
       1776,
       1783
@@ -1671,6 +1713,7 @@
      "module": "Analytics.hs",
      "check": "checkUuoeVar",
      "registry": "node",
+     "order": 25,
      "source_lines": [
       1793,
       1818
@@ -1710,6 +1753,7 @@
      "module": "Analytics.hs",
      "check": "checkTestRedirects",
      "registry": "node",
+     "order": 31,
      "source_lines": [
       1823,
       1839
@@ -1744,6 +1788,7 @@
      "module": "Analytics.hs",
      "check": "checkPS1Assignments",
      "registry": "node",
+     "order": 33,
      "source_lines": [
       1850,
       1862
@@ -1772,6 +1817,7 @@
      "module": "Analytics.hs",
      "check": "checkBackticks",
      "registry": "node",
+     "order": 34,
      "source_lines": [
       1866,
       1872
@@ -1806,6 +1852,7 @@
      "module": "Analytics.hs",
      "check": "checkBadParameterSubstitution",
      "registry": "node",
+     "order": 32,
      "source_lines": [
       1885,
       1945
@@ -1859,6 +1906,7 @@
      "module": "Analytics.hs",
      "check": "checkInexplicablyUnquoted",
      "registry": "node",
+     "order": 35,
      "source_lines": [
       1958,
       2001
@@ -1905,6 +1953,7 @@
      "module": "Analytics.hs",
      "check": "checkTildeInQuotes",
      "registry": "node",
+     "order": 36,
      "source_lines": [
       2007,
       2016
@@ -1928,6 +1977,7 @@
      "module": "Analytics.hs",
      "check": "checkLonelyDotDash",
      "registry": "node",
+     "order": 37,
      "source_lines": [
       2019,
       2024
@@ -1961,6 +2011,7 @@
      "module": "Analytics.hs",
      "check": "checkSpuriousExec",
      "registry": "node",
+     "order": 38,
      "source_lines": [
       2038,
       2074
@@ -2004,6 +2055,7 @@
      "module": "Analytics.hs",
      "check": "checkSpuriousExpansion",
      "registry": "node",
+     "order": 39,
      "source_lines": [
       2078,
       2090
@@ -2027,6 +2079,7 @@
      "module": "Analytics.hs",
      "check": "checkDollarBrackets",
      "registry": "node",
+     "order": 40,
      "source_lines": [
       2093,
       2096
@@ -2062,6 +2115,7 @@
      "module": "Analytics.hs",
      "check": "checkSshHereDoc",
      "registry": "node",
+     "order": 41,
      "source_lines": [
       2099,
       2110
@@ -2094,6 +2148,7 @@
      "module": "Analytics.hs",
      "check": "checkSpacefulnessCfg",
      "registry": "node",
+     "order": 96,
      "source_lines": [
       2298,
       2298
@@ -2190,6 +2245,7 @@
      "module": "Analytics.hs",
      "check": "checkVerboseSpacefulnessCfg",
      "registry": "optional-tree",
+     "order": 0,
      "source_lines": [
       2299,
       2300
@@ -2225,6 +2281,7 @@
      "module": "Analytics.hs",
      "check": "checkVariableBraces",
      "registry": "optional-tree",
+     "order": 4,
      "source_lines": [
       2352,
       2362
@@ -2260,6 +2317,7 @@
      "module": "Analytics.hs",
      "check": "checkQuotesInLiterals",
      "registry": "tree",
+     "order": 0,
      "source_lines": [
       2374,
       2429
@@ -2303,6 +2361,7 @@
      "module": "Analytics.hs",
      "check": "checkFunctionsUsedExternally",
      "registry": "tree",
+     "order": 2,
      "source_lines": [
       2454,
       2506
@@ -2347,6 +2406,7 @@
      "module": "Analytics.hs",
      "check": "checkUnusedAssignments",
      "registry": "tree",
+     "order": 3,
      "source_lines": [
       2567,
       2589
@@ -2436,6 +2496,7 @@
      "module": "Analytics.hs",
      "check": "checkUnassignedReferences",
      "registry": "tree",
+     "order": 7,
      "source_lines": [
       2649,
       2649
@@ -2511,6 +2572,7 @@
      "module": "Analytics.hs",
      "check": "checkGlobsAsOptions",
      "registry": "node",
+     "order": 42,
      "source_lines": [
       2743,
       2760
@@ -2550,6 +2612,7 @@
      "module": "Analytics.hs",
      "check": "checkWhileReadPitfalls",
      "registry": "node",
+     "order": 43,
      "source_lines": [
       2777,
       2846
@@ -2595,6 +2658,7 @@
      "module": "Analytics.hs",
      "check": "checkPrefixAssignmentReference",
      "registry": "node",
+     "order": 49,
      "source_lines": [
       2849,
       2868
@@ -2629,6 +2693,7 @@
      "module": "Analytics.hs",
      "check": "checkCharRangeGlob",
      "registry": "node",
+     "order": 45,
      "source_lines": [
       2878,
       2912
@@ -2670,6 +2735,7 @@
      "module": "Analytics.hs",
      "check": "checkCdAndBack",
      "registry": "node",
+     "order": 51,
      "source_lines": [
       2921,
       2944
@@ -2708,6 +2774,7 @@
      "module": "Analytics.hs",
      "check": "checkLoopKeywordScope",
      "registry": "node",
+     "order": 50,
      "source_lines": [
       2952,
       2971
@@ -2749,6 +2816,7 @@
      "module": "Analytics.hs",
      "check": "checkFunctionDeclarations",
      "registry": "node",
+     "order": 54,
      "source_lines": [
       2975,
       2995
@@ -2786,6 +2854,7 @@
      "module": "Analytics.hs",
      "check": "checkStderrPipe",
      "registry": "node",
+     "order": 55,
      "source_lines": [
       2998,
       3006
@@ -2818,6 +2887,7 @@
      "module": "Analytics.hs",
      "check": "checkUnpassedInFunctions",
      "registry": "tree",
+     "order": 4,
      "source_lines": [
       3025,
       3107
@@ -2868,6 +2938,7 @@
      "module": "Analytics.hs",
      "check": "checkOverridingPath",
      "registry": "node",
+     "order": 56,
      "source_lines": [
       3116,
       3127
@@ -2906,6 +2977,7 @@
      "module": "Analytics.hs",
      "check": "checkTildeInPath",
      "registry": "node",
+     "order": 64,
      "source_lines": [
       3131,
       3144
@@ -2939,6 +3011,7 @@
      "module": "Analytics.hs",
      "check": "checkUnsupported",
      "registry": "node",
+     "order": 58,
      "source_lines": [
       3149,
       3158
@@ -2973,6 +3046,7 @@
      "module": "Analytics.hs",
      "check": "checkMultipleAppends",
      "registry": "node",
+     "order": 59,
      "source_lines": [
       3175,
       3193
@@ -3006,6 +3080,7 @@
      "module": "Analytics.hs",
      "check": "checkSuspiciousIFS",
      "registry": "node",
+     "order": 60,
      "source_lines": [
       3197,
       3215
@@ -3039,6 +3114,7 @@
      "module": "Analytics.hs",
      "check": "checkShouldUseGrepQ",
      "registry": "node",
+     "order": 61,
      "source_lines": [
       3222,
       3251
@@ -3075,6 +3151,7 @@
      "module": "Analytics.hs",
      "check": "checkTestArgumentSplitting",
      "registry": "node",
+     "order": 62,
      "source_lines": [
       3273,
       3351
@@ -3144,6 +3221,7 @@
      "module": "Analytics.hs",
      "check": "checkReadWithoutR",
      "registry": "node",
+     "order": 65,
      "source_lines": [
       3358,
       3369
@@ -3180,6 +3258,7 @@
      "module": "Analytics.hs",
      "check": "checkCpLegacyR",
      "registry": "node",
+     "order": 66,
      "source_lines": [
       3372,
       3380
@@ -3212,6 +3291,7 @@
      "module": "Analytics.hs",
      "check": "checkUncheckedCdPushdPopd",
      "registry": "tree",
+     "order": 8,
      "source_lines": [
       3421,
       3456
@@ -3281,6 +3361,7 @@
      "module": "Analytics.hs",
      "check": "checkLoopVariableReassignment",
      "registry": "node",
+     "order": 67,
      "source_lines": [
       3461,
       3485
@@ -3317,6 +3398,7 @@
      "module": "Analytics.hs",
      "check": "checkTrailingBracket",
      "registry": "node",
+     "order": 68,
      "source_lines": [
       3491,
       3510
@@ -3352,6 +3434,7 @@
      "module": "Analytics.hs",
      "check": "checkReturnAgainstZero",
      "registry": "node",
+     "order": 69,
      "source_lines": [
       3533,
       3599
@@ -3404,6 +3487,7 @@
      "module": "Analytics.hs",
      "check": "checkRedirectedNowhere",
      "registry": "node",
+     "order": 70,
      "source_lines": [
       3608,
       3632
@@ -3444,6 +3528,7 @@
      "module": "Analytics.hs",
      "check": "checkArrayAssignmentIndices",
      "registry": "tree",
+     "order": 9,
      "source_lines": [
       3646,
       3677
@@ -3491,6 +3576,7 @@
      "module": "Analytics.hs",
      "check": "checkUnmatchableCases",
      "registry": "node",
+     "order": 71,
      "source_lines": [
       3687,
       3729
@@ -3536,6 +3622,7 @@
      "module": "Analytics.hs",
      "check": "checkSubshellAsTest",
      "registry": "node",
+     "order": 72,
      "source_lines": [
       3737,
       3757
@@ -3575,6 +3662,7 @@
      "module": "Analytics.hs",
      "check": "checkSplittingInArrays",
      "registry": "node",
+     "order": 73,
      "source_lines": [
       3766,
       3794
@@ -3615,6 +3703,7 @@
      "module": "Analytics.hs",
      "check": "checkRedirectionToNumber",
      "registry": "node",
+     "order": 74,
      "source_lines": [
       3799,
       3805
@@ -3637,6 +3726,7 @@
      "module": "Analytics.hs",
      "check": "checkGlobAsCommand",
      "registry": "node",
+     "order": 75,
      "source_lines": [
       3809,
       3815
@@ -3671,6 +3761,7 @@
      "module": "Analytics.hs",
      "check": "checkFlagAsCommand",
      "registry": "node",
+     "order": 76,
      "source_lines": [
       3820,
       3826
@@ -3693,6 +3784,7 @@
      "module": "Analytics.hs",
      "check": "checkEmptyCondition",
      "registry": "node",
+     "order": 77,
      "source_lines": [
       3829,
       3832
@@ -3726,6 +3818,7 @@
      "module": "Analytics.hs",
      "check": "checkPipeToNowhere",
      "registry": "node",
+     "order": 78,
      "source_lines": [
       3856,
       4022
@@ -3785,6 +3878,7 @@
      "module": "Analytics.hs",
      "check": "checkUseBeforeDefinition",
      "registry": "tree",
+     "order": 10,
      "source_lines": [
       4034,
       4065
@@ -3826,6 +3920,7 @@
      "module": "Analytics.hs",
      "check": "checkForLoopGlobVariables",
      "registry": "node",
+     "order": 79,
      "source_lines": [
       4069,
       4080
@@ -3859,6 +3954,7 @@
      "module": "Analytics.hs",
      "check": "checkSubshelledTests",
      "registry": "node",
+     "order": 80,
      "source_lines": [
       4090,
       4167
@@ -3901,6 +3997,7 @@
      "module": "Analytics.hs",
      "check": "checkUnnecessarilyInvertedTest",
      "registry": "optional-tree",
+     "order": 2,
      "source_lines": [
       4183,
       4239
@@ -3950,6 +4047,7 @@
      "module": "Analytics.hs",
      "check": "checkRedirectionToCommand",
      "registry": "node",
+     "order": 81,
      "source_lines": [
       4243,
       4249
@@ -3983,6 +4081,7 @@
      "module": "Analytics.hs",
      "check": "checkNullaryExpansionTest",
      "registry": "optional-tree",
+     "order": 1,
      "source_lines": [
       4256,
       4272
@@ -4021,6 +4120,7 @@
      "module": "Analytics.hs",
      "check": "checkDollarQuoteParen",
      "registry": "node",
+     "order": 82,
      "source_lines": [
       4277,
       4284
@@ -4043,6 +4143,7 @@
      "module": "Analytics.hs",
      "check": "checkTranslatedStringVariable",
      "registry": "node",
+     "order": 84,
      "source_lines": [
       4290,
       4298
@@ -4079,6 +4180,7 @@
      "module": "Analytics.hs",
      "check": "checkDefaultCase",
      "registry": "optional-tree",
+     "order": 3,
      "source_lines": [
       4303,
       4315
@@ -4113,6 +4215,7 @@
      "module": "Analytics.hs",
      "check": "checkUselessBang",
      "registry": "node",
+     "order": 83,
      "source_lines": [
       4326,
       4363
@@ -4153,6 +4256,7 @@
      "module": "Analytics.hs",
      "check": "checkModifiedArithmeticInRedirection",
      "registry": "node",
+     "order": 85,
      "source_lines": [
       4371,
       4399
@@ -4190,6 +4294,7 @@
      "module": "Analytics.hs",
      "check": "checkAliasUsedInSameParsingUnit",
      "registry": "tree",
+     "order": 11,
      "source_lines": [
       4406,
       4449
@@ -4228,6 +4333,7 @@
      "module": "Analytics.hs",
      "check": "checkBlatantRecursion",
      "registry": "node",
+     "order": 86,
      "source_lines": [
       4481,
       4509
@@ -4265,6 +4371,7 @@
      "module": "Analytics.hs",
      "check": "checkBadTestAndOr",
      "registry": "node",
+     "order": 87,
      "source_lines": [
       4513,
       4545
@@ -4300,6 +4407,7 @@
      "module": "Analytics.hs",
      "check": "checkComparisonWithLeadingX",
      "registry": "node",
+     "order": 91,
      "source_lines": [
       4553,
       4584
@@ -4337,6 +4445,7 @@
      "module": "Analytics.hs",
      "check": "checkAssignToSelf",
      "registry": "node",
+     "order": 88,
      "source_lines": [
       4589,
       4605
@@ -4371,6 +4480,7 @@
      "module": "Analytics.hs",
      "check": "checkEqualsInCommand",
      "registry": "node",
+     "order": 89,
      "source_lines": [
       4637,
       4785
@@ -4449,6 +4559,7 @@
      "module": "Analytics.hs",
      "check": "checkSecondArgIsComparison",
      "registry": "node",
+     "order": 90,
      "source_lines": [
       4796,
       4820
@@ -4493,6 +4604,7 @@
      "module": "Analytics.hs",
      "check": "checkCommandWithTrailingSymbol",
      "registry": "node",
+     "order": 92,
      "source_lines": [
       4831,
       4857
@@ -4538,6 +4650,7 @@
      "module": "Analytics.hs",
      "check": "checkRequireDoubleBracket",
      "registry": "optional-tree",
+     "order": 6,
      "source_lines": [
       4864,
       4895
@@ -4572,6 +4685,7 @@
      "module": "Analytics.hs",
      "check": "checkRequireDoubleEquals",
      "registry": "optional-tree",
+     "order": 7,
      "source_lines": [
       4901,
       4911
@@ -4607,6 +4721,7 @@
      "module": "Analytics.hs",
      "check": "checkUnquotedParameterExpansionPattern",
      "registry": "node",
+     "order": 93,
      "source_lines": [
       4917,
       4937
@@ -4641,6 +4756,7 @@
      "module": "Analytics.hs",
      "check": "checkArrayValueUsedAsIndex",
      "registry": "tree",
+     "order": 12,
      "source_lines": [
       4947,
       5021
@@ -4681,6 +4797,7 @@
      "module": "Analytics.hs",
      "check": "checkSetESuppressed",
      "registry": "optional-tree",
+     "order": 8,
      "source_lines": [
       5041,
       5082
@@ -4732,6 +4849,7 @@
      "module": "Analytics.hs",
      "check": "checkExtraMaskedReturns",
      "registry": "optional-tree",
+     "order": 9,
      "source_lines": [
       5125,
       5201
@@ -4803,6 +4921,7 @@
      "module": "Analytics.hs",
      "check": "checkBatsTestDoesNotUseNegation",
      "registry": "node",
+     "order": 94,
      "source_lines": [
       5216,
       5240
@@ -4844,6 +4963,7 @@
      "module": "Analytics.hs",
      "check": "checkCommandIsUnreachable",
      "registry": "node",
+     "order": 95,
      "source_lines": [
       5246,
       5272
@@ -4881,6 +5001,7 @@
      "module": "Analytics.hs",
      "check": "checkOverwrittenExitCode",
      "registry": "node",
+     "order": 97,
      "source_lines": [
       5281,
       5317
@@ -4921,6 +5042,7 @@
      "module": "Analytics.hs",
      "check": "checkUnnecessaryArithmeticExpansionIndex",
      "registry": "node",
+     "order": 98,
      "source_lines": [
       5322,
       5335
@@ -4955,6 +5077,7 @@
      "module": "Analytics.hs",
      "check": "checkUnnecessaryParens",
      "registry": "node",
+     "order": 99,
      "source_lines": [
       5344,
       5366
@@ -4995,6 +5118,7 @@
      "module": "Analytics.hs",
      "check": "checkPlusEqualsNumber",
      "registry": "node",
+     "order": 100,
      "source_lines": [
       5376,
       5406
@@ -5034,6 +5158,7 @@
      "module": "Analytics.hs",
      "check": "checkExpansionWithRedirection",
      "registry": "node",
+     "order": 101,
      "source_lines": [
       5415,
       5442
@@ -5074,6 +5199,7 @@
      "module": "Analytics.hs",
      "check": "checkUnaryTestA",
      "registry": "node",
+     "order": 102,
      "source_lines": [
       5446,
       5452
@@ -5107,6 +5233,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkTr",
      "registry": "command",
+     "order": 0,
      "source_lines": [
       236,
       255
@@ -5159,6 +5286,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkFindNameGlob",
      "registry": "command",
+     "order": 1,
      "source_lines": [
       259,
       268
@@ -5192,6 +5320,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkExpr",
      "registry": "command",
+     "order": 2,
      "source_lines": [
       284,
       337
@@ -5246,6 +5375,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkGrepRe",
      "registry": "command",
+     "order": 3,
      "source_lines": [
       362,
       406
@@ -5303,6 +5433,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkGrepSendsPipefail",
      "registry": "command",
+     "order": 42,
      "source_lines": [
       426,
       427
@@ -5338,6 +5469,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkEgrepSendsPipefail",
      "registry": "command",
+     "order": 43,
      "source_lines": [
       429,
       430
@@ -5357,6 +5489,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkFgrepSendsPipefail",
      "registry": "command",
+     "order": 44,
      "source_lines": [
       432,
       434
@@ -5376,6 +5509,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkTrapQuotes",
      "registry": "command",
+     "order": 4,
      "source_lines": [
       470,
       482
@@ -5411,6 +5545,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkReturn",
      "registry": "command",
+     "order": 5,
      "source_lines": [
       490,
       493
@@ -5437,6 +5572,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkExit",
      "registry": "command",
+     "order": 6,
      "source_lines": [
       501,
       504
@@ -5478,6 +5614,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkFindExecWithSingleArgument",
      "registry": "command",
+     "order": 7,
      "source_lines": [
       528,
       542
@@ -5511,6 +5648,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkUnusedEchoEscapes",
      "registry": "command",
+     "order": 8,
      "source_lines": [
       555,
       568
@@ -5553,6 +5691,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkInjectableFindSh",
      "registry": "command",
+     "order": 9,
      "source_lines": [
       572,
       593
@@ -5586,6 +5725,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkFindActionPrecedence",
      "registry": "command",
+     "order": 10,
      "source_lines": [
       597,
       612
@@ -5619,6 +5759,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkMkdirDashPM",
      "registry": "command",
+     "order": 11,
      "source_lines": [
       635,
       649
@@ -5671,6 +5812,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkNonportableSignals",
      "registry": "command",
+     "order": 12,
      "source_lines": [
       657,
       684
@@ -5710,6 +5852,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkInteractiveSu",
      "registry": "command",
+     "order": 13,
      "source_lines": [
       689,
       703
@@ -5744,6 +5887,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkSshCommandString",
      "registry": "command",
+     "order": 14,
      "source_lines": [
       708,
       721
@@ -5778,6 +5922,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkPrintfVar",
      "registry": "command",
+     "order": 15,
      "source_lines": [
       746,
       785
@@ -5835,6 +5980,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkUuoeCmd",
      "registry": "command",
+     "order": 16,
      "source_lines": [
       835,
       840
@@ -5859,6 +6005,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkSetAssignment",
      "registry": "command",
+     "order": 17,
      "source_lines": [
       847,
       860
@@ -5896,6 +6043,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkExportedExpansions",
      "registry": "command",
+     "order": 18,
      "source_lines": [
       865,
       871
@@ -5930,6 +6078,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkReadExpansions",
      "registry": "command",
+     "order": 36,
      "source_lines": [
       881,
       909
@@ -5971,6 +6120,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkAliasesUsesArgs",
      "registry": "command",
+     "order": 19,
      "source_lines": [
       922,
       932
@@ -5992,6 +6142,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkAliasesExpandEarly",
      "registry": "command",
+     "order": 20,
      "source_lines": [
       936,
       944
@@ -6026,6 +6177,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkUnsetGlobs",
      "registry": "command",
+     "order": 21,
      "source_lines": [
       950,
       956
@@ -6061,6 +6213,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkFindWithoutPath",
      "registry": "command",
+     "order": 22,
      "source_lines": [
       965,
       982
@@ -6099,6 +6252,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkTimeParameters",
      "registry": "command",
+     "order": 23,
      "source_lines": [
       987,
       996
@@ -6133,6 +6287,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkTimedCommand",
      "registry": "command",
+     "order": 24,
      "source_lines": [
       1000,
       1022
@@ -6168,6 +6323,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkLocalScope",
      "registry": "command",
+     "order": 25,
      "source_lines": [
       1025,
       1030
@@ -6188,6 +6344,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkMultipleDeclaring",
      "registry": "command",
+     "order": 47,
      "source_lines": [
       1038,
       1046
@@ -6205,6 +6362,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkDeprecatedTempfile",
      "registry": "command",
+     "order": 26,
      "source_lines": [
       1049,
       1051
@@ -6239,6 +6397,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkDeprecatedEgrep",
      "registry": "command",
+     "order": 27,
      "source_lines": [
       1053,
       1055
@@ -6258,6 +6417,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkDeprecatedFgrep",
      "registry": "command",
+     "order": 28,
      "source_lines": [
       1057,
       1059
@@ -6290,6 +6450,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkWhileGetoptsCase",
      "registry": "command",
+     "order": 29,
      "source_lines": [
       1068,
       1142
@@ -6332,6 +6493,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkCatastrophicRm",
      "registry": "command",
+     "order": 30,
      "source_lines": [
       1157,
       1206
@@ -6378,6 +6540,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkLetUsage",
      "registry": "command",
+     "order": 31,
      "source_lines": [
       1209,
       1214
@@ -6398,6 +6561,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkMvArguments",
      "registry": "command",
+     "order": 32,
      "source_lines": [
       1236,
       1239
@@ -6425,6 +6589,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkCpArguments",
      "registry": "command",
+     "order": 33,
      "source_lines": [
       1240,
       1243
@@ -6442,6 +6607,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkLnArguments",
      "registry": "command",
+     "order": 34,
      "source_lines": [
       1244,
       1248
@@ -6474,6 +6640,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkFindRedirections",
      "registry": "command",
+     "order": 35,
      "source_lines": [
       1252,
       1265
@@ -6507,6 +6674,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkSudoRedirect",
      "registry": "command",
+     "order": 50,
      "source_lines": [
       1277,
       1299
@@ -6536,6 +6704,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkSudoArgs",
      "registry": "command",
+     "order": 49,
      "source_lines": [
       1307,
       1318
@@ -6553,6 +6722,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkSourceArgs",
      "registry": "command",
+     "order": 37,
      "source_lines": [
       1322,
       1329
@@ -6587,6 +6757,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkChmodDashr",
      "registry": "command",
+     "order": 38,
      "source_lines": [
       1333,
       1340
@@ -6608,6 +6779,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkXargsDashi",
      "registry": "command",
+     "order": 39,
      "source_lines": [
       1346,
       1354
@@ -6644,6 +6816,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkArgComparison",
      "registry": "command",
+     "order": 45,
      "source_lines": [
       1363,
       1392
@@ -6673,6 +6846,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkMaskedReturns",
      "registry": "command",
+     "order": 46,
      "source_lines": [
       1408,
       1448
@@ -6702,6 +6876,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkUnquotedEchoSpaces",
      "registry": "command",
+     "order": 40,
      "source_lines": [
       1455,
       1474
@@ -6738,6 +6913,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkEvalArray",
      "registry": "command",
+     "order": 41,
      "source_lines": [
       1480,
       1494
@@ -6775,6 +6951,7 @@
      "module": "Checks/Commands.hs",
      "check": "checkBackreferencingDeclaration",
      "registry": "command",
+     "order": 48,
      "source_lines": [
       1502,
       1541
@@ -6804,6 +6981,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkForDecimals",
      "registry": "shell-support",
+     "order": 0,
      "source_lines": [
       80,
       88
@@ -6837,6 +7015,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkBashisms",
      "registry": "shell-support",
+     "order": 1,
      "source_lines": [
       249,
       536
@@ -7153,6 +7332,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkEchoSed",
      "registry": "shell-support",
+     "order": 2,
      "source_lines": [
       579,
       614
@@ -7187,6 +7367,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkBraceExpansionVars",
      "registry": "shell-support",
+     "order": 3,
      "source_lines": [
       619,
       642
@@ -7223,6 +7404,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkMultiDimensionalArrays",
      "registry": "shell-support",
+     "order": 4,
      "source_lines": [
       649,
       662
@@ -7259,6 +7441,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkPS1Assignments",
      "registry": "shell-support",
+     "order": 5,
      "source_lines": [
       673,
       689
@@ -7299,6 +7482,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkMultipleBangs",
      "registry": "shell-support",
+     "order": 6,
      "source_lines": [
       692,
       699
@@ -7319,6 +7503,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkBangAfterPipe",
      "registry": "shell-support",
+     "order": 7,
      "source_lines": [
       703,
       714
@@ -7353,6 +7538,7 @@
      "module": "Checks/ShellSupport.hs",
      "check": "checkNegatedUnaryOps",
      "registry": "shell-support",
+     "order": 8,
      "source_lines": [
       720,
       730
