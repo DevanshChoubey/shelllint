@@ -7,18 +7,73 @@
 // the `regex` crate (leftmost-first). Alternations whose earlier branch is a
 // prefix of a later one (`a|ab`) can pick a shorter match. Other known
 // differences: `\` inside a bracket expression is an escape here but literal
-// in POSIX; an unmatched `{` is an error here but literal in tdfa; and with
-// tdfa's default `multiline = True` a negated class `[^...]` does not match
-// newline, while here it does. ShellCheck's own patterns are written to avoid
-// these cases; callers porting a pattern must check it against this list.
+// in POSIX; and an unmatched `{` is an error here but literal in tdfa.
+// ShellCheck's own patterns are written to avoid these cases; callers porting a
+// pattern must check it against this list. (With tdfa's `multiline = True` a
+// negated class `[^...]` does not match newline; `mk_regex` reproduces that.)
 
 use regex::{Regex, RegexBuilder};
 
 /// Precompile the regex
 // tdfa's defaultCompOpt has `multiline = True`: `^`/`$` match at line
-// boundaries and `.` does not match newline (the `regex` default).
+// boundaries, and neither `.` (the `regex` default) nor a negated bracket
+// expression `[^...]` matches newline (see `exclude_newline_from_negated_classes`).
 pub fn mk_regex(str: &str) -> Regex {
-    RegexBuilder::new(str).multi_line(true).build().unwrap_or_else(|e| panic!("Invalid regex {str:?}: {e}"))
+    RegexBuilder::new(&exclude_newline_from_negated_classes(str))
+        .multi_line(true)
+        .build()
+        .unwrap_or_else(|e| panic!("Invalid regex {str:?}: {e}"))
+}
+
+/// Keep '\n' out of each negated bracket expression: `[^...]` becomes the
+/// intersection `[[^...]&&[^\n]]`. In tdfa's multiline mode a negated class
+/// never matches '\n'; in the `regex` crate it does. Escapes (`\x`) and POSIX
+/// classes (`[:space:]`) inside a bracket are skipped, and a `]` right after
+/// `[` or `[^` is literal.
+fn exclude_newline_from_negated_classes(re: &str) -> String {
+    let mut out = String::with_capacity(re.len());
+    let mut it = re.chars().peekable();
+    while let Some(c) = it.next() {
+        match c {
+            '\\' => {
+                out.push(c);
+                out.extend(it.next());
+            }
+            '[' => {
+                let negated = it.next_if_eq(&'^').is_some();
+                let mut class = String::from(if negated { "[^" } else { "[" });
+                class.extend(it.next_if_eq(&']'));
+                while let Some(c) = it.next() {
+                    class.push(c);
+                    match c {
+                        '\\' => class.extend(it.next()),
+                        '[' if it.peek() == Some(&':') => {
+                            // `[:name:]`: copy through the closing `:]`.
+                            let mut prev = '[';
+                            while let Some(c) = it.next() {
+                                class.push(c);
+                                if prev == ':' && c == ']' {
+                                    break;
+                                }
+                                prev = c;
+                            }
+                        }
+                        ']' => break,
+                        _ => {}
+                    }
+                }
+                if negated && class.ends_with(']') {
+                    out.push('[');
+                    out.push_str(&class);
+                    out.push_str("&&[^\\n]]");
+                } else {
+                    out.push_str(&class);
+                }
+            }
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 /// Does the regex match?
@@ -143,5 +198,33 @@ mod tests {
     fn multiline_anchors() {
         assert!(matches("x\nfoo", &mk_regex("^foo$")));
         assert!(!matches("a\nb", &mk_regex("a.b")));
+    }
+
+    #[test]
+    fn negated_classes_do_not_match_newline() {
+        assert!(!matches("`a\nb`", &mk_regex("`[^`]+`")));
+        assert!(matches("`a b`", &mk_regex("`[^`]+`")));
+        assert!(!matches("-\n", &mk_regex("^(\\+|-[^-])")));
+        // A negated class still matches everything else it did.
+        assert!(matches("x]", &mk_regex("x[^]a]|x]")));
+        assert!(!matches("\n", &mk_regex("[^[:space:]a]")));
+        assert!(matches("b", &mk_regex("[^[:space:]a]")));
+        // A leading '-' stays literal (not a range from '\n').
+        let re = mk_regex("^x:[^-=?+]");
+        assert!(matches("x:1", &re) && matches("x:;", &re));
+        assert!(!matches("x:-", &re) && !matches("x:\n", &re));
+    }
+
+    #[test]
+    fn negated_class_rewrite() {
+        let r = exclude_newline_from_negated_classes;
+        assert_eq!(r("[^a]"), "[[^a]&&[^\\n]]");
+        assert_eq!(r("[^]a]b"), "[[^]a]&&[^\\n]]b");
+        assert_eq!(r("[^-=?+]"), "[[^-=?+]&&[^\\n]]");
+        assert_eq!(r("\\[^a]"), "\\[^a]");
+        assert_eq!(r("[a^]"), "[a^]");
+        assert_eq!(r("[\\]\\[^$+\\\\]"), "[\\]\\[^$+\\\\]");
+        assert_eq!(r("[^[:space:]^]x[^/]"), "[[^[:space:]^]&&[^\\n]]x[[^/]&&[^\\n]]");
+        assert_eq!(r("[^a-zA-Z1-9]\\*|[\\]\\[^$+\\\\]"), "[[^a-zA-Z1-9]&&[^\\n]]\\*|[\\]\\[^$+\\\\]");
     }
 }

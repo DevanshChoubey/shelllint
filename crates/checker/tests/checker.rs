@@ -1599,3 +1599,25 @@ fn printf_format_width_d_is_a_literal_d_as_in_regex_tdfa() {
                   printf '%*.*f' 1 2 3\nprintf '%dd' 1\n";
     assert_eq!(oracle_positions(script), vec![(2183, 5, 8, 5, 15)]);
 }
+
+#[test]
+fn negated_regex_classes_do_not_match_newline() {
+    // regex-tdfa's multiline mode keeps '\n' out of `[^...]`.
+    // SC2016 "`[^`]+`": oracle no comments for a backtick span across lines.
+    assert_eq!(oracle_positions("#!/bin/sh\necho 'Run `make\ninstall` first'\n"), vec![]);
+    assert_eq!(oracle_positions("#!/bin/sh\necho 'Run `make install` first'\n"), vec![(2016, 2, 6, 2, 32)]);
+    // SC2022 "[^a-zA-Z1-9]\\*": the '\n' before '*' does not count as a
+    // non-letter, so 'a*' is the suspicious part.
+    // SC3057 ":[^-=?+]": "${x:\n}" is not string indexing.
+    // SC3041 "-[^-]": "-\n" is not a set flag.
+    // oracle: 2:6-3:5 2022, 4:7-5:2 2154
+    assert_eq!(
+        oracle_positions("#!/bin/sh\ngrep \"x\n*a*\" f\necho \"${x:\n}\"\nset \"-\n\"\n"),
+        vec![(2022, 2, 6, 3, 5), (2154, 4, 7, 5, 2)]
+    );
+    // oracle (dash): 2:7-3:2 2154, 3:5-3:11 3057 (only the real `${x:1}`)
+    assert_eq!(
+        oracle_positions("#!/bin/dash\necho \"${x:\n}\" \"${x:1}\"\nset \"-\n\" -e\n"),
+        vec![(2154, 2, 7, 3, 2), (3057, 3, 5, 3, 11)]
+    );
+}
