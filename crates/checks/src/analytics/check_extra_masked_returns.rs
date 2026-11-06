@@ -91,10 +91,17 @@ fn is_masked_node(params: &Params<'_>, sast: &Ast, t: Id) -> bool {
 }
 
 /// `containsSimpleCommand t = isNothing $ doAnalysis go t`
+// `doAnalysis` in `Maybe` stops at the first `T_SimpleCommand`; walking the
+// whole subtree instead is quadratic in the nesting depth.
 fn contains_simple_command(ast: &Ast, t: Id) -> bool {
-    let mut found = false;
-    ast.analyze(t, &mut |x| found |= matches!(ast.get(x), Token::T_SimpleCommand(..)), &mut |_| {});
-    found
+    let mut stack = vec![t];
+    while let Some(x) = stack.pop() {
+        if matches!(ast.get(x), Token::T_SimpleCommand(..)) {
+            return true;
+        }
+        stack.extend(ast.children(x));
+    }
+    false
 }
 
 fn all_but_last_simple_commands(ast: &Ast, cmds: &[Id]) -> Vec<Id> {

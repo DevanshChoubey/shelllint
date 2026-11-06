@@ -111,7 +111,7 @@ fn pilot_codes() {
 #[test]
 fn analytics_checker_runs_node_and_tree_checks() {
     let c = analytics_checker(&spec());
-    assert_eq!(run_module(&c, "#!/bin/bash -x -e\nn=$(echo $foo | wc -c)", &spec()), [2000, 2034, 2096, 2154]);
+    assert_eq!(run_module(&c, "#!/bin/bash -x -e\nn=$(echo $foo | wc -c)", &spec()), [2000, 2034, 2086, 2096, 2154]);
     // "unregistered" entries are never run by the module checker.
     assert_eq!(run_module(&c, "#!/bin/bash\n((3.14*c))", &spec()), [2154]); // no 2079
 }
