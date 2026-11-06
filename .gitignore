@@ -8,3 +8,4 @@ bench/real/
 packaging/npm/platforms/*/bin/shellcheck-rust*
 packaging/pypi/dist/
 packaging/pypi/build/
+playground/pkg/

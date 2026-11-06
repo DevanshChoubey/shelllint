@@ -1,0 +1,7 @@
+# Only the wasm32 target is affected; native builds are unchanged.
+# wasm-ld defaults to a 1 MiB shell stack, which the checker's recursive
+# parser overflows on moderately nested input (the native build runs the
+# checker on a 512 MiB thread instead, see crates/checker). 8 MiB is address
+# space in linear memory, committed only as it is used.
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "link-arg=-zstack-size=8388608"]
