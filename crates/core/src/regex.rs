@@ -50,7 +50,7 @@ fn exclude_newline_from_negated_classes(re: &str) -> String {
                         '[' if it.peek() == Some(&':') => {
                             // `[:name:]`: copy through the closing `:]`.
                             let mut prev = '[';
-                            while let Some(c) = it.next() {
+                            for c in it.by_ref() {
                                 class.push(c);
                                 if prev == ':' && c == ']' {
                                     break;

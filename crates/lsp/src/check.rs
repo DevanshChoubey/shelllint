@@ -283,10 +283,7 @@ mod tests {
 
     fn codes(text: &str) -> Vec<(i64, i64)> {
         let s = Settings::default();
-        run_check(text, "t.sh", true, &s)
-            .iter()
-            .map(|f| (f.code, f.range.start.line as i64))
-            .collect()
+        run_check(text, "t.sh", true, &s).iter().map(|f| (f.code, f.range.start.line as i64)).collect()
     }
 
     /// Disable `code` at its first finding; the edited script must no longer

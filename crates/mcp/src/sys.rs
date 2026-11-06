@@ -101,7 +101,10 @@ mod tests {
     #[test]
     fn non_inputs_get_the_cli_message() {
         let sys = McpSystem::new(&[]);
-        assert_eq!(sys.read_file(None, "./lib.sh"), Err("./lib.sh was not specified as input (see shellcheck -x).".into()));
+        assert_eq!(
+            sys.read_file(None, "./lib.sh"),
+            Err("./lib.sh was not specified as input (see shellcheck -x).".into())
+        );
         assert_eq!(
             sys.read_file(Some(false), "./lib.sh"),
             Err("./lib.sh was not specified as input, and external files were disabled via directive.".into())

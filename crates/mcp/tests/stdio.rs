@@ -221,7 +221,7 @@ const NASTY_STRINGS: &[&str] = &[
 
 fn nasty_value(rng: &mut Rng, depth: u32) -> Value {
     match rng.next() % if depth > 2 { 5 } else { 8 } {
-        0 | 1 | 2 => json!(rng.pick(NASTY_STRINGS)),
+        0..=2 => json!(rng.pick(NASTY_STRINGS)),
         3 => json!(null),
         4 => rng.pick(&[json!(true), json!(-1), json!(1.5e300), json!(u64::MAX), json!(0)]).clone(),
         5 => Value::Array((0..rng.next() % 4).map(|_| nasty_value(rng, depth + 1)).collect()),
@@ -247,7 +247,7 @@ fn fuzzed_malformed_and_unicode_arguments_never_kill_the_server() {
         }
         // Keep the required argument present (and a string) half the time so the
         // option parsing is reached, not only the "missing argument" path.
-        if rng.next() % 2 == 0 {
+        if rng.next().is_multiple_of(2) {
             let key = match name {
                 "check_script" | "fix_script" => "script",
                 "check_file" => "path",

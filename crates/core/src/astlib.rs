@@ -1150,9 +1150,7 @@ pub fn executable_from_shebang(s: &str) -> String {
     }
     if matches(s, &ENV_RE) {
         return match match_regex(&ENV_RE, s) {
-            Some(g) if g.len() == 2 => {
-                from_env_args(&crate::unicode::words(&g[1]))
-            }
+            Some(g) if g.len() == 2 => from_env_args(&crate::unicode::words(&g[1])),
             _ => String::new(),
         };
     }

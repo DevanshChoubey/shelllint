@@ -130,7 +130,16 @@ mod tests {
 
     #[test]
     fn parse_code_rejects_non_ascii_without_panicking() {
-        for s in ["a\u{e9}", "\u{e9}", "\u{1F600}", "S\u{e9}2086", "sc\u{e9}", "\u{1F600}2086", "SC\u{663}", "\u{FF33}\u{FF23}1"] {
+        for s in [
+            "a\u{e9}",
+            "\u{e9}",
+            "\u{1F600}",
+            "S\u{e9}2086",
+            "sc\u{e9}",
+            "\u{1F600}2086",
+            "SC\u{663}",
+            "\u{FF33}\u{FF23}1",
+        ] {
             assert_eq!(parse_code(s), None, "{s:?}");
         }
     }

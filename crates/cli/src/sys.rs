@@ -196,8 +196,8 @@ fn ghc_errno_type(n: i32) -> &'static str {
             "unsupported operation"
         }
         EALREADY | EEXIST | EINPROGRESS | EISCONN => "already exists",
-        EBADF | EDESTADDRREQ | EDOM | EILSEQ | EINVAL | ELOOP | ENAMETOOLONG | ENOEXEC | ENOSTR | ENOTBLK | ENOTCONN
-        | ENOTSOCK => "invalid argument",
+        EBADF | EDESTADDRREQ | EDOM | EILSEQ | EINVAL | ELOOP | ENAMETOOLONG | ENOEXEC | ENOSTR | ENOTBLK
+        | ENOTCONN | ENOTSOCK => "invalid argument",
         ECHILD | ECONNREFUSED | EHOSTUNREACH | ENETUNREACH | ENODATA | ENOENT | ENOMSG | ENONET | ENXIO | ESRCH => {
             "does not exist"
         }

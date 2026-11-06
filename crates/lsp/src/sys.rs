@@ -7,8 +7,8 @@
 
 use std::path::{Path, PathBuf};
 
-use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
 use shellcheck_checker::decode_string;
+use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
 use shellcheck_core::interface::SystemInterface;
 
 #[derive(Default)]

@@ -256,7 +256,9 @@ mod tests {
         assert_eq!(handle_line("{oops").unwrap()["error"]["code"], PARSE_ERROR);
         assert_eq!(handle_line("[]").unwrap()["error"]["code"], INVALID_REQUEST);
         // Non-object arguments are a failed tool call, not a protocol error.
-        let r = handle_line(r#"{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"explain","arguments":[1]}}"#);
+        let r = handle_line(
+            r#"{"jsonrpc":"2.0","id":8,"method":"tools/call","params":{"name":"explain","arguments":[1]}}"#,
+        );
         assert_eq!(r.unwrap()["result"]["isError"], true);
         let r = handle_line(r#"{"jsonrpc":"2.0","id":7,"method":"nope"}"#).unwrap();
         assert_eq!((r["id"].clone(), r["error"]["code"].clone()), (json!(7), json!(METHOD_NOT_FOUND)));

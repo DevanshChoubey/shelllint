@@ -515,7 +515,10 @@ fn relative_or_empty_xdg_config_home_falls_back_to_home_config() {
     // An absolute one is used, and its editorconfig.ini too.
     let abs = format!("{}/./", w.join("xdg").to_string_lossy());
     let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("XDG_CONFIG_HOME", &abs)]);
-    assert_eq!(o.stdout, "a.sh:3:1: warning: foo appears unused. Verify use (or export if used externally). [SC2034]\n");
+    assert_eq!(
+        o.stdout,
+        "a.sh:3:1: warning: foo appears unused. Verify use (or export if used externally). [SC2034]\n"
+    );
 }
 
 #[cfg(unix)]
