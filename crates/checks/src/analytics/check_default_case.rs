@@ -25,14 +25,15 @@ static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_default_case(p: &Params<'_>, t: Id, c: &mut Comments) {
-    if let Token::T_CaseExpression(id, list) = p.ast.get(t) {
-        let id = *id;
+    // `T_CaseExpression id _ list`: `id` is the case expression's own id
+    // (`t`), not the scrutinee word the Rust variant holds first.
+    if let Token::T_CaseExpression(_, list) = p.ast.get(t) {
         if !list
             .iter()
             .any(|(_, pats, _)| pats.iter().any(|&pat| can_match_any_(p, pat)))
         {
             c.info(
-                id,
+                t,
                 2249,
                 "Consider adding a default *) case, even if it just exits with error.",
             );
