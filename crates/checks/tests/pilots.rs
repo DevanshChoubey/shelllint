@@ -276,7 +276,7 @@ fn is_sourced_and_floating_point() {
 }
 
 #[test]
-fn check_command_and_check_list() {
+fn check_command_matches_basename() {
     let p = parse("/bin/sed -e x");
     let mut seen = None;
     check_command(&p.ast, "sed", |cmd, rest| seen = Some((cmd, rest.len())), p.command());
@@ -284,9 +284,6 @@ fn check_command_and_check_list() {
     let mut none = true;
     check_command(&p.ast, "awk", |_, _| none = false, p.command());
     assert!(none);
-    let double = |x: i32| vec![x, x];
-    let single = |x: i32| vec![x + 1];
-    assert_eq!(check_list(&[&double, &single], 3), [3, 3, 4]);
 }
 
 #[test]

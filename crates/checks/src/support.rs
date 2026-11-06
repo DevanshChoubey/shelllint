@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of the shared check helpers of ShellCheck (e11f964):
-// src/ShellCheck/Analytics.hs (`checkList`, `runNodeAnalysis`,
+// src/ShellCheck/Analytics.hs (`runNodeAnalysis`,
 // `nodeChecksToTreeCheck`, `checkCommand`, `hasFloatingPoint`, `isCondition`,
 // `replaceStart`, `replaceEnd`, `replaceToken`, `surroundWith`, `fixWith`,
-// `analyse`, `functions`, `doVariableFlowAnalysis`, `isSourced`) and
+// `analyse`, `functions`, `doVariableFlowAnalysis`,
+// `quotesMayConflictWithSC2281`, `addDoubleQuotesAround`,
+// `checkSpacefulnessCfg'`, `isSourced`) and
 // src/ShellCheck/Checks/Commands.hs (`checkGrepSendsPipefailImpl`,
 // `returnOrExit`, `getSingleUnmodifiedBracedString`, `missingDestination`).
 //
@@ -17,22 +19,22 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use shellcheck_analyzer::analyzerlib::{Comments, DataType, Params, StackData, is_command};
+use shellcheck_analyzer::analyzerlib::{
+    Comments, DataType, Params, StackData, is_command, is_counting_reference, is_param_to, is_quote_free,
+    is_quoted_alternative_reference, used_as_command_name,
+};
+use shellcheck_analyzer::cfg_analysis::{CFVariableProp, SpaceStatus, VariableState, get_incoming_state};
 use shellcheck_core::ast::{Ast, Id, Pos, Token};
+use shellcheck_core::data::SPECIAL_VARIABLES_WITHOUT_SPACES;
 use shellcheck_core::astlib::{
-    arguments, brace_expand, get_all_flags, get_braced_reference, get_literal_string_ext, get_opts,
-    get_path, get_word_parts, may_become_multiple_args, oversimplify,
+    arguments, brace_expand, get_all_flags, get_braced_modifier, get_braced_reference, get_literal_string_ext,
+    get_opts, get_path, get_word_parts, is_array_expansion, may_become_multiple_args, oversimplify,
 };
 use shellcheck_core::interface::{
     Fix, InsertionPoint, Position, Replacement, Shell, TokenComment,
 };
 
 // ---- Analytics.hs ----
-
-/// `checkList l t = concatMap (\f -> f t) l`
-pub fn check_list<T: Copy, R>(l: &[&dyn Fn(T) -> Vec<R>], t: T) -> Vec<R> {
-    l.iter().flat_map(|f| f(t)).collect()
-}
 
 /// `runNodeAnalysis f p t`: run a node check at every node of `t`, in
 /// pre-order, and collect what it writes.
@@ -206,6 +208,85 @@ pub fn do_variable_flow_analysis<S, V>(
         chunks.push(l);
     }
     chunks.into_iter().rev().flatten().collect()
+}
+
+// Don't suggest quotes if this will instead be autocorrected
+// from $foo=bar to foo=bar. This is not pretty but ok.
+pub fn quotes_may_conflict_with_sc2281(params: &Params<'_>, t: Id) -> bool {
+    let path = get_path(params.ast, t);
+    let [_, w, sc, ..] = &path[..] else { return false };
+    let Token::T_NormalWord(parts) = params.ast.get(*w) else { return false };
+    let [me, lit, ..] = &parts[..] else { return false };
+    let Token::T_Literal(s) = params.ast.get(*lit) else { return false };
+    if !s.starts_with('=') {
+        return false;
+    }
+    let Token::T_SimpleCommand(_, words) = params.ast.get(*sc) else { return false };
+    let Some(cmd) = words.first() else { return false };
+    t == *me && *w == *cmd
+}
+
+pub fn add_double_quotes_around(params: &Params<'_>, token: Id) -> Fix {
+    surround_with(token, params, "\"")
+}
+
+/// `checkSpacefulnessCfg' dirtyPass`, shared by `checkSpacefulnessCfg`
+/// (`True`) and `checkVerboseSpacefulnessCfg` (`False`).
+pub fn check_spacefulness_cfg_prime(dirty_pass: bool, params: &Params<'_>, token: Id, c: &mut Comments) {
+    let Token::T_DollarBraced(_, list) = params.ast.get(token) else { return };
+    let id = token;
+    let braced_string = oversimplify(params.ast, *list).concat();
+    let name = get_braced_reference(&braced_string);
+
+    let needs_quoting = !is_array_expansion(params.ast, token) // There's another warning for this
+        && !is_counting_reference(params.ast, token)
+        && !is_quote_free(params.ast, params.shell_type, token)
+        && !is_quoted_alternative_reference(params.ast, token)
+        && !used_as_command_name(params.ast, token);
+
+    let is_clean_state = |state: &VariableState| {
+        state.variable_properties.all_have(CFVariableProp::CFVPInteger)
+            || state.variable_value.space_status == SpaceStatus::SpaceStatusClean
+    };
+
+    let is_clean = (|| {
+        let cfga = params.cfg_analysis.as_deref()?;
+        let state = get_incoming_state(cfga, id)?;
+        let value = state.variable_in_scope(&name)?;
+        Some(is_clean_state(&value))
+    })()
+    .unwrap_or(false);
+
+    let is_default_assignment = |token: Id| {
+        let modifier = get_braced_modifier(&braced_string);
+        ["=", ":="].iter().any(|p| modifier.starts_with(p)) && is_param_to(params.ast, ":", token)
+    };
+
+    if needs_quoting && (dirty_pass == !is_clean) {
+        if !(SPECIAL_VARIABLES_WITHOUT_SPACES.contains(&name.as_str())
+            || quotes_may_conflict_with_sc2281(params, token))
+        {
+            if dirty_pass {
+                if is_default_assignment(token) {
+                    c.info(token, 2223, "This default assignment may cause DoS due to globbing. Quote it.");
+                } else {
+                    c.info_with_fix(
+                        id,
+                        2086,
+                        "Double quote to prevent globbing and word splitting.",
+                        add_double_quotes_around(params, token),
+                    );
+                }
+            } else {
+                c.style_with_fix(
+                    id,
+                    2248,
+                    "Prefer double quoting even when variables don't contain special characters.",
+                    add_double_quotes_around(params, token),
+                );
+            }
+        }
+    }
 }
 
 /// Is `t` inside a `source`d file?
@@ -392,3 +473,45 @@ impl Scratch {
         Params { ast: &self.ast, ..p.clone() }
     }
 }
+
+// ---- Registration ----
+
+/// Register a parametrised command check for each name, as a Haskell
+/// `commandChecks` entry `map f [...]` does: one `CheckEntry` per name,
+/// named `<name> "<cmd>"` (e.g. `checkMaskedReturns "local"`), matching the
+/// command with `CommandName::<kind>(cmd)`, all at `order`. `check` is
+/// called as `check(cmd, params, t, comments)`.
+///
+/// ```ignore
+/// parametrised_command_checks!("checkArgComparison", 45, Exactly, check_arg_comparison,
+///     ["alias", "local", "declare"]);
+/// ```
+macro_rules! parametrised_command_checks {
+    ($name:literal, $order:literal, $kind:ident, $check:path, [$($cmd:literal),+ $(,)?]) => {
+        $(
+            const _: () = {
+                #[linkme::distributed_slice(::shellcheck_analyzer::api::CHECKS)]
+                static ENTRY: ::shellcheck_analyzer::api::CheckEntry = ::shellcheck_analyzer::api::CheckEntry {
+                    module: "Checks/Commands.hs",
+                    name: concat!($name, " \"", $cmd, "\""),
+                    registry: "command",
+                    order: $order,
+                    optional: None,
+                    kind: ::shellcheck_analyzer::api::CheckKind::Command(
+                        ::shellcheck_analyzer::api::CommandName::$kind($cmd),
+                        run,
+                    ),
+                };
+
+                fn run(
+                    p: &::shellcheck_analyzer::analyzerlib::Params<'_>,
+                    t: ::shellcheck_core::ast::Id,
+                    c: &mut ::shellcheck_analyzer::analyzerlib::Comments,
+                ) {
+                    $check($cmd, p, t, c)
+                }
+            };
+        )+
+    };
+}
+pub(crate) use parametrised_command_checks;

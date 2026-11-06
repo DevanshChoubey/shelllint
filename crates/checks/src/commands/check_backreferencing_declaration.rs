@@ -4,95 +4,20 @@
 use std::collections::BTreeMap;
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
 use shellcheck_analyzer::cfg::{CFEffect, CFNode, IdTagged};
 use shellcheck_analyzer::cfg_analysis::CfgAnalysis;
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::arguments;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_LOCAL: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkBackreferencingDeclaration \"local\"",
-    registry: "command",
-    order: 48,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("local"), local_cmd),
-};
+use crate::support::parametrised_command_checks;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_DECLARE: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkBackreferencingDeclaration \"declare\"",
-    registry: "command",
-    order: 48,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("declare"), declare_cmd),
-};
-
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_EXPORT: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkBackreferencingDeclaration \"export\"",
-    registry: "command",
-    order: 48,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("export"), export_cmd),
-};
-
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_READONLY: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkBackreferencingDeclaration \"readonly\"",
-    registry: "command",
-    order: 48,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("readonly"), readonly_cmd),
-};
-
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_TYPESET: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkBackreferencingDeclaration \"typeset\"",
-    registry: "command",
-    order: 48,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("typeset"), typeset_cmd),
-};
-
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_LET: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkBackreferencingDeclaration \"let\"",
-    registry: "command",
-    order: 48,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("let"), let_cmd),
-};
-
-fn local_cmd(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_backreferencing_declaration("local", p, t, c)
-}
-
-fn declare_cmd(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_backreferencing_declaration("declare", p, t, c)
-}
-
-fn export_cmd(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_backreferencing_declaration("export", p, t, c)
-}
-
-fn readonly_cmd(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_backreferencing_declaration("readonly", p, t, c)
-}
-
-fn typeset_cmd(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_backreferencing_declaration("typeset", p, t, c)
-}
-
-fn let_cmd(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_backreferencing_declaration("let", p, t, c)
-}
+parametrised_command_checks!(
+    "checkBackreferencingDeclaration",
+    48,
+    Exactly,
+    check_backreferencing_declaration,
+    ["local", "declare", "export", "readonly", "typeset", "let"]
+);
 
 fn check_backreferencing_declaration(cmd: &'static str, p: &Params<'_>, t: Id, c: &mut Comments) {
     // mapM_ (\cfga -> foldM_ (perArg cfga) M.empty $ arguments t) maybeCfga

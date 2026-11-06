@@ -2,92 +2,22 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkMaskedReturns`, lines 1408-1448 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_path_m};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{arguments, get_all_flags, get_command_name, get_word_parts};
 use shellcheck_core::interface::Shell;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_LOCAL: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkMaskedReturns \"local\"",
-    registry: "command",
-    order: 46,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("local"), local_),
-};
+use crate::support::parametrised_command_checks;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_DECLARE: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkMaskedReturns \"declare\"",
-    registry: "command",
-    order: 46,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("declare"), declare),
-};
+parametrised_command_checks!(
+    "checkMaskedReturns",
+    46,
+    Exactly,
+    check_masked_returns,
+    ["local", "declare", "export", "readonly", "typeset", "let"]
+);
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_EXPORT: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkMaskedReturns \"export\"",
-    registry: "command",
-    order: 46,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("export"), export),
-};
-
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_READONLY: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkMaskedReturns \"readonly\"",
-    registry: "command",
-    order: 46,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("readonly"), readonly),
-};
-
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_TYPESET: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkMaskedReturns \"typeset\"",
-    registry: "command",
-    order: 46,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("typeset"), typeset),
-};
-
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_LET: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkMaskedReturns \"let\"",
-    registry: "command",
-    order: 46,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Exactly("let"), let_),
-};
-
-fn local_(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_cmd(p, t, c)
-}
-
-fn declare(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_cmd(p, t, c)
-}
-
-fn export(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_cmd(p, t, c)
-}
-
-fn readonly(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_cmd(p, t, c)
-}
-
-fn typeset(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_cmd(p, t, c)
-}
-
-fn let_(p: &Params<'_>, t: Id, c: &mut Comments) {
+/// `checkMaskedReturns str = CommandCheck (Exactly str) checkCmd`
+fn check_masked_returns(_str: &str, p: &Params<'_>, t: Id, c: &mut Comments) {
     check_cmd(p, t, c)
 }
 

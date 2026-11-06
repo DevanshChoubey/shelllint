@@ -2,47 +2,15 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkSudoRedirect`, lines 1277-1299 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command_m};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::oversimplify;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_SUDO: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkSudoRedirect \"sudo\"",
-    registry: "command",
-    order: 50,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Basename("sudo"), sudo),
-};
+use crate::support::parametrised_command_checks;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_DOAS: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkSudoRedirect \"doas\"",
-    registry: "command",
-    order: 50,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Basename("doas"), doas),
-};
+parametrised_command_checks!("checkSudoRedirect", 50, Basename, check_sudo_redirect_, ["sudo", "doas", "run0"]);
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_RUN0: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkSudoRedirect \"run0\"",
-    registry: "command",
-    order: 50,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Basename("run0"), run0),
-};
-
-fn sudo(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_sudo_redirect(p, t, c)
-}
-fn doas(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_sudo_redirect(p, t, c)
-}
-fn run0(p: &Params<'_>, t: Id, c: &mut Comments) {
+/// `checkSudoRedirect cmd = CommandCheck (Basename cmd) f`
+fn check_sudo_redirect_(_cmd: &str, p: &Params<'_>, t: Id, c: &mut Comments) {
     check_sudo_redirect(p, t, c)
 }
 
