@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Port of ShellCheck src/ShellCheck/Analytics.hs `checkDefaultCase`, lines 4303-4315 (e11f964)
+
+use shellcheck_analyzer::analyzerlib::{Comments, Params};
+use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
+use shellcheck_core::ast::{Id, Token};
+use shellcheck_core::astlib::{
+    PseudoGlob, pseudo_glob_is_superset_of, word_to_exact_pseudo_glob,
+};
+
+#[linkme::distributed_slice(CHECKS)]
+static ENTRY: CheckEntry = CheckEntry {
+    module: "Analytics.hs",
+    name: "checkDefaultCase",
+    registry: "optional-tree",
+    order: 3,
+    optional: Some(StaticCheckDescription {
+        name: "add-default-case",
+        id: &[2249],
+        description: "Suggest adding a default case in `case` statements",
+        positive: "case $? in 0) echo 'Success';; esac",
+        negative: "case $? in 0) echo 'Success';; *) echo 'Fail' ;; esac",
+    }),
+    kind: CheckKind::Node(check_default_case),
+};
+
+fn check_default_case(p: &Params<'_>, t: Id, c: &mut Comments) {
+    if let Token::T_CaseExpression(id, list) = p.ast.get(t) {
+        let id = *id;
+        if !list
+            .iter()
+            .any(|(_, pats, _)| pats.iter().any(|&pat| can_match_any_(p, pat)))
+        {
+            c.info(
+                id,
+                2249,
+                "Consider adding a default *) case, even if it just exits with error.",
+            );
+        }
+    }
+}
+
+fn can_match_any_(p: &Params<'_>, pat: Id) -> bool {
+    match word_to_exact_pseudo_glob(p.ast, pat) {
+        Some(pg) => pseudo_glob_is_superset_of(&pg, &[PseudoGlob::PGMany]),
+        None => false,
+    }
+}
