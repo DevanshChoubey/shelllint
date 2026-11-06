@@ -1589,3 +1589,13 @@ fn shebang_words_do_not_split_on_unicode_line_separators() {
     // oracle: e.sh no comments
     assert_eq!(oracle_positions("#!/bin/bash \u{85}/x\necho\n"), vec![]);
 }
+
+#[test]
+fn printf_format_width_d_is_a_literal_d_as_in_regex_tdfa() {
+    // Haskell's "\\d" in the printf format regex is a literal 'd' in
+    // regex-tdfa, not a digit class.
+    // oracle: only 5:8-5:15 2183 ('%d.*f' counts 'd' as the width)
+    let script = "#!/bin/bash\nprintf '%5.*f\\n' 2\nprintf '%5*d\\n' 3\nprintf '%1.*f' 1\nprintf '%d.*f' 1\n\
+                  printf '%*.*f' 1 2 3\nprintf '%dd' 1\n";
+    assert_eq!(oracle_positions(script), vec![(2183, 5, 8, 5, 15)]);
+}
