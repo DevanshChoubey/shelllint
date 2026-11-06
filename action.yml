@@ -26,9 +26,9 @@ inputs:
     required: false
     default: "0.0.1"
   repository:
-    description: GitHub repository that hosts the release assets, as OWNER/NAME.
+    description: GitHub repository that hosts the release assets, as DevanshChoubey/NAME.
     required: false
-    default: OWNER/shellcheck-rust
+    default: DevanshChoubey/shellcheck-rust
   fail-on-findings:
     description: Fail the step when findings are reported (exit status 1). Set to false to only annotate.
     required: false
@@ -74,7 +74,8 @@ runs:
         curl -fsSL --retry 3 -o "$dir/SHA256SUMS" "$base/SHA256SUMS"
         # Verify the download against the published checksum.
         (cd "$dir" && grep " $asset\$" SHA256SUMS | sha256sum -c -)
-        (cd "$dir" && if [ "$ext" = zip ]; then unzip -q "$asset"; else tar -xzf "$asset"; fi)
+        # Archives hold one top-level directory; flatten it so the binary sits in $dir.
+        (cd "$dir" && if [ "$ext" = zip ]; then unzip -q "$asset" && mv shellcheck-rust-*/* . ; else tar -xzf "$asset" --strip-components=1; fi)
         bin="$dir/shellcheck-rust"
         [ "$ACTION_RUNNER_OS" = Windows ] && bin="$dir/shellcheck-rust.exe"
         chmod +x "$bin" 2>/dev/null || true

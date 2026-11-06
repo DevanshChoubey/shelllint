@@ -16,7 +16,7 @@ rustPlatform.buildRustPackage {
 
   meta = {
     description = "A Rust port of ShellCheck: finds bugs in shell scripts";
-    homepage = "https://github.com/OWNER/shellcheck-rust";
+    homepage = "https://github.com/DevanshChoubey/shellcheck-rust";
     license = lib.licenses.gpl3Plus;
     mainProgram = "shellcheck-rust";
   };

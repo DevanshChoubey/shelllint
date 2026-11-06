@@ -19,7 +19,7 @@ const pkg = PACKAGES[key];
 if (!pkg) {
   console.error(
     `shellcheck-rust: no prebuilt binary for ${key}. ` +
-      "Build from source instead: cargo install --git https://github.com/OWNER/shellcheck-rust shellcheck-rust"
+      "Build from source instead: cargo install --git https://github.com/DevanshChoubey/shellcheck-rust shellcheck-rust"
   );
   process.exit(1);
 }

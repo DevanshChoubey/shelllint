@@ -1,11 +1,11 @@
-# Maintainer: OWNER <you@example.com>
+# Maintainer: devansh choubey <devanshc13 at gmail dot com>
 # Binary package: installs the static musl release tarball (no Rust needed).
 pkgname=shellcheck-rust-bin
 pkgver=0.0.1
 pkgrel=1
 pkgdesc="A Rust port of ShellCheck: finds bugs in shell scripts (prebuilt static binary)"
 arch=('x86_64' 'aarch64')
-url="https://github.com/OWNER/shellcheck-rust"
+url="https://github.com/DevanshChoubey/shellcheck-rust"
 license=('GPL-3.0-or-later')
 provides=('shellcheck-rust')
 conflicts=('shellcheck-rust')

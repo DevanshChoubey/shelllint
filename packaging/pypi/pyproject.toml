@@ -29,8 +29,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/OWNER/shellcheck-rust"
-Repository = "https://github.com/OWNER/shellcheck-rust"
+Homepage = "https://github.com/DevanshChoubey/shellcheck-rust"
+Repository = "https://github.com/DevanshChoubey/shellcheck-rust"
 
 [tool.maturin]
 bindings = "bin"

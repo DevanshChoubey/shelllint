@@ -203,7 +203,7 @@ A Cargo workspace whose crates mirror ShellCheck's Haskell modules:
 | `crates/core` (`shellcheck-core`) | `AST.hs`, `ASTLib.hs`, `Interface.hs`, `Data.hs`, `Prelude.hs`, `Regex.hs` | The arena AST, shared types, data tables and regex helpers |
 | `crates/parser` (`shellcheck-parser`) | `Parser.hs` | The shell parser: turns a script into an AST plus parse diagnostics |
 | `crates/analyzer` (`shellcheck-analyzer`) | `Analyzer.hs`, `AnalyzerLib.hs`, `CFG.hs`, `CFGAnalysis.hs` | The analysis framework, the check registry, and control-flow and data-flow analysis |
-| `crates/checks` (`shellcheck-checks`) | `Analytics.hs`, `Checks/*.hs` | The checks, one file each, registered with `linkme` |
+| `crates/checks` (`shellcheck-checks`) | `Analytics.hs`, `Checks/*.hs` | The checks, one file each, collected into a generated `CHECKS` registry by `build.rs` |
 | `crates/checker` (`shellcheck-checker`) | `Checker.hs`, `EditorConfig.hs` | Runs the parser, analyzer and checks, then applies directives, filters and severities |
 | `crates/formatter` (`shellcheck-formatter`) | `Formatter/*.hs`, `Fixer.hs` | The output formats and the code that applies fixes |
 | `crates/cli` (`shellcheck-rust`) | `shellcheck.hs` | The `shellcheck-rust` binary: flags, rc files and file handling |

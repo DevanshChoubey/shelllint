@@ -6,20 +6,20 @@ that fits your setup; all of them put the same binary on your `PATH`.
 | Method | Command | Needs |
 |---|---|---|
 | Release binary | download + extract | nothing |
-| Docker / Podman | `docker run --rm -i ghcr.io/OWNER/shellcheck-rust -f gcc - < script.sh` | Docker |
-| cargo | `cargo install --git https://github.com/OWNER/shellcheck-rust shellcheck-rust` | Rust |
+| Docker / Podman | `docker run --rm -i ghcr.io/devanshchoubey/shellcheck-rust -f gcc - < script.sh` | Docker |
+| cargo | `cargo install --git https://github.com/DevanshChoubey/shellcheck-rust shellcheck-rust` | Rust |
 | npm | `npm install -g shellcheck-rust` | Node 16+ |
 | pip | `pip install shellcheck-rust` | Python 3.8+ |
-| Homebrew | `brew install OWNER/tap/shellcheck-rust` | Homebrew |
+| Homebrew | `brew install DevanshChoubey/tap/shellcheck-rust` | Homebrew |
 | Arch (AUR) | `yay -S shellcheck-rust-bin` (or `shellcheck-rust` to build) | an AUR helper |
-| Nix | `nix run github:OWNER/shellcheck-rust` | Nix flakes/`nix-build` |
+| Nix | `nix run github:DevanshChoubey/shellcheck-rust` | Nix flakes/`nix-build` |
 | pre-commit | see [pre-commit](#pre-commit) | pre-commit |
 | GitHub Actions | see [GitHub Action](#github-action) | a workflow |
 
 Platform support for the prebuilt binaries: Linux x86_64 and aarch64 (static
 musl, runs on any distro), macOS x86_64 and Apple Silicon, Windows x86_64 (MSVC).
 
-Replace `OWNER` with the GitHub owner of the repository, and `0.0.1` with the
+Replace `0.0.1` with the
 release you want.
 
 ## Release binary
@@ -30,8 +30,8 @@ Every release attaches one archive per target plus a `SHA256SUMS` file:
 V=0.0.1
 T=x86_64-unknown-linux-musl          # or aarch64-unknown-linux-musl,
                                      # x86_64-apple-darwin, aarch64-apple-darwin
-curl -fsSLO "https://github.com/OWNER/shellcheck-rust/releases/download/v$V/shellcheck-rust-v$V-$T.tar.gz"
-curl -fsSLO "https://github.com/OWNER/shellcheck-rust/releases/download/v$V/SHA256SUMS"
+curl -fsSLO "https://github.com/DevanshChoubey/shellcheck-rust/releases/download/v$V/shellcheck-rust-v$V-$T.tar.gz"
+curl -fsSLO "https://github.com/DevanshChoubey/shellcheck-rust/releases/download/v$V/SHA256SUMS"
 grep "shellcheck-rust-v$V-$T.tar.gz" SHA256SUMS | sha256sum -c -
 tar -xzf "shellcheck-rust-v$V-$T.tar.gz"
 install -m755 "shellcheck-rust-v$V-$T/shellcheck-rust" ~/.local/bin/
@@ -46,8 +46,8 @@ The image is built `FROM scratch` around a static musl binary (a few MB, no
 shell, no libc). It takes the same arguments as the binary:
 
 ```sh
-docker run --rm -i ghcr.io/OWNER/shellcheck-rust:0.0.1 -f gcc - < script.sh
-docker run --rm -v "$PWD:/src" -w /src ghcr.io/OWNER/shellcheck-rust:0.0.1 -f tty scripts/*.sh
+docker run --rm -i ghcr.io/devanshchoubey/shellcheck-rust:0.0.1 -f gcc - < script.sh
+docker run --rm -v "$PWD:/src" -w /src ghcr.io/devanshchoubey/shellcheck-rust:0.0.1 -f tty scripts/*.sh
 ```
 
 To build it locally from a checkout:
@@ -70,7 +70,7 @@ cargo install shellcheck-rust
 From git, today:
 
 ```sh
-cargo install --git https://github.com/OWNER/shellcheck-rust shellcheck-rust
+cargo install --git https://github.com/DevanshChoubey/shellcheck-rust shellcheck-rust
 # or from a checkout:
 cargo install --path crates/cli
 ```
@@ -104,7 +104,7 @@ Or into an isolated tool environment: `pipx install shellcheck-rust`.
 ## Homebrew
 
 ```sh
-brew install OWNER/tap/shellcheck-rust
+brew install DevanshChoubey/tap/shellcheck-rust
 ```
 
 The formula is in `packaging/homebrew/shellcheck-rust.rb`, a template that the
@@ -124,7 +124,7 @@ release is cut.
 ## Nix
 
 ```sh
-nix run github:OWNER/shellcheck-rust
+nix run github:DevanshChoubey/shellcheck-rust
 nix-build packaging/nix      # from a checkout
 ```
 
@@ -136,7 +136,7 @@ the workspace `Cargo.lock`.
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/OWNER/shellcheck-rust
+  - repo: https://github.com/DevanshChoubey/shellcheck-rust
     rev: v0.0.1
     hooks:
       - id: shellcheck-rust          # language: rust, builds with cargo
@@ -151,7 +151,7 @@ flags with `args: [--severity=warning]` in your config.
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: OWNER/shellcheck-rust@v0.0.1
+- uses: DevanshChoubey/shellcheck-rust@v0.0.1
   with:
     paths: "scripts/**/*.sh install.sh"
     severity: warning

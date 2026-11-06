@@ -7,16 +7,16 @@
 #   @SHA256_X86_64_LINUX@         sha256 of shellcheck-rust-v@VERSION@-x86_64-unknown-linux-musl.tar.gz
 #   @SHA256_AARCH64_LINUX@        sha256 of shellcheck-rust-v@VERSION@-aarch64-unknown-linux-musl.tar.gz
 #
-# Users install with: brew install OWNER/tap/shellcheck-rust
+# Users install with: brew install DevanshChoubey/tap/shellcheck-rust
 # (the formula lives in a tap; copy this file to Formula/shellcheck-rust.rb there).
 
 class ShellcheckRust < Formula
   desc "Rust port of ShellCheck: finds bugs in shell scripts"
-  homepage "https://github.com/OWNER/shellcheck-rust"
+  homepage "https://github.com/DevanshChoubey/shellcheck-rust"
   version "@VERSION@"
   license "GPL-3.0-or-later"
 
-  base_url = "https://github.com/OWNER/shellcheck-rust/releases/download/v#{version}"
+  base_url = "https://github.com/DevanshChoubey/shellcheck-rust/releases/download/v#{version}"
 
   on_macos do
     if Hardware::CPU.arm?

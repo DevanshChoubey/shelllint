@@ -4,10 +4,10 @@
   "description": "A Rust port of ShellCheck: finds bugs in shell scripts. Ships a prebuilt static binary per platform.",
   "keywords": ["shell", "shellcheck", "bash", "lint", "linter", "static-analysis"],
   "license": "GPL-3.0-or-later",
-  "homepage": "https://github.com/OWNER/shellcheck-rust",
+  "homepage": "https://github.com/DevanshChoubey/shellcheck-rust",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/shellcheck-rust.git"
+    "url": "git+https://github.com/DevanshChoubey/shellcheck-rust.git"
   },
   "bin": {
     "shellcheck-rust": "bin/shellcheck-rust.js"
