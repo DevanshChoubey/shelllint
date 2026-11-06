@@ -477,3 +477,110 @@ fn list_optional_is_checker_optional_checks() {
     let listed: Vec<&str> = o.stdout.lines().filter_map(|l| l.strip_prefix("name:    ")).collect();
     assert_eq!(listed, names);
 }
+
+/// Like `run_in`, with extra environment variables.
+fn run_in_env(dir: &std::path::Path, args: &[&str], env: &[(&str, &str)]) -> Out {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"));
+    cmd.args(args).current_dir(dir).env_remove("SHELLCHECK_OPTS").stdin(Stdio::null());
+    for (k, v) in env {
+        cmd.env(k, v);
+    }
+    let o = cmd.output().unwrap();
+    Out {
+        code: o.status.code().unwrap_or(-1),
+        stdout: String::from_utf8_lossy(&o.stdout).into_owned(),
+        stderr: String::from_utf8_lossy(&o.stderr).into_owned(),
+    }
+}
+
+#[test]
+fn relative_or_empty_xdg_config_home_falls_back_to_home_config() {
+    // Expected output captured from the Haskell oracle.
+    let d = tmpdir("xdg-rel");
+    let (w, h) = (d.join("w"), d.join("h"));
+    std::fs::create_dir_all(w.join("xdg")).unwrap();
+    std::fs::create_dir_all(h.join(".config")).unwrap();
+    std::fs::write(w.join("a.sh"), "#!/bin/sh\necho $1\nfoo=`ls`\n").unwrap();
+    std::fs::write(w.join("xdg/shellcheckrc"), "disable=SC2086\n").unwrap();
+    std::fs::write(w.join("xdg/editorconfig.ini"), "[*]\nshellcheck.disable=SC2006\n").unwrap();
+    std::fs::write(h.join(".config/shellcheckrc"), "disable=SC2034\n").unwrap();
+    let home = h.to_string_lossy().into_owned();
+    let home_only = "a.sh:2:6: note: Double quote to prevent globbing and word splitting. [SC2086]\n\
+                     a.sh:3:5: note: Use $(...) notation instead of legacy backticks `...`. [SC2006]\n";
+    for xdg in ["xdg", "./xdg", "xdg/", "../w/xdg", ""] {
+        let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("XDG_CONFIG_HOME", xdg)]);
+        assert_eq!(o.stdout, home_only, "XDG_CONFIG_HOME={:?}", xdg);
+        assert_eq!(o.code, 1);
+    }
+    // An absolute one is used, and its editorconfig.ini too.
+    let abs = format!("{}/./", w.join("xdg").to_string_lossy());
+    let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("XDG_CONFIG_HOME", &abs)]);
+    assert_eq!(o.stdout, "a.sh:3:1: warning: foo appears unused. Verify use (or export if used externally). [SC2034]\n");
+}
+
+#[cfg(unix)]
+#[test]
+fn file_open_errors_use_ghc_io_error_text() {
+    let d = std::env::temp_dir().join(format!("sc-ioerr-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&d);
+    std::fs::create_dir_all(&d).unwrap();
+    std::fs::write(d.join("ok.sh"), CLEAN).unwrap();
+    std::os::unix::fs::symlink("l1", d.join("l2")).unwrap();
+    std::os::unix::fs::symlink("l2", d.join("l1")).unwrap();
+    let long = format!("{}.sh", "0".repeat(300));
+    let cases = [
+        ("ok.sh/x", "inappropriate type (Not a directory)"),
+        ("l1", "invalid argument (Symbolic link loop)"),
+        (long.as_str(), "invalid argument (Filename too long)"),
+    ];
+    for (f, desc) in cases {
+        let o = run_in(&d, &["--norc", f]);
+        assert_eq!(o.code, 2, "{f}");
+        assert_eq!(o.stderr, format!("{f}: {f}: openBinaryFile: {desc}\n"));
+    }
+    let _ = std::fs::remove_dir_all(&d);
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn read_error_after_open_is_reported_by_hgetcontents() {
+    let o = run(&["--norc", "/proc/self/mem"], "");
+    assert_eq!(o.code, 2);
+    assert_eq!(o.stderr, "/proc/self/mem: /proc/self/mem: hGetContents: hardware fault (I/O error)\n");
+}
+
+#[test]
+fn files_from_trims_with_ghc_is_space() {
+    let d = std::env::temp_dir().join(format!("sc-filesfrom-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&d);
+    std::fs::create_dir_all(&d).unwrap();
+    std::fs::write(d.join("a.sh"), CLEAN).unwrap();
+    // U+00A0 and U+3000 are isSpace; U+0085 and U+2028 are not, so they stay in the name.
+    std::fs::write(d.join("list"), "\u{a0}a.sh\u{3000}\n\u{85}b.sh\n").unwrap();
+    let o = run_in(&d, &["--norc", "--files-from", "list"]);
+    assert_eq!(o.code, 2);
+    assert_eq!(o.stderr, "\u{85}b.sh: \u{85}b.sh: openBinaryFile: does not exist (No such file or directory)\n");
+    let _ = std::fs::remove_dir_all(&d);
+}
+
+/// GHC's RTS prints "out of memory" and exits 251; the CLI's allocator wrapper does the same.
+#[cfg(target_os = "linux")]
+#[test]
+fn allocation_failure_exits_251_with_message() {
+    let d = std::env::temp_dir().join(format!("sc-oom-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&d);
+    std::fs::create_dir_all(&d).unwrap();
+    // A sparse 3 GB file cannot be read into memory under a 1.5 GB address-space limit.
+    std::fs::File::create(d.join("big.sh")).unwrap().set_len(3 << 30).unwrap();
+    let o = Command::new("sh")
+        .arg("-c")
+        .arg("ulimit -v 1500000 && exec \"$0\" --norc big.sh")
+        .arg(env!("CARGO_BIN_EXE_shellcheck-rust"))
+        .current_dir(&d)
+        .stdin(Stdio::null())
+        .output()
+        .unwrap();
+    let _ = std::fs::remove_dir_all(&d);
+    assert_eq!(o.status.code(), Some(251));
+    assert_eq!(String::from_utf8_lossy(&o.stderr), "shellcheck-rust: out of memory\n");
+}
