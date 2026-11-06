@@ -11,3 +11,15 @@ repository = ""
 [profile.release]
 lto = true
 codegen-units = 1
+
+# The pathological-input tests (crates/conformance/tests/pathological.rs)
+# must finish in 10 s under `cargo test`; unoptimised, the parser takes
+# ~15-20 s on 50,000 lines. Optimise the pipeline crates in dev/test builds.
+[profile.dev.package.shellcheck-parser]
+opt-level = 2
+[profile.dev.package.shellcheck-core]
+opt-level = 2
+[profile.dev.package.shellcheck-analyzer]
+opt-level = 2
+[profile.dev.package.regex-automata]
+opt-level = 2

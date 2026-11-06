@@ -5,3 +5,7 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+shellcheck-core = { path = "../core" }
+shellcheck-parser = { path = "../parser" }
+shellcheck-analyzer = { path = "../analyzer" }
+shellcheck-checks = { path = "../checks" }

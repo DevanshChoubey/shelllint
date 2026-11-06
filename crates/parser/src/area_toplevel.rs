@@ -873,10 +873,14 @@ pub(crate) fn parse_shell(env: Environment<'_>, name: &str, contents: &str) -> P
         Ok((script, userstate)) => {
             let mut notes: Vec<ParseNote> = userstate.parse_notes.iter().rev().cloned().collect();
             notes.extend(parse_problems);
+            let span_files: Vec<(u32, u32)> = userstate.span_files.iter().map(|(s, e)| (s.0, e.0)).collect();
+            let files = p.files.clone();
             ParseResult {
                 comments: nub(notes).iter().map(|n| p.to_positioned_comment(n)).collect(),
                 ast: userstate.ast,
                 root: Some(script),
+                span_files,
+                files,
             }
         }
         Err(err) => {
@@ -889,6 +893,8 @@ pub(crate) fn parse_shell(env: Environment<'_>, name: &str, contents: &str) -> P
                 comments: notes.iter().map(|n| p.to_positioned_comment(n)).collect(),
                 ast: Default::default(),
                 root: None,
+                span_files: vec![],
+                files: vec![],
             }
         }
     }

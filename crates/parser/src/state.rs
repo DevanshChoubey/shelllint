@@ -62,7 +62,7 @@ pub struct UserState {
     /// The token arena; also `positionMap` (spans) and `lastId` (length).
     pub ast: Ast,
     /// File of each span's (start, end); parallel to `ast`.
-    span_files: Vec<(FileId, FileId)>,
+    pub(crate) span_files: Vec<(FileId, FileId)>,
     /// Oldest first.
     pub parse_notes: Vec<ParseNote>,
     /// `Map.insert` log, oldest first; later entries win.
