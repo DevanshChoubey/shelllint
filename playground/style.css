@@ -1,0 +1,158 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+:root {
+  --bg: #fafaf9;
+  --panel: #ffffff;
+  --fg: #1c1c1e;
+  --muted: #6b7280;
+  --border: #e4e4e7;
+  --gutter: #f1f1f0;
+  --c-error: #dc2626;
+  --c-warning: #d97706;
+  --c-info: #2563eb;
+  --c-style: #7c3aed;
+  --mark: rgb(220 38 38 / 0.10);
+  --focus: #2563eb;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111113;
+    --panel: #18181b;
+    --fg: #e4e4e7;
+    --muted: #9ca3af;
+    --border: #2e2e33;
+    --gutter: #1c1c20;
+    --c-error: #f87171;
+    --c-warning: #fbbf24;
+    --c-info: #60a5fa;
+    --c-style: #c4b5fd;
+    --mark: rgb(248 113 113 / 0.14);
+    --focus: #60a5fa;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111113;
+  --panel: #18181b;
+  --fg: #e4e4e7;
+  --muted: #9ca3af;
+  --border: #2e2e33;
+  --gutter: #1c1c20;
+  --c-error: #f87171;
+  --c-warning: #fbbf24;
+  --c-info: #60a5fa;
+  --c-style: #c4b5fd;
+  --mark: rgb(248 113 113 / 0.14);
+  --focus: #60a5fa;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+h1 { font-size: 1.1rem; margin: 0; white-space: nowrap; }
+h2 { font-size: 0.95rem; margin: 0 0 .5rem; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+a { color: var(--focus); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem;
+  padding: .6rem 1rem; border-bottom: 1px solid var(--border); background: var(--panel);
+}
+.bar label { display: flex; align-items: center; gap: .4rem; font-size: .9rem; }
+select, button {
+  font: inherit; font-size: .9rem; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 6px; padding: .3rem .6rem;
+}
+button { cursor: pointer; }
+button:disabled { opacity: .5; cursor: default; }
+button:not(:disabled):hover { border-color: var(--focus); }
+.actions { display: flex; gap: .5rem; margin-left: auto; }
+#status { font-size: .85rem; min-width: 8ch; }
+
+main {
+  flex: 1; display: grid; gap: 0;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+  min-height: 0;
+}
+.editor { min-width: 0; border-right: 1px solid var(--border); }
+.surface {
+  display: flex; height: calc(100vh - 62px); min-height: 360px;
+  background: var(--panel); overflow: hidden;
+}
+
+/* Line numbers and severity dots. Metrics must match .layer exactly. */
+.gutter {
+  flex: 0 0 auto; min-width: 3.5rem; overflow: hidden; background: var(--gutter);
+  border-right: 1px solid var(--border); text-align: right; color: var(--muted);
+  font: 14px/21px var(--mono); padding: 12px 0; user-select: none;
+}
+.gutter .ln { padding: 0 .6rem 0 1.2rem; position: relative; white-space: pre; }
+.gutter .ln::before {
+  content: ""; position: absolute; left: .45rem; top: 50%; width: 7px; height: 7px;
+  margin-top: -3.5px; border-radius: 50%; display: none;
+}
+.gutter .ln.sev-error::before { display: block; background: var(--c-error); }
+.gutter .ln.sev-warning::before { display: block; background: var(--c-warning); }
+.gutter .ln.sev-info::before { display: block; background: var(--c-info); }
+.gutter .ln.sev-style::before { display: block; background: var(--c-style); }
+
+.code { position: relative; flex: 1; min-width: 0; overflow: hidden; }
+.layer {
+  position: absolute; inset: 0; margin: 0; border: 0; border-radius: 0;
+  font: 14px/21px var(--mono); padding: 12px 14px; white-space: pre; tab-size: 8;
+  overflow: auto; background: transparent; resize: none; width: 100%; height: 100%;
+  letter-spacing: normal; word-spacing: normal;
+}
+#backdrop { color: var(--fg); pointer-events: none; overflow: hidden; }
+#src {
+  color: transparent; caret-color: var(--fg); z-index: 1;
+  -webkit-text-fill-color: transparent; outline: none;
+}
+#src::selection { background: rgb(37 99 235 / 0.3); -webkit-text-fill-color: transparent; }
+#backdrop .m { border-radius: 2px; background: var(--mark); text-decoration: underline wavy var(--c-error); text-underline-offset: 3px; }
+#backdrop .m.sev-warning { background: rgb(217 119 6 / 0.12); text-decoration-color: var(--c-warning); }
+#backdrop .m.sev-info { background: rgb(37 99 235 / 0.10); text-decoration-color: var(--c-info); }
+#backdrop .m.sev-style { background: rgb(124 58 237 / 0.10); text-decoration-color: var(--c-style); }
+
+.side { padding: 1rem; overflow: auto; border-top: 1px solid var(--border); max-height: calc(100vh - 62px); }
+.diags { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+.diag {
+  border: 1px solid var(--border); border-left: 4px solid var(--c-error); border-radius: 6px;
+  padding: .5rem .6rem; background: var(--panel);
+}
+.diag.sev-warning { border-left-color: var(--c-warning); }
+.diag.sev-info { border-left-color: var(--c-info); }
+.diag.sev-style { border-left-color: var(--c-style); }
+.diag button.jump {
+  all: unset; cursor: pointer; display: block; width: 100%;
+}
+.diag button.jump:focus-visible { outline: 2px solid var(--focus); }
+.diag .head { font-size: .8rem; color: var(--muted); display: flex; gap: .5rem; flex-wrap: wrap; }
+.diag .head a { font-weight: 600; }
+.diag .msg { margin: .2rem 0 .3rem; font-size: .92rem; }
+.diag .fix { font-size: .82rem; }
+.empty { color: var(--muted); font-size: .9rem; }
+
+.optional { display: grid; gap: .35rem; margin-top: .5rem; font-size: .88rem; }
+.optional label { display: flex; gap: .4rem; align-items: flex-start; }
+.optional small { color: var(--muted); display: block; }
+
+@media (max-width: 800px) {
+  main { grid-template-columns: 1fr; }
+  .editor { border-right: 0; }
+  .surface { height: 60vh; min-height: 300px; }
+  .side { max-height: none; border-top: 1px solid var(--border); }
+  .actions { margin-left: 0; }
+  #status { min-width: 0; }
+}

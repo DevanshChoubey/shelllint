@@ -131,10 +131,27 @@ pub const CHECK_STACK_BYTES: usize = 512 * 1024 * 1024;
 // cannot overflow; nesting beyond ~10000 levels still aborts the process.
 // This is why `SystemInterface` requires `Sync`.
 pub fn check_script(sys: &dyn SystemInterface, spec: &CheckSpec) -> CheckResult {
-    shellcheck_parser::engine::with_stack(CHECK_STACK_BYTES, || {
+    run_on_check_stack(|| {
         let results = check_script_contents(sys, spec, &spec.script);
         CheckResult { filename: spec.filename.clone(), comments: results, ..empty_check_result() }
     })
+}
+
+/// Runs `f` on a thread with a `CHECK_STACK_BYTES` stack.
+#[cfg(not(target_arch = "wasm32"))]
+fn run_on_check_stack<R: Send>(f: impl FnOnce() -> R + Send) -> R {
+    shellcheck_parser::engine::with_stack(CHECK_STACK_BYTES, f)
+}
+
+/// `wasm32-unknown-unknown` has no threads, so `f` runs on the caller's stack.
+// WASM: that stack is set at link time, not by `CHECK_STACK_BYTES`. The
+// default is wasm-ld's 1 MiB, which overflows at a few hundred nested `$(`;
+// the workspace `.cargo/config.toml` raises it with `-zstack-size`. The
+// resulting nesting limit is not measured yet (the wasm build does not link,
+// see the note in scripts/build-wasm.sh).
+#[cfg(target_arch = "wasm32")]
+fn run_on_check_stack<R>(f: impl FnOnce() -> R) -> R {
+    f()
 }
 
 /// The `where`-bound `checkScript contents` of `checkScript`.

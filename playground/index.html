@@ -1,0 +1,64 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lint shell scripts in your browser with ShellCheck, compiled to WebAssembly.">
+  <title>ShellCheck Playground</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>ShellCheck <span id="ver" class="muted"></span></h1>
+    <label>Shell
+      <select id="shell">
+        <option value="auto">auto (shebang)</option>
+        <option value="sh">sh</option>
+        <option value="bash">bash</option>
+        <option value="dash">dash</option>
+        <option value="ksh">ksh</option>
+        <option value="busybox">busybox</option>
+      </select>
+    </label>
+    <label>Min severity
+      <select id="severity">
+        <option value="style">style</option>
+        <option value="info">info</option>
+        <option value="warning">warning</option>
+        <option value="error">error</option>
+      </select>
+    </label>
+    <div class="actions">
+      <button id="fixAll" type="button" disabled>Fix all</button>
+      <button id="share" type="button">Copy link</button>
+    </div>
+    <span id="status" class="muted" role="status" aria-live="polite"></span>
+  </header>
+
+  <main>
+    <section class="editor" aria-label="Script">
+      <div class="surface">
+        <div id="gutter" class="gutter" aria-hidden="true"></div>
+        <div class="code">
+          <pre id="backdrop" class="layer" aria-hidden="true"></pre>
+          <textarea id="src" class="layer" spellcheck="false" autocapitalize="off" autocorrect="off" wrap="off" aria-label="Shell script"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <h2>Diagnostics</h2>
+      <ol id="diags" class="diags"></ol>
+      <details>
+        <summary>Optional checks</summary>
+        <div id="optional" class="optional"></div>
+      </details>
+      <p class="muted small">Runs locally in your browser. No script leaves this page.
+        <a href="https://www.shellcheck.net/wiki/" rel="noopener">Wiki</a></p>
+    </aside>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
