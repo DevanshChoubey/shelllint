@@ -49,6 +49,10 @@ checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 [[package]]
 name = "shellcheck-analyzer"
 version = "0.0.1"
+dependencies = [
+ "regex",
+ "shellcheck-core",
+]
 
 [[package]]
 name = "shellcheck-checker"
