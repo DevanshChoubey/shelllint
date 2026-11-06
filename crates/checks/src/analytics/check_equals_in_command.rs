@@ -8,7 +8,7 @@ use shellcheck_analyzer::analyzerlib::{Comments, Params};
 use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::astlib::{
-    get_braced_modifier, get_braced_reference, get_literal_string_ext, get_unquoted_literal, is_quoteable_expansion,
+    get_braced_modifier, get_braced_reference, get_literal_string_ext, get_unquoted_literal,
     is_quotes, is_variable_char, is_variable_name, oversimplify, will_become_multiple_args,
 };
 use shellcheck_core::interface::Shell;
@@ -44,9 +44,7 @@ fn has_equals(params: &Params<'_>, t: Id) -> bool {
 
 fn check(params: &Params<'_>, original_token: Id, t: Id, c: &mut Comments) {
     let Token::T_NormalWord(list) = params.ast.get(t) else { return };
-    if !list.iter().any(|&x| has_equals(params, x)) {
-        return;
-    }
+    // `when (any hasEquals list)`, then `break hasEquals list`.
     let Some(idx) = list.iter().position(|&x| has_equals(params, x)) else { return };
     let leading = strip_single_plus(params, &list[..idx]);
     msg(params, original_token, t, leading, list[idx], c);
@@ -80,7 +78,7 @@ fn may_be_variable_name(params: &Params<'_>, l: &[Id]) -> bool {
     if l.iter().any(|&x| will_become_multiple_args(ast, x)) {
         return false;
     }
-    // DIVERGENCE: the synthetic `T_NormalWord (Id 0) l` is not built; its literal
+    // The synthetic `T_NormalWord (Id 0) l` is not built; its literal
     // string is the concatenation of the literal strings of its parts.
     let mut str = String::new();
     for &x in l {
@@ -234,10 +232,4 @@ fn msg(params: &Params<'_>, original_token: Id, cmd: Id, leading: &[Id], eq: Id,
     generic_msg(c, cmd);
 }
 
-#[allow(dead_code)]
-fn is_expansion(params: &Params<'_>, t: Id) -> bool {
-    match params.ast.get(t) {
-        Token::T_Arithmetic(..) => true,
-        _ => is_quoteable_expansion(params.ast, t),
-    }
-}
+// Haskell's local `isExpansion` is unused, so it is not ported.

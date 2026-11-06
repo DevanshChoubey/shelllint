@@ -52,30 +52,63 @@ fn check_unassigned_references_true(p: &Params<'_>, t: Id) -> Vec<TokenComment> 
 //  :? or :- with optional array index and colon
 static GUARD_REGEX: LazyLock<Regex> = LazyLock::new(|| mk_regex("^(\\[.*\\])?:?[-?]"));
 
-// DIVERGENCE: `dist` is a private Levenshtein distance (the Haskell is the
-// wiki's edit-distance implementation, which computes the same value).
-fn dist(a: &[char], b: &[char]) -> usize {
-    let mut prev: Vec<usize> = (0..=b.len()).collect();
+// `dist` is the wiki's edit-distance implementation; any Levenshtein
+// distance computes the same value. `getBestMatch` only accepts a best score
+// of at most 2, so scores are computed capped at 3 (`MATCH_CAP`): the first
+// candidate with the minimal capped score is the first with the minimal
+// score whenever that minimum is at most 2, and otherwise both give
+// Nothing.
+const MATCH_CAP: usize = 3;
+
+/// `min (dist a b) cap`, using two reusable rows and stopping once a whole
+/// row is at least `cap` (row minima never decrease).
+fn dist_capped(a: &[char], b: &[char], cap: usize, prev: &mut Vec<usize>, cur: &mut Vec<usize>) -> usize {
+    if a.len().abs_diff(b.len()) >= cap {
+        return cap;
+    }
+    prev.clear();
+    prev.extend(0..=b.len());
     for (i, ac) in a.iter().enumerate() {
-        let mut cur = vec![i + 1];
+        cur.clear();
+        cur.push(i + 1);
         for (j, bc) in b.iter().enumerate() {
             let sub = prev[j] + usize::from(ac != bc);
-            cur.push(sub.min(prev[j + 1] + 1).min(cur[j] + 1));
+            let v = sub.min(prev[j + 1] + 1).min(cur[j] + 1);
+            cur.push(v);
         }
-        prev = cur;
+        if cur.iter().all(|&v| v >= cap) {
+            return cap;
+        }
+        std::mem::swap(prev, cur);
     }
-    prev[b.len()]
+    prev[b.len()].min(cap)
 }
 
 fn to_lower(s: &str) -> Vec<char> {
     s.chars().map(|c| c.to_lowercase().next().unwrap_or(c)).collect()
 }
 
-fn match_(var: &str, candidate: &str) -> usize {
-    if var != candidate && to_lower(var) == to_lower(candidate) {
+/// A name with its characters and `map toLower` characters, computed once.
+struct Candidate<'a> {
+    name: &'a str,
+    chars: Vec<char>,
+    lower: Vec<char>,
+}
+
+impl<'a> Candidate<'a> {
+    fn new(name: &'a str) -> Self {
+        Candidate { name, chars: name.chars().collect(), lower: to_lower(name) }
+    }
+}
+
+/// `min (match var candidate) MATCH_CAP`, where
+/// `match var candidate = if var /= candidate && map toLower var == map toLower candidate
+///                        then 1 else dist var candidate`
+fn match_capped(var: &Candidate<'_>, candidate: &Candidate<'_>, prev: &mut Vec<usize>, cur: &mut Vec<usize>) -> usize {
+    if var.name != candidate.name && var.lower == candidate.lower {
         1
     } else {
-        dist(&var.chars().collect::<Vec<_>>(), &candidate.chars().collect::<Vec<_>>())
+        dist_capped(&var.chars, &candidate.chars, MATCH_CAP, prev, cur)
     }
 }
 
@@ -103,15 +136,25 @@ fn check_unassigned_references_(include_globals: bool, p: &Params<'_>, _t: Id) -
         .filter(|(k, _)| !write_map.contains_key(*k) && !default_assigned.contains(&k.as_str()))
         .map(|(k, v)| (k, *v))
         .collect();
-    let written_vars: Vec<&String> = write_map.keys().filter(|k| is_variable_name(k)).collect();
+    let written_vars: Vec<Candidate<'_>> =
+        write_map.keys().filter(|k| is_variable_name(k)).map(|k| Candidate::new(k)).collect();
 
     let get_best_match = |var: &str| -> Option<String> {
-        let mut best: Vec<(&String, usize)> = written_vars.iter().map(|x| (*x, match_(var, x))).collect();
-        best.sort_by_key(|(_, s)| *s);
-        let (m, score) = best.first()?;
-        let l = m.chars().count();
-        let good = l > 3 && *score <= 1 || l > 7 && *score <= 2;
-        if good { Some((*m).clone()) } else { None }
+        // `listToMaybe (sortBy (comparing snd) matches)`: the first candidate
+        // with the minimal score (sortBy is stable).
+        let var = Candidate::new(var);
+        let (mut prev, mut cur) = (Vec::new(), Vec::new());
+        let mut best: Option<(&Candidate<'_>, usize)> = None;
+        for x in &written_vars {
+            let score = match_capped(&var, x, &mut prev, &mut cur);
+            if best.is_none_or(|(_, s)| score < s) {
+                best = Some((x, score));
+            }
+        }
+        let (m, score) = best?;
+        let l = m.chars.len();
+        let good = l > 3 && score <= 1 || l > 7 && score <= 2;
+        if good { Some(m.name.to_string()) } else { None }
     };
 
     let is_local = |s: &str| s.chars().any(|c| c.is_lowercase());

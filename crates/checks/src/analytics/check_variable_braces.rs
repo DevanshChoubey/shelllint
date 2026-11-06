@@ -4,10 +4,10 @@
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
 use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_braced_reference, get_path, oversimplify};
+use shellcheck_core::astlib::{get_braced_reference, oversimplify};
 use shellcheck_core::data::UNBRACED_VARIABLES;
 
-use crate::support::{fix_with, replace_end, replace_start};
+use crate::support::{fix_with, quotes_may_conflict_with_sc2281, replace_end, replace_start};
 
 #[linkme::distributed_slice(CHECKS)]
 static ENTRY: CheckEntry = CheckEntry {
@@ -24,22 +24,6 @@ static ENTRY: CheckEntry = CheckEntry {
     }),
     kind: CheckKind::Node(check_variable_braces),
 };
-
-// Don't suggest quotes if this will instead be autocorrected
-// from $foo=bar to foo=bar. This is not pretty but ok.
-fn quotes_may_conflict_with_sc2281(params: &Params<'_>, t: Id) -> bool {
-    let path = get_path(params.ast, t);
-    let [_, w, sc, ..] = &path[..] else { return false };
-    let Token::T_NormalWord(parts) = params.ast.get(*w) else { return false };
-    let [me, lit, ..] = &parts[..] else { return false };
-    let Token::T_Literal(s) = params.ast.get(*lit) else { return false };
-    if !s.starts_with('=') {
-        return false;
-    }
-    let Token::T_SimpleCommand(_, words) = params.ast.get(*sc) else { return false };
-    let Some(cmd) = words.first() else { return false };
-    t == *me && *w == *cmd
-}
 
 fn check_variable_braces(params: &Params<'_>, t: Id, c: &mut Comments) {
     let Token::T_DollarBraced(false, l) = params.ast.get(t) else { return };

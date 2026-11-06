@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use shellcheck_analyzer::analyzerlib::{
-    Comments, DataType, Params, Scope, StackData, VariableState, is_true_assignment_source,
+    Comments, Params, Scope, StackData, VariableState, is_true_assignment_source,
 };
 use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind};
 use shellcheck_core::ast::{AssignmentMode, Id, Token};
@@ -34,13 +34,16 @@ enum SubshellCheckScope {
     InFunction(HashMap<String, VariableState>),
 }
 
-/// An assignment as stored in a scope: (base, token, name, data).
-type Assigned = (Id, Id, String, DataType);
+/// An assignment as stored in a scope. Haskell keeps the whole
+/// `(base, token, name, data)` tuple, but only the token and the name are
+/// read when the scope ends.
+type Assigned = (Id, String);
 
 type Scopes = Vec<(SubshellCheckScope, Vec<Assigned>)>;
 
-// DIVERGENCE: the Haskell recursion is a loop; scope assignment lists keep the
-// newest entry last, so they are walked in reverse to match `x:scope` order.
+// The Haskell recursion over `flow` is written as a loop. Scope assignment
+// lists keep the newest entry last, so they are walked in reverse to match
+// the `x:scope` order.
 fn find_subshelled(
     p: &Params<'_>,
     flow: &[StackData],
@@ -50,13 +53,12 @@ fn find_subshelled(
 ) {
     for item in flow {
         match item {
-            StackData::Assignment(b, tok, str, data) => {
+            StackData::Assignment(_, tok, str, data) => {
                 if scopes.is_empty() {
                     return;
                 }
                 if is_true_assignment_source(data) {
-                    let x = (*b, *tok, str.clone(), data.clone());
-                    scopes.last_mut().unwrap().1.push(x);
+                    scopes.last_mut().unwrap().1.push((*tok, str.clone()));
                     dead_vars.insert(str.clone(), VariableState::Alive);
                 }
             }
@@ -83,12 +85,12 @@ fn find_subshelled(
                 let outer = std::mem::take(&mut dead_vars);
                 scopes.push((SubshellCheckScope::InFunction(outer), vec![]));
             }
-            // DIVERGENCE: Haskell has no case for NoneScope (a pattern-match failure);
-            // it is ignored here.
+            // Unreachable: AnalyzerLib only pushes a StackScope
+            // `when (scopeType /= NoneScope)`, so Haskell needs no case for it.
             StackData::StackScope(Scope::NoneScope) => {}
             StackData::StackScopeEnd => match scopes.pop() {
                 Some((SubshellCheckScope::InSubshell(reason), scope)) => {
-                    for (_, token, var, _) in scope.iter().rev() {
+                    for (token, var) in scope.iter().rev() {
                         dead_vars.insert(var.clone(), VariableState::Dead(*token, reason.clone()));
                     }
                 }

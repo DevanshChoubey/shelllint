@@ -113,14 +113,9 @@ fn check_number_comparisons(p: &Params<'_>, id: Id, c: &mut Comments) {
         }
     };
 
-    let assigned_variables = || -> Vec<String> {
-        p.variable_flow
-            .iter()
-            .filter_map(|t| match t {
-                StackData::Assignment(_, _, name, _) => Some(name.clone()),
-                _ => None,
-            })
-            .collect()
+    // `s `elem` assignedVariables`, without building the list.
+    let is_assigned_variable = |s: &str| -> bool {
+        p.variable_flow.iter().any(|t| matches!(t, StackData::Assignment(_, _, name, _) if name == s))
     };
 
     let is_non_num = |t: Id| -> bool {
@@ -162,7 +157,7 @@ fn check_number_comparisons(p: &Params<'_>, id: Id, c: &mut Comments) {
                 //   It's not a recognized variable name
                 if !is_var
                     || get_word_parts(ast, t).into_iter().any(|x| is_quotes(ast, x))
-                    || !assigned_variables().contains(&as_string)
+                    || !is_assigned_variable(&as_string)
                 {
                     c.warn(
                         t,

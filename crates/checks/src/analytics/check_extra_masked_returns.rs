@@ -4,11 +4,13 @@
 use shellcheck_analyzer::analyzerlib::{Comments, Params, parents};
 use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, StaticCheckDescription};
 use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::astlib::{get_all_flags, get_command, get_command_basename};
+use shellcheck_core::astlib::{
+    basename, get_all_flags, get_bsd_opts, get_command, get_command_basename, get_literal_string, is_flag,
+};
 use shellcheck_core::data::DECLARING_COMMANDS;
 use shellcheck_core::interface::TokenComment;
 
-use crate::support::{Scratch, run_node_analysis};
+use crate::support::run_node_analysis;
 
 #[linkme::distributed_slice(CHECKS)]
 static ENTRY: CheckEntry = CheckEntry {
@@ -27,13 +29,13 @@ static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_extra_masked_returns(params: &Params<'_>, t: Id) -> Vec<TokenComment> {
-    // DIVERGENCE: `removeTransparentCommands` rewrites a private copy of the
-    // arena in place (ids are kept, as in Haskell). Ancestor lookups
+    // `removeTransparentCommands` is not materialised: each check below
+    // reads a `T_SimpleCommand`'s words through `effective_words`, which is
+    // what the rewritten token would hold. Ancestor lookups
     // (`parents params`) use the original tree, as the Haskell params do.
-    let mut scratch = Scratch::new(params.ast);
-    remove_transparent_commands(&mut scratch.ast, t);
-    let p2 = scratch.params(params);
-    let sast: &Ast = &scratch.ast;
+    // The walks still visit a dropped `time` word, which is harmless: a word
+    // whose command basename is literally `time` holds no command.
+    let sast: &Ast = params.ast;
 
     let find_masking_nodes = |_: &Params<'_>, id: Id, c: &mut Comments| {
         let find_in_list = |l: &[Id], c: &mut Comments| {
@@ -53,16 +55,18 @@ fn check_extra_masked_returns(params: &Params<'_>, t: Id) -> Vec<TokenComment> {
                 find_in_list(&all_but_last_simple_commands(sast, cmds), c)
             }
             Token::T_ProcSub(_, list) => find_in_list(list, c),
-            Token::T_SimpleCommand(assigns, words) if !words.is_empty() => {
-                let mut l = assigns.clone();
-                l.extend_from_slice(&words[1..]);
-                find_in_list(&l, c)
-            }
-            Token::T_SimpleCommand(assigns, _) => find_in_list(&all_but_last_simple_commands(sast, assigns), c),
+            Token::T_SimpleCommand(assigns, _) => match effective_words(sast, id) {
+                [_, rest @ ..] => {
+                    let mut l = assigns.clone();
+                    l.extend_from_slice(rest);
+                    find_in_list(&l, c)
+                }
+                [] => find_in_list(&all_but_last_simple_commands(sast, assigns), c),
+            },
             _ => {}
         }
     };
-    run_node_analysis(&find_masking_nodes, &p2, t)
+    run_node_analysis(&find_masking_nodes, params, t)
 }
 
 /// `doAnalysis findMaskedNodes n`
@@ -72,7 +76,7 @@ fn do_analysis_find_masked(params: &Params<'_>, sast: &Ast, n: Id, c: &mut Comme
 
 fn find_masked_nodes(params: &Params<'_>, sast: &Ast, t: Id, c: &mut Comments) {
     match sast.get(t) {
-        Token::T_SimpleCommand(_, words) if !words.is_empty() => {
+        Token::T_SimpleCommand(..) if !effective_words(sast, t).is_empty() => {
             if is_masked_node(params, sast, t) {
                 inform(t, c);
             }
@@ -109,17 +113,21 @@ fn all_but_last_simple_commands(ast: &Ast, cmds: &[Id]) -> Vec<Id> {
     if simple.is_empty() { vec![] } else { simple[..simple.len() - 1].to_vec() }
 }
 
-fn remove_transparent_commands(ast: &mut Ast, t: Id) {
-    let mut ids = vec![];
-    ast.analyze(t, &mut |x| ids.push(x), &mut |_| {});
-    for id in ids {
-        if let Token::T_SimpleCommand(assigns, words) = ast.get(id)
-            && !words.is_empty()
-            && is_transparent_command(ast, id)
-        {
-            let new = Token::T_SimpleCommand(assigns.clone(), words[1..].to_vec());
-            ast.set(id, new);
-        }
+/// The words of `T_SimpleCommand` `t` after `removeTransparentCommands`:
+/// ```haskell
+/// removeTransparentCommands t =
+///     doTransform go t
+///   where
+///     go cmd@(T_SimpleCommand id assigns (_:t)) | isTransparentCommand cmd = T_SimpleCommand id assigns t
+///     go t = t
+/// ```
+// The words themselves are never rewritten, so the transform's bottom-up
+// order does not change which commands are transparent.
+fn effective_words(ast: &Ast, t: Id) -> &[Id] {
+    let Token::T_SimpleCommand(_, words) = ast.get(t) else { return &[] };
+    match &words[..] {
+        [_, rest @ ..] if is_transparent_command(ast, t) => rest,
+        _ => words,
     }
 }
 
@@ -162,7 +170,7 @@ fn is_declaring_command(ast: &Ast, t: Id) -> bool {
 }
 
 fn is_harmless_command(ast: &Ast, t: Id) -> bool {
-    match get_command_basename(ast, t) {
+    match command_name_of_words(ast, effective_words(ast, t)).map(|s| basename(&s)) {
         Some(b) => matches!(b.as_str(), "echo" | "basename" | "dirname" | "printf" | "set" | "shopt"),
         None => false,
     }
@@ -170,4 +178,26 @@ fn is_harmless_command(ast: &Ast, t: Id) -> bool {
 
 fn is_transparent_command(ast: &Ast, t: Id) -> bool {
     get_command_basename(ast, t).as_deref() == Some("time")
+}
+
+/// `getCommandName` of a `T_SimpleCommand` holding `words`
+/// (`astlib::get_command_name_and_token False`).
+fn command_name_of_words(ast: &Ast, words: &[Id]) -> Option<String> {
+    let (&w, rest) = words.split_first()?;
+    let s = get_literal_string(ast, w)?;
+    let first_arg = || {
+        let arg = *rest.first()?;
+        if is_flag(ast, arg) { None } else { Some(arg) }
+    };
+    let actual = match s.as_str() {
+        "busybox" | "builtin" | "command" | "run" => first_arg(),
+        "exec" => get_bsd_opts(ast, "cla:", rest)
+            .and_then(|opts| opts.into_iter().find(|(name, _)| name.is_empty()))
+            .map(|(_, (t, _))| t),
+        _ => None,
+    };
+    match actual {
+        Some(actual) => get_literal_string(ast, actual),
+        None => Some(s),
+    }
 }

@@ -86,17 +86,17 @@ fn check_pipe(ast: &Ast, input: PipeType, stage: Id, output: PipeType, c: &mut C
             fds.push(get_redirection_fds(ast, r)?);
         }
 
-        let mut fd_map: BTreeMap<u128, Vec<Id>> = BTreeMap::new();
+        let mut fd_map: BTreeMap<Fd, Vec<Id>> = BTreeMap::new();
         for (list, &redir) in fds.iter().zip(redirs.iter()) {
-            for &n in list {
+            for n in list {
                 // Map.fromListWith (++): new elements are prepended
-                fd_map.entry(n).or_default().insert(0, redir);
+                fd_map.entry(n.clone()).or_default().insert(0, redir);
             }
         }
 
         let input_warning = |c: &mut Comments| {
             if input != PipeType::NoPipe && !has_consumers() {
-                if let Some(&over) = fd_map.get(&0).and_then(|l| l.first()) {
+                if let Some(&over) = fd_map.get(&Fd::STDIN).and_then(|l| l.first()) {
                     c.err(
                         get_op_id(ast, over),
                         2259,
@@ -111,7 +111,7 @@ fn check_pipe(ast: &Ast, input: PipeType, stage: Id, output: PipeType, c: &mut C
         // to stderr if the files fail to open
         let output_warning = |c: &mut Comments| {
             if output == PipeType::StdoutPipe && !has_producers() {
-                if let Some(&over) = fd_map.get(&1).and_then(|l| l.first()) {
+                if let Some(&over) = fd_map.get(&Fd::STDOUT).and_then(|l| l.first()) {
                     c.err(
                         get_op_id(ast, over),
                         2260,
@@ -124,7 +124,7 @@ fn check_pipe(ast: &Ast, input: PipeType, stage: Id, output: PipeType, c: &mut C
         input_warning(c);
         output_warning(c);
         for (n, list) in &fd_map {
-            warn_about_dupes(ast, *n, list, c);
+            warn_about_dupes(ast, n, list, c);
         }
         Some(())
     })();
@@ -140,7 +140,7 @@ fn command_specific_exception(ast: &Ast, name: &str, cmd: Id) -> bool {
     }
 }
 
-fn warn_about_dupes(ast: &Ast, n: u128, list: &[Id], c: &mut Comments) {
+fn warn_about_dupes(ast: &Ast, n: &Fd, list: &[Id], c: &mut Comments) {
     if list.len() >= 2 {
         for &r in list {
             c.err(
@@ -155,14 +155,44 @@ fn warn_about_dupes(ast: &Ast, n: u128, list: &[Id], c: &mut Comments) {
     }
 }
 
-// DIVERGENCE: Haskell's local `alternative` is unused, so it is not ported.
+// Haskell's local `alternative` is unused, so it is not ported.
 
-fn fd_str(n: u128) -> String {
-    match n {
-        0 => "stdin".to_string(),
-        1 => "stdout".to_string(),
-        2 => "stderr".to_string(),
-        _ => format!("FD {}", n),
+/// A file descriptor number: Haskell's `read num :: Integer`, kept as its
+/// decimal digits without leading zeros (`show`) so that any length works.
+/// Ordered by value, as `Map Integer` keys are.
+#[derive(Clone, PartialEq, Eq, Debug)]
+struct Fd(std::borrow::Cow<'static, str>);
+
+impl Fd {
+    const STDIN: Fd = Fd(std::borrow::Cow::Borrowed("0"));
+    const STDOUT: Fd = Fd(std::borrow::Cow::Borrowed("1"));
+    const STDERR: Fd = Fd(std::borrow::Cow::Borrowed("2"));
+
+    /// `read digits`, for a non-empty string of ASCII digits.
+    fn read(digits: &str) -> Fd {
+        let trimmed = digits.trim_start_matches('0');
+        Fd(if trimmed.is_empty() { "0".into() } else { trimmed.to_string().into() })
+    }
+}
+
+impl Ord for Fd {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        (self.0.len(), &self.0).cmp(&(other.0.len(), &other.0))
+    }
+}
+
+impl PartialOrd for Fd {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn fd_str(n: &Fd) -> String {
+    match &*n.0 {
+        "0" => "stdin".to_string(),
+        "1" => "stdout".to_string(),
+        "2" => "stderr".to_string(),
+        n => format!("FD {}", n),
     }
 }
 
@@ -239,19 +269,18 @@ fn get_op_id(ast: &Ast, t: Id) -> Id {
     }
 }
 
-fn get_redirection_fds(ast: &Ast, t: Id) -> Option<Vec<u128>> {
+fn get_redirection_fds(ast: &Ast, t: Id) -> Option<Vec<Fd>> {
     match ast.get(t) {
         Token::T_FdRedirect(num, x) => {
             if num.is_empty() {
                 get_default_fds(ast, *x)
             } else if num == "&" {
-                Some(vec![1, 2])
+                Some(vec![Fd::STDOUT, Fd::STDERR])
             } else if num.chars().all(|ch| ch.is_ascii_digit()) {
                 // Don't report the number unless we know what it is.
                 // This avoids triggering on 3>&1 1>&3
                 get_default_fds(ast, *x)?;
-                // DIVERGENCE: an unparseable (overflowing) number yields Nothing
-                num.parse::<u128>().ok().map(|n| vec![n])
+                Some(vec![Fd::read(num)])
             } else {
                 // Don't bother with {fd}>42 and such
                 None
@@ -261,16 +290,16 @@ fn get_redirection_fds(ast: &Ast, t: Id) -> Option<Vec<u128>> {
     }
 }
 
-fn get_default_fds(ast: &Ast, redir: Id) -> Option<Vec<u128>> {
+fn get_default_fds(ast: &Ast, redir: Id) -> Option<Vec<Fd>> {
     match ast.get(redir) {
-        Token::T_HereDoc(..) => Some(vec![0]),
-        Token::T_HereString(..) => Some(vec![0]),
+        Token::T_HereDoc(..) => Some(vec![Fd::STDIN]),
+        Token::T_HereString(..) => Some(vec![Fd::STDIN]),
         Token::T_IoFile(op, _) => match ast.get(*op) {
-            Token::T_Less => Some(vec![0]),
-            Token::T_Greater => Some(vec![1]),
-            Token::T_DGREAT => Some(vec![1]),
-            Token::T_GREATAND => Some(vec![1, 2]),
-            Token::T_CLOBBER => Some(vec![1]),
+            Token::T_Less => Some(vec![Fd::STDIN]),
+            Token::T_Greater => Some(vec![Fd::STDOUT]),
+            Token::T_DGREAT => Some(vec![Fd::STDOUT]),
+            Token::T_GREATAND => Some(vec![Fd::STDOUT, Fd::STDERR]),
+            Token::T_CLOBBER => Some(vec![Fd::STDOUT]),
             Token::T_IoDuplicate(op2, s) if s == "-" => get_default_fds(ast, *op2),
             _ => None,
         },
@@ -279,7 +308,7 @@ fn get_default_fds(ast: &Ast, redir: Id) -> Option<Vec<u128>> {
 }
 
 fn redirects_stdin(ast: &Ast, t: Id) -> bool {
-    get_redirection_fds(ast, t).is_some_and(|fds| fds.contains(&0))
+    get_redirection_fds(ast, t).is_some_and(|fds| fds.contains(&Fd::STDIN))
 }
 
 fn pipe_type(ast: &Ast, t: Id) -> PipeType {

@@ -16,34 +16,52 @@ static ENTRY: CheckEntry = CheckEntry {
     kind: CheckKind::Command(CommandName::Basename("find"), check_injectable_find_sh),
 };
 
-type Pred = fn(&str) -> bool;
-
 /// `CommandCheck (Basename "find") (check . arguments)`
 fn check_injectable_find_sh(p: &Params<'_>, t: Id, c: &mut Comments) {
     let args = arguments(p.ast, t);
     let id_strings: Vec<(Id, String)> =
         args.iter().map(|&x| (x, only_literal_string(p.ast, x))).collect();
-    let pattern: [Pred; 3] = [
-        |s| ["-exec", "-execdir", "-ok", "-okdir"].contains(&s),
-        |s| ["sh", "bash", "dash", "ksh"].contains(&s),
-        |s| s == "-c",
-    ];
-    match_pat(&pattern, &id_strings, c);
+    match_pattern(&id_strings, c);
 }
 
-fn match_pat(pat: &[Pred], list: &[(Id, String)], c: &mut Comments) {
-    if list.is_empty() {
-        return;
+// `match pattern idStrings`, where
+//   pattern = [(`elem` ["-exec", "-execdir", "-ok", "-okdir"]),
+//              (`elem` ["sh", "bash", "dash", "ksh"]),
+//              (== "-c")]
+// and
+//   match _ [] = return ()
+//   match [] (next:_) = action next
+//   match (p:tests) ((id, arg):args) = do
+//       when (p arg) $ match tests args
+//       match (p:tests) args
+//
+// The backtracking `match` runs `action` once for every ordered
+// (-exec, sh, -c) triple, i.e. on `list[k]` once per pair i < j < k-1 with
+// pattern[0] at i, pattern[1] at j and pattern[2] at k-1. Its duplicate
+// comments are identical and dropped later by `nubTokenComments`, but there
+// are O(n^3) of them. This scan visits each `k` once, in the same order as
+// the first time the backtracking search reaches it, and acts on it if at
+// least one such triple exists: the same comments after the nub, in linear
+// time.
+fn match_pattern(list: &[(Id, String)], c: &mut Comments) {
+    let is_exec = |s: &str| ["-exec", "-execdir", "-ok", "-okdir"].contains(&s);
+    let is_shell = |s: &str| ["sh", "bash", "dash", "ksh"].contains(&s);
+    // `seen_exec`: some pattern[0] at an index < the current one;
+    // `seen_shell`: some pattern[0] .. pattern[1] pair before it.
+    let (mut seen_exec, mut seen_shell) = (false, false);
+    for (k, (_, arg)) in list.iter().enumerate() {
+        if seen_shell && arg == "-c"
+            && let Some(next) = list.get(k + 1)
+        {
+            action(next, c);
+        }
+        if seen_exec && is_shell(arg) {
+            seen_shell = true;
+        }
+        if is_exec(arg) {
+            seen_exec = true;
+        }
     }
-    let Some((p, tests)) = pat.split_first() else {
-        action(&list[0], c);
-        return;
-    };
-    let (_, arg) = &list[0];
-    if p(arg) {
-        match_pat(tests, &list[1..], c);
-    }
-    match_pat(pat, &list[1..], c);
 }
 
 fn action((id, arg): &(Id, String), c: &mut Comments) {

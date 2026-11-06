@@ -17,7 +17,7 @@ static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_dollar_quote_paren(p: &Params<'_>, t: Id, c: &mut Comments) {
-    // DIVERGENCE: the token's own id is `t`, as T_DollarDoubleQuoted holds only its children.
+    // The token's own id is `t`, as T_DollarDoubleQuoted holds only its children.
     let Token::T_DollarDoubleQuoted(l) = p.ast.get(t) else { return };
     let Some(&first) = l.first() else { return };
     let Token::T_Literal(s) = p.ast.get(first) else { return };

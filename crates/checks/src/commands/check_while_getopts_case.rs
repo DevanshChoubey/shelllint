@@ -54,8 +54,8 @@ fn check_while_getopts_case(p: &Params<'_>, t: Id, c: &mut Comments) {
     }
 
     // Make sure the variable isn't modified
-    // DIVERGENCE: Haskell wraps the body in a synthetic T_BraceGroup; the
-    // variable flow of a brace group is just that of its children.
+    // Haskell wraps the body in a synthetic T_BraceGroup; the variable flow
+    // of a brace group is just that of its children, so none is built.
     if body.iter().any(|&b| modifies_variable(p, b, &getopts_var)) {
         return;
     }

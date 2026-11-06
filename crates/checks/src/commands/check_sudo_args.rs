@@ -2,47 +2,15 @@
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkSudoArgs`, lines 1307-1318 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CHECKS, CheckEntry, CheckKind, CommandName};
 use shellcheck_core::ast::Id;
 use shellcheck_core::astlib::{arguments, get_bsd_opts, get_literal_string};
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_SUDO: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkSudoArgs \"sudo\"",
-    registry: "command",
-    order: 49,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Basename("sudo"), sudo),
-};
+use crate::support::parametrised_command_checks;
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_DOAS: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkSudoArgs \"doas\"",
-    registry: "command",
-    order: 49,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Basename("doas"), doas),
-};
+parametrised_command_checks!("checkSudoArgs", 49, Basename, check_sudo_args_, ["sudo", "doas", "run0"]);
 
-#[linkme::distributed_slice(CHECKS)]
-static ENTRY_RUN0: CheckEntry = CheckEntry {
-    module: "Checks/Commands.hs",
-    name: "checkSudoArgs \"run0\"",
-    registry: "command",
-    order: 49,
-    optional: None,
-    kind: CheckKind::Command(CommandName::Basename("run0"), run0),
-};
-
-fn sudo(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_sudo_args(p, t, c)
-}
-fn doas(p: &Params<'_>, t: Id, c: &mut Comments) {
-    check_sudo_args(p, t, c)
-}
-fn run0(p: &Params<'_>, t: Id, c: &mut Comments) {
+/// `checkSudoArgs cmd = CommandCheck (Basename cmd) f`
+fn check_sudo_args_(_cmd: &str, p: &Params<'_>, t: Id, c: &mut Comments) {
     check_sudo_args(p, t, c)
 }
 

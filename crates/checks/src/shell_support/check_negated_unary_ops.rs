@@ -32,7 +32,7 @@ fn msg(op: &str) -> String {
     match op {
         "-o" => "[ ! -o opt ] is always true because -o becomes logical OR. Use [[ ]] or ! [ -o opt ].".to_string(),
         "-a" => "[ ! -a file ] is always true because -a becomes logical AND. Use -e instead.".to_string(),
-        // DIVERGENCE: pleaseReport is not ported; unreachable given the op guard.
-        _ => "unhandled negated unary message".to_string(),
+        // Unreachable given the op guard.
+        _ => shellcheck_core::prelude::please_report("unhandled negated unary message"),
     }
 }

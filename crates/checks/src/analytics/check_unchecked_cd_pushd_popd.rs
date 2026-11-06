@@ -31,13 +31,7 @@ fn check_unchecked_cd_pushd_popd(params: &Params<'_>, root: Id) -> Vec<TokenComm
     }
     let mut c = Comments::new();
     // doAnalysis: pre-order traversal.
-    let mut stack = vec![root];
-    while let Some(id) = stack.pop() {
-        check_element(params, id, &mut c);
-        let mut kids: Vec<Id> = params.ast.children(id).collect();
-        kids.reverse();
-        stack.extend(kids);
-    }
+    params.ast.analyze(root, &mut |id| check_element(params, id, &mut c), &mut |_| {});
     c.into_vec()
 }
 
