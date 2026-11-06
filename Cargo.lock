@@ -201,6 +201,13 @@ dependencies = [
 [[package]]
 name = "shellcheck-rust"
 version = "0.0.1"
+dependencies = [
+ "shellcheck-analyzer",
+ "shellcheck-checker",
+ "shellcheck-checks",
+ "shellcheck-core",
+ "shellcheck-formatter",
+]
 
 [[package]]
 name = "syn"

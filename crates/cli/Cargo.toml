@@ -8,3 +8,11 @@ description = "A Rust port of ShellCheck (work in progress)"
 [[bin]]
 name = "shellcheck-rust"
 path = "src/main.rs"
+
+[dependencies]
+shellcheck-core = { path = "../core" }
+shellcheck-analyzer = { path = "../analyzer" }
+shellcheck-formatter = { path = "../formatter" }
+# Linked only so the linkme-registered checks end up in the binary.
+shellcheck-checks = { path = "../checks" }
+shellcheck-checker = { path = "../checker" }
