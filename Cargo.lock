@@ -159,6 +159,9 @@ dependencies = [
 [[package]]
 name = "shellcheck-parser"
 version = "0.0.1"
+dependencies = [
+ "shellcheck-core",
+]
 
 [[package]]
 name = "shellcheck-rust"
