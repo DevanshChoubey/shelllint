@@ -14,6 +14,9 @@
 // machine's memory. The child prints its own VmHWM; the parent kills it
 // after the deadline.
 
+// Uses /bin/sh with `ulimit -v` (and /proc), which only Linux supports.
+#![cfg(target_os = "linux")]
+
 use std::io::Read;
 use std::process::{Command, Stdio};
 use std::sync::mpsc;

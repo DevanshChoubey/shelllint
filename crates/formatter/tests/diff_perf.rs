@@ -7,6 +7,9 @@
 // child process under `ulimit -v`, so a regression fails instead of
 // exhausting the machine's memory, and checks the child's time and VmHWM.
 
+// Uses /bin/sh with `ulimit -v` (and /proc), which only Linux supports.
+#![cfg(target_os = "linux")]
+
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 

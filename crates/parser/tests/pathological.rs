@@ -13,6 +13,9 @@
 //   cloned the whole SystemState, including every parse problem so far, once
 //   per simple command (16000 lines with one problem each: ~18 s).
 
+// Uses /bin/sh with `ulimit -v` (and /proc), which only Linux supports.
+#![cfg(target_os = "linux")]
+
 use std::io::Read;
 use std::process::{Command, Stdio};
 use std::sync::mpsc;

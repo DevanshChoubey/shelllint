@@ -9,6 +9,9 @@
 // time limit. Every input used to take well over the limit because some
 // per-item work scanned or copied the whole script.
 
+// Uses /bin/sh with `ulimit -v` (and /proc), which only Linux supports.
+#![cfg(target_os = "linux")]
+
 use std::io::Read;
 use std::process::{Command, Stdio};
 use std::sync::mpsc;

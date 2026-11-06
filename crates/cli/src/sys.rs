@@ -705,6 +705,8 @@ mod tests {
         assert_eq!(e, "/nonexistent/q.sh: openBinaryFile: does not exist (No such file or directory)");
     }
 
+    // The strerror texts are musl's (the oracle is a static musl build); only Linux uses that table.
+    #[cfg(target_os = "linux")]
     #[test]
     fn ghc_error_text_for_other_errnos() {
         let show = |n: i32| show_io_error("f", &std::io::Error::from_raw_os_error(n));

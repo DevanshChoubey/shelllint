@@ -47,6 +47,8 @@ opt-level = 2
 # one-to-one; collapsing them into let-chains hides that correspondence.
 collapsible_if = "allow"
 collapsible_else_if = "allow"
+# Same for an `if` inside a `match` arm (newer clippy: collapsible_match).
+collapsible_match = "allow"
 # Boolean expressions are transcribed from Haskell (`not (a && b)` etc.).
 nonminimal_bool = "allow"
 # Types spell out the Haskell signatures they port.
