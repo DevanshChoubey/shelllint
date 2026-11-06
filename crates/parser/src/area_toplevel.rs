@@ -1110,3 +1110,83 @@ impl<'a> P<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::testing::test_environment;
+    use shellcheck_core::interface::{mock_rc_file, mocked_system_interface};
+
+    fn pos(p: &mut P<'_>, line: u32, column: u32) -> SourcePos {
+        SourcePos { line, column, ..p.initial_pos("-") }
+    }
+
+    #[test]
+    fn get_string_from_parsec_uses_last_nonempty_message() {
+        let msgs = vec!["Expected 'fi'".to_string(), "".to_string()];
+        assert_eq!(get_string_from_parsec(&msgs), "Expected 'fi'. Fix any mentioned problems and try again.");
+        assert_eq!(get_string_from_parsec(&[]), " Fix any mentioned problems and try again.");
+    }
+
+    #[test]
+    fn notes_for_context_uses_first_two_names() {
+        let mut p = P::new(test_environment(), "-", "");
+        let (a, b, c) = (pos(&mut p, 1, 1), pos(&mut p, 2, 1), pos(&mut p, 3, 1));
+        let ctx = vec![
+            Context::ContextName(a, "if expression".to_string()),
+            Context::ContextSource("x".to_string()),
+            Context::ContextName(b, "function".to_string()),
+            Context::ContextName(c, "case item".to_string()),
+        ];
+        let notes = notes_for_context(&ctx);
+        assert_eq!(notes.len(), 2);
+        assert_eq!((notes[0].code, notes[0].severity, notes[0].start), (1073, ErrorC, a));
+        assert_eq!(notes[0].message, "Couldn't parse this if expression. Fix to allow more checks.");
+        assert_eq!((notes[1].code, notes[1].severity, notes[1].start), (1009, InfoC, b));
+        assert_eq!(notes[1].message, "The mentioned syntax error was in this function.");
+    }
+
+    #[test]
+    fn sort_notes_orders_by_start_end_severity() {
+        let mut p = P::new(test_environment(), "-", "");
+        let (a, b) = (pos(&mut p, 1, 5), pos(&mut p, 2, 1));
+        let n = |s, e, sev| ParseNote::new(s, e, sev, 1000, "");
+        let sorted = p.sort_notes(vec![n(b, b, ErrorC), n(a, b, InfoC), n(a, b, ErrorC), n(a, a, InfoC)]);
+        assert_eq!(sorted, vec![n(a, a, InfoC), n(a, b, ErrorC), n(a, b, InfoC), n(b, b, ErrorC)]);
+    }
+
+    #[test]
+    fn positioned_comment_carries_file_name() {
+        let mut p = P::new(test_environment(), "foo.sh", "");
+        let s = SourcePos { line: 3, column: 9, ..p.initial_pos("foo.sh") };
+        let c = p.to_positioned_comment(&ParseNote::new(s, s, ErrorC, 1072, "msg"));
+        assert_eq!((c.start_pos.file.as_str(), c.start_pos.line, c.start_pos.column), ("foo.sh", 3, 9));
+        assert_eq!((c.comment.code, c.comment.message.as_str(), c.fix), (1072, "msg", None));
+    }
+
+    #[test]
+    fn config_file_errors_are_reported_in_the_rc_file() {
+        let sys = mock_rc_file("disable=1234\nfoo bar\n", mocked_system_interface(vec![]));
+        let env = Environment { system_interface: &sys, ..test_environment() };
+        let mut p = P::new(env, "script", "");
+        let anns = p.run(|p| p.read_config_file("script")).unwrap();
+        assert!(anns.is_empty());
+        let probs = &p.sys.parse_problems;
+        assert_eq!(probs.len(), 1);
+        assert_eq!(probs[0].code, 1134);
+        assert_eq!(probs[0].start.line, 2);
+        assert!(probs[0].message.starts_with("Failed to process "), "{}", probs[0].message);
+        assert!(probs[0].message.contains(", line 2: "), "{}", probs[0].message);
+    }
+
+    #[test]
+    fn config_file_annotations_and_ignore_rc() {
+        let sys = mock_rc_file("# c\ndisable=1234\n", mocked_system_interface(vec![]));
+        let env = Environment { system_interface: &sys, ..test_environment() };
+        let mut p = P::new(env.clone(), "script", "");
+        let anns = p.run(|p| p.read_config_file("script")).unwrap();
+        assert_eq!(anns, vec![Annotation::DisableComment(1234, 1235)]);
+        let mut p = P::new(Environment { ignore_rc: true, ..env }, "script", "");
+        assert!(p.run(|p| p.read_config_file("script")).unwrap().is_empty());
+    }
+}
