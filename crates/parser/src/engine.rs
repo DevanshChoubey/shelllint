@@ -296,11 +296,7 @@ impl<'a> P<'a> {
 
     /// Parsec's derived `Ord SourcePos`: name, then line, then column.
     pub fn compare_pos(&self, a: SourcePos, b: SourcePos) -> Ordering {
-        let names = if a.file == b.file {
-            Ordering::Equal
-        } else {
-            self.source_name(a).cmp(self.source_name(b))
-        };
+        let names = if a.file == b.file { Ordering::Equal } else { self.source_name(a).cmp(self.source_name(b)) };
         names.then(a.line.cmp(&b.line)).then(a.column.cmp(&b.column))
     }
 
@@ -376,12 +372,7 @@ impl<'a> P<'a> {
     // ---- checkpoints ---------------------------------------------------
 
     pub fn checkpoint(&self) -> Checkpoint {
-        Checkpoint {
-            input: self.input.clone(),
-            pos: self.pos,
-            consumed: self.consumed,
-            user: self.user.snapshot(),
-        }
+        Checkpoint { input: self.input.clone(), pos: self.pos, consumed: self.consumed, user: self.user.snapshot() }
     }
 
     /// Return to a checkpoint. The carried error becomes unknown, as for a

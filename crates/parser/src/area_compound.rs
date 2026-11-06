@@ -192,11 +192,7 @@ impl<'a> P<'a> {
             p.alt(
                 |p| p.char_('}'),
                 |p| {
-                    p.parse_problem(
-                        ErrorC,
-                        1056,
-                        "Expected a '}'. If you have one, try a ; or \\n in front of it.",
-                    );
+                    p.parse_problem(ErrorC, 1056, "Expected a '}'. If you have one, try a ; or \\n in front of it.");
                     p.fail("Missing '}'")
                 },
             )?;
@@ -712,7 +708,8 @@ impl<'a> P<'a> {
         let cmd = choice!(
             self,
             |p| p.read_brace_group(),
-            |p| p.read_ambiguous(
+            |p| {
+                p.read_ambiguous(
                 "((",
                 |p| p.read_arithmetic_expression(),
                 |p| p.read_subshell(),
@@ -725,7 +722,8 @@ impl<'a> P<'a> {
                     );
                     Ok(())
                 },
-            ),
+            )
+            },
             |p| p.read_subshell(),
             |p| p.read_while_clause(),
             |p| p.read_until_clause(),

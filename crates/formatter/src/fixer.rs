@@ -48,10 +48,7 @@ fn realign_column(ls: &[&str], line: i64, col: i64) -> i64 {
 fn realigned(ls: &[&str], start: &Position, end: &Position) -> (Position, Position) {
     let sc = realign_column(ls, start.line, start.column);
     let ec = realign_column(ls, end.line, end.column);
-    (
-        Position { column: sc, ..start.clone() },
-        Position { column: ec, ..end.clone() },
-    )
+    (Position { column: sc, ..start.clone() }, Position { column: ec, ..end.clone() })
 }
 
 /// Rewrite a comment from a tabstop of 8 to 1
@@ -71,22 +68,17 @@ pub fn map_positions(f: impl Fn(&Position) -> Position, fix: &Fix) -> Fix {
         replacements: fix
             .replacements
             .iter()
-            .map(|r| Replacement {
-                start_pos: f(&r.start_pos),
-                end_pos: f(&r.end_pos),
-                ..r.clone()
-            })
+            .map(|r| Replacement { start_pos: f(&r.start_pos), end_pos: f(&r.end_pos), ..r.clone() })
             .collect(),
     }
 }
 
 /// The Semigroup instance for Fix: discard the right side on overlap.
 fn fix_append(f1: Fix, f2: &Fix) -> Fix {
-    let conflict = f1.replacements.iter().any(|r1| {
-        f2.replacements
-            .iter()
-            .any(|r2| overlap(&r2.start_pos, &r2.end_pos, &r1.start_pos, &r1.end_pos))
-    });
+    let conflict = f1
+        .replacements
+        .iter()
+        .any(|r1| f2.replacements.iter().any(|r2| overlap(&r2.start_pos, &r2.end_pos, &r1.start_pos, &r1.end_pos)));
     if conflict {
         f1
     } else {
@@ -126,11 +118,8 @@ fn do_replace(start: i64, end: i64, o: &[char], r: &str) -> Vec<char> {
 
 /// Apply a fix and return resulting lines.
 pub fn apply_fix(fix: &Fix, file_lines: &[&str]) -> Vec<String> {
-    let untabbed: Vec<Replacement> = fix
-        .replacements
-        .iter()
-        .map(|r| remove_tab_stops_replacement(r, file_lines))
-        .collect();
+    let untabbed: Vec<Replacement> =
+        fix.replacements.iter().map(|r| remove_tab_stops_replacement(r, file_lines)).collect();
 
     // multiToSingleLine
     let mut shift_tree: Vec<(i64, i64)> = vec![];
@@ -149,11 +138,7 @@ pub fn apply_fix(fix: &Fix, file_lines: &[&str]) -> Vec<String> {
     };
     let adjusted: Vec<Replacement> = untabbed
         .iter()
-        .map(|r| Replacement {
-            start_pos: adjust(&r.start_pos),
-            end_pos: adjust(&r.end_pos),
-            ..r.clone()
-        })
+        .map(|r| Replacement { start_pos: adjust(&r.start_pos), end_pos: adjust(&r.end_pos), ..r.clone() })
         .collect();
 
     // applyReplacements2: reverse $ sortWith repPrecedence

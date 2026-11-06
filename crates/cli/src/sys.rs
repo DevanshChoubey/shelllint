@@ -40,9 +40,7 @@ pub fn io_interface(options: &Options, files: &[String]) -> IoInterface {
 }
 
 fn normalize(x: &str) -> String {
-    std::fs::canonicalize(x)
-        .map(|p| p.to_string_lossy().into_owned())
-        .unwrap_or_else(|_| x.to_string())
+    std::fs::canonicalize(x).map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| x.to_string())
 }
 
 /// Haskell `show` of the IOException `openBinaryFile` raises.
@@ -131,11 +129,7 @@ fn dir_of(path: &str) -> String {
 
 impl IoInterface {
     fn allowable(&self, rc_suggests_external: Option<bool>, x: &str) -> bool {
-        if rc_suggests_external.unwrap_or(self.external_sources) {
-            true
-        } else {
-            self.inputs.contains(&normalize(x))
-        }
+        if rc_suggests_external.unwrap_or(self.external_sources) { true } else { self.inputs.contains(&normalize(x)) }
     }
 
     fn read_config(file: &str) -> Option<(String, String)> {
@@ -152,17 +146,12 @@ impl IoInterface {
     }
 
     fn default_paths() -> Vec<String> {
-        Self::default_paths_from(
-            std::env::var("HOME").ok(),
-            std::env::var("XDG_CONFIG_HOME").ok(),
-        )
+        Self::default_paths_from(std::env::var("HOME").ok(), std::env::var("XDG_CONFIG_HOME").ok())
     }
 
     fn default_paths_from(home: Option<String>, xdg: Option<String>) -> Vec<String> {
         let home = home.filter(|h| !h.is_empty());
-        let xdg = xdg
-            .filter(|h| !h.is_empty())
-            .or_else(|| home.as_ref().map(|h| format!("{}/.config", h)));
+        let xdg = xdg.filter(|h| !h.is_empty()).or_else(|| home.as_ref().map(|h| format!("{}/.config", h)));
         match (home, xdg) {
             (Some(h), Some(x)) => vec![format!("{}/.shellcheckrc", h), format!("{}/shellcheckrc", x)],
             _ => vec![],
@@ -175,11 +164,7 @@ impl IoInterface {
 
     fn config_paths_with(dir: &str, defaults: &[String]) -> Vec<String> {
         let next = dir_of(dir);
-        let rest = if next != dir {
-            Self::config_paths_with(&next, defaults)
-        } else {
-            defaults.to_vec()
-        };
+        let rest = if next != dir { Self::config_paths_with(&next, defaults) } else { defaults.to_vec() };
         let join = |name: &str| {
             if dir.ends_with('/') { format!("{}{}", dir, name) } else { format!("{}/{}", dir, name) }
         };
@@ -208,9 +193,7 @@ impl IoInterface {
                 if dir == cache.0 {
                     return cache.1.clone();
                 }
-                let result = Self::config_paths(&dir)
-                    .iter()
-                    .find_map(|p| Self::read_config(p));
+                let result = Self::config_paths(&dir).iter().find_map(|p| Self::read_config(p));
                 *cache = (dir, result.clone());
                 result
             }
@@ -254,10 +237,7 @@ impl SystemInterface for IoInterface {
                 Err(e) => Err(show_io_error(file, &e)),
             }
         } else if rc_suggests_external == Some(false) {
-            Err(format!(
-                "{} was not specified as input, and external files were disabled via directive.",
-                file
-            ))
+            Err(format!("{} was not specified as input, and external files were disabled via directive.", file))
         } else {
             Err(format!("{} was not specified as input (see shellcheck -x).", file))
         }
@@ -389,10 +369,7 @@ mod tests {
         assert_eq!(sys2.find_source(&cur, None, &[], "/nonexistent/zz.sh"), "/nonexistent/zz.sh");
         // An absolute name is also searched with its leading slash dropped, under
         // each search path (splitDrive).
-        assert_eq!(
-            sys.find_source(&cur, None, &[], "/dup.sh"),
-            s("p1/dup.sh")
-        );
+        assert_eq!(sys.find_source(&cur, None, &[], "/dup.sh"), s("p1/dup.sh"));
     }
 
     #[test]
@@ -495,16 +472,10 @@ mod tests {
         let lib = write(&d.join("lib.sh"), "echo lib");
         let sys = iface(false, &[], None, &[&main]);
         assert_eq!(sys.read_file(None, &main), Ok("echo main".into()));
-        assert_eq!(
-            sys.read_file(None, &lib),
-            Err(format!("{} was not specified as input (see shellcheck -x).", lib))
-        );
+        assert_eq!(sys.read_file(None, &lib), Err(format!("{} was not specified as input (see shellcheck -x).", lib)));
         assert_eq!(
             sys.read_file(Some(false), &lib),
-            Err(format!(
-                "{} was not specified as input, and external files were disabled via directive.",
-                lib
-            ))
+            Err(format!("{} was not specified as input, and external files were disabled via directive.", lib))
         );
         assert_eq!(sys.read_file(Some(true), &lib), Ok("echo lib".into()));
         let x = iface(true, &[], None, &[]);

@@ -20,7 +20,8 @@ use shellcheck_core::prelude::please_report;
 use crate::ParseResult;
 use crate::engine::{Input, P, PR, ParseError, SourcePos};
 use crate::state::{
-    Context, ContextStack, Environment, ParseNote, UserState, code_for_parse_note, context_item_disables_code, initial_user_state,
+    Context, ContextStack, Environment, ParseNote, UserState, code_for_parse_note, context_item_disables_code,
+    initial_user_state,
 };
 
 // annotations imports
@@ -68,12 +69,8 @@ impl<'a> P<'a> {
             )?;
 
             let cpos = p.get_position();
-            let close = alt!(
-                p,
-                |p| p.try_(|p| p.string("]]")),
-                |p| p.string("]"),
-                |p| p.fail("Expected test to end here (don't wrap commands in []/[[]])")
-            )?;
+            let close = alt!(p, |p| p.try_(|p| p.string("]]")), |p| p.string("]"), |p| p
+                .fail("Expected test to end here (don't wrap commands in []/[[]])"))?;
             let id = p.end_span(start);
             if open == "[[" && close != "]]" {
                 p.parse_problem_at(
@@ -114,20 +111,15 @@ impl<'a> P<'a> {
     pub(crate) fn read_annotation_without_prefix(&mut self, sandboxed: bool) -> PR<Vec<Annotation>> {
         let values = self.many1(|p| p.read_annotation_key(sandboxed))?;
         self.optional(|p| p.read_any_comment())?;
-        alt!(
-            self,
-            |p| p.linefeed().map(drop),
-            |p| p.eof(),
-            |p| {
-                p.parse_note(
-                    Severity::ErrorC,
-                    1125,
-                    "Invalid key=value pair? Ignoring the rest of this directive starting here.",
-                );
-                p.many(|p| p.none_of("\n"))?;
-                alt!(p, |p| p.linefeed().map(drop), |p| p.eof())
-            }
-        )?;
+        alt!(self, |p| p.linefeed().map(drop), |p| p.eof(), |p| {
+            p.parse_note(
+                Severity::ErrorC,
+                1125,
+                "Invalid key=value pair? Ignoring the rest of this directive starting here.",
+            );
+            p.many(|p| p.none_of("\n"))?;
+            alt!(p, |p| p.linefeed().map(drop), |p| p.eof())
+        })?;
         self.many(|p| p.linewhitespace())?;
         Ok(values.into_iter().flatten().collect())
     }
@@ -190,8 +182,7 @@ impl<'a> P<'a> {
             "enable" => self.annotation_plain_or_quoted(&|p| {
                 p.sep_by(
                     |p| {
-                        let name: String =
-                            p.many1(|p| p.alt(|p| p.letter(), |p| p.char_('-')))?.into_iter().collect();
+                        let name: String = p.many1(|p| p.alt(|p| p.letter(), |p| p.char_('-')))?.into_iter().collect();
                         Ok(Annotation::EnableComment(name))
                     },
                     |p| p.char_(','),
@@ -215,9 +206,8 @@ impl<'a> P<'a> {
             }
             "extended-analysis" => {
                 let pos = self.get_position();
-                let value = self.annotation_plain_or_quoted(&|p| {
-                    Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>())
-                })?;
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
                 match value.as_str() {
                     "true" => vec![Annotation::ExtendedAnalysis(true)],
                     "false" => vec![Annotation::ExtendedAnalysis(false)],
@@ -234,9 +224,8 @@ impl<'a> P<'a> {
             }
             "external-sources" => {
                 let pos = self.get_position();
-                let value = self.annotation_plain_or_quoted(&|p| {
-                    Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>())
-                })?;
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
                 match value.as_str() {
                     "true" => {
                         if sandboxed {
@@ -474,12 +463,9 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn keyword_separator(&mut self) -> PR<()> {
-        crate::alt!(
-            self,
-            |p| p.eof(),
-            |p| p.try_(|p| p.allspacing_or_fail()).map(drop),
-            |p| p.one_of(";()[<>&|").map(drop),
-        )
+        crate::alt!(self, |p| p.eof(), |p| p.try_(|p| p.allspacing_or_fail()).map(drop), |p| p
+            .one_of(";()[<>&|")
+            .map(drop),)
     }
 
     pub(crate) fn read_keyword(&mut self) -> PR<Id> {
@@ -630,7 +616,11 @@ impl<'a> P<'a> {
                         "Parsing stopped here. Is this keyword correctly matched up?"
                     ),
                     |p| {
-                        p.parse_problem(ErrorC, 1070, "Parsing stopped here. Mismatched keywords or invalid parentheses?");
+                        p.parse_problem(
+                            ErrorC,
+                            1070,
+                            "Parsing stopped here. Mismatched keywords or invalid parentheses?",
+                        );
                         Ok(())
                     },
                 )
@@ -683,15 +673,13 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn any_spacing_or_comment(&mut self) -> PR<()> {
-        self.many(|p| p.alt(|p| p.allspacing_or_fail().map(drop), |p| p.read_any_comment().map(drop)))
-            .map(drop)
+        self.many(|p| p.alt(|p| p.allspacing_or_fail().map(drop), |p| p.read_any_comment().map(drop))).map(drop)
     }
 
     pub(crate) fn read_script_file(&mut self, sourced: bool) -> PR<Id> {
         fn is_valid_shell(s: &str) -> Option<bool> {
             let good_shells = ["sh", "ash", "dash", "busybox sh", "bash", "bats", "ksh", "oksh"];
-            let bad_shells =
-                ["awk", "csh", "expect", "fish", "perl", "python", "python3", "ruby", "tcsh", "zsh"];
+            let bad_shells = ["awk", "csh", "expect", "fish", "perl", "python", "python3", "ruby", "tcsh", "zsh"];
             let good = s.is_empty() || good_shells.iter().any(|g| s.starts_with(g));
             let bad = bad_shells.iter().any(|b| s.starts_with(b));
             if good {
@@ -759,8 +747,7 @@ impl<'a> P<'a> {
                 let mut annotations = file_annotations;
                 annotations.extend(rc_annotations);
                 let annotation_id = p.end_span(annotation_start);
-                let shell_annotation_specified =
-                    annotations.iter().any(|x| matches!(x, Annotation::ShellOverride(_)));
+                let shell_annotation_specified = annotations.iter().any(|x| matches!(x, Annotation::ShellOverride(_)));
                 let shell_flag_specified = p.env.shell_type_override.is_some();
                 let ignore_shebang = shell_annotation_specified || shell_flag_specified;
 
@@ -1022,17 +1009,13 @@ impl<'a> P<'a> {
     pub(crate) fn reattach_here_docs(&mut self, root: Id, map: &BTreeMap<Id, Vec<Id>>) -> Id {
         let mut here_docs = Vec::new();
         let ast = &self.user.ast;
-        ast.analyze(
-            root,
-            &mut |_| {},
-            &mut |id| {
-                if let Token::T_HereDoc(_, _, _, list) = ast.get(id) {
-                    if list.is_empty() {
-                        here_docs.push(id);
-                    }
+        ast.analyze(root, &mut |_| {}, &mut |id| {
+            if let Token::T_HereDoc(_, _, _, list) = ast.get(id) {
+                if list.is_empty() {
+                    here_docs.push(id);
                 }
-            },
-        );
+            }
+        });
         for id in here_docs {
             if let Some(list) = map.get(&id) {
                 if let Token::T_HereDoc(dash, quote, string, _) = self.user.ast.get(id).clone() {

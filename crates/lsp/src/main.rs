@@ -7,7 +7,11 @@ fn main() {
             return;
         }
         Some("--help") | Some("-h") => {
-            println!("{} - ShellCheck language server over stdio.\n\nUsage: {} [--version | --help]\nNo arguments: speak LSP on stdin/stdout.", shellcheck_lsp::SERVER_NAME, shellcheck_lsp::SERVER_NAME);
+            println!(
+                "{} - ShellCheck language server over stdio.\n\nUsage: {} [--version | --help]\nNo arguments: speak LSP on stdin/stdout.",
+                shellcheck_lsp::SERVER_NAME,
+                shellcheck_lsp::SERVER_NAME
+            );
             return;
         }
         _ => {}

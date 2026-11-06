@@ -9,14 +9,13 @@
 
 use shellcheck_checker::editorconfig::{
     EditorConfigFs, editor_config_directives, get_editor_config, invalid_directive_lines, invalid_root_lines,
-    is_editor_config_root, is_editor_config_rejection, merge_configs, take_directory,
-    matches_glob, parse_editor_config,
+    is_editor_config_rejection, is_editor_config_root, matches_glob, merge_configs, parse_editor_config,
+    take_directory,
 };
 use shellcheck_checker::{check_script, check_script_codes, decode_string, sort_messages};
 use shellcheck_core::interface::{
-    CheckSpec, Code, Comment, ErrorMessage, MockedSystemInterface, Position, PositionedComment,
-    Severity, Shell, SystemInterface, empty_check_spec, mock_rc_file, mocked_system_interface,
-    new_positioned_comment,
+    CheckSpec, Code, Comment, ErrorMessage, MockedSystemInterface, Position, PositionedComment, Severity, Shell,
+    SystemInterface, empty_check_spec, mock_rc_file, mocked_system_interface, new_positioned_comment,
 };
 
 // ---- Checker.hs test helpers ---------------------------------------------
@@ -107,7 +106,10 @@ fn check_with_rc_includes_and_source_path(
     mapper: FindSource,
     spec: CheckSpec,
 ) -> Vec<Code> {
-    let sys = TestSys { find_source: Some(mapper), ..TestSys::new(mock_rc_file(rc, mocked_system_interface(files(includes)))) };
+    let sys = TestSys {
+        find_source: Some(mapper),
+        ..TestSys::new(mock_rc_file(rc, mocked_system_interface(files(includes))))
+    };
     get_errors(&sys, spec)
 }
 
@@ -152,7 +154,10 @@ fn prop_editor_config_unknown_shell_is_reported() {
 
 #[test]
 fn prop_editor_config_comment_value_is_reported() {
-    assert_eq!(check_with_editor_config("[foo]\nshellcheck.disable=#abc\n", "foo", "#!/bin/sh\necho \"hi\""), vec![1134]);
+    assert_eq!(
+        check_with_editor_config("[foo]\nshellcheck.disable=#abc\n", "foo", "#!/bin/sh\necho \"hi\""),
+        vec![1134]
+    );
 }
 
 #[test]
@@ -346,7 +351,10 @@ fn prop_non_recursive_parsing() {
 #[test]
 fn prop_source_directive_doesnt_follow_file() {
     assert_eq!(
-        check_with_includes(&[("foo", "source bar"), ("bar", "baz=3")], "#shellcheck source=foo\n. \"$1\"; echo \"$baz\""),
+        check_with_includes(
+            &[("foo", "source bar"), ("bar", "baz=3")],
+            "#shellcheck source=foo\n. \"$1\"; echo \"$baz\""
+        ),
         none()
     );
 }
@@ -399,7 +407,9 @@ fn prop_filewide_annotation_base2() {
 #[test]
 fn prop_filewide_annotation8() {
     assert_eq!(
-        check("# Disable $? warning\n#shellcheck disable=SC2181\n# Disable quoting warning\n#shellcheck disable=2086\ntrue\n[ $? == 0 ] && echo $1"),
+        check(
+            "# Disable $? warning\n#shellcheck disable=SC2181\n# Disable quoting warning\n#shellcheck disable=2086\ntrue\n[ $? == 0 ] && echo $1"
+        ),
         none()
     );
 }
@@ -432,7 +442,10 @@ fn prop_deduces_type_from_envrc_extension() {
 
 #[test]
 fn prop_can_disable_shebang_warning() {
-    assert_eq!(check_with_spec(&[], CheckSpec { filename: "file.sh".into(), ..spec("#shellcheck disable=SC2148\nfoo") }), none());
+    assert_eq!(
+        check_with_spec(&[], CheckSpec { filename: "file.sh".into(), ..spec("#shellcheck disable=SC2148\nfoo") }),
+        none()
+    );
 }
 
 #[test]
@@ -440,7 +453,10 @@ fn prop_can_disable_all_warnings() {
     assert_eq!(
         check_with_spec(
             &[],
-            CheckSpec { filename: "file.sh".into(), ..spec("#!/bin/sh\necho $1\n#shellcheck disable=all\necho `echo $1`") }
+            CheckSpec {
+                filename: "file.sh".into(),
+                ..spec("#!/bin/sh\necho $1\n#shellcheck disable=all\necho `echo $1`")
+            }
         ),
         vec![2086]
     );
@@ -449,14 +465,20 @@ fn prop_can_disable_all_warnings() {
 #[test]
 fn prop_can_disable_parse_errors() {
     assert_eq!(
-        check_with_spec(&[], CheckSpec { filename: "file.sh".into(), ..spec("#shellcheck disable=SC1073,SC1072,SC2148\n()") }),
+        check_with_spec(
+            &[],
+            CheckSpec { filename: "file.sh".into(), ..spec("#shellcheck disable=SC1073,SC1072,SC2148\n()") }
+        ),
         none()
     );
 }
 
 #[test]
 fn prop_sh_extension_doesnt_matter() {
-    assert_eq!(check_with_spec(&[], CheckSpec { filename: "file.sh".into(), ..spec("echo 'hello world'") }), vec![2148]);
+    assert_eq!(
+        check_with_spec(&[], CheckSpec { filename: "file.sh".into(), ..spec("echo 'hello world'") }),
+        vec![2148]
+    );
 }
 
 #[test]
@@ -703,7 +725,12 @@ fn prop_rc_can_leave_external_sources_unspecified() {
         }
     }
     assert_eq!(
-        check_with_rc_includes_and_source_path("", &[("resolved/mylib", "echo $1")], f, source_path_spec("#!/bin/bash\nsource mylib")),
+        check_with_rc_includes_and_source_path(
+            "",
+            &[("resolved/mylib", "echo $1")],
+            f,
+            source_path_spec("#!/bin/bash\nsource mylib")
+        ),
         vec![2086]
     );
 }
@@ -751,7 +778,9 @@ fn prop_file_can_disable_external_sources() {
             "external-sources=true",
             &[("withExternal", "echo $1"), ("withoutExternal", "_=`foo`")],
             f,
-            source_path_spec("#!/bin/bash\ntrue\nsource withExternal\n# shellcheck external-sources=false\nsource withoutExternal")
+            source_path_spec(
+                "#!/bin/bash\ntrue\nsource withExternal\n# shellcheck external-sources=false\nsource withoutExternal"
+            )
         ),
         vec![2006, 2086]
     );
@@ -858,7 +887,10 @@ fn prop_flag_wins_when_suppressing_dfa1() {
     assert_eq!(
         check_with_rc(
             "extended-analysis=false",
-            CheckSpec { extended_analysis: Some(true), ..spec("#!/bin/sh\n# shellcheck extended-analysis=false\nexit; foo;") }
+            CheckSpec {
+                extended_analysis: Some(true),
+                ..spec("#!/bin/sh\n# shellcheck extended-analysis=false\nexit; foo;")
+            }
         ),
         vec![2317]
     );
@@ -869,7 +901,10 @@ fn prop_flag_wins_when_suppressing_dfa2() {
     assert_eq!(
         check_with_rc(
             "extended-analysis=true",
-            CheckSpec { extended_analysis: Some(false), ..spec("#!/bin/sh\n# shellcheck extended-analysis=true\nexit; foo;") }
+            CheckSpec {
+                extended_analysis: Some(false),
+                ..spec("#!/bin/sh\n# shellcheck extended-analysis=true\nexit; foo;")
+            }
         ),
         none()
     );
@@ -882,7 +917,16 @@ fn positioned(sys: &dyn SystemInterface, spec: CheckSpec) -> Vec<(Code, i64, i64
     check_script(sys, &spec)
         .comments
         .into_iter()
-        .map(|pc| (pc.comment.code, pc.start_pos.line, pc.start_pos.column, pc.end_pos.line, pc.end_pos.column, pc.start_pos.file))
+        .map(|pc| {
+            (
+                pc.comment.code,
+                pc.start_pos.line,
+                pc.start_pos.column,
+                pc.end_pos.line,
+                pc.end_pos.column,
+                pc.start_pos.file,
+            )
+        })
         .collect()
 }
 
@@ -959,7 +1003,8 @@ fn sourced_file_comments_use_its_file_name() {
     // A parse note and (once ported) analysis comments in a sourced file
     // carry the sourced file's name.
     let sys = mocked_system_interface(files(&[("lib", "echo \"$10\"")]));
-    let got = positioned(&sys, CheckSpec { filename: "main".into(), check_sourced: true, ..spec("#!/bin/bash\nsource lib") });
+    let got =
+        positioned(&sys, CheckSpec { filename: "main".into(), check_sourced: true, ..spec("#!/bin/bash\nsource lib") });
     assert_eq!(got, vec![(1037, 1, 7, 1, 7, "lib".into())]);
 }
 
@@ -1011,12 +1056,17 @@ fn sort_messages_order() {
 fn min_severity_filters() {
     // oracle (-s bash): 2:3 1009 (info), 2:12 1073 (error), 3:1 1072 (error)
     let script = "for f in a; do\n  if true; then\n";
-    let all = check_script(&mocked_system_interface(vec![]), &CheckSpec { shell_type_override: Some(Shell::Bash), ..spec(script) });
-    let got: Vec<(Code, i64, i64)> = all.comments.iter().map(|p| (p.comment.code, p.start_pos.line, p.start_pos.column)).collect();
+    let all = check_script(
+        &mocked_system_interface(vec![]),
+        &CheckSpec { shell_type_override: Some(Shell::Bash), ..spec(script) },
+    );
+    let got: Vec<(Code, i64, i64)> =
+        all.comments.iter().map(|p| (p.comment.code, p.start_pos.line, p.start_pos.column)).collect();
     assert_eq!(got, vec![(1009, 2, 3), (1073, 2, 12), (1072, 3, 1)]);
     let sev: Vec<Severity> = all.comments.iter().map(|p| p.comment.severity).collect();
     assert!(sev.contains(&Severity::InfoC) && sev.contains(&Severity::ErrorC), "{:?}", all.comments);
-    let errors = check_script(&mocked_system_interface(vec![]), &CheckSpec { min_severity: Severity::ErrorC, ..spec(script) });
+    let errors =
+        check_script(&mocked_system_interface(vec![]), &CheckSpec { min_severity: Severity::ErrorC, ..spec(script) });
     assert!(!errors.comments.is_empty());
     assert!(errors.comments.iter().all(|p| p.comment.severity == Severity::ErrorC));
 }
@@ -1182,7 +1232,10 @@ fn prop_parse_editor_config2() {
 }
 #[test]
 fn prop_parse_editor_config3() {
-    assert_eq!(parse_editor_config("[{PKGBUILD,APKBUILD}]\nshellcheck.disable=SC2034\n", "PKGBUILD"), "\ndisable=SC2034\n");
+    assert_eq!(
+        parse_editor_config("[{PKGBUILD,APKBUILD}]\nshellcheck.disable=SC2034\n", "PKGBUILD"),
+        "\ndisable=SC2034\n"
+    );
 }
 #[test]
 fn prop_parse_editor_config4() {
@@ -1462,7 +1515,10 @@ fn fix_replacements_get_the_comment_file() {
         pc.fix.unwrap().replacements.into_iter().map(|r| (r.start_pos.file, r.end_pos.file)).collect()
     };
     // A token in the sourced file: empty files become "lib"; a set file is kept.
-    let pc = shellcheck_checker::token_to_position(&pr, tc(find_literal(&pr, "libword"), vec![rep("", 1, 6), rep("other", 1, 13)]));
+    let pc = shellcheck_checker::token_to_position(
+        &pr,
+        tc(find_literal(&pr, "libword"), vec![rep("", 1, 6), rep("other", 1, 13)]),
+    );
     assert_eq!(pc.start_pos.file, "lib");
     assert_eq!(files_of(pc), vec![("lib".into(), "lib".into()), ("other".into(), "other".into())]);
     // A main-file token.

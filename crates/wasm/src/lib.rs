@@ -20,12 +20,9 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
 
-
 use shellcheck_checker::{check_script, optional_checks};
 use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
-use shellcheck_core::interface::{
-    CheckResult, CheckSpec, Fix, Severity, empty_check_spec, new_system_interface,
-};
+use shellcheck_core::interface::{CheckResult, CheckSpec, Fix, Severity, empty_check_spec, new_system_interface};
 use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
 use shellcheck_formatter::{Formatter, haskell_lines, json1};
 
@@ -120,10 +117,7 @@ pub fn fix(script: &str, options_json: &str, index: i32) -> Result<String, Strin
     let fixes: Vec<Fix> = if index < 0 {
         result.comments.iter().filter_map(|c| c.fix.clone()).collect()
     } else {
-        let comment = result
-            .comments
-            .get(index as usize)
-            .ok_or_else(|| format!("no diagnostic at index {index}"))?;
+        let comment = result.comments.get(index as usize).ok_or_else(|| format!("no diagnostic at index {index}"))?;
         comment.fix.iter().cloned().collect()
     };
     if fixes.is_empty() {

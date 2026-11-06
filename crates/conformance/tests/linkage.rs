@@ -12,9 +12,7 @@ use shellcheck_conformance::{default_corpus_dir, load_corpus};
 #[test]
 fn registry_lists_the_checks() {
     assert!(
-        shellcheck_checks::CHECKS
-            .iter()
-            .any(|e| e.module == "Analytics.hs" && e.name == "checkEchoWc"),
+        shellcheck_checks::CHECKS.iter().any(|e| e.module == "Analytics.hs" && e.name == "checkEchoWc"),
         "Analytics.hs:checkEchoWc missing from shellcheck_checks::CHECKS"
     );
 }

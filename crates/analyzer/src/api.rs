@@ -161,10 +161,7 @@ pub fn analytics_optional_checks(checks: &[&'static CheckEntry]) -> Vec<CheckDes
 }
 
 fn optional_descriptions(checks: &[&'static CheckEntry], registry: &str) -> Vec<CheckDescription> {
-    registered(checks, registry)
-        .into_iter()
-        .filter_map(|e| e.optional.map(|d| d.description()))
-        .collect()
+    registered(checks, registry).into_iter().filter_map(|e| e.optional.map(|d| d.description())).collect()
 }
 
 /// `if "all" in keys then all optionals else mapMaybe (lookup key) keys`
@@ -174,9 +171,7 @@ fn selected_optionals(checks: &[&'static CheckEntry], spec: &AnalysisSpec, regis
     if keys.iter().any(|k| k == "all") {
         all
     } else {
-        keys.iter()
-            .filter_map(|k| all.iter().copied().find(|e| e.optional.is_some_and(|d| d.name == k)))
-            .collect()
+        keys.iter().filter_map(|k| all.iter().copied().find(|e| e.optional.is_some_and(|d| d.name == k))).collect()
     }
 }
 
@@ -197,10 +192,7 @@ pub fn analytics_checker(checks: &[&'static CheckEntry], spec: &AnalysisSpec) ->
             c.tell(analytics_tree_check(p, root, e));
         }
     };
-    Checker {
-        per_script: vec![Box::new(per_script)],
-        per_token: vec![],
-    }
+    Checker { per_script: vec![Box::new(per_script)], per_token: vec![] }
 }
 
 /// Checks/Commands.hs `optionalChecks`
@@ -286,9 +278,7 @@ pub fn get_checker(list: &[(CommandName, NodeFn)]) -> Checker {
     let map = build_command_map(list);
     Checker {
         per_script: vec![],
-        per_token: vec![Box::new(move |p: &Params<'_>, t: Id, c: &mut Comments| {
-            check_command(&map, p, t, c)
-        })],
+        per_token: vec![Box::new(move |p: &Params<'_>, t: Id, c: &mut Comments| check_command(&map, p, t, c))],
     }
 }
 
@@ -322,8 +312,5 @@ pub fn shell_support_checker(checks: &[&'static CheckEntry], params: &Params<'_>
             _ => panic!("{}: shell-support entries must be CheckKind::ForShell", e.name),
         })
         .collect();
-    Checker {
-        per_script: vec![],
-        per_token,
-    }
+    Checker { per_script: vec![], per_token }
 }

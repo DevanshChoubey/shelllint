@@ -73,12 +73,7 @@ fn check_with(name: &str, rss_limit_mb: u64, as_limit_kb: Option<u64>, script: i
             c
         }
     };
-    let mut child = command
-        .env(CHILD_ENV, "1")
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
+    let mut child = command.env(CHILD_ENV, "1").stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().unwrap();
     let mut stdout = child.stdout.take().unwrap();
     let mut stderr = child.stderr.take().unwrap();
     // stderr is drained on its own thread so a full stderr pipe cannot

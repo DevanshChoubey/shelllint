@@ -191,8 +191,10 @@ fn selected_optionals_all_versus_keys() {
     let script = "tr x y";
     // Only the test-only optional codes (9001..=9003); real registered checks also fire.
     let test_only = |v: Vec<Code>| v.into_iter().filter(|c| (9001..=9003).contains(c)).collect::<Vec<Code>>();
-    let analytics = |keys: &[&str]| test_only(run_module(&analytics_checker(registry(), &with(keys)), script, &with(keys)));
-    let commands = |keys: &[&str]| test_only(run_module(&commands_checker(registry(), &with(keys)), script, &with(keys)));
+    let analytics =
+        |keys: &[&str]| test_only(run_module(&analytics_checker(registry(), &with(keys)), script, &with(keys)));
+    let commands =
+        |keys: &[&str]| test_only(run_module(&commands_checker(registry(), &with(keys)), script, &with(keys)));
     assert_eq!(analytics(&[]), Vec::<Code>::new());
     assert_eq!(analytics(&["opt-b"]), [9002]);
     assert_eq!(analytics(&["opt-b", "nope", "opt-a"]), [9001, 9002]);
@@ -214,7 +216,17 @@ fn is_condition_walks_parents() {
     let p = parse("if a; b; then c; fi; d && e; f || g; while h; do i; done");
     let path = |s: &str| shellcheck_core::astlib::get_path(&p.ast, p.literal(s));
     // Only the last command of an if/while condition list counts.
-    let want = [("a", false), ("b", true), ("c", false), ("d", true), ("e", false), ("f", true), ("g", false), ("h", true), ("i", false)];
+    let want = [
+        ("a", false),
+        ("b", true),
+        ("c", false),
+        ("d", true),
+        ("e", false),
+        ("f", true),
+        ("g", false),
+        ("h", true),
+        ("i", false),
+    ];
     for (s, w) in want {
         assert_eq!(is_condition(&p.ast, &path(s)), w, "{s}");
     }
@@ -304,7 +316,11 @@ fn run_node_analysis_visits_every_node() {
 fn grep_codes(s: &str) -> Vec<Code> {
     let p = parse(s);
     let params = p.params(&spec());
-    let grep = p.find(|t| matches!(t, Token::T_SimpleCommand(..))).into_iter().find(|&t| is_command(&p.ast, t, "grep")).unwrap();
+    let grep = p
+        .find(|t| matches!(t, Token::T_SimpleCommand(..)))
+        .into_iter()
+        .find(|&t| is_command(&p.ast, t, "grep"))
+        .unwrap();
     let mut c = Comments::new();
     check_grep_sends_pipefail_impl(&params, grep, &mut c);
     codes(&c.into_vec())

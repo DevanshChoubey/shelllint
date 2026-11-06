@@ -58,12 +58,8 @@ fn handshake_list_and_check_script_finds_sc2086() {
     assert_eq!(replies.len(), 3, "notification must not be answered: {replies:?}");
 
     // tools/list: the five tools, each with a description and an input schema.
-    let names: Vec<&str> = reply(&replies, 2)["result"]["tools"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|t| t["name"].as_str().unwrap())
-        .collect();
+    let names: Vec<&str> =
+        reply(&replies, 2)["result"]["tools"].as_array().unwrap().iter().map(|t| t["name"].as_str().unwrap()).collect();
     assert_eq!(names, ["check_script", "check_file", "explain", "list_checks", "fix_script"]);
 
     // tools/call check_script: SC2086 on line 2, column 4.
@@ -172,7 +168,8 @@ fn unparsable_line_gets_parse_error_and_server_keeps_going() {
     }
     drop(child.stdin.take());
     let out = child.wait_with_output().unwrap();
-    let lines: Vec<Value> = String::from_utf8(out.stdout).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
+    let lines: Vec<Value> =
+        String::from_utf8(out.stdout).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect();
     assert_eq!(lines[0]["error"]["code"], -32700);
     assert_eq!(lines[1]["id"], 9);
 }

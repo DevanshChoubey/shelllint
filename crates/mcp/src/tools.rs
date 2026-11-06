@@ -14,7 +14,9 @@ use shellcheck_core::interface::{
 use shellcheck_formatter::diff::{Diff, get_diff};
 use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
 use shellcheck_formatter::tty::WIKI_LINK;
-use shellcheck_formatter::{code_no, col_no, end_col_no, end_line_no, haskell_lines, line_no, make_non_virtual, message_text, severity_text};
+use shellcheck_formatter::{
+    code_no, col_no, end_col_no, end_line_no, haskell_lines, line_no, make_non_virtual, message_text, severity_text,
+};
 
 use crate::catalog;
 
@@ -211,9 +213,10 @@ struct LintOptions {
 fn parse_options(args: &Value) -> Result<LintOptions, String> {
     let shell = match args.get("shell").and_then(Value::as_str) {
         None => None,
-        Some(s) => Some(shell_for_executable(s).ok_or_else(|| {
-            format!("Unknown shell '{s}'. Valid values: {}", SHELL_OPTIONS.join(", "))
-        })?),
+        Some(s) => Some(
+            shell_for_executable(s)
+                .ok_or_else(|| format!("Unknown shell '{s}'. Valid values: {}", SHELL_OPTIONS.join(", ")))?,
+        ),
     };
 
     let mut enable = Vec::new();
@@ -224,16 +227,14 @@ fn parse_options(args: &Value) -> Result<LintOptions, String> {
         } else if known.contains(&name) {
             enable.push(name);
         } else {
-            return Err(format!(
-                "Unknown optional check '{name}'. Valid names: all, {}",
-                known.join(", ")
-            ));
+            return Err(format!("Unknown optional check '{name}'. Valid names: all, {}", known.join(", ")));
         }
     }
 
     let mut exclude = Vec::new();
     for s in string_list(args, "exclude")? {
-        let code = catalog::parse_code(&s).ok_or_else(|| format!("'{s}' is not a ShellCheck code (expected e.g. SC2086)"))?;
+        let code =
+            catalog::parse_code(&s).ok_or_else(|| format!("'{s}' is not a ShellCheck code (expected e.g. SC2086)"))?;
         exclude.push(Code::from(code));
     }
 
@@ -255,7 +256,9 @@ fn string_list(args: &Value, key: &str) -> Result<Vec<String>, String> {
         Some(Value::String(s)) => Ok(split_commas(s)),
         Some(Value::Array(items)) => items
             .iter()
-            .map(|v| v.as_str().map(|s| s.trim().to_string()).ok_or_else(|| format!("'{key}' must contain only strings")))
+            .map(|v| {
+                v.as_str().map(|s| s.trim().to_string()).ok_or_else(|| format!("'{key}' must contain only strings"))
+            })
             .collect::<Result<Vec<_>, _>>()
             .map(|v| v.into_iter().filter(|s| !s.is_empty()).collect()),
         Some(_) => Err(format!("'{key}' must be an array of strings")),
@@ -432,14 +435,23 @@ fn fix_text(script: &str, args: &Value) -> ToolOutput {
     // Re-check the fixed script so `remaining` reflects what is left after the fixes.
     let remaining = if fixes.is_empty() { raw.clone() } else { lint(&fixed, DEFAULT_NAME, &opts) };
     let remaining_comments = make_non_virtual(&remaining, &fixed);
-    let diff = unified_diff(DEFAULT_NAME, &old_lines, &haskell_lines(&fixed).into_iter().map(String::from).collect::<Vec<_>>());
+    let diff = unified_diff(
+        DEFAULT_NAME,
+        &old_lines,
+        &haskell_lines(&fixed).into_iter().map(String::from).collect::<Vec<_>>(),
+    );
 
     let mut text = if applied == 0 {
         "No automatic fixes apply to this script.".to_string()
     } else {
         format!("Applied {applied} fix{}.", if applied == 1 { "" } else { "es" })
     };
-    text.push_str(&format!(" {} issue{} remain{}.", remaining_comments.len(), plural(remaining_comments.len()), if remaining_comments.len() == 1 { "s" } else { "" }));
+    text.push_str(&format!(
+        " {} issue{} remain{}.",
+        remaining_comments.len(),
+        plural(remaining_comments.len()),
+        if remaining_comments.len() == 1 { "s" } else { "" }
+    ));
     if !diff.is_empty() {
         text.push_str(&format!("\n\n```diff\n{diff}```"));
     }
@@ -504,10 +516,14 @@ pub fn unified_diff(name: &str, old: &[String], new: &[String]) -> String {
 
 fn explain(code: &str) -> ToolOutput {
     let Some(number) = catalog::parse_code(code) else {
-        return ToolOutput::error(format!("'{code}' is not a ShellCheck code (expected e.g. SC2086). Use list_checks to find codes."));
+        return ToolOutput::error(format!(
+            "'{code}' is not a ShellCheck code (expected e.g. SC2086). Use list_checks to find codes."
+        ));
     };
     let Some(e) = catalog::find(number) else {
-        return ToolOutput::error(format!("SC{number} is not a code this server knows. Use list_checks to see the known codes."));
+        return ToolOutput::error(format!(
+            "SC{number} is not a code this server knows. Use list_checks to see the known codes."
+        ));
     };
     let wiki = format!("{WIKI_LINK}SC{number}");
     let severity = e.severity.as_deref().unwrap_or("unknown");
@@ -520,7 +536,10 @@ fn explain(code: &str) -> ToolOutput {
         text.push_str(&format!("Check: {c}\n"));
     }
     if let Some(o) = &e.optional {
-        text.push_str(&format!("Optional check '{}': off by default; enable it with enable=[\"{}\"].\n", o.name, o.name));
+        text.push_str(&format!(
+            "Optional check '{}': off by default; enable it with enable=[\"{}\"].\n",
+            o.name, o.name
+        ));
         text.push_str(&format!("Description: {}\n", o.description));
     }
     text.push_str(&format!("Wiki: {wiki}\n"));
@@ -585,14 +604,16 @@ fn list_checks(args: &Value) -> ToolOutput {
     }
     let checks: Vec<Value> = matches
         .iter()
-        .map(|e| json!({
-            "code": format!("SC{}", e.code),
-            "number": e.code,
-            "check": e.check,
-            "severity": e.severity,
-            "message": e.message,
-            "optional": e.optional.as_ref().map(|o| o.name.clone()),
-        }))
+        .map(|e| {
+            json!({
+                "code": format!("SC{}", e.code),
+                "number": e.code,
+                "check": e.check,
+                "severity": e.severity,
+                "message": e.message,
+                "optional": e.optional.as_ref().map(|o| o.name.clone()),
+            })
+        })
         .collect();
     ToolOutput::ok(text.trim_end().to_string(), json!({"count": matches.len(), "checks": checks}))
 }

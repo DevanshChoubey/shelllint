@@ -74,11 +74,7 @@ fn run_record_inner(rec: &Record) -> Outcome {
             };
             let want = code_set(rec.expect_codes.as_deref().unwrap_or(&[]));
             let got = code_set(&codes);
-            if got == want {
-                Outcome::Pass
-            } else {
-                Outcome::Fail(format!("{target}: expected {want:?}, got {got:?}"))
-            }
+            if got == want { Outcome::Pass } else { Outcome::Fail(format!("{target}: expected {want:?}, got {got:?}")) }
         }
         "parse" => {
             let Some(r) = parser_result(target, script) else {
@@ -86,11 +82,7 @@ fn run_record_inner(rec: &Record) -> Outcome {
             };
             let got = parse_expectation(r);
             let want = rec.expect_parse.as_deref().unwrap_or("ok");
-            if got == want {
-                Outcome::Pass
-            } else {
-                Outcome::Fail(format!("{target}: expected {want}, got {got}"))
-            }
+            if got == want { Outcome::Pass } else { Outcome::Fail(format!("{target}: expected {want}, got {got}")) }
         }
         _ => Outcome::Unported,
     }
@@ -126,9 +118,7 @@ pub struct Filter {
 
 impl Filter {
     pub fn matches(&self, r: &Record) -> bool {
-        let m = self.module.as_ref().is_none_or(|m| {
-            r.module == *m || r.module.strip_suffix(".hs") == Some(m.as_str())
-        });
+        let m = self.module.as_ref().is_none_or(|m| r.module == *m || r.module.strip_suffix(".hs") == Some(m.as_str()));
         let k = self.kind.as_ref().is_none_or(|k| r.kind == *k);
         let t = self.target.as_ref().is_none_or(|t| r.target.as_deref() == Some(t));
         m && k && t
@@ -372,9 +362,9 @@ impl shellcheck_core::interface::SystemInterface for OracleRunInterface {
     fn read_file(&self, external: Option<bool>, file: &str) -> Result<String, String> {
         Err(match external {
             Some(true) => format!("{file}: openBinaryFile: does not exist (No such file or directory)"),
-            Some(false) => format!(
-                "{file} was not specified as input, and external files were disabled via directive."
-            ),
+            Some(false) => {
+                format!("{file} was not specified as input, and external files were disabled via directive.")
+            }
             None => format!("{file} was not specified as input (see shellcheck -x)."),
         })
     }
@@ -454,10 +444,7 @@ pub struct FullParityResult {
 
 /// Compares the exact ordered json1 comment list (minus `file`) of every
 /// script that has oracle codes against corpus/oracle-full.jsonl.
-pub fn run_parity_full(
-    recs: &[Record],
-    oracle: &BTreeMap<String, crate::OracleFull>,
-) -> FullParityResult {
+pub fn run_parity_full(recs: &[Record], oracle: &BTreeMap<String, crate::OracleFull>) -> FullParityResult {
     let prev = std::panic::take_hook();
     std::panic::set_hook(Box::new(|_| {}));
     let mut res = FullParityResult { available: cfg!(feature = "checker"), ..Default::default() };
@@ -576,8 +563,10 @@ mod tests {
         r.script = Some("#!/bin/bash\necho $1\n".into());
         let got = pipeline_json1(&r).unwrap();
         assert_eq!(got.len(), 1);
-        assert_eq!(render_comment(&got[0]),
-            "2:6-2:8 info SC2086 Double quote to prevent globbing and word splitting. fix={\"replacements\":[{\"column\":6,\"endColumn\":6,\"endLine\":2,\"insertionPoint\":\"afterEnd\",\"line\":2,\"precedence\":7,\"replacement\":\"\\\"\"},{\"column\":8,\"endColumn\":8,\"endLine\":2,\"insertionPoint\":\"beforeStart\",\"line\":2,\"precedence\":7,\"replacement\":\"\\\"\"}]}");
+        assert_eq!(
+            render_comment(&got[0]),
+            "2:6-2:8 info SC2086 Double quote to prevent globbing and word splitting. fix={\"replacements\":[{\"column\":6,\"endColumn\":6,\"endLine\":2,\"insertionPoint\":\"afterEnd\",\"line\":2,\"precedence\":7,\"replacement\":\"\\\"\"},{\"column\":8,\"endColumn\":8,\"endLine\":2,\"insertionPoint\":\"beforeStart\",\"line\":2,\"precedence\":7,\"replacement\":\"\\\"\"}]}"
+        );
         assert!(got[0].get("file").is_none());
     }
 

@@ -17,8 +17,7 @@ use shellcheck_checks::CHECKS;
 
 use shellcheck_analyzer::analyzerlib::{Checker, Params, filter_by_annotation, make_parameters, run_checker};
 use shellcheck_analyzer::api::{
-    analytics_checker, analytics_optional_checks, commands_checker, commands_optional_checks,
-    shell_support_checker,
+    analytics_checker, analytics_optional_checks, commands_checker, commands_optional_checks, shell_support_checker,
 };
 use shellcheck_core::ast::{Ast, Id};
 use shellcheck_core::astlib::get_enable_directives;

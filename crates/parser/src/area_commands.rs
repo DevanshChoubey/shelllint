@@ -2,8 +2,8 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 2054-2438:
 // separators, simple commands, `source`, pipelines, and/or lists, terms.
 
-use shellcheck_core::astlib::{get_literal_string, get_word_parts, is_string_expansion};
 use shellcheck_core::ast::{Annotation, Ast, Id, Token};
+use shellcheck_core::astlib::{get_literal_string, get_word_parts, is_string_expansion};
 use shellcheck_core::interface::Severity::{ErrorC, InfoC, WarningC};
 
 use crate::engine::{P, PR, SourcePos, is_alpha};
@@ -219,11 +219,8 @@ impl<'a> P<'a> {
             // DIVERGENCE: Haskell's `toLower` is the simple case mapping; the
             // only char whose full lowercase is longer (U+0130) simply maps to
             // the first char of it, so the first char is taken.
-            let cmd_string: String = str
-                .chars()
-                .take_while(|&c| is_alpha(c))
-                .map(|c| c.to_lowercase().next().unwrap_or(c))
-                .collect();
+            let cmd_string: String =
+                str.chars().take_while(|&c| is_alpha(c)).map(|c| c.to_lowercase().next().unwrap_or(c)).collect();
             if cmd_string == "elsif" || cmd_string == "elseif" {
                 self.parse_problem_at_id(cmd, ErrorC, 1131, "Use 'elif' to start another branch.");
             }
@@ -589,7 +586,11 @@ fn is_command(literal: &Option<String>, strings: &[&str]) -> bool {
 }
 
 /// `getParser def cmd table`
-fn get_parser<'a>(def: SuffixReader<'a>, cmd: &Option<String>, table: &[(&[&str], SuffixReader<'a>)]) -> SuffixReader<'a> {
+fn get_parser<'a>(
+    def: SuffixReader<'a>,
+    cmd: &Option<String>,
+    table: &[(&[&str], SuffixReader<'a>)],
+) -> SuffixReader<'a> {
     match table {
         [] => def,
         [(list, action), rest @ ..] => {

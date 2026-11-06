@@ -2,8 +2,8 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1836-2053:
 // here documents, pending here documents, IO redirections, here strings.
 
-use shellcheck_core::astlib::e4m;
 use shellcheck_core::ast::{Dashed, Id, Quoted, Token};
+use shellcheck_core::astlib::e4m;
 use shellcheck_core::interface::Severity::ErrorC;
 use shellcheck_core::prelude::please_report;
 
@@ -93,12 +93,9 @@ impl<'a> P<'a> {
 
     pub(crate) fn read_io_source(&mut self) -> PR<String> {
         self.try_(|p| {
-            let x = alt!(
-                p,
-                |p: &mut Self| p.string("&"),
-                |p: &mut Self| p.read_io_variable(),
-                |p: &mut Self| p.many(|p| p.digit()).map(|ds| ds.into_iter().collect()),
-            )?;
+            let x = alt!(p, |p: &mut Self| p.string("&"), |p: &mut Self| p.read_io_variable(), |p: &mut Self| p
+                .many(|p| p.digit())
+                .map(|ds| ds.into_iter().collect()),)?;
             p.look_ahead(|p| p.alt(|p| p.read_io_file_op().map(drop), |p| p.string("<<").map(drop)))?;
             Ok(x)
         })
@@ -248,11 +245,7 @@ fn pending_check_end(p: &mut P<'_>, dashed: Dashed, end_token: &str) -> PR<(bool
                 ppt(p, 1121, "Add ;/& terminators (and other syntax) on the line with the <<, not here.");
                 Ok(found_cause)
             } else if has_trailing_space && has_trailer {
-                ppt(
-                    p,
-                    1122,
-                    "Nothing allowed after end token. To continue a command, put it on the line with the <<.",
-                );
+                ppt(p, 1122, "Nothing allowed after end token. To continue a command, put it on the line with the <<.");
                 Ok(found_cause)
             } else if leader_is_ok && has_trailing_space && !has_trailer {
                 p.parse_problem_at(trailing_space_pos, ErrorC, 1118, "Delete whitespace after the here-doc end token.");

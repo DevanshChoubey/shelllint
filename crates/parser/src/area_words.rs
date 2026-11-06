@@ -2,8 +2,8 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1108-1611:
 // words, quotes, backticks, globs, extglobs, escapes, brace expansions.
 
-use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::ast::{Id, Token};
+use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::interface::Severity::{ErrorC, InfoC, WarningC};
 
 use crate::area_spacing::{QUOTABLE_CHARS, UNICODE_DOUBLE_QUOTES, UNICODE_SINGLE_QUOTES};
@@ -335,7 +335,12 @@ impl<'a> P<'a> {
     }
 
     /// Run a parser on a new input, such as for `..` or here documents.
-    pub(crate) fn sub_parse<T>(&mut self, pos: SourcePos, parser: impl FnOnce(&mut Self) -> PR<T>, input: &str) -> PR<T> {
+    pub(crate) fn sub_parse<T>(
+        &mut self,
+        pos: SourcePos,
+        parser: impl FnOnce(&mut Self) -> PR<T>,
+        input: &str,
+    ) -> PR<T> {
         let last_position = self.get_position();
         let last_input = self.get_input();
         self.set_position(pos);
@@ -633,12 +638,7 @@ impl<'a> P<'a> {
         let x = self.look_ahead(|p| p.any_char())?;
 
         if x == '\'' {
-            self.parse_problem_at(
-                pos,
-                InfoC,
-                1003,
-                "Want to escape a single quote? echo 'This is how it'\\''s done'.",
-            );
+            self.parse_problem_at(pos, InfoC, 1003, "Want to escape a single quote? echo 'This is how it'\\''s done'.");
         }
 
         Ok(s.to_string())
@@ -684,10 +684,8 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_generic_literal1<T>(&mut self, end_exp: impl FnMut(&mut Self) -> PR<T>) -> PR<String> {
-        let strings = self.reluctantly_till1(
-            |p| p.alt(|p| p.read_generic_escaped(), |p| p.any_char().map(String::from)),
-            end_exp,
-        )?;
+        let strings = self
+            .reluctantly_till1(|p| p.alt(|p| p.read_generic_escaped(), |p| p.any_char().map(String::from)), end_exp)?;
         Ok(strings.concat())
     }
 

@@ -11,11 +11,9 @@ mod sys;
 use std::io::Write;
 use std::process::exit;
 
-use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
 use shellcheck_checker::{check_script_owned, optional_checks};
-use shellcheck_core::interface::{
-    CheckSpec, ColorOption, Severity, SystemInterface,
-};
+use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
+use shellcheck_core::interface::{CheckSpec, ColorOption, Severity, SystemInterface};
 use shellcheck_formatter::{Formatter, by_name, tty::WIKI_LINK};
 
 use options::{Flag, Options, default_options, get_opt, get_usage_info, options as option_table};
@@ -104,10 +102,7 @@ fn main() {
 
 fn run_main() -> i32 {
     // DIVERGENCE: non-UTF-8 arguments are converted lossily (U+FFFD).
-    let params: Vec<String> = std::env::args_os()
-        .skip(1)
-        .map(|a| a.to_string_lossy().into_owned())
-        .collect();
+    let params: Vec<String> = std::env::args_os().skip(1).map(|a| a.to_string_lossy().into_owned()).collect();
     let mut args = get_env_args();
     args.extend(params);
     let status = match parse_arguments(&args).and_then(|(flags, files)| process(&flags, &files)) {
@@ -199,11 +194,7 @@ fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
     }
     match sys::input_file(path) {
         Err(e) => {
-            print_err(&format!(
-                "Could not read file list: {}: {}",
-                path,
-                sys::show_io_error_in("openFile", path, &e)
-            ));
+            print_err(&format!("Could not read file list: {}: {}", path, sys::show_io_error_in("openFile", path, &e)));
             Err(Status::RuntimeException)
         }
         Ok((contents, _)) => Ok(parse_file_list_lines(&contents)),
@@ -248,18 +239,12 @@ fn process_file(
             return Status::RuntimeException;
         }
     };
-    let spec = CheckSpec {
-        filename: filename.to_string(),
-        script: contents,
-        ..options.check_spec.clone()
-    };
+    let spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
     let result = check_script_owned(sys, spec);
     format.on_result(&result, sys, out);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
     // means shellcheck cannot apply the requested configuration.
-    if result.comments.iter().any(|pc| {
-        pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig")
-    }) {
+    if result.comments.iter().any(|pc| pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig")) {
         Status::SupportFailure
     } else if result.comments.is_empty() {
         Status::NoProblems
@@ -273,11 +258,7 @@ fn parse_enum<T: Copy>(name: &str, value: &str, list: &[(&str, T)]) -> Result<T,
         Some((_, v)) => Ok(*v),
         None => {
             let names: Vec<&str> = list.iter().map(|(k, _)| *k).collect();
-            print_err(&format!(
-                "Unknown value for --{}. Valid options are: {}",
-                name,
-                names.join(", ")
-            ));
+            print_err(&format!("Unknown value for --{}. Valid options are: {}", name, names.join(", ")));
             Err(Status::SupportFailure)
         }
     }
@@ -394,9 +375,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
 
 /// System.FilePath `splitSearchPath` (POSIX): empty components become ".".
 fn split_search_path(s: &str) -> Vec<String> {
-    s.split(':')
-        .map(|p| if p.is_empty() { ".".to_string() } else { p.to_string() })
-        .collect()
+    s.split(':').map(|p| if p.is_empty() { ".".to_string() } else { p.to_string() }).collect()
 }
 
 fn verify_files(files: &[String]) -> Result<(), Status> {
@@ -410,11 +389,7 @@ fn verify_files(files: &[String]) -> Result<(), Status> {
 
 fn print_version() {
     println!("shellcheck-rust - shell script analysis tool (a Rust port of ShellCheck)");
-    println!(
-        "version: {} (ports ShellCheck v{}-171-ge11f964)",
-        env!("CARGO_PKG_VERSION"),
-        SHELLCHECK_VERSION
-    );
+    println!("version: {} (ports ShellCheck v{}-171-ge11f964)", env!("CARGO_PKG_VERSION"), SHELLCHECK_VERSION);
     println!("license: GNU General Public License, version 3");
     println!("website: {}", PROJECT_WEBSITE);
 }

@@ -9,8 +9,8 @@
 use shellcheck_analyzer::analyzerlib::*;
 use shellcheck_analyzer::api::entry_test_checker;
 use shellcheck_analyzer::testing::find_entries;
-use shellcheck_core::interface::{AnalysisSpec, Shell, TokenComment};
 use shellcheck_checks::CHECKS;
+use shellcheck_core::interface::{AnalysisSpec, Shell, TokenComment};
 
 /// A comment as the oracle reports it: code, start (line, column), end
 /// (line, column), message.

@@ -2156,4 +2156,3 @@ pub(crate) static NUMBER: &[(u32, u32)] = &[
     (0x1F100, 0x1F10C),
     (0x1FBF0, 0x1FBF9),
 ];
-
