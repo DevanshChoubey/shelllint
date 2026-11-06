@@ -1,0 +1,1890 @@
+[
+ {
+  "code": 2000,
+  "check": "checkEchoWc",
+  "severity": "style",
+  "message": "See if you can use ${#variable} instead.",
+  "bad": "n=$(echo $foo | wc -c)",
+  "good": null
+ },
+ {
+  "code": 2001,
+  "check": "checkEchoSed",
+  "severity": "style",
+  "message": "See if you can use ${variable//search/replace} instead.",
+  "bad": "rm $(sed -e 's,foo,bar,' <<< $cow)",
+  "good": null
+ },
+ {
+  "code": 2002,
+  "check": "checkUuoc",
+  "severity": "style",
+  "message": "Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead.",
+  "bad": "cat foo | grep bar",
+  "good": "cat $var"
+ },
+ {
+  "code": 2004,
+  "check": "checkArithmeticDeref",
+  "severity": "style",
+  "message": "$/${} is unnecessary on arithmetic variables.",
+  "bad": "(( a[$i] ))",
+  "good": "(($1))"
+ },
+ {
+  "code": 2005,
+  "check": "checkUuoeCmd",
+  "severity": "style",
+  "message": "Useless echo? Instead of 'echo $(cmd)', just use 'cmd'.",
+  "bad": "echo `foo`",
+  "good": "echo \"$(<file)\""
+ },
+ {
+  "code": 2006,
+  "check": "checkBackticks",
+  "severity": "style",
+  "message": "Use $(...) notation instead of legacy backticks `...`.",
+  "bad": "rm `ls`",
+  "good": "echo $(foo)"
+ },
+ {
+  "code": 2007,
+  "check": "checkDollarBrackets",
+  "severity": "style",
+  "message": "Use $((..)) instead of deprecated $[..]",
+  "bad": "echo $[1+2]",
+  "good": "echo $((1+2))"
+ },
+ {
+  "code": 2009,
+  "check": "checkPipePitfalls",
+  "severity": "info",
+  "message": "Consider using pgrep instead of grepping ps output.",
+  "bad": null,
+  "good": "ls -N | foo"
+ },
+ {
+  "code": 2010,
+  "check": "checkPipePitfalls",
+  "severity": "warning",
+  "message": "Don't use ls | grep. Use a glob or a for loop with a condition to allow non-alphanumeric filenames.",
+  "bad": "ls | grep -v mp3",
+  "good": "ls -N | foo"
+ },
+ {
+  "code": 2011,
+  "check": "checkPipePitfalls",
+  "severity": "warning",
+  "message": "Use 'find .. -print0 | xargs -0 ..' or 'find .. -exec .. +' to allow non-alphanumeric filenames.",
+  "bad": null,
+  "good": "ls -N | foo"
+ },
+ {
+  "code": 2012,
+  "check": "checkPipePitfalls",
+  "severity": "info",
+  "message": "Use find instead of ls to better handle non-alphanumeric filenames.",
+  "bad": "ls | echo $(cat)",
+  "good": "ls -N | foo"
+ },
+ {
+  "code": 2013,
+  "check": "checkForInCat",
+  "severity": "info",
+  "message": "To read lines rather than words, pipe/redirect to a 'while read' loop.",
+  "bad": "for f in `cat foo`; do stuff; done",
+  "good": "for f in $(cat foo | grep bar | wc -l); do stuff; done"
+ },
+ {
+  "code": 2014,
+  "check": "checkFindExec",
+  "severity": "info",
+  "message": "This will expand once before find runs, not per file found.",
+  "bad": "find / -type d -execdir rm *.jpg \\;",
+  "good": "find / -name '*.php' -exec foo {} +"
+ },
+ {
+  "code": 2015,
+  "check": "checkShorthandIf",
+  "severity": "info",
+  "message": "Note that A && B || C is not if-then-else. C may run when A is true.",
+  "bad": "foo && bar || false",
+  "good": "foo && a=b || a=c"
+ },
+ {
+  "code": 2016,
+  "check": "checkSingleQuotedVariables",
+  "severity": "info",
+  "message": "Expressions don't expand in single quotes, use double quotes for that.",
+  "bad": "git '$a'",
+  "good": "echo '``'"
+ },
+ {
+  "code": 2017,
+  "check": "checkDivBeforeMult",
+  "severity": "info",
+  "message": "Increase precision by replacing a/b*c with a*c/b.",
+  "bad": "echo $((c/n*100))",
+  "good": "echo $((c*100/n))"
+ },
+ {
+  "code": 2018,
+  "check": "checkTr",
+  "severity": "info",
+  "message": "Use '[:lower:]' to support accents and foreign alphabets.",
+  "bad": "tr 'a-z' 'A-Z'",
+  "good": "ls [a-z]"
+ },
+ {
+  "code": 2019,
+  "check": "checkTr",
+  "severity": "info",
+  "message": "Use '[:upper:]' to support accents and foreign alphabets.",
+  "bad": "tr 'a-z' 'A-Z'",
+  "good": "ls [a-z]"
+ },
+ {
+  "code": 2020,
+  "check": "checkTr",
+  "severity": "info",
+  "message": "tr replaces sets of chars, not words (mentioned due to duplicates).",
+  "bad": "tr foo bar",
+  "good": "ls [a-z]"
+ },
+ {
+  "code": 2021,
+  "check": "checkTr",
+  "severity": "info",
+  "message": "Don't use [] around classes in tr, it replaces literal square brackets.",
+  "bad": "tr '[a-z]' '[A-Z]'",
+  "good": "ls [a-z]"
+ },
+ {
+  "code": 2023,
+  "check": "checkTimeParameters",
+  "severity": "info",
+  "message": "The shell may override 'time' as seen in man time(1). Use 'command time ..' for that one.",
+  "bad": "time -f lol sleep 10",
+  "good": "time -p foo"
+ },
+ {
+  "code": 2024,
+  "check": "checkSudoRedirect",
+  "severity": "info",
+  "message": "sudo/doas/run0 doesn't affect redirects. Use sudo cat file | ..",
+  "bad": "doas cmd < input",
+  "good": null
+ },
+ {
+  "code": 2025,
+  "check": "checkPS1Assignments",
+  "severity": "info",
+  "message": "Make sure all escape sequences are enclosed in \\[..\\] to prevent line wrapping issues",
+  "bad": "PS1=$'\\x1b[c '",
+  "good": "PS1='\\[\\e\\]'"
+ },
+ {
+  "code": 2026,
+  "check": "checkInexplicablyUnquoted",
+  "severity": "info",
+  "message": "This word is outside of quotes. Did you intend to 'nest '\"'single quotes'\"' instead'? ",
+  "bad": "'it's",
+  "good": "'foo'*"
+ },
+ {
+  "code": 2027,
+  "check": "checkInexplicablyUnquoted",
+  "severity": "warning",
+  "message": "The surrounding quotes actually unquote this. Remove or escape them.",
+  "bad": null,
+  "good": "'foo'*"
+ },
+ {
+  "code": 2028,
+  "check": "checkUnusedEchoEscapes",
+  "severity": "info",
+  "message": "echo may not expand escape sequences. Use printf.",
+  "bad": "echo '\\5a'",
+  "good": "echo lol"
+ },
+ {
+  "code": 2029,
+  "check": "checkSshCommandString",
+  "severity": "info",
+  "message": "Note that, unescaped, this expands on the client side.",
+  "bad": "ssh host \"echo $PS1\"",
+  "good": "ssh \"$host\""
+ },
+ {
+  "code": 2033,
+  "check": "checkFunctionsUsedExternally",
+  "severity": "warning",
+  "message": "Shell functions can't be passed to external commands. Use separate script or sh -c.",
+  "bad": "foo() { :; }; sudo foo",
+  "good": "f() { :; }; echo f"
+ },
+ {
+  "code": 2035,
+  "check": "checkGlobsAsOptions",
+  "severity": "info",
+  "message": "Use ./*glob* or -- *glob* so names with dashes won't become options.",
+  "bad": "ls ??.*",
+  "good": "*.txt"
+ },
+ {
+  "code": 2036,
+  "check": "checkPipedAssignment",
+  "severity": "warning",
+  "message": "If you wanted to assign the output of the pipeline, use a=$(b | c) .",
+  "bad": "A=ls | grep foo",
+  "good": "A=foo"
+ },
+ {
+  "code": 2037,
+  "check": "checkAssignAteCommand",
+  "severity": "error",
+  "message": "To assign the output of a command, use var=$(cmd) .",
+  "bad": "A=ls -l",
+  "good": "A=foo ls -l"
+ },
+ {
+  "code": 2038,
+  "check": "checkPipePitfalls",
+  "severity": "warning",
+  "message": "Use 'find .. -print0 | xargs -0 ..' or 'find .. -exec .. +' to allow non-alphanumeric filenames.",
+  "bad": "find . | xargs foo",
+  "good": "ls -N | foo"
+ },
+ {
+  "code": 2041,
+  "check": "checkForInQuoted",
+  "severity": "warning",
+  "message": "This is a literal string. To run as a command, use $(..) instead of '..' . ",
+  "bad": "for f in 'find /'; do true; done",
+  "good": "for f in \"$@\"; do echo foo; done"
+ },
+ {
+  "code": 2042,
+  "check": "checkForInQuoted",
+  "severity": "warning",
+  "message": "Use spaces, not commas, to separate loop elements.",
+  "bad": "for f in 1,2,3; do true; done",
+  "good": "for f in \"$@\"; do echo foo; done"
+ },
+ {
+  "code": 2043,
+  "check": "checkForInQuoted",
+  "severity": "warning",
+  "message": "This loop will only ever run once. Bad quoting or missing glob/expansion?",
+  "bad": "for f in ls; do true; done",
+  "good": "for f in \"$@\"; do echo foo; done"
+ },
+ {
+  "code": 2044,
+  "check": "checkForInLs",
+  "severity": "warning",
+  "message": "For loops over find output are fragile. Use find -exec or a while read loop.",
+  "bad": "for f in `find / -name '*.mp3'`; do mplayer \"$f\"; done",
+  "good": null
+ },
+ {
+  "code": 2045,
+  "check": "checkForInLs",
+  "severity": "warning",
+  "message": "Iterating over ls output is fragile. Use globs.",
+  "bad": "for f in `ls *.mp3`; do mplayer \"$f\"; done",
+  "good": null
+ },
+ {
+  "code": 2046,
+  "check": "checkUnquotedExpansions",
+  "severity": "warning",
+  "message": "Quote this to prevent word splitting.",
+  "bad": "rm `ls`",
+  "good": "$(cmd)"
+ },
+ {
+  "code": 2048,
+  "check": "checkDollarStar",
+  "severity": "warning",
+  "message": "Use \"$@\" (with quotes) to prevent whitespace problems.",
+  "bad": "ls ${*}",
+  "good": "a=$*"
+ },
+ {
+  "code": 2049,
+  "check": "checkGlobbedRegex",
+  "severity": "warning",
+  "message": "=~ is for regex, but this looks like a glob. Use = instead.",
+  "bad": "[[ $foo =~ f* ]]",
+  "good": "[[ $foo =~ \\* ]]"
+ },
+ {
+  "code": 2050,
+  "check": "checkConstantIfs",
+  "severity": "warning",
+  "message": "This expression is constant. Did you forget the $ on a variable?",
+  "bad": "[ 3 \\> 2 ]",
+  "good": "[ a -nt b ]"
+ },
+ {
+  "code": 2051,
+  "check": "checkBraceExpansionVars",
+  "severity": "warning",
+  "message": "Bash doesn't support variables in brace range expansions.",
+  "bad": "echo {1..$n}",
+  "good": "echo {1,3,$n}"
+ },
+ {
+  "code": 2054,
+  "check": "checkCommarrays",
+  "severity": "warning",
+  "message": "Use spaces, not commas, to separate array elements.",
+  "bad": "a=(1,2)",
+  "good": "cow=('one,' 'two')"
+ },
+ {
+  "code": 2056,
+  "check": "checkOrNeq",
+  "severity": "warning",
+  "message": "You probably wanted && here, otherwise it's always true.",
+  "bad": "(( a!=lol || a!=foo ))",
+  "good": "[[ $a != x || $a != x ]]"
+ },
+ {
+  "code": 2057,
+  "check": "checkValidCondOps",
+  "severity": "warning",
+  "message": "Unknown binary operator.",
+  "bad": "[[ a -xz b ]]",
+  "good": "[ 3 \\> 2 ]"
+ },
+ {
+  "code": 2058,
+  "check": "checkValidCondOps",
+  "severity": "warning",
+  "message": "Unknown unary operator.",
+  "bad": "[ -M a ]",
+  "good": "[ 3 \\> 2 ]"
+ },
+ {
+  "code": 2059,
+  "check": "checkPrintfVar",
+  "severity": "info",
+  "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+  "bad": "printf \"Lol: $s\"",
+  "good": "printf '%(%s)T'"
+ },
+ {
+  "code": 2060,
+  "check": "checkTr",
+  "severity": "warning",
+  "message": "Quote parameters to tr to prevent glob expansion.",
+  "bad": "tr -d [aa]",
+  "good": "ls [a-z]"
+ },
+ {
+  "code": 2062,
+  "check": "checkGrepRe",
+  "severity": "warning",
+  "message": "Quote the grep pattern so the shell won't interpret it.",
+  "bad": "grep *foo* file",
+  "good": "grep foo *.mp3"
+ },
+ {
+  "code": 2063,
+  "check": "checkGrepRe",
+  "severity": "warning",
+  "message": "Grep uses regex, but this looks like a glob.",
+  "bad": "grep *foo* file",
+  "good": "grep foo *.mp3"
+ },
+ {
+  "code": 2064,
+  "check": "checkTrapQuotes",
+  "severity": "warning",
+  "message": "Use single quotes, otherwise this expands now rather than when signalled.",
+  "bad": "trap \"echo $num\" INT",
+  "good": "trap 'echo $num' INT"
+ },
+ {
+  "code": 2065,
+  "check": "checkTestRedirects",
+  "severity": "warning",
+  "message": "This is interpreted as a shell file redirection, not a comparison.",
+  "bad": "test 3 > 1",
+  "good": "test 3 \\> 1"
+ },
+ {
+  "code": 2066,
+  "check": "checkForInQuoted",
+  "severity": "error",
+  "message": "Since you double quoted this, it will not word split, and the loop will only run once.",
+  "bad": "for f in \"$(ls)\"; do echo foo; done",
+  "good": "for f in \"$@\"; do echo foo; done"
+ },
+ {
+  "code": 2067,
+  "check": "checkFindExec",
+  "severity": "error",
+  "message": "Missing ';' or + terminating -exec. You can't use |/||/&&, and ';' has to be a separate, quoted argument.",
+  "bad": "find / -name '*.php' -exec rm {};",
+  "good": "find / -name '*.php' -exec foo {} +"
+ },
+ {
+  "code": 2068,
+  "check": "checkUnquotedDollarAt",
+  "severity": "error",
+  "message": "Double quote array expansions to avoid re-splitting elements.",
+  "bad": "$@",
+  "good": "a=$@"
+ },
+ {
+  "code": 2069,
+  "check": "checkStderrRedirect",
+  "severity": "warning",
+  "message": "To redirect stdout+stderr, 2>&1 must be last (or use '{ cmd > file; } 2>&1' to clarify).",
+  "bad": "test 2>&1 > cow",
+  "good": "test > cow 2>&1"
+ },
+ {
+  "code": 2070,
+  "check": "checkUnquotedN",
+  "severity": "error",
+  "message": "-n doesn't work with unquoted arguments. Quote or use [[ ]].",
+  "bad": "[ -n $cow ]",
+  "good": "[ -n \"$@\" ]"
+ },
+ {
+  "code": 2072,
+  "check": "checkNumberComparisons",
+  "severity": "error",
+  "message": "Decimals are not supported. Either use integers only, or use bc or awk to compare.",
+  "bad": "[[ $foo > 2.72 ]]",
+  "good": "[[ $foo ]] > 3"
+ },
+ {
+  "code": 2074,
+  "check": "checkSingleBracketOperators",
+  "severity": "error",
+  "message": "Can't use =~ in [ ]. Use [[..]] instead.",
+  "bad": "[ test =~ foo ]",
+  "good": null
+ },
+ {
+  "code": 2076,
+  "check": "checkQuotedCondRegex",
+  "severity": "warning",
+  "message": "Remove quotes from right-hand side of =~ to match as a regex rather than literally.",
+  "bad": "[[ $foo =~ \"bar.*\" ]]",
+  "good": "[[ $foo =~ $foo ]]"
+ },
+ {
+  "code": 2078,
+  "check": "checkConstantNullary",
+  "severity": "error",
+  "message": "This expression is constant. Did you forget a $ somewhere?",
+  "bad": "[[ cmd ]]",
+  "good": null
+ },
+ {
+  "code": 2079,
+  "check": "checkForDecimals",
+  "severity": "error",
+  "message": "(( )) doesn't support decimals. Use bc or awk.",
+  "bad": "((3.14*c))",
+  "good": "declare -A foo; foo[1.2]=bar"
+ },
+ {
+  "code": 2080,
+  "check": "checkArithmeticBadOctal",
+  "severity": "error",
+  "message": "Numbers with leading 0 are considered octal.",
+  "bad": "(( 0192 ))",
+  "good": "(( 0x192 ))"
+ },
+ {
+  "code": 2082,
+  "check": "checkBadParameterSubstitution",
+  "severity": "error",
+  "message": "To expand via indirection, use arrays, ${!name} or (for sh only) eval.",
+  "bad": "${$#}",
+  "good": "${bar}"
+ },
+ {
+  "code": 2083,
+  "check": "checkLonelyDotDash",
+  "severity": "error",
+  "message": "Don't add spaces after the slash in './file'.",
+  "bad": "./ file",
+  "good": "./file"
+ },
+ {
+  "code": 2084,
+  "check": "checkSpuriousExpansion",
+  "severity": "error",
+  "message": "Remove '$' or use '_=$((expr))' to avoid executing output.",
+  "bad": "$((i++))",
+  "good": "$(cmd) --flag1 --flag2"
+ },
+ {
+  "code": 2086,
+  "check": "checkSpacefulnessCfg'",
+  "severity": "info",
+  "message": "Double quote to prevent globbing and word splitting.",
+  "bad": "rm $1",
+  "good": null
+ },
+ {
+  "code": 2088,
+  "check": "checkTildeInQuotes",
+  "severity": "warning",
+  "message": "Tilde does not expand in quotes. Use $HOME.",
+  "bad": "foo > '~/dir'",
+  "good": "~/file"
+ },
+ {
+  "code": 2091,
+  "check": "checkSpuriousExpansion",
+  "severity": "warning",
+  "message": "Remove surrounding $() to avoid executing output (or use eval if intentional).",
+  "bad": "$(  )",
+  "good": "$(cmd) --flag1 --flag2"
+ },
+ {
+  "code": 2092,
+  "check": "checkSpuriousExpansion",
+  "severity": "warning",
+  "message": "Remove backticks to avoid executing output (or use eval if intentional).",
+  "bad": "`ls *.mp3`",
+  "good": "$(cmd) --flag1 --flag2"
+ },
+ {
+  "code": 2093,
+  "check": "checkSpuriousExec",
+  "severity": "warning",
+  "message": "Remove \"exec \" if script should continue after this command.",
+  "bad": "exec foo; true",
+  "good": "exec file; :"
+ },
+ {
+  "code": 2097,
+  "check": "checkPrefixAssignmentReference",
+  "severity": "warning",
+  "message": "This assignment is only seen by the forked process.",
+  "bad": "var=foo echo $var",
+  "good": "var=$(echo $var) cmd"
+ },
+ {
+  "code": 2098,
+  "check": "checkPrefixAssignmentReference",
+  "severity": "warning",
+  "message": "This expansion will not see the mentioned assignment.",
+  "bad": "var=foo echo $var",
+  "good": "var=$(echo $var) cmd"
+ },
+ {
+  "code": 2101,
+  "check": "checkCharRangeGlob",
+  "severity": "warning",
+  "message": "Named class needs outer [], e.g. [[:digit:]].",
+  "bad": "ls *[:digit:].jpg",
+  "good": "tr -d [aa]"
+ },
+ {
+  "code": 2102,
+  "check": "checkCharRangeGlob",
+  "severity": "info",
+  "message": "Ranges can only match single chars (mentioned due to duplicates).",
+  "bad": "ls [10-15]",
+  "good": "tr -d [aa]"
+ },
+ {
+  "code": 2103,
+  "check": "checkCdAndBack",
+  "severity": "info",
+  "message": "Use a ( subshell ) to avoid having to cd back.",
+  "bad": "cd $tmp; foo; cd -",
+  "good": "cd ..; foo; cd .."
+ },
+ {
+  "code": 2107,
+  "check": "checkConditionalAndOrs",
+  "severity": "error",
+  "message": "Instead of [ a && b ], use [ a ] && [ b ].",
+  "bad": "[ foo && bar ]",
+  "good": "[[ foo || bar ]]"
+ },
+ {
+  "code": 2108,
+  "check": "checkConditionalAndOrs",
+  "severity": "error",
+  "message": "In [[..]], use && instead of -a.",
+  "bad": null,
+  "good": "[[ foo || bar ]]"
+ },
+ {
+  "code": 2109,
+  "check": "checkConditionalAndOrs",
+  "severity": "error",
+  "message": "Instead of [ a || b ], use [ a ] || [ b ].",
+  "bad": "[ a != $cow || b != $foo ]",
+  "good": "[[ foo || bar ]]"
+ },
+ {
+  "code": 2110,
+  "check": "checkConditionalAndOrs",
+  "severity": "error",
+  "message": "In [[..]], use || instead of -o.",
+  "bad": "[[ foo -o bar ]]",
+  "good": "[[ foo || bar ]]"
+ },
+ {
+  "code": 2111,
+  "check": "checkFunctionDeclarations",
+  "severity": "error",
+  "message": "ksh does not allow 'function' keyword and '()' at the same time.",
+  "bad": "#!/bin/ksh\nfunction foo() { command foo --lol \"$@\"; }",
+  "good": "foo() { echo bar; }"
+ },
+ {
+  "code": 2112,
+  "check": "checkFunctionDeclarations",
+  "severity": "warning",
+  "message": "'function' keyword is non-standard. Delete it.",
+  "bad": null,
+  "good": "foo() { echo bar; }"
+ },
+ {
+  "code": 2113,
+  "check": "checkFunctionDeclarations",
+  "severity": "warning",
+  "message": "'function' keyword is non-standard. Use 'foo()' instead of 'function foo'.",
+  "bad": "#!/bin/dash\nfunction foo { lol; }",
+  "good": "foo() { echo bar; }"
+ },
+ {
+  "code": 2114,
+  "check": "checkCatastrophicRm",
+  "severity": "warning",
+  "message": "Warning: deletes a system directory.",
+  "bad": "rm -rf /home",
+  "good": "rm -r /home/${USER:?}/*"
+ },
+ {
+  "code": 2116,
+  "check": "checkUuoeVar",
+  "severity": "style",
+  "message": "Useless echo? Instead of 'cmd $(echo foo)', just use 'cmd foo'.",
+  "bad": "1+`echo 2`",
+  "good": "echo $tmp"
+ },
+ {
+  "code": 2117,
+  "check": "checkInteractiveSu",
+  "severity": "info",
+  "message": "To run commands as another user, use su -c or sudo.",
+  "bad": "su; rm file; su $USER",
+  "good": "echo rm | su foo"
+ },
+ {
+  "code": 2118,
+  "check": "checkStderrPipe",
+  "severity": "error",
+  "message": "Ksh does not support |&. Use 2>&1 |.",
+  "bad": "#!/bin/ksh\nfoo |& bar",
+  "good": "#!/bin/bash\nfoo |& bar"
+ },
+ {
+  "code": 2121,
+  "check": "checkSetAssignment",
+  "severity": "warning",
+  "message": "To assign a variable, use just 'var=value', no 'set ..'.",
+  "bad": "set foo 42",
+  "good": "set"
+ },
+ {
+  "code": 2123,
+  "check": "checkOverridingPath",
+  "severity": "warning",
+  "message": "PATH is the shell search path. Use another name.",
+  "bad": "PATH=\"mydir\"",
+  "good": "PATH=$OLDPATH"
+ },
+ {
+  "code": 2124,
+  "check": "checkArrayAsString",
+  "severity": "warning",
+  "message": "Assigning an array to a string! Assign as array, or use * instead of @ to concatenate.",
+  "bad": "a=$@",
+  "good": "a=$*"
+ },
+ {
+  "code": 2125,
+  "check": "checkArrayAsString",
+  "severity": "warning",
+  "message": "Brace expansions and globs are literal in assignments. Quote it or use an array.",
+  "bad": "a=*.png",
+  "good": "a=$*"
+ },
+ {
+  "code": 2126,
+  "check": "checkPipePitfalls",
+  "severity": "style",
+  "message": "Consider using 'grep -c' instead of 'grep|wc -l'.",
+  "bad": "foo | grep bar | wc -l",
+  "good": "ls -N | foo"
+ },
+ {
+  "code": 2129,
+  "check": "checkMultipleAppends",
+  "severity": "style",
+  "message": "Consider using { cmd1; cmd2; } >> file instead of individual redirects.",
+  "bad": "foo >> file; bar >> file; baz >> file;",
+  "good": "foo < file; bar < file; baz < file;"
+ },
+ {
+  "code": 2139,
+  "check": "checkAliasesExpandEarly",
+  "severity": "warning",
+  "message": "This expands when defined, not when used. Consider escaping.",
+  "bad": "alias $1='foo'",
+  "good": "alias -p"
+ },
+ {
+  "code": 2140,
+  "check": "checkInexplicablyUnquoted",
+  "severity": "warning",
+  "message": "Word is of the form \"A\"B\"C\" (B indicated). Did you mean \"ABC\" or \"A\\\"B\\\"C\"?",
+  "bad": "echo \"VALUES (\"id\")\"",
+  "good": "'foo'*"
+ },
+ {
+  "code": 2142,
+  "check": "checkAliasesUsesArgs",
+  "severity": "error",
+  "message": "Aliases can't use positional parameters. Use a function.",
+  "bad": "alias a='cp $1 /a'",
+  "good": "alias $1='foo'"
+ },
+ {
+  "code": 2145,
+  "check": "checkConcatenatedDollarAt",
+  "severity": "error",
+  "message": "Argument mixes string and array. Use * or separate argument.",
+  "bad": "echo $a$@",
+  "good": "echo $@"
+ },
+ {
+  "code": 2146,
+  "check": "checkFindActionPrecedence",
+  "severity": "warning",
+  "message": "This action ignores everything before the -o. Use \\( \\) to group.",
+  "bad": "find . -name '*.wav' -o -name '*.au' -exec rm {} +",
+  "good": "find . -name '*.wav' -o -name '*.au'"
+ },
+ {
+  "code": 2147,
+  "check": "checkTildeInPath",
+  "severity": "warning",
+  "message": "Literal tilde in PATH works poorly across programs.",
+  "bad": "PATH='~foo/bin'",
+  "good": "PATH=~/bin"
+ },
+ {
+  "code": 2148,
+  "check": "checkShebang",
+  "severity": "error",
+  "message": "Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive.",
+  "bad": null,
+  "good": "#! /bin/sh  -l "
+ },
+ {
+  "code": 2151,
+  "check": "checkReturn",
+  "severity": "error",
+  "message": "Only one integer 0-255 can be returned. Use stdout for other data.",
+  "bad": null,
+  "good": "return"
+ },
+ {
+  "code": 2152,
+  "check": "checkReturn",
+  "severity": "error",
+  "message": "Can only return 0-255. Other data should be written to stdout.",
+  "bad": "return -1",
+  "good": "return"
+ },
+ {
+  "code": 2155,
+  "check": "checkMaskedReturns",
+  "severity": "warning",
+  "message": "Declare and assign separately to avoid masking return values.",
+  "bad": "declare a=$(false)",
+  "good": null
+ },
+ {
+  "code": 2156,
+  "check": "checkInjectableFindSh",
+  "severity": "warning",
+  "message": "Injecting filenames is fragile and insecure. Use parameters.",
+  "bad": "find . -exec sh -c 'echo {}' \\;",
+  "good": "find . -ok sh -c 'rm \"$@\"' _ {} \\;"
+ },
+ {
+  "code": 2158,
+  "check": "checkConstantNullary",
+  "severity": "error",
+  "message": "[ false ] is true. Remove the brackets.",
+  "bad": "[ false ]",
+  "good": null
+ },
+ {
+  "code": 2159,
+  "check": "checkConstantNullary",
+  "severity": "error",
+  "message": "[ 0 ] is true. Use 'false' instead.",
+  "bad": null,
+  "good": null
+ },
+ {
+  "code": 2160,
+  "check": "checkConstantNullary",
+  "severity": "style",
+  "message": "Instead of '[ true ]', just use 'true'.",
+  "bad": "[[ true ]]",
+  "good": null
+ },
+ {
+  "code": 2161,
+  "check": "checkConstantNullary",
+  "severity": "style",
+  "message": "Instead of '[ 1 ]', use 'true'.",
+  "bad": "[ 1 ]",
+  "good": null
+ },
+ {
+  "code": 2165,
+  "check": "checkLoopVariableReassignment",
+  "severity": "warning",
+  "message": "This nested loop overrides the index variable of its parent.",
+  "bad": "for i in *; do for i in *.bar; do true; done; done",
+  "good": "for i in *; do for j in *.bar; do true; done; done"
+ },
+ {
+  "code": 2166,
+  "check": "checkConditionalAndOrs",
+  "severity": "warning",
+  "message": "Prefer [ p ] && [ q ] as [ p -a q ] is not well defined.",
+  "bad": "[ foo -a bar ]",
+  "good": "[[ foo || bar ]]"
+ },
+ {
+  "code": 2167,
+  "check": "checkLoopVariableReassignment",
+  "severity": "warning",
+  "message": "This parent loop has its index variable overridden.",
+  "bad": "for i in *; do for i in *.bar; do true; done; done",
+  "good": "for i in *; do for j in *.bar; do true; done; done"
+ },
+ {
+  "code": 2172,
+  "check": "checkNonportableSignals",
+  "severity": "warning",
+  "message": "Trapping signals by number is not well defined. Prefer signal names.",
+  "bad": "trap f 8",
+  "good": "trap f 0"
+ },
+ {
+  "code": 2173,
+  "check": "checkNonportableSignals",
+  "severity": "error",
+  "message": "SIGKILL/SIGSTOP can not be trapped.",
+  "bad": "trap f 9",
+  "good": "trap f 0"
+ },
+ {
+  "code": 2174,
+  "check": "checkMkdirDashPM",
+  "severity": "warning",
+  "message": "When used with -p, -m only applies to the deepest directory.",
+  "bad": "mkdir -pm 0755 $dir",
+  "good": "mkdir a/b"
+ },
+ {
+  "code": 2175,
+  "check": "checkBraceExpansionVars",
+  "severity": "style",
+  "message": "Quote this invalid brace expansion since it should be passed literally to eval.",
+  "bad": "eval echo DSC{0001..$n}.jpg",
+  "good": "echo {1,3,$n}"
+ },
+ {
+  "code": 2176,
+  "check": "checkTimedCommand",
+  "severity": "warning",
+  "message": "'time' is undefined for pipelines. time single stage or bash -c instead.",
+  "bad": "#!/bin/sh\ntime -p foo | bar",
+  "good": "#!/bin/sh\ntime sleep 1"
+ },
+ {
+  "code": 2177,
+  "check": "checkTimedCommand",
+  "severity": "warning",
+  "message": "'time' is undefined for compound commands, time sh -c instead.",
+  "bad": "#!/bin/dash\ntime ( foo; bar; )",
+  "good": "#!/bin/sh\ntime sleep 1"
+ },
+ {
+  "code": 2180,
+  "check": "checkMultiDimensionalArrays",
+  "severity": "warning",
+  "message": "Bash does not support multidimensional arrays. Use 1D or associative arrays.",
+  "bad": "foo[a][b]=3",
+  "good": "foo[a]=3"
+ },
+ {
+  "code": 2182,
+  "check": "checkPrintfVar",
+  "severity": "error",
+  "message": "This printf format string has no variables. Other arguments are ignored.",
+  "bad": "printf foo bar baz",
+  "good": "printf '%(%s)T'"
+ },
+ {
+  "code": 2184,
+  "check": "checkUnsetGlobs",
+  "severity": "warning",
+  "message": "Quote arguments to unset so they're not glob expanded.",
+  "bad": "unset foo[1]",
+  "good": "unset foo"
+ },
+ {
+  "code": 2185,
+  "check": "checkFindWithoutPath",
+  "severity": "info",
+  "message": "Some finds don't have a default path. Specify '.' explicitly.",
+  "bad": "find",
+  "good": "find -O3 ."
+ },
+ {
+  "code": 2187,
+  "check": "checkShebang",
+  "severity": "warning",
+  "message": "Ash scripts will be checked as Dash. Add '# shellcheck shell=dash' to silence.",
+  "bad": "#!/usr/bin/env ash",
+  "good": "#! /bin/sh  -l "
+ },
+ {
+  "code": 2188,
+  "check": "checkRedirectedNowhere",
+  "severity": "warning",
+  "message": "This redirection doesn't have a command. Move to its command (or use 'true' as no-op).",
+  "bad": "3>&2",
+  "good": "var=`< file`"
+ },
+ {
+  "code": 2189,
+  "check": "checkRedirectedNowhere",
+  "severity": "error",
+  "message": "You can't have | between this redirection and the command it should apply to.",
+  "bad": "grep foo | > bar",
+  "good": "var=`< file`"
+ },
+ {
+  "code": 2190,
+  "check": "checkArrayAssignmentIndices",
+  "severity": "warning",
+  "message": "Elements in associative arrays need index, e.g. array=( [index]=value ) .",
+  "bad": "declare -A foo; foo=(bar)",
+  "good": "arr=( [foo]=\"\" )"
+ },
+ {
+  "code": 2191,
+  "check": "checkArrayAssignmentIndices",
+  "severity": "warning",
+  "message": "The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.",
+  "bad": "arr=( 1=value )",
+  "good": "arr=( [foo]=\"\" )"
+ },
+ {
+  "code": 2192,
+  "check": "checkArrayAssignmentIndices",
+  "severity": "warning",
+  "message": "This array element has no value. Remove spaces after = or use \"\" for empty string.",
+  "bad": "arr=( [foo]= bar )",
+  "good": "arr=( [foo]=\"\" )"
+ },
+ {
+  "code": 2193,
+  "check": "checkConstantIfs",
+  "severity": "warning",
+  "message": "The arguments to this comparison can never be equal. Make sure your syntax is correct.",
+  "bad": "[[ x = [\"$1\"] ]]",
+  "good": "[ a -nt b ]"
+ },
+ {
+  "code": 2194,
+  "check": "checkUnmatchableCases",
+  "severity": "warning",
+  "message": "This word is constant. Did you forget the $ on a variable?",
+  "bad": "case foo in bar) true; esac",
+  "good": "case $f in ?*) true;; *) false;; esac"
+ },
+ {
+  "code": 2195,
+  "check": "checkUnmatchableCases",
+  "severity": "warning",
+  "message": "This pattern will never match the case statement's word. Double check them.",
+  "bad": "case foo-$bar in ??|*) true; esac",
+  "good": "case $f in ?*) true;; *) false;; esac"
+ },
+ {
+  "code": 2198,
+  "check": "checkTestArgumentSplitting",
+  "severity": "warning",
+  "message": "Arrays don't work as operands in [ ]. Use a loop (or concatenate with * instead of @).",
+  "bad": "[ -e $@ ]",
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2199,
+  "check": "checkTestArgumentSplitting",
+  "severity": "error",
+  "message": "Arrays implicitly concatenate in [[ ]]. Use a loop (or explicit * instead of @).",
+  "bad": "[[ $@ ]]",
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2200,
+  "check": "checkTestArgumentSplitting",
+  "severity": "warning",
+  "message": "Brace expansions don't work as operands in [ ]. Use a loop.",
+  "bad": null,
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2201,
+  "check": "checkTestArgumentSplitting",
+  "severity": "error",
+  "message": "Brace expansion doesn't happen in [[ ]]. Use a loop.",
+  "bad": "[[ foo == f{o,oo,ooo} ]]",
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2202,
+  "check": "checkTestArgumentSplitting",
+  "severity": "warning",
+  "message": "Globs don't work as operands in [ ]. Use a loop.",
+  "bad": "[ *.png ]",
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2203,
+  "check": "checkTestArgumentSplitting",
+  "severity": "error",
+  "message": "Globs are ignored in [[ ]] except right of =/!=. Use a loop.",
+  "bad": "[[ *.png == '' ]]",
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2204,
+  "check": "checkSubshellAsTest",
+  "severity": "error",
+  "message": "(..) is a subshell. Did you mean [ .. ], a test expression?",
+  "bad": "( -e file )",
+  "good": "[ 1 -gt 2 ]"
+ },
+ {
+  "code": 2205,
+  "check": "checkSubshellAsTest",
+  "severity": "warning",
+  "message": "(..) is a subshell. Did you mean [ .. ], a test expression?",
+  "bad": "( 1 -gt 2 )",
+  "good": "[ 1 -gt 2 ]"
+ },
+ {
+  "code": 2208,
+  "check": "checkTestArgumentSplitting",
+  "severity": "error",
+  "message": "Use [[ ]] or quote arguments to -v to avoid glob expansion.",
+  "bad": null,
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2209,
+  "check": "checkAssignAteCommand",
+  "severity": "warning",
+  "message": "Use var=$(command) to assign output (or quote to assign string).",
+  "bad": "here=pwd",
+  "good": "A=foo ls -l"
+ },
+ {
+  "code": 2210,
+  "check": "checkRedirectionToNumber",
+  "severity": "warning",
+  "message": "This is a file redirection. Was it supposed to be a comparison or fd operation?",
+  "bad": "foo 1>2",
+  "good": "foo 1>&2"
+ },
+ {
+  "code": 2211,
+  "check": "checkGlobAsCommand",
+  "severity": "warning",
+  "message": "This is a glob used as a command name. Was it supposed to be in ${..}, array, or is it missing quoting?",
+  "bad": "*",
+  "good": "echo foo*"
+ },
+ {
+  "code": 2212,
+  "check": "checkEmptyCondition",
+  "severity": "style",
+  "message": "Use 'false' instead of empty [/[[ conditionals.",
+  "bad": "[ ]",
+  "good": "[ foo -o bar ]"
+ },
+ {
+  "code": 2214,
+  "check": "checkWhileGetoptsCase",
+  "severity": "warning",
+  "message": "This case is not specified by getopts.",
+  "bad": "while getopts 'a:' x; do case $x in a) foo;; b) bar;; esac; done",
+  "good": "while getopts 'a:b' x; do case $y in a) foo;; esac; done"
+ },
+ {
+  "code": 2215,
+  "check": "checkFlagAsCommand",
+  "severity": "warning",
+  "message": "This flag is used as a command name. Bad line break or missing [ .. ]?",
+  "bad": "-e file",
+  "good": "var=cmd --arg"
+ },
+ {
+  "code": 2218,
+  "check": "checkUseBeforeDefinition",
+  "severity": "error",
+  "message": "This function is only defined later. Move the definition up.",
+  "bad": "f; f() { true; }",
+  "good": "f() { true; }; f"
+ },
+ {
+  "code": 2219,
+  "check": "checkLetUsage",
+  "severity": "style",
+  "message": "Instead of 'let expr', prefer (( expr )) .",
+  "bad": "let a=1",
+  "good": "(( a=1 ))"
+ },
+ {
+  "code": 2220,
+  "check": "checkWhileGetoptsCase",
+  "severity": "warning",
+  "message": "Invalid flags are not handled. Add a *) case.",
+  "bad": "while getopts 'a:b' x; do case $x in a) foo;; esac; done",
+  "good": "while getopts 'a:b' x; do case $y in a) foo;; esac; done"
+ },
+ {
+  "code": 2223,
+  "check": "checkSpacefulnessCfg'",
+  "severity": "info",
+  "message": "This default assignment may cause DoS due to globbing. Quote it.",
+  "bad": ": ${foo=bar}",
+  "good": null
+ },
+ {
+  "code": 2224,
+  "check": "checkMvArguments",
+  "severity": "error",
+  "message": "This mv has no destination. Check the arguments.",
+  "bad": "mv 'foo bar'",
+  "good": "mv \"$@\""
+ },
+ {
+  "code": 2225,
+  "check": "checkCpArguments",
+  "severity": "error",
+  "message": "This cp has no destination. Check the arguments.",
+  "bad": null,
+  "good": null
+ },
+ {
+  "code": 2226,
+  "check": "checkLnArguments",
+  "severity": "warning",
+  "message": "This ln has no destination. Check the arguments, or specify '.' explicitly.",
+  "bad": null,
+  "good": null
+ },
+ {
+  "code": 2227,
+  "check": "checkFindRedirections",
+  "severity": "warning",
+  "message": "Redirection applies to the find command itself. Rewrite to work per action (or move to end).",
+  "bad": "find . -exec echo {} > file \\;",
+  "good": "find . -exec echo {} \\; > file"
+ },
+ {
+  "code": 2231,
+  "check": "checkForLoopGlobVariables",
+  "severity": "info",
+  "message": "Quote expansions in this for loop glob to prevent wordsplitting, e.g. \"$dir\"/*.txt .",
+  "bad": "for i in $var/*.txt; do true; done",
+  "good": "for i in $var; do true; done"
+ },
+ {
+  "code": 2233,
+  "check": "checkSubshelledTests",
+  "severity": "style",
+  "message": "Remove superfluous (..) around condition to avoid subshell overhead.",
+  "bad": null,
+  "good": "( [[ ${var:=x} = y ]] )"
+ },
+ {
+  "code": 2234,
+  "check": "checkSubshelledTests",
+  "severity": "style",
+  "message": "Remove superfluous (..) around test command to avoid subshell overhead.",
+  "bad": "( [ a ] )",
+  "good": "( [[ ${var:=x} = y ]] )"
+ },
+ {
+  "code": 2235,
+  "check": "checkSubshelledTests",
+  "severity": "style",
+  "message": "Use { ..; } instead of (..) to avoid subshell overhead.",
+  "bad": "a && ( [ b ] || ! [ c ] )",
+  "good": "( [[ ${var:=x} = y ]] )"
+ },
+ {
+  "code": 2236,
+  "check": "checkUnnecessarilyInvertedTest",
+  "severity": "style",
+  "message": "Use -z instead of ! -n.",
+  "bad": "[ ! -z $var ]",
+  "good": "[ -z $var ]"
+ },
+ {
+  "code": 2237,
+  "check": "checkUnnecessarilyInvertedTest",
+  "severity": "style",
+  "message": "Use [ -z .. ] instead of ! [ -n .. ].",
+  "bad": "! test -z \"$1\"",
+  "good": "[ -z $var ]"
+ },
+ {
+  "code": 2238,
+  "check": "checkRedirectionToCommand",
+  "severity": "warning",
+  "message": "Redirecting to/from command name instead of file. Did you want pipes/xargs (or quote to ignore)?",
+  "bad": "ls > rm",
+  "good": "ls > 'rm'"
+ },
+ {
+  "code": 2239,
+  "check": "checkShebang",
+  "severity": "error",
+  "message": "Ensure the shebang uses an absolute path to the interpreter.",
+  "bad": "#!bin/sh\ntrue",
+  "good": "#! /bin/sh  -l "
+ },
+ {
+  "code": 2240,
+  "check": "checkSourceArgs",
+  "severity": "warning",
+  "message": "The dot command does not support arguments in sh/dash. Set them as variables.",
+  "bad": "#!/bin/sh\n. script arg",
+  "good": "#!/bin/sh\n. script"
+ },
+ {
+  "code": 2241,
+  "check": "checkExit",
+  "severity": "error",
+  "message": "The exit status can only be one integer 0-255. Use stdout for other data.",
+  "bad": null,
+  "good": "exit"
+ },
+ {
+  "code": 2242,
+  "check": "checkExit",
+  "severity": "error",
+  "message": "Can only exit with status 0-255. Other data should be written to stdout/stderr.",
+  "bad": "exit -1",
+  "good": "exit"
+ },
+ {
+  "code": 2243,
+  "check": "checkNullaryExpansionTest",
+  "severity": "style",
+  "message": "Prefer explicit -n to check for output (or run command without [/[[ to check for success).",
+  "bad": "[[ `x` ]]",
+  "good": "[[ $a=1 ]]"
+ },
+ {
+  "code": 2244,
+  "check": "checkNullaryExpansionTest",
+  "severity": "style",
+  "message": "Prefer explicit -n to check non-empty string (or use =/-ne to check boolean/integer).",
+  "bad": "[[ $@ ]]",
+  "good": "[[ $a=1 ]]"
+ },
+ {
+  "code": 2246,
+  "check": "checkShebang",
+  "severity": "error",
+  "message": "This shebang specifies a directory. Ensure the interpreter is a file.",
+  "bad": "#!/bin/sh/\ntrue",
+  "good": "#! /bin/sh  -l "
+ },
+ {
+  "code": 2247,
+  "check": "checkDollarQuoteParen",
+  "severity": "warning",
+  "message": "Flip leading $ and \" if this should be a quoted substitution.",
+  "bad": "$\"(foo)\"",
+  "good": "$\"..\""
+ },
+ {
+  "code": 2248,
+  "check": "checkSpacefulnessCfg'",
+  "severity": "style",
+  "message": "Prefer double quoting even when variables don't contain special characters.",
+  "bad": "echo $RANDOM",
+  "good": null
+ },
+ {
+  "code": 2249,
+  "check": "checkDefaultCase",
+  "severity": "info",
+  "message": "Consider adding a default *) case, even if it just exits with error.",
+  "bad": "case $1 in a) true ;; esac",
+  "good": "case $1 in **) true ;; esac"
+ },
+ {
+  "code": 2250,
+  "check": "checkVariableBraces",
+  "severity": "style",
+  "message": "Prefer putting braces around variable references even when not strictly required.",
+  "bad": "x=$x",
+  "good": "$foo=42"
+ },
+ {
+  "code": 2251,
+  "check": "checkUselessBang",
+  "severity": "info",
+  "message": "This ! is not on a condition and skips errexit. Use `&& exit 1` instead, or make sure $? is checked.",
+  "bad": "set -e; { ! true; }",
+  "good": "! true; rest"
+ },
+ {
+  "code": 2252,
+  "check": "checkOrNeq",
+  "severity": "warning",
+  "message": "You probably wanted && here, otherwise it's always true.",
+  "bad": "[ $a != a ] || [ $a != b ]",
+  "good": "[[ $a != x || $a != x ]]"
+ },
+ {
+  "code": 2253,
+  "check": "checkChmodDashr",
+  "severity": "warning",
+  "message": "Use -R to recurse, or explicitly a-r to remove read permissions.",
+  "bad": "chmod -r 0755 dir",
+  "good": "chmod a-r dir"
+ },
+ {
+  "code": 2254,
+  "check": "checkCaseAgainstGlob",
+  "severity": "warning",
+  "message": "Quote expansions in case patterns to match literally rather than as a glob.",
+  "bad": "case foo in lol$n) foo;; esac",
+  "good": "case foo in *$bar*) foo;; esac"
+ },
+ {
+  "code": 2255,
+  "check": "checkTestArgumentSplitting",
+  "severity": "error",
+  "message": "[ ] does not apply arithmetic evaluation. Evaluate with $((..)) for numbers, or use string comparator for strings.",
+  "bad": "[ 6 -eq 2*3 ]",
+  "good": "[ \"$@\" ]"
+ },
+ {
+  "code": 2256,
+  "check": "checkTranslatedStringVariable",
+  "severity": "warning",
+  "message": "This translated string is the name of a variable. Flip leading $ and \" if this should be a quoted substitution.",
+  "bad": "foo_bar2=val; $\"foo_bar2\"",
+  "good": "$\"..\""
+ },
+ {
+  "code": 2257,
+  "check": "checkModifiedArithmeticInRedirection",
+  "severity": "warning",
+  "message": "Arithmetic modifications in command redirections may be discarded. Do them separately.",
+  "bad": "ls > $((i++))",
+  "good": "#!/bin/dash\nls > $((i=i+1))"
+ },
+ {
+  "code": 2258,
+  "check": "checkForInQuoted",
+  "severity": "warning",
+  "message": "The trailing comma is part of the value, not a separator. Delete or quote it.",
+  "bad": "for f in ls, grep, mv; do true; done",
+  "good": "for f in \"$@\"; do echo foo; done"
+ },
+ {
+  "code": 2262,
+  "check": "checkAliasUsedInSameParsingUnit",
+  "severity": "warning",
+  "message": "This alias can't be defined and used in the same parsing unit. Use a function instead.",
+  "bad": "alias x=y; x",
+  "good": "alias x=y\nx"
+ },
+ {
+  "code": 2263,
+  "check": "checkAliasUsedInSameParsingUnit",
+  "severity": "info",
+  "message": "Since they're in the same parsing unit, this command will not refer to the previously mentioned alias.",
+  "bad": "alias x=y; x",
+  "good": "alias x=y\nx"
+ },
+ {
+  "code": 2264,
+  "check": "checkBlatantRecursion",
+  "severity": "error",
+  "message": "This function unconditionally re-invokes itself. Missing 'command'?",
+  "bad": "f() { f; }",
+  "good": "f() { command f; }"
+ },
+ {
+  "code": 2265,
+  "check": "checkBadTestAndOr",
+  "severity": "error",
+  "message": "Use && for logical AND. Single & will background and return true.",
+  "bad": "[ x ] & [ y ]",
+  "good": null
+ },
+ {
+  "code": 2266,
+  "check": "checkBadTestAndOr",
+  "severity": "warning",
+  "message": "Use || for logical OR. Single | will pipe.",
+  "bad": "[ x ] | [ y ]",
+  "good": null
+ },
+ {
+  "code": 2267,
+  "check": "checkXargsDashi",
+  "severity": "info",
+  "message": "GNU xargs -i is deprecated in favor of -I{}",
+  "bad": "xargs -i{} echo {}",
+  "good": "xargs -I{} echo {}"
+ },
+ {
+  "code": 2269,
+  "check": "checkAssignToSelf",
+  "severity": "info",
+  "message": "This variable is assigned to itself, so the assignment does nothing.",
+  "bad": "x=$x",
+  "good": "x=$x mycmd"
+ },
+ {
+  "code": 2270,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "To assign positional parameters, use 'set -- first second ..' (or use [ ] to compare).",
+  "bad": "1='foo'",
+  "good": null
+ },
+ {
+  "code": 2271,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "For indirection, use arrays, declare \"var$n=value\", or (for sh) read/eval.",
+  "bad": "$(cmd)='foo'",
+  "good": null
+ },
+ {
+  "code": 2272,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "Command name contains ==. For comparison, use [ \"$var\" = value ].",
+  "bad": "elseif[$i==2]",
+  "good": null
+ },
+ {
+  "code": 2273,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "Sequence of ===s found. Merge conflict or intended as a commented border?",
+  "bad": "=======",
+  "good": null
+ },
+ {
+  "code": 2274,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "Command name starts with ===. Intended as a commented border?",
+  "bad": "======= Here =======",
+  "good": null
+ },
+ {
+  "code": 2275,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "Command name starts with =. Bad line break?",
+  "bad": "foo\n=42",
+  "good": null
+ },
+ {
+  "code": 2276,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "This is interpreted as a command name containing '='. Bad assignment or comparison?",
+  "bad": "${}=value",
+  "good": null
+ },
+ {
+  "code": 2277,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "Use BASH_ARGV0 to assign to $0 in bash (or use [ ] to compare).",
+  "bad": "#!/bin/bash\n0='foo'",
+  "good": null
+ },
+ {
+  "code": 2278,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "$0 can't be assigned in Ksh (but it does reflect the current function).",
+  "bad": "#!/bin/ksh \n$0='foo'",
+  "good": null
+ },
+ {
+  "code": 2279,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "$0 can't be assigned in Dash. This becomes a command name.",
+  "bad": "#!/bin/dash\n${0}='foo'",
+  "good": null
+ },
+ {
+  "code": 2280,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "$0 can't be assigned this way, and there is no portable alternative.",
+  "bad": "#!/bin/sh  \n0='foo'",
+  "good": null
+ },
+ {
+  "code": 2282,
+  "check": "checkEqualsInCommand",
+  "severity": "error",
+  "message": "Variable names can't start with numbers, so this is interpreted as a command.",
+  "bad": "411toppm=true",
+  "good": null
+ },
+ {
+  "code": 2284,
+  "check": "checkSecondArgIsComparison",
+  "severity": "error",
+  "message": "Use [ x = y ] to compare values (or quote '==' if literal).",
+  "bad": "2f ==$bar",
+  "good": null
+ },
+ {
+  "code": 2286,
+  "check": "checkCommandWithTrailingSymbol",
+  "severity": "error",
+  "message": "This empty string is interpreted as a command name. Double check syntax (or use 'true' as a no-op).",
+  "bad": null,
+  "good": "/*"
+ },
+ {
+  "code": 2287,
+  "check": "checkCommandWithTrailingSymbol",
+  "severity": "error",
+  "message": "This is interpreted as a command name ending with '/'. Double check syntax.",
+  "bad": "/",
+  "good": "/*"
+ },
+ {
+  "code": 2289,
+  "check": "checkCommandWithTrailingSymbol",
+  "severity": "error",
+  "message": "This is interpreted as a command name containing a tab. Double check syntax.",
+  "bad": "\"foo\nbar\"foo",
+  "good": "/*"
+ },
+ {
+  "code": 2290,
+  "check": "checkArgComparison",
+  "severity": "error",
+  "message": "Remove spaces around = to assign.",
+  "bad": "let x = 0",
+  "good": null
+ },
+ {
+  "code": 2291,
+  "check": "checkUnquotedEchoSpaces",
+  "severity": "info",
+  "message": "Quote repeated spaces to avoid them collapsing into one.",
+  "bad": "echo foo         bar",
+  "good": "echo foo  bar"
+ },
+ {
+  "code": 2292,
+  "check": "checkRequireDoubleBracket",
+  "severity": "style",
+  "message": "Prefer [[ ]] over [ ] for tests in Bash/Ksh/Busybox.",
+  "bad": "[ ]",
+  "good": "[[ -x foo ]]"
+ },
+ {
+  "code": 2293,
+  "check": "checkEvalArray",
+  "severity": "style",
+  "message": "When eval'ing @Q-quoted words, use * rather than @ as the index.",
+  "bad": "eval \"${args[@]@Q}\"",
+  "good": "eval \"$*\""
+ },
+ {
+  "code": 2294,
+  "check": "checkEvalArray",
+  "severity": "warning",
+  "message": "eval negates the benefit of arrays. Drop eval to preserve whitespace/symbols (or eval as string).",
+  "bad": "eval $@",
+  "good": "eval \"$*\""
+ },
+ {
+  "code": 2295,
+  "check": "checkUnquotedParameterExpansionPattern",
+  "severity": "info",
+  "message": "Expansions inside ${..} need to be quoted separately, otherwise they match as patterns.",
+  "bad": "echo \"${var#$x}\"",
+  "good": "echo \"${var[#$x]}\""
+ },
+ {
+  "code": 2297,
+  "check": "checkBadParameterSubstitution",
+  "severity": "error",
+  "message": "Double quotes must be outside ${}: ${\"invalid\"} vs \"${valid}\".",
+  "bad": "${\"bar\"}",
+  "good": "${bar}"
+ },
+ {
+  "code": 2299,
+  "check": "checkBadParameterSubstitution",
+  "severity": "error",
+  "message": "Parameter expansions can't be nested. Use temporary variables.",
+  "bad": "${${x%.*}##*/}",
+  "good": "${bar}"
+ },
+ {
+  "code": 2300,
+  "check": "checkBadParameterSubstitution",
+  "severity": "error",
+  "message": "Parameter expansion can't be applied to command substitutions. Use temporary variables.",
+  "bad": "${$(x)//x/y}",
+  "good": "${bar}"
+ },
+ {
+  "code": 2304,
+  "check": "checkExpr",
+  "severity": "error",
+  "message": "* must be escaped to multiply: \\*. Modern $((x * y)) avoids this issue.",
+  "bad": "# shellcheck disable=SC2003\nexpr 1 * 2",
+  "good": "foo=$(expr foo : regex)"
+ },
+ {
+  "code": 2305,
+  "check": "checkExpr",
+  "severity": "warning",
+  "message": "Quote regex argument to expr to avoid it expanding as a glob.",
+  "bad": "# shellcheck disable=SC2003\nexpr foo : fo*",
+  "good": "foo=$(expr foo : regex)"
+ },
+ {
+  "code": 2306,
+  "check": "checkExpr",
+  "severity": "warning",
+  "message": "Escape glob characters in arguments to expr to avoid pathname expansion.",
+  "bad": null,
+  "good": "foo=$(expr foo : regex)"
+ },
+ {
+  "code": 2307,
+  "check": "checkExpr",
+  "severity": "warning",
+  "message": "'expr' expects 3+ arguments but sees 1. Make sure each operator/operand is a separate argument, and escape <>&|.",
+  "bad": "# shellcheck disable=SC2003\nexpr 5 -3",
+  "good": "foo=$(expr foo : regex)"
+ },
+ {
+  "code": 2311,
+  "check": "checkSetESuppressed",
+  "severity": "info",
+  "message": "Bash implicitly disabled set -e for this function invocation because it's inside a command substitution. Add set -e; before it or enable inherit_errexit.",
+  "bad": "set -e; f(){ :; }; x=$(f)",
+  "good": "f(){ :; }; x=$(f)"
+ },
+ {
+  "code": 2312,
+  "check": "checkExtraMaskedReturns",
+  "severity": "info",
+  "message": "Consider invoking this command separately to avoid masking its return value (or use '|| true' to ignore).",
+  "bad": "rm `ls`",
+  "good": "time false"
+ },
+ {
+  "code": 2313,
+  "check": "checkReadExpansions",
+  "severity": "warning",
+  "message": "Quote array indices to avoid them expanding as globs.",
+  "bad": "read arr[val]",
+  "good": "read $1"
+ },
+ {
+  "code": 2314,
+  "check": "checkBatsTestDoesNotUseNegation",
+  "severity": "style",
+  "message": "In Bats, ! will not fail the test if it is not the last command anymore. Use `run ! ` (on Bats >= 1.5.0) instead.",
+  "bad": "#!/usr/bin/env/bats\n@test \"name\" { ! true; }",
+  "good": "#!/usr/bin/env/bats\n@test \"name\" { run ! true; }"
+ },
+ {
+  "code": 2315,
+  "check": "checkBatsTestDoesNotUseNegation",
+  "severity": "style",
+  "message": "In Bats, ! will not fail the test if it is not the last command anymore. Fold the `!` into the conditional!",
+  "bad": "#!/usr/bin/env/bats\n@test \"name\" { ! [ -e test ]; }",
+  "good": "#!/usr/bin/env/bats\n@test \"name\" { run ! true; }"
+ },
+ {
+  "code": 2317,
+  "check": "checkCommandIsUnreachable",
+  "severity": "info",
+  "message": "Command appears to be unreachable. Check usage (or ignore if invoked indirectly).",
+  "bad": "foo; bar; exit; baz",
+  "good": "foo; bar || exit; baz"
+ },
+ {
+  "code": 2319,
+  "check": "checkOverwrittenExitCode",
+  "severity": "warning",
+  "message": "This $? refers to a condition, not a command. Assign to a variable to avoid it being overwritten.",
+  "bad": "x; [ $? -gt 0 ] && fail=$?",
+  "good": "x; [ $? -eq 1 ]"
+ },
+ {
+  "code": 2320,
+  "check": "checkOverwrittenExitCode",
+  "severity": "warning",
+  "message": "This $? refers to echo/printf, not a previous command. Assign to variable to avoid it being overwritten.",
+  "bad": "x; echo \"Exit is $?\"; [ $? -eq 0 ]",
+  "good": "x; [ $? -eq 1 ]"
+ },
+ {
+  "code": 2321,
+  "check": "checkUnnecessaryArithmeticExpansionIndex",
+  "severity": "style",
+  "message": "Array indices are already arithmetic contexts. Prefer removing the $(( and )).",
+  "bad": "a[$((1+1))]=n",
+  "good": "a[1+1]=n"
+ },
+ {
+  "code": 2322,
+  "check": "checkUnnecessaryParens",
+  "severity": "style",
+  "message": "In arithmetic contexts, ((x)) is the same as (x). Prefer only one layer of parentheses.",
+  "bad": "x[((1+1))+1]=1",
+  "good": "(( (1)+1 ))"
+ },
+ {
+  "code": 2324,
+  "check": "checkPlusEqualsNumber",
+  "severity": "warning",
+  "message": "var+=1 will append, not increment. Use (( var += 1 )), typeset -i var, or quote number to silence.",
+  "bad": "x+=1",
+  "good": "x+='1'"
+ },
+ {
+  "code": 2325,
+  "check": "checkMultipleBangs",
+  "severity": "error",
+  "message": "Multiple ! in front of pipelines are a bash/ksh extension. Use only 0 or 1.",
+  "bad": null,
+  "good": "! true"
+ },
+ {
+  "code": 2326,
+  "check": "checkBangAfterPipe",
+  "severity": "error",
+  "message": "! is not allowed in the middle of pipelines. Use command group as in cmd | { ! cmd; } if necessary.",
+  "bad": "true | ! true",
+  "good": "! ! true | true"
+ },
+ {
+  "code": 2327,
+  "check": "checkExpansionWithRedirection",
+  "severity": "warning",
+  "message": "This command substitution will be empty because the command's output gets redirected away.",
+  "bad": "var=$(foo > bar)",
+  "good": "var=$(cat <&3)"
+ },
+ {
+  "code": 2329,
+  "check": "checkCommandIsUnreachable",
+  "severity": "info",
+  "message": "This function is never invoked. Check usage (or ignored if invoked indirectly).",
+  "bad": "( f() { a=1; }; ); echo $a",
+  "good": "foo; bar || exit; baz"
+ },
+ {
+  "code": 2330,
+  "check": "checkComparisonAgainstGlob",
+  "severity": "error",
+  "message": "BusyBox [[ .. ]] does not support glob matching. Use a case statement.",
+  "bad": "#!/bin/busybox sh\n[[ $f == *foo* ]]",
+  "good": "[ $cow = foo ]"
+ },
+ {
+  "code": 2331,
+  "check": "checkUnaryTestA",
+  "severity": "style",
+  "message": "For file existence, prefer standard -e over legacy -a.",
+  "bad": "[ -a foo ]",
+  "good": "[ foo -a bar ]"
+ },
+ {
+  "code": 2333,
+  "check": "checkAndEq",
+  "severity": "warning",
+  "message": "You probably wanted || here, otherwise it's always false.",
+  "bad": "[ $a = a ] && [ $a = b ]",
+  "good": "[ a = $cow && b = $foo ]"
+ },
+ {
+  "code": 2334,
+  "check": "checkAndEq",
+  "severity": "warning",
+  "message": "You probably wanted || here, otherwise it's always false.",
+  "bad": "(( a == 1 && a == 2 ))",
+  "good": "[ a = $cow && b = $foo ]"
+ },
+ {
+  "code": 2336,
+  "check": "checkCpLegacyR",
+  "severity": "warning",
+  "message": "cp -r behavior is implementation-defined",
+  "bad": "cp -r foo bar",
+  "good": "cp -R foo bar"
+ },
+ {
+  "code": 2338,
+  "check": "checkRequireDoubleEquals",
+  "severity": "style",
+  "message": "Prefer == over = for string comparisons in Bash tests.",
+  "bad": "[[ $@ = $@ ]]",
+  "good": "[[ \"$x\" == \"$y\" ]]"
+ }
+]
