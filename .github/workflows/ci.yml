@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  # Keep in sync with rust-version in Cargo.toml.
+  MSRV: "1.88"
+
+# The corpus (corpus/tests.jsonl) already stores the oracle results
+# from real ShellCheck, so no job here needs Docker or the reference/shellcheck
+# submodule.
+
+jobs:
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt --no-self-update
+          rustup default stable
+      - run: cargo fmt --all --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy --no-self-update
+          rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+  test:
+    name: test (${{ matrix.os }}, ${{ matrix.toolchain }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    # Windows is not yet verified (some CLI and rc-file tests use Unix paths).
+    # Its failures are reported but do not fail the workflow.
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, toolchain: stable, experimental: false }
+          - { os: ubuntu-latest, toolchain: msrv, experimental: false }
+          - { os: macos-latest, toolchain: stable, experimental: false }
+          - { os: windows-latest, toolchain: stable, experimental: true }
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install toolchain
+        run: |
+          tc="${{ matrix.toolchain }}"
+          if [ "$tc" = msrv ]; then tc="$MSRV"; fi
+          rustup toolchain install "$tc" --profile minimal --no-self-update
+          rustup default "$tc"
+          rustc --version
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ${{ matrix.toolchain }}
+      # The checker runs each script on a thread with a 512 MB stack, so keep
+      # test parallelism low.
+      - name: Test (Linux, including pathological-input tests)
+        if: runner.os == 'Linux'
+        run: cargo test --workspace --locked -- --test-threads=2
+      # The pathological tests read /proc and use /bin/sh with `ulimit -v`, so
+      # they only run on Linux. Elsewhere, run the rest of the conformance crate.
+      - name: Test (macOS / Windows)
+        if: runner.os != 'Linux'
+        run: |
+          cargo test --workspace --locked --exclude shellcheck-conformance -- --test-threads=2
+          cargo test -p shellcheck-conformance --locked --lib --test linkage -- --test-threads=2
+
+  conformance:
+    name: conformance gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - name: report (each check against its upstream unit tests)
+        run: cargo run -q --locked -p shellcheck-conformance -- report
+      - name: parity (full pipeline against stored oracle codes, no regressions)
+        run: cargo run -q --locked -p shellcheck-conformance --features checker -- parity
