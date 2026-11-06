@@ -55,7 +55,7 @@ def rust_helpers():
     for path, where in RUST_HELPER_FILES:
         p = ROOT / path
         if p.exists():
-            for m in re.finditer(r"^pub (?:fn|use \S+::)(\w+)", p.read_text(), re.M):
+            for m in re.finditer(r"^pub (?:fn |use \S+::)(\w+)", p.read_text(), re.M):
                 found.setdefault(m.group(1), where)
     return found
 
