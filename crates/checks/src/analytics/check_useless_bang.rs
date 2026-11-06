@@ -26,8 +26,8 @@ fn check_useless_bang(params: &Params<'_>, t: Id, c: &mut Comments) {
 }
 
 fn check(params: &Params<'_>, t: Id, c: &mut Comments) {
-    match params.ast.get(t) {
-        &Token::T_Banged(cmd) if !is_condition(params.ast, &get_path(params.ast, t)) => {
+    match *params.ast.get(t) {
+        Token::T_Banged(cmd) if !is_condition(params.ast, &get_path(params.ast, t)) => {
             c.info_with_fix(
                 t,
                 2251,
@@ -38,7 +38,7 @@ fn check(params: &Params<'_>, t: Id, c: &mut Comments) {
                 ]),
             );
         }
-        &Token::T_Annotation(_, inner) => check(params, inner, c),
+        Token::T_Annotation(_, inner) => check(params, inner, c),
         _ => {}
     }
 }

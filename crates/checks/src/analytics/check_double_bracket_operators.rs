@@ -20,7 +20,7 @@ fn check_double_bracket_operators(p: &Params<'_>, t: Id, c: &mut Comments) {
             c.err(
                 t,
                 2075,
-                &format!("Escaping {} is required in [..], but invalid in [[..]]", op),
+                format!("Escaping {} is required in [..], but invalid in [[..]]", op),
             );
         }
     }

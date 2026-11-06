@@ -54,7 +54,7 @@ fn check_array_value_used_as_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> 
             return vec![];
         };
         // Are we still in this loop?
-        if !get_path(ast, t).iter().any(|&x| x == *loop_id) {
+        if !get_path(ast, t).contains(loop_id) {
             return vec![];
         }
         vec![

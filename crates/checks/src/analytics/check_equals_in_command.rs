@@ -66,7 +66,7 @@ fn is_conflict_marker(params: &Params<'_>, cmd: Id) -> bool {
     }
     let n = s.chars().count();
     // Git uses 7 but who knows
-    n >= 4 && n <= 12
+    (4..=12).contains(&n)
 }
 
 fn may_be_variable_name(params: &Params<'_>, l: &[Id]) -> bool {
@@ -171,7 +171,7 @@ fn msg(params: &Params<'_>, original_token: Id, cmd: Id, leading: &[Id], eq: Id,
             let is_plain = is_variable_name(&variable_str);
             let is_positional = variable_str.chars().all(|c| c.is_ascii_digit());
 
-            let is_array = variable_reference != "" && variable_modifier.starts_with('[') && variable_modifier.ends_with(']');
+            let is_array = !variable_reference.is_empty() && variable_modifier.starts_with('[') && variable_modifier.ends_with(']');
 
             if variable_str.is_empty() {
                 // Don't try to fix ${}=foo

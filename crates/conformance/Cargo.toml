@@ -29,3 +29,6 @@ shellcheck-checks = { workspace = true, optional = true }
 shellcheck-checker = { workspace = true, optional = true }
 shellcheck-core = { workspace = true, optional = true }
 shellcheck-formatter = { workspace = true, optional = true }
+
+[lints]
+workspace = true

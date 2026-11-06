@@ -119,7 +119,7 @@ fn check_word2(ast: &Ast, word: Id, token: &[Id], c: &mut Comments) {
         c.warn(
             word,
             2115,
-            &format!("Use \"${{var:?}}\" to ensure this never expands to {} .", path),
+            format!("Use \"${{var:?}}\" to ensure this never expands to {} .", path),
         );
     }
 }

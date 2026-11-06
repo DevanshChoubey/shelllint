@@ -28,7 +28,7 @@ fn check(p: &Params<'_>, t: Id, c: &mut Comments) {
         c.warn(
             t,
             2163,
-            &format!("This does not export '{}'. Remove $/${{}} for that, or use ${{var?}} to quiet.", name),
+            format!("This does not export '{}'. Remove $/${{}} for that, or use ${{var?}} to quiet.", name),
         );
     }
 }

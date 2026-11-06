@@ -122,7 +122,7 @@ impl<'a> P<'a> {
     }
 
     fn cond_read_regular_or_escaped(&mut self, p: PFn<'a, String>) -> PR<String> {
-        self.alt(|q| q.cond_read_escaped(p), |q| p(q))
+        self.alt(|q| q.cond_read_escaped(p), p)
     }
 
     fn cond_guard_arithmetic(&mut self, single: bool) -> PR<()> {

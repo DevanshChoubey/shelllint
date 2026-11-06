@@ -27,7 +27,7 @@ fn check_arithmetic_op_command(p: &Params<'_>, t: Id, c: &mut Comments) {
             c.warn(
                 first_word,
                 2099,
-                &format!("Use $((..)) for arithmetics, e.g. i=$((i {} 2))", op),
+                format!("Use $((..)) for arithmetics, e.g. i=$((i {} 2))", op),
             );
         }
     }

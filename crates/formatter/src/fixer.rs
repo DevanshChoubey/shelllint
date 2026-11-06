@@ -90,7 +90,7 @@ fn fix_append(f1: Fix, f2: &Fix) -> Fix {
 
 /// `fold fixes`: mconcat = foldl mappend mempty
 pub fn merge_fixes(fixes: &[Fix]) -> Fix {
-    fixes.iter().fold(Fix { replacements: vec![] }, |acc, f| fix_append(acc, f))
+    fixes.iter().fold(Fix { replacements: vec![] }, fix_append)
 }
 
 fn get_prefix_sum(target: i64, tree: &[(i64, i64)]) -> i64 {

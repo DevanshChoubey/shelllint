@@ -31,7 +31,7 @@ fn check(p: &Params<'_>, c: &mut Comments, id: Id, bool_: bool, token: Id) {
     c.style(
         id,
         2143,
-        &format!(
+        format!(
             "Use {}{} -q instead of comparing output with [ {} .. ].",
             flip, name, op
         ),

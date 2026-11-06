@@ -100,10 +100,10 @@ pub fn haskell_lines(s: &str) -> Vec<&str> {
 }
 
 /// NE.groupWith: group adjacent elements with equal keys (no sorting).
-pub fn group_with<'a, K: PartialEq>(
-    items: &'a [PositionedComment],
+pub fn group_with<K: PartialEq>(
+    items: &[PositionedComment],
     key: impl Fn(&PositionedComment) -> K,
-) -> Vec<&'a [PositionedComment]> {
+) -> Vec<&[PositionedComment]> {
     let mut groups = vec![];
     let mut start = 0;
     for i in 1..=items.len() {

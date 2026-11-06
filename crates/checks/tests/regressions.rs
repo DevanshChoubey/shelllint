@@ -33,7 +33,7 @@ fn report(module: &str, name: &str, script: &str) -> Vec<Reported> {
         .into_iter()
         .map(|tc| {
             let (s, e) = pr.ast.span(tc.id);
-            (i64::from(tc.comment.code), (s.line, s.column), (e.line, e.column), tc.comment.message)
+            (tc.comment.code, (s.line, s.column), (e.line, e.column), tc.comment.message)
         })
         .collect()
 }

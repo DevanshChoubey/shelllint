@@ -207,7 +207,7 @@ fn check_unassigned_references_(include_globals: bool, p: &Params<'_>, _t: Id) -
             Token::T_DollarBraced(_, v) => {
                 let name = oversimplify(ast, *v).concat();
                 let rest: String = name
-                    .trim_start_matches(|c| c == '#' || c == '!')
+                    .trim_start_matches(['#', '!'])
                     .trim_start_matches(is_variable_char)
                     .to_string();
                 matches(&rest, &GUARD_REGEX)

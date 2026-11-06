@@ -13,3 +13,6 @@ description = "Core AST, interface types and data tables for shellcheck-rust"
 
 [dependencies]
 regex = "1"
+
+[lints]
+workspace = true

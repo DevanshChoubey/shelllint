@@ -39,3 +39,25 @@ opt-level = 2
 opt-level = 2
 [profile.dev.package.regex-automata]
 opt-level = 2
+
+# Clippy lints that fight a faithful port of the Haskell source. CI runs
+# `cargo clippy --workspace --all-targets -- -D warnings`.
+[workspace.lints.clippy]
+# Nested `if`/`if let` mirror Haskell guards, `case` arms and `when` blocks
+# one-to-one; collapsing them into let-chains hides that correspondence.
+collapsible_if = "allow"
+collapsible_else_if = "allow"
+# Boolean expressions are transcribed from Haskell (`not (a && b)` etc.).
+nonminimal_bool = "allow"
+# Types spell out the Haskell signatures they port.
+type_complexity = "allow"
+# Enum variants keep their Haskell constructor names.
+enum_variant_names = "allow"
+# Haskell guards with equal bodies stay separate branches, as written.
+if_same_then_else = "allow"
+# `..new_analysis_result()` ports Haskell record update syntax
+# (`newAnalysisResult { arComments = ... }`), kept even when every field
+# is set.
+needless_update = "allow"
+# Local names (`foo`, `bar`) are the Haskell source's.
+disallowed_names = "allow"

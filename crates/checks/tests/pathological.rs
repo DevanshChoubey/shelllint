@@ -56,7 +56,7 @@ fn check(
             .unwrap()
             .join()
             .unwrap();
-        let codes: Vec<i64> = codes.into_iter().map(i64::from).collect();
+        let codes: Vec<i64> = codes.into_iter().collect();
         expect(&codes);
         println!("PEAK_RSS_MB={}", peak_rss_mb());
         return;

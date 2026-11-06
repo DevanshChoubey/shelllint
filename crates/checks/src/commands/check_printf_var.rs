@@ -79,7 +79,7 @@ fn check(p: &Params<'_>, format: Id, more: &[Id], c: &mut Comments) {
             // We don't know so trust the user
         } else if arg_count < format_count && only_trailing_ts(&formats, arg_count) {
             // Allow trailing %()Ts since they use the current time
-        } else if arg_count > 0 && arg_count % format_count == 0 {
+        } else if arg_count > 0 && arg_count.is_multiple_of(format_count) {
             // Great: a suitable number of arguments
         } else {
             c.warn(

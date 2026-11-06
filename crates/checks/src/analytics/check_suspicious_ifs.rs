@@ -29,13 +29,13 @@ fn check_suspicious_ifs(p: &Params<'_>, t: Id, c: &mut Comments) {
     let tab = if has_dollar_single { "$'\\t'" } else { "\"$(printf '\\t')\"" };
 
     let suggest = |c: &mut Comments, r: &str| {
-        c.warn(value, 2141, &format!("This backslash is literal. Did you mean IFS={} ?", r))
+        c.warn(value, 2141, format!("This backslash is literal. Did you mean IFS={} ?", r))
     };
     let suggest2 = |c: &mut Comments, desc: &str| {
         c.warn(
             value,
             2141,
-            &format!(
+            format!(
                 "This IFS value contains {}. For tabs/linefeeds/escapes, use $'..', literal, or printf.",
                 desc
             ),

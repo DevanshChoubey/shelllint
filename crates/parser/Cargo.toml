@@ -13,3 +13,6 @@ description = "Shell script parser for shellcheck-rust, a Rust port of ShellChec
 
 [dependencies]
 shellcheck-core.workspace = true
+
+[lints]
+workspace = true

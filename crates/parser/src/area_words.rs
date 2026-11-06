@@ -22,23 +22,6 @@ const GLOB_CLASS_CHARS: &str = "![?*@!+";
 const NORMAL_LITERAL_STANDARD_END: &str =
     "[{}|&;<>()\\ '\t\n\r\u{A0}\\\"$`?*@!+\u{201C}\u{201D}\u{2033}\u{2036}\u{2018}\u{2019}";
 
-#[cfg(test)]
-mod char_set_tests {
-    use super::*;
-    use crate::area_spacing::{DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS};
-
-    #[test]
-    fn spelled_out_char_sets_match_their_definitions() {
-        assert_eq!(SINGLE_QUOTED_PART_END, format!("'\\{UNICODE_SINGLE_QUOTES}"));
-        assert_eq!(DOUBLE_LITERAL_PART_END, format!("{DOUBLE_QUOTABLE_CHARS}{UNICODE_DOUBLE_QUOTES}"));
-        assert_eq!(GLOB_CLASS_CHARS, format!("![{EXTGLOB_START_CHARS}"));
-        assert_eq!(
-            NORMAL_LITERAL_STANDARD_END,
-            format!("[{{}}{QUOTABLE_CHARS}{EXTGLOB_START_CHARS}{UNICODE_DOUBLE_QUOTES}{UNICODE_SINGLE_QUOTES}")
-        );
-    }
-}
-
 impl<'a> P<'a> {
     pub(crate) fn read_normal_word(&mut self) -> PR<Id> {
         self.read_normalish_word("", &["do", "done", "then", "fi", "esac"])
@@ -741,5 +724,22 @@ impl<'a> P<'a> {
                 })
             },
         )
+    }
+}
+
+#[cfg(test)]
+mod char_set_tests {
+    use super::*;
+    use crate::area_spacing::{DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS};
+
+    #[test]
+    fn spelled_out_char_sets_match_their_definitions() {
+        assert_eq!(SINGLE_QUOTED_PART_END, format!("'\\{UNICODE_SINGLE_QUOTES}"));
+        assert_eq!(DOUBLE_LITERAL_PART_END, format!("{DOUBLE_QUOTABLE_CHARS}{UNICODE_DOUBLE_QUOTES}"));
+        assert_eq!(GLOB_CLASS_CHARS, format!("![{EXTGLOB_START_CHARS}"));
+        assert_eq!(
+            NORMAL_LITERAL_STANDARD_END,
+            format!("[{{}}{QUOTABLE_CHARS}{EXTGLOB_START_CHARS}{UNICODE_DOUBLE_QUOTES}{UNICODE_SINGLE_QUOTES}")
+        );
     }
 }

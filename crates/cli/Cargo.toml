@@ -22,3 +22,6 @@ shellcheck-analyzer.workspace = true
 shellcheck-formatter.workspace = true
 shellcheck-checks.workspace = true
 shellcheck-checker.workspace = true
+
+[lints]
+workspace = true

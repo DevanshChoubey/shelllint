@@ -33,7 +33,7 @@ fn aliases(ast: &shellcheck_core::ast::Ast, t: Id) -> BTreeMap<String, Id> {
 
 fn find_aliases(ast: &shellcheck_core::ast::Ast, t: Id, st: &mut Vec<(String, Id)>) {
     if let Token::T_SimpleCommand(_, words) = ast.get(t)
-        && words.len() >= 1
+        && !words.is_empty()
         && is_unqualified_command(ast, t, "alias")
     {
         for &arg in &words[1..] {

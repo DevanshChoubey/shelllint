@@ -33,7 +33,7 @@ fn check_or_neq(p: &Params<'_>, t: Id, c: &mut Comments) {
                 c.warn(
                     t,
                     2055,
-                    &format!(
+                    format!(
                         "You probably wanted {} here, otherwise it's always true.",
                         if *typ == ConditionType::SingleBracket { "-a" } else { "&&" }
                     ),

@@ -28,7 +28,7 @@ fn check_command_with_trailing_symbol(p: &Params<'_>, t: Id, c: &mut Comments) {
         _ if "\\.,([{<>}])#\"'% ".contains(last) => c.warn(
             cmd,
             2288,
-            &format!("This is interpreted as a command name ending with {}. Double check syntax.", format(last)),
+            format!("This is interpreted as a command name ending with {}. Double check syntax.", format(last)),
         ),
         _ if s.contains('\t') => c.err(cmd, 2289, "This is interpreted as a command name containing a tab. Double check syntax."),
         _ if s.contains('\n') => c.err(cmd, 2289, "This is interpreted as a command name containing a linefeed. Double check syntax."),

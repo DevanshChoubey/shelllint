@@ -16,3 +16,6 @@ build = "build.rs"
 shellcheck-core.workspace = true
 shellcheck-analyzer.workspace = true
 regex = "1"
+
+[lints]
+workspace = true

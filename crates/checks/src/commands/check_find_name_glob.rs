@@ -38,7 +38,7 @@ fn check_find_name_glob(p: &Params<'_>, t: Id, c: &mut Comments) {
         let (a, b) = (pair[0], pair[1]);
         if let Some(s) = get_literal_string(p.ast, a) {
             if accepts_glob(&s) && is_glob(p.ast, b) {
-                c.warn(b, 2061, &format!("Quote the parameter to {} so the shell won't interpret it.", s));
+                c.warn(b, 2061, format!("Quote the parameter to {} so the shell won't interpret it.", s));
             }
         }
     }

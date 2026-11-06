@@ -304,7 +304,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
             for s in split(',', val).iter().filter(|s| !s.is_empty()) {
                 new.push(parse_num(s)?);
             }
-            new.extend(options.check_spec.excluded_warnings.drain(..));
+            new.append(&mut options.check_spec.excluded_warnings);
             options.check_spec.excluded_warnings = new;
         }
         "include" => {

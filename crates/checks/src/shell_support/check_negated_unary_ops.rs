@@ -20,7 +20,7 @@ fn f(p: &Params<'_>, t: Id, c: &mut Comments) {
         if o == "!" {
             if let Token::TC_Unary(_, op, _) = p.ast.get(*inner) {
                 if op == "-a" || op == "-o" {
-                    c.err(t, 2332, &msg(op));
+                    c.err(t, 2332, msg(op));
                 }
             }
         }

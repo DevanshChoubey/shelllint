@@ -26,7 +26,7 @@ fn check_unsupported(p: &Params<'_>, t: Id, c: &mut Comments) {
         c.err(
             t,
             2127,
-            &format!("To use {}, specify #!/usr/bin/env {}", name, shells.join(" or ")),
+            format!("To use {}, specify #!/usr/bin/env {}", name, shells.join(" or ")),
         );
     }
 }

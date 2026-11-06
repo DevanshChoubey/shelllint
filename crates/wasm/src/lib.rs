@@ -204,6 +204,6 @@ mod tests {
     #[test]
     fn lists_optional_checks() {
         let v: Value = serde_json::from_str(&list_checks()).unwrap();
-        assert!(v.as_array().map_or(false, |a| !a.is_empty()));
+        assert!(v.as_array().is_some_and(|a| !a.is_empty()));
     }
 }

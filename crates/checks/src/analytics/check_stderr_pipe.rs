@@ -16,10 +16,7 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_stderr_pipe(params: &Params<'_>, t: Id, c: &mut Comments) {
-    match params.shell_type {
-        Shell::Ksh => match_(params, t, c),
-        _ => {}
-    }
+    if params.shell_type == Shell::Ksh { match_(params, t, c) }
 }
 
 fn match_(p: &Params<'_>, id: Id, c: &mut Comments) {

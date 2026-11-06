@@ -36,7 +36,7 @@ fn check(p: &Params<'_>, last: Id, command: Id, c: &mut Comments) {
             c.warn(
                 last,
                 2171,
-                &format!(
+                format!(
                     "Found trailing {} outside test. Add missing {} or quote if intentional.",
                     str, opposite
                 ),

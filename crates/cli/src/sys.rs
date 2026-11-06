@@ -480,7 +480,7 @@ mod tests {
         assert_eq!(sys.read_file(Some(true), &lib), Ok("echo lib".into()));
         let x = iface(true, &[], None, &[]);
         assert_eq!(x.read_file(None, &lib), Ok("echo lib".into()));
-        assert_eq!(x.read_file(Some(false), &lib).unwrap_err().contains("disabled via directive"), true);
+        assert!(x.read_file(Some(false), &lib).unwrap_err().contains("disabled via directive"));
         let e = x.read_file(None, "/nonexistent/q.sh").unwrap_err();
         assert_eq!(e, "/nonexistent/q.sh: openBinaryFile: does not exist (No such file or directory)");
     }

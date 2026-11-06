@@ -49,7 +49,7 @@ fn dollar_warning(p: &Params<'_>, t: Id, c: &mut Comments) {
     c.warn(
         t,
         2229,
-        &format!("This does not read '{name}'. Remove $/${{}} for that, or use ${{var?}} to quiet."),
+        format!("This does not read '{name}'. Remove $/${{}} for that, or use ${{var?}} to quiet."),
     );
 }
 
