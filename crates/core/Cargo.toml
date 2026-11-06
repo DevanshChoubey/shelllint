@@ -1,0 +1,9 @@
+[package]
+name = "shellcheck-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Core AST, interface types and data tables for shellcheck-rust"
+
+[dependencies]
+regex = "1"
