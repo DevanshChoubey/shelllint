@@ -17,7 +17,7 @@ use shellcheck_core::interface::{
 use shellcheck_formatter::{Formatter, by_name, tty::WIKI_LINK};
 
 use options::{Flag, Options, default_options, get_opt, get_usage_info, options as option_table};
-use sys::{io_interface, trim_line};
+use sys::io_interface;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 enum Status {
@@ -35,7 +35,7 @@ fn print_err(s: &str) {
 fn parse_file_list_lines(contents: &str) -> Vec<String> {
     contents
         .lines()
-        .map(trim_line)
+        .map(|l| l.trim_matches(|c: char| c.is_whitespace()))
         .filter(|l| !l.is_empty() && !l.starts_with('#'))
         .map(String::from)
         .collect()
@@ -71,6 +71,7 @@ fn get_env_args() -> Vec<String> {
 }
 
 fn main() {
+    // DIVERGENCE: non-UTF-8 arguments are converted lossily (U+FFFD).
     let params: Vec<String> = std::env::args_os()
         .skip(1)
         .map(|a| a.to_string_lossy().into_owned())
@@ -135,6 +136,8 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
 
 fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
     if path == "-" {
+        // DIVERGENCE: stdin is read as UTF-8 here (invalid input yields an empty
+        // list); Haskell's getContents uses the locale encoding.
         let mut bytes = String::new();
         let _ = std::io::Read::read_to_string(&mut std::io::stdin().lock(), &mut bytes);
         return Ok(parse_file_list_lines(&bytes));
@@ -240,6 +243,8 @@ fn parse_num(s: &str) -> Result<i64, Status> {
         print_err(&format!("Invalid number: {}", num));
         return Err(Status::SyntaxFailure);
     }
+    // DIVERGENCE: Haskell's `read ""` crashes on an empty number (rejected above
+    // instead); Integer is unbounded, here values past i64::MAX saturate.
     Ok(num.parse::<i64>().unwrap_or(i64::MAX))
 }
 

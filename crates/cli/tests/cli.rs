@@ -274,3 +274,13 @@ fn on_failure_per_format() {
         assert!(o.stderr.starts_with("/nonexistent/x.sh: /nonexistent/x.sh: openBinaryFile"), "{}: {}", fmt, o.stderr);
     }
 }
+
+#[test]
+fn missing_plus_clean_file_exits_2() {
+    let a = tmpfile("two.sh", CLEAN);
+    let o = run(&["/nonexistent/x.sh", &a], "");
+    assert_eq!(o.code, 2);
+    assert!(o.stderr.starts_with("/nonexistent/x.sh: "), "{}", o.stderr);
+    let o = run(&[&a, "/nonexistent/x.sh"], "");
+    assert_eq!(o.code, 2);
+}

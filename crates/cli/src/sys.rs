@@ -98,11 +98,14 @@ pub fn decode_string(bytes: &[u8]) -> String {
         };
         let decoded = init.and_then(|x| construct(x, n, &bytes[i..]));
         match decoded {
-            Some((n, used)) => {
-                out.push(char::from_u32(n).unwrap_or(c as char));
+            // DIVERGENCE: Haskell's `chr` accepts surrogates; Rust's `char` cannot
+            // represent them, so such a sequence falls back to Latin-1 like an
+            // invalid one (`c : decode rest`).
+            Some((n, used)) if char::from_u32(n).is_some() => {
+                out.push(char::from_u32(n).unwrap());
                 i += used;
             }
-            None => out.push(c as char),
+            _ => out.push(c as char),
         }
     }
     out
@@ -118,10 +121,6 @@ fn construct(mut x: u32, n: usize, rest: &[u8]) -> Option<(u32, usize)> {
         }
     }
     if x <= 0x10FFFF { Some((x, n)) } else { None }
-}
-
-fn trim(s: &str) -> &str {
-    s.trim_matches(|c: char| c.is_whitespace())
 }
 
 fn dir_of(path: &str) -> String {
@@ -156,9 +155,15 @@ impl IoInterface {
     }
 
     fn default_paths() -> Vec<String> {
-        let home = std::env::var("HOME").ok().filter(|h| !h.is_empty());
-        let xdg = std::env::var("XDG_CONFIG_HOME")
-            .ok()
+        Self::default_paths_from(
+            std::env::var("HOME").ok(),
+            std::env::var("XDG_CONFIG_HOME").ok(),
+        )
+    }
+
+    fn default_paths_from(home: Option<String>, xdg: Option<String>) -> Vec<String> {
+        let home = home.filter(|h| !h.is_empty());
+        let xdg = xdg
             .filter(|h| !h.is_empty())
             .or_else(|| home.as_ref().map(|h| format!("{}/.config", h)));
         match (home, xdg) {
@@ -168,11 +173,15 @@ impl IoInterface {
     }
 
     fn config_paths(dir: &str) -> Vec<String> {
+        Self::config_paths_with(dir, &Self::default_paths())
+    }
+
+    fn config_paths_with(dir: &str, defaults: &[String]) -> Vec<String> {
         let next = dir_of(dir);
         let rest = if next != dir {
-            Self::config_paths(&next)
+            Self::config_paths_with(&next, defaults)
         } else {
-            Self::default_paths()
+            defaults.to_vec()
         };
         let join = |name: &str| {
             if dir.ends_with('/') { format!("{}{}", dir, name) } else { format!("{}/{}", dir, name) }
@@ -290,6 +299,188 @@ impl SystemInterface for IoInterface {
     }
 }
 
-pub fn trim_line(s: &str) -> &str {
-    trim(s)
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::options::default_options;
+    use std::fs;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static N: AtomicUsize = AtomicUsize::new(0);
+
+    fn tmp() -> PathBuf {
+        let d = std::env::temp_dir().join(format!(
+            "shellcheck-rust-sys-{}-{}",
+            std::process::id(),
+            N.fetch_add(1, Ordering::SeqCst)
+        ));
+        fs::create_dir_all(&d).unwrap();
+        d.canonicalize().unwrap()
+    }
+
+    fn write(p: &Path, c: &str) -> String {
+        fs::create_dir_all(p.parent().unwrap()).unwrap();
+        fs::write(p, c).unwrap();
+        p.to_string_lossy().into_owned()
+    }
+
+    fn iface(ext: bool, sp: &[&str], rc: Option<&str>, files: &[&str]) -> IoInterface {
+        let mut o = default_options();
+        o.external_sources = ext;
+        o.source_paths = sp.iter().map(|s| s.to_string()).collect();
+        o.rcfile = rc.map(String::from);
+        let files: Vec<String> = files.iter().map(|s| s.to_string()).collect();
+        io_interface(&o, &files)
+    }
+
+    #[test]
+    fn find_source_search_order() {
+        let d = tmp();
+        let s = |p: &str| d.join(p).to_string_lossy().into_owned();
+        write(&d.join("lib.sh"), "");
+        write(&d.join("p1/lib.sh"), "");
+        write(&d.join("p2/only2.sh"), "");
+        write(&d.join("ann/only3.sh"), "");
+        let cur = s("main.sh");
+        let sys = iface(true, &[&s("p1"), &s("p2")], None, &[]);
+        let ann = vec![s("ann")];
+        // Not in the cwd, so the -P paths are searched in order.
+        assert_eq!(sys.find_source(&cur, None, &[], "lib.sh"), s("p1/lib.sh"));
+        assert_eq!(sys.find_source(&cur, None, &[], "only2.sh"), s("p2/only2.sh"));
+        assert_eq!(sys.find_source(&cur, None, &[], "missing.sh"), "missing.sh");
+        // A file in the cwd wins over the -P paths.
+        assert_eq!(sys.find_source(&cur, None, &[], "Cargo.toml"), "Cargo.toml");
+        // Annotation paths come after the -P flags.
+        assert_eq!(sys.find_source(&cur, None, &ann, "only3.sh"), s("ann/only3.sh"));
+        // SCRIPTDIR expands to the directory of the current script.
+        let sd = vec!["SCRIPTDIR/p1".to_string()];
+        let sys2 = iface(true, &[], None, &[]);
+        assert_eq!(sys2.find_source(&cur, None, &sd, "lib.sh"), format!("{}/p1/lib.sh", d.to_string_lossy()));
+        assert_eq!(
+            sys2.find_source(&cur, None, &[], "SCRIPTDIR/lib.sh"),
+            format!("{}/lib.sh", d.to_string_lossy())
+        );
+        // Absolute path found as-is; missing absolute path falls back to itself.
+        assert_eq!(sys2.find_source(&cur, None, &[], &s("lib.sh")), s("lib.sh"));
+        assert_eq!(sys2.find_source(&cur, None, &[], "/nonexistent/zz.sh"), "/nonexistent/zz.sh");
+    }
+
+    #[test]
+    fn find_source_respects_external_gate() {
+        let d = tmp();
+        let lib = write(&d.join("lib.sh"), "");
+        let main = write(&d.join("main.sh"), "");
+        let none = iface(false, &[], None, &[&main]);
+        assert_eq!(none.find_source(&main, None, &[], &lib), lib); // default, not allowed
+        let allowed = iface(false, &[], None, &[&main, &lib]);
+        assert_eq!(allowed.find_source(&main, None, &[], &lib), lib);
+        // rc/annotation Some(true) overrides, Some(false) forbids.
+        let off = iface(true, &[], None, &[]);
+        let sp = vec![d.to_string_lossy().into_owned()];
+        assert_eq!(off.find_source(&main, Some(false), &sp, "lib.sh"), "lib.sh");
+        assert_eq!(off.find_source(&main, Some(true), &sp, "lib.sh"), lib);
+    }
+
+    #[test]
+    fn config_walks_up_and_prefers_dotfile() {
+        let d = tmp();
+        write(&d.join("shellcheckrc"), "disable=SC1");
+        let sub = d.join("a/b");
+        let script = write(&sub.join("x.sh"), "");
+        let sys = iface(false, &[], None, &[]);
+        // Only the undotted file exists up the tree.
+        let (path, c) = sys.get_config(&script).unwrap();
+        assert_eq!(path, format!("{}/shellcheckrc", d.to_string_lossy()));
+        assert_eq!(c, "disable=SC1");
+        // A dotted one closer wins; and .shellcheckrc beats shellcheckrc in one dir.
+        write(&d.join("a/.shellcheckrc"), "disable=SC2");
+        write(&d.join("a/shellcheckrc"), "disable=SC3");
+        let sys = iface(false, &[], None, &[]);
+        let (path, c) = sys.get_config(&script).unwrap();
+        assert_eq!(path, format!("{}/a/.shellcheckrc", d.to_string_lossy()));
+        assert_eq!(c, "disable=SC2");
+        // Same-directory lookups are served from the cache even if the file vanishes.
+        fs::remove_file(d.join("a/.shellcheckrc")).unwrap();
+        assert_eq!(sys.get_config(&script).unwrap().1, "disable=SC2");
+    }
+
+    #[test]
+    fn config_default_paths_home_and_xdg() {
+        let v = IoInterface::default_paths_from(Some("/h".into()), None);
+        assert_eq!(v, vec!["/h/.shellcheckrc", "/h/.config/shellcheckrc"]);
+        let v = IoInterface::default_paths_from(Some("/h".into()), Some("/x".into()));
+        assert_eq!(v, vec!["/h/.shellcheckrc", "/x/shellcheckrc"]);
+        assert!(IoInterface::default_paths_from(None, None).is_empty());
+        // They are searched after every directory up to the root.
+        let d = tmp();
+        let home_rc = write(&d.join("home/.shellcheckrc"), "enable=all");
+        let defaults = vec![home_rc.clone()];
+        let paths = IoInterface::config_paths_with(&d.join("q").to_string_lossy(), &defaults);
+        assert_eq!(paths.last().unwrap(), &home_rc);
+        assert_eq!(paths[0], format!("{}/q/.shellcheckrc", d.to_string_lossy()));
+        assert_eq!(paths[1], format!("{}/q/shellcheckrc", d.to_string_lossy()));
+        assert!(paths.contains(&"/.shellcheckrc".to_string()));
+        assert_eq!(IoInterface::read_config(&home_rc).unwrap().1, "enable=all");
+    }
+
+    #[test]
+    fn rcfile_is_cached_with_slash_sentinel() {
+        let d = tmp();
+        let rc = write(&d.join("my.rc"), "disable=SC9");
+        write(&d.join("shellcheckrc"), "ignored");
+        let sys = iface(false, &[], Some(&rc), &[]);
+        let other = write(&d.join("x/y.sh"), "");
+        assert_eq!(sys.get_config(&other), Some((rc.clone(), "disable=SC9".into())));
+        assert_eq!(sys.config_cache.lock().unwrap().0, "/");
+        // Cached: removing the file or asking about other scripts changes nothing.
+        fs::remove_file(&rc).unwrap();
+        assert_eq!(sys.get_config("/elsewhere/z.sh"), Some((rc.clone(), "disable=SC9".into())));
+        // A missing rcfile caches None.
+        let sys = iface(false, &[], Some("/nonexistent/rc"), &[]);
+        assert_eq!(sys.get_config(&other), None);
+        assert_eq!(sys.config_cache.lock().unwrap().0, "/");
+        assert_eq!(sys.get_config(&other), None);
+    }
+
+    #[test]
+    fn read_file_external_gating() {
+        let d = tmp();
+        let main = write(&d.join("main.sh"), "echo main");
+        let lib = write(&d.join("lib.sh"), "echo lib");
+        let sys = iface(false, &[], None, &[&main]);
+        assert_eq!(sys.read_file(None, &main), Ok("echo main".into()));
+        assert_eq!(
+            sys.read_file(None, &lib),
+            Err(format!("{} was not specified as input (see shellcheck -x).", lib))
+        );
+        assert_eq!(
+            sys.read_file(Some(false), &lib),
+            Err(format!(
+                "{} was not specified as input, and external files were disabled via directive.",
+                lib
+            ))
+        );
+        assert_eq!(sys.read_file(Some(true), &lib), Ok("echo lib".into()));
+        let x = iface(true, &[], None, &[]);
+        assert_eq!(x.read_file(None, &lib), Ok("echo lib".into()));
+        assert_eq!(x.read_file(Some(false), &lib).unwrap_err().contains("disabled via directive"), true);
+        let e = x.read_file(None, "/nonexistent/q.sh").unwrap_err();
+        assert_eq!(e, "/nonexistent/q.sh: openBinaryFile: does not exist (No such file or directory)");
+    }
+
+    #[test]
+    fn decode_string_utf8_and_latin1_fallback() {
+        assert_eq!(decode_string(b"abc"), "abc");
+        assert_eq!(decode_string("h\u{e9}\u{20ac}\u{1f600}".as_bytes()), "h\u{e9}\u{20ac}\u{1f600}");
+        // Invalid UTF-8 bytes become the Latin-1 characters of the same value.
+        assert_eq!(decode_string(&[0x68, 0xe9, 0x21]), "h\u{e9}!");
+        assert_eq!(decode_string(&[0xc3]), "\u{c3}"); // truncated sequence
+        assert_eq!(decode_string(&[0xc3, 0x41]), "\u{c3}A"); // bad continuation
+        assert_eq!(decode_string(&[0x80]), "\u{80}"); // stray continuation
+        assert_eq!(decode_string(&[0xf8, 0x80]), "\u{f8}\u{80}"); // 5-byte lead
+        // Surrogate (ED A0 80): not representable, falls back byte by byte.
+        assert_eq!(decode_string(&[0xed, 0xa0, 0x80]), "\u{ed}\u{a0}\u{80}");
+        // Beyond U+10FFFF (F4 90 80 80) is rejected.
+        assert_eq!(decode_string(&[0xf4, 0x90, 0x80, 0x80]), "\u{f4}\u{90}\u{80}\u{80}");
+    }
 }
