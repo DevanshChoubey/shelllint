@@ -12,7 +12,7 @@ parser = ["dep:shellcheck-parser"]
 # The checks register themselves into the analyzer's CHECKS slice (linkme),
 # so the crate holding them must be linked too.
 analyzer = ["dep:shellcheck-analyzer", "dep:shellcheck-checks"]
-checker = ["dep:shellcheck-checker", "dep:shellcheck-core"]
+checker = ["dep:shellcheck-checker", "dep:shellcheck-core", "dep:shellcheck-formatter"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
@@ -22,3 +22,4 @@ shellcheck-analyzer = { path = "../analyzer", optional = true }
 shellcheck-checks = { path = "../checks", optional = true }
 shellcheck-checker = { path = "../checker", optional = true }
 shellcheck-core = { path = "../core", optional = true }
+shellcheck-formatter = { path = "../formatter", optional = true }
