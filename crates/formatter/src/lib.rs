@@ -14,6 +14,7 @@ use shellcheck_core::interface::{
 };
 
 pub mod checkstyle;
+pub mod diff;
 pub mod fixer;
 pub mod gcc;
 pub mod json;
@@ -47,6 +48,7 @@ pub fn by_name(name: &str, opts: FormatterOptions) -> Option<Box<dyn Formatter>>
         "json" => Some(Box::new(json::format())),
         "json1" => Some(Box::new(json1::format())),
         "checkstyle" => Some(Box::new(checkstyle::format())),
+        "diff" => Some(Box::new(diff::format(opts))),
         "quiet" => Some(Box::new(quiet::format(opts))),
         _ => None,
     }
