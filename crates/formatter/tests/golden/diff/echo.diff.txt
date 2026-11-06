@@ -1,0 +1,6 @@
+--- a/echo.sh
++++ b/echo.sh
+@@ -1,1 +1,1 @@
+-echo $1
++echo "$1"
+

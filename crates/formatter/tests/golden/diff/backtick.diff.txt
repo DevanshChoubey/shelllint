@@ -1,0 +1,10 @@
+--- a/backtick.sh
++++ b/backtick.sh
+@@ -1,4 +1,4 @@
+ #!/bin/sh
+-x=`date`
++x=$(date)
+ echo "$x"
+-y=`uname -a`
++y=$(uname -a)
+
