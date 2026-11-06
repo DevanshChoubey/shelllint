@@ -63,11 +63,26 @@ fn tmpfile(name: &str, contents: &str) -> String {
     p.to_string_lossy().into_owned()
 }
 
+/// The options this port adds beyond ShellCheck, as `--help` lists them
+/// after upstream's.
+const EXTENSION_HELP: &str = concat!(
+    "                      --fix                      Apply all auto-fixes to FILES in place, then report what is left\n",
+    "                      --dry-run                  With --fix, print the fixes as a diff (like -f diff) instead\n",
+);
+
+/// `--help` as this port prints it: upstream's text (help.txt, verbatim)
+/// with the extensions after upstream's options.
+fn expected_help() -> String {
+    let oracle = include_str!("help.txt");
+    let body = oracle.strip_suffix('\n').unwrap();
+    format!("{}{}\n", body, EXTENSION_HELP)
+}
+
 #[test]
 fn help_matches_oracle() {
     let o = run(&["--help"], "");
     assert_eq!(o.code, 0);
-    assert_eq!(o.stdout, include_str!("help.txt"));
+    assert_eq!(o.stdout, expected_help());
 }
 
 #[test]
@@ -77,6 +92,11 @@ fn version_names_project_and_upstream() {
     assert!(o.stdout.starts_with("shellcheck-rust"), "{}", o.stdout);
     assert!(o.stdout.contains("v0.11.0-171-ge11f964"), "{}", o.stdout);
     assert!(o.stdout.contains("license: GNU General Public License, version 3\n"));
+    // The website line points at this project, not shellcheck.net.
+    let website = o.stdout.lines().last().unwrap();
+    assert_eq!(website, format!("website: {}", env!("CARGO_PKG_REPOSITORY")));
+    assert!(!o.stdout.contains("shellcheck.net"), "{}", o.stdout);
+    assert_eq!(o.stdout.lines().count(), 4, "{}", o.stdout);
     assert_eq!(run(&["--version"], "").stdout, o.stdout);
 }
 
@@ -114,6 +134,8 @@ fn every_help_flag_is_accepted() {
         ("-x", &["-x", "-"]),
         ("--external-sources", &["--external-sources", "-"]),
         ("--files-from", &["--files-from=/dev/null"]),
+        ("--fix", &["--fix", "--files-from=/dev/null"]),
+        ("--dry-run", &["--fix", "--dry-run", "--files-from=/dev/null"]),
     ];
     for (flag, args) in cases {
         let o = run(args, CLEAN);
@@ -124,7 +146,7 @@ fn every_help_flag_is_accepted() {
         assert_eq!(run(args, "").code, 0, "{:?}", args);
     }
     // Make sure the table above covers every flag the oracle lists.
-    for line in help.lines().skip(1) {
+    for line in help.lines().skip(1).chain(EXTENSION_HELP.lines()) {
         for tok in line.split_whitespace().filter(|t| t.starts_with('-')) {
             let name = tok.split(['=', '[']).next().unwrap().trim_end_matches(',');
             assert!(
@@ -162,7 +184,7 @@ fn exit_code_warning_is_1() {
 
 #[test]
 fn bad_option_messages_match_oracle() {
-    let usage = String::from_utf8(include_bytes!("help.txt").to_vec()).unwrap();
+    let usage = expected_help();
     let usage = format!("Usage: shellcheck [OPTIONS...] FILES...\n{}", usage.split_once('\n').unwrap().1);
     let o = run(&["--bogus"], "");
     assert_eq!(o.stderr, format!("unrecognized option `--bogus'\n\n{}\n", usage.trim_end_matches('\n').to_string() + "\n"));

@@ -17,6 +17,10 @@ pub struct Options {
     #[allow(dead_code)]
     pub min_severity: Severity,
     pub rcfile: Option<String>,
+    /// `--fix` (an extension beyond ShellCheck): apply the fixes in place.
+    pub fix: bool,
+    /// `--dry-run` (extension): with `--fix`, print the diff instead.
+    pub dry_run: bool,
 }
 
 pub fn default_options() -> Options {
@@ -30,6 +34,8 @@ pub fn default_options() -> Options {
         },
         min_severity: Severity::StyleC,
         rcfile: None,
+        fix: false,
+        dry_run: false,
     }
 }
 
@@ -91,6 +97,9 @@ pub fn options() -> Vec<OptDescr> {
         o("x", &["external-sources"], No("externals"), "", "Allow 'source' outside of FILES"),
         o("", &["help"], No("help"), "", "Show this usage summary and exit"),
         o("", &["files-from"], Req("files-from"), "FILE", "Read input files from FILE (one per line, or '-' for stdin)"),
+        // Extensions beyond ShellCheck (not in upstream's --help).
+        o("", &["fix"], No("fix"), "", "Apply all auto-fixes to FILES in place, then report what is left"),
+        o("", &["dry-run"], No("dry-run"), "", "With --fix, print the fixes as a diff (like -f diff) instead"),
     ]
 }
 

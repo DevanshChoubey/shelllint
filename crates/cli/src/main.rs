@@ -4,6 +4,7 @@
 // Linked only so the linkme-registered checks end up in the binary.
 use shellcheck_checks as _;
 
+mod fix;
 mod options;
 mod sys;
 
@@ -20,8 +21,13 @@ use shellcheck_formatter::{Formatter, by_name, tty::WIKI_LINK};
 use options::{Flag, Options, default_options, get_opt, get_usage_info, options as option_table};
 use sys::io_interface;
 
+/// The project's website, printed by `--version` (upstream prints
+/// https://www.shellcheck.net). Comes from the package's `repository` key so
+/// a rename only touches Cargo.toml.
+pub const PROJECT_WEBSITE: &str = env!("CARGO_PKG_REPOSITORY");
+
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-enum Status {
+pub(crate) enum Status {
     NoProblems,
     SomeProblems,
     SupportFailure,
@@ -29,7 +35,7 @@ enum Status {
     RuntimeException,
 }
 
-fn print_err(s: &str) {
+pub(crate) fn print_err(s: &str) {
     eprintln!("{}", s);
 }
 
@@ -169,6 +175,14 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
         }
     };
 
+    if options.dry_run && !options.fix {
+        print_err("--dry-run only works together with --fix.");
+        return Err(Status::SyntaxFailure);
+    }
+    if options.fix {
+        return Ok(fix::run_fix(&options, formatter, &all_files));
+    }
+
     let sys = io_interface(&options, &all_files);
     Ok(run_formatter(&sys, formatter, &options, &all_files))
 }
@@ -196,7 +210,7 @@ fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
     }
 }
 
-fn run_formatter(
+pub(crate) fn run_formatter(
     sys: &dyn SystemInterface,
     mut format: Box<dyn Formatter>,
     options: &Options,
@@ -368,6 +382,9 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "rcfile" => options.rcfile = Some(val.clone()),
         "enable" => options.check_spec.optional_checks.extend(split(',', val)),
         "extended-analysis" => options.check_spec.extended_analysis = Some(parse_bool(val)?),
+        // Extensions beyond ShellCheck.
+        "fix" => options.fix = true,
+        "dry-run" => options.dry_run = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),
@@ -399,7 +416,7 @@ fn print_version() {
         SHELLCHECK_VERSION
     );
     println!("license: GNU General Public License, version 3");
-    println!("website: https://www.shellcheck.net");
+    println!("website: {}", PROJECT_WEBSITE);
 }
 
 fn print_optional() {
