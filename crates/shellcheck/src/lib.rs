@@ -203,17 +203,29 @@ pub struct Replacement {
 ///
 /// Apply it with [`Fix::apply`]. The replacements are readable through
 /// [`Fix::replacements`].
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(from = "FixRepr", into = "FixRepr"))]
 pub struct Fix {
     replacements: Vec<Replacement>,
     /// The fix in the checker's own coordinates, with tab stops still
     /// present. `apply` runs on this so tabbed sources come out right.
-    /// A deserialised fix rebuilds it from `replacements`, which is exact
-    /// for lines without tabs.
+    /// A deserialised fix rebuilds it from `replacements` (tab = one
+    /// column) and sets `untabbed`; `raw_for` then restores the tab stops
+    /// from the source it is applied to.
     raw: CoreFix,
+    untabbed: bool,
 }
+
+/// Fixes are equal when their public replacements are; the internal
+/// coordinates are derived from them.
+impl PartialEq for Fix {
+    fn eq(&self, other: &Fix) -> bool {
+        self.replacements == other.replacements
+    }
+}
+
+impl Eq for Fix {}
 
 impl Fix {
     /// The replacements, in the order ShellCheck emitted them.
@@ -238,7 +250,45 @@ impl Fix {
     /// assert_eq!(apply_fixes(src, &diags), "rm \"$file\"\n");
     /// ```
     pub fn apply(&self, src: &str) -> String {
-        apply_raw(&self.raw, src)
+        apply_raw(&self.raw_for(src), src)
+    }
+
+    /// The fix in checker coordinates (tab stops of 8) for `src`.
+    fn raw_for(&self, src: &str) -> CoreFix {
+        if !self.untabbed {
+            return self.raw.clone();
+        }
+        let lines = haskell_lines(src);
+        let virt = |p: &shellcheck_core::interface::Position| {
+            let mut p = p.clone();
+            let line = usize::try_from(p.line - 1).ok().and_then(|i| lines.get(i));
+            if let (Some(line), true) = (line, p.column > 1) {
+                // Inverse of the checker's tab-stop removal: the first
+                // virtual column of the real column.
+                let mut v = 1i64;
+                let mut chars = line.chars();
+                for _ in 1..p.column {
+                    v += match chars.next() {
+                        Some('\t') => 8 - ((v - 1) % 8),
+                        _ => 1,
+                    };
+                }
+                p.column = v;
+            }
+            p
+        };
+        CoreFix {
+            replacements: self
+                .raw
+                .replacements
+                .iter()
+                .map(|r| shellcheck_core::interface::Replacement {
+                    start_pos: virt(&r.start_pos),
+                    end_pos: virt(&r.end_pos),
+                    ..r.clone()
+                })
+                .collect(),
+        }
     }
 }
 
@@ -274,7 +324,7 @@ impl From<FixRepr> for Fix {
                 },
             })
             .collect();
-        Fix { replacements: r.replacements, raw: CoreFix { replacements } }
+        Fix { replacements: r.replacements, raw: CoreFix { replacements }, untabbed: true }
     }
 }
 
@@ -298,7 +348,7 @@ fn pos(line: usize, column: usize) -> shellcheck_core::interface::Position {
 /// assert_ne!(fixed, src);
 /// ```
 pub fn apply_fixes(src: &str, diagnostics: &[Diagnostic]) -> String {
-    let fixes: Vec<CoreFix> = diagnostics.iter().filter_map(|d| d.fix.as_ref().map(|f| f.raw.clone())).collect();
+    let fixes: Vec<CoreFix> = diagnostics.iter().filter_map(|d| d.fix.as_ref().map(|f| f.raw_for(src))).collect();
     apply_raw(&merge_fixes(&fixes), src)
 }
 
@@ -533,6 +583,7 @@ fn to_diagnostic(pc: &PositionedComment, raw_fix: Option<&CoreFix>) -> Diagnosti
                 })
                 .collect(),
             raw: raw.clone(),
+            untabbed: false,
         }),
         _ => None,
     };

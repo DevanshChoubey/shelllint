@@ -125,3 +125,32 @@ fn list_checks_is_sorted_and_unique() {
     assert_eq!(names, sorted);
     assert!(checks.iter().all(|c| c.optional && !c.codes.is_empty()));
 }
+
+#[cfg(feature = "serde")]
+#[test]
+fn deserialized_fix_applies_correctly_on_lines_with_tabs() {
+    let sources = [
+        "#!/bin/bash\n\techo $1\n",
+        "#!/bin/bash\n\t\techo $1 $2\n",
+        "#!/bin/bash\necho\t$1\n",
+        "#!/bin/bash\nif true; then\n\tx=`date`\n\techo $x\nfi\n",
+        "#!/bin/bash\n\t \techo é $1\n",
+    ];
+    for src in sources {
+        let diags = Linter::new().check_str(src);
+        assert!(diags.iter().any(|d| d.fix.is_some()), "no fix for {src:?}");
+        let json = serde_json::to_string(&diags).unwrap();
+        let back: Vec<shellcheck::Diagnostic> = serde_json::from_str(&json).unwrap();
+        assert_eq!(back, diags, "round trip differs for {src:?}");
+        assert_eq!(apply_fixes(src, &back), apply_fixes(src, &diags), "apply_fixes differs for {src:?}");
+        for (a, b) in diags.iter().zip(&back) {
+            if let (Some(fa), Some(fb)) = (&a.fix, &b.fix) {
+                assert_eq!(fb.apply(src), fa.apply(src), "Fix::apply differs for {src:?}");
+            }
+        }
+    }
+    let src = "#!/bin/bash\n\techo $1\n";
+    let back: Vec<shellcheck::Diagnostic> =
+        serde_json::from_str(&serde_json::to_string(&Linter::new().check_str(src)).unwrap()).unwrap();
+    assert_eq!(apply_fixes(src, &back), "#!/bin/bash\n\techo \"$1\"\n");
+}
