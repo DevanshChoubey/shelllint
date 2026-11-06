@@ -300,3 +300,22 @@ fn fuzzed_malformed_and_unicode_arguments_never_kill_the_server() {
     }
     assert_eq!(reply(&replies, 100_000)["result"], json!({}));
 }
+
+/// SC1091 uses the CLI's wording (`shellcheck --norc` without -x), not the
+/// test mock's "File not included in mock.".
+#[test]
+fn sc1091_message_matches_the_cli() {
+    let dir = std::path::Path::new(env!("CARGO_TARGET_TMPDIR")).join("mcp-sc1091");
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("m2.sh");
+    std::fs::write(&path, "#!/bin/sh\n. ./lib.sh\n").unwrap();
+    let replies = session(&[
+        call(1, "check_file", json!({"path": path.to_str().unwrap()})),
+        call(2, "check_script", json!({"script": "#!/bin/sh\n. ./lib.sh\n"})),
+    ]);
+    for id in [1, 2] {
+        let diags = reply(&replies, id)["result"]["structuredContent"]["diagnostics"].as_array().unwrap().clone();
+        let d = diags.iter().find(|d| d["code"] == "SC1091").unwrap_or_else(|| panic!("no SC1091: {diags:?}"));
+        assert_eq!(d["message"], "Not following: ./lib.sh was not specified as input (see shellcheck -x).");
+    }
+}

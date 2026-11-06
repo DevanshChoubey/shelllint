@@ -7,6 +7,7 @@
 //! docs/mcp.md for the client configuration.
 
 pub mod catalog;
+pub mod sys;
 pub mod tools;
 
 use std::io::{self, BufRead, Read, Write};

@@ -9,7 +9,7 @@ use serde_json::{Value, json};
 use shellcheck_checker::{check_script, decode_string};
 use shellcheck_core::data::shell_for_executable;
 use shellcheck_core::interface::{
-    CheckSpec, Code, PositionedComment, Severity, Shell, empty_check_spec, mocked_system_interface,
+    CheckSpec, Code, PositionedComment, Severity, Shell, empty_check_spec,
 };
 use shellcheck_formatter::diff::{Diff, get_diff};
 use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
@@ -19,6 +19,7 @@ use shellcheck_formatter::{
 };
 
 use crate::catalog;
+use crate::sys::McpSystem;
 
 /// Largest script accepted, in bytes.
 pub const MAX_BYTES: usize = 1024 * 1024;
@@ -177,7 +178,7 @@ pub fn exists(name: &str) -> bool {
 pub fn call(name: &str, args: &Value) -> ToolOutput {
     match name {
         "check_script" => match required_str(args, "script") {
-            Ok(script) => check_text(script, DEFAULT_NAME, args),
+            Ok(script) => check_text(script, DEFAULT_NAME, false, args),
             Err(e) => ToolOutput::error(e),
         },
         "check_file" => match required_str(args, "path") {
@@ -272,8 +273,9 @@ fn split_commas(s: &str) -> Vec<String> {
 // ---- linting -----------------------------------------------------------------
 
 /// Run the full pipeline. The comments keep the checker's own (tab-stop 8)
-/// positions, which `apply_fix` needs.
-fn lint(script: &str, filename: &str, opts: &LintOptions) -> Vec<PositionedComment> {
+/// positions, which `apply_fix` needs. `is_file`: `filename` is the file on
+/// disk the script came from, so it counts as an input (as on the CLI).
+fn lint(script: &str, filename: &str, is_file: bool, opts: &LintOptions) -> Vec<PositionedComment> {
     let spec = CheckSpec {
         filename: filename.to_string(),
         script: script.to_string(),
@@ -284,10 +286,12 @@ fn lint(script: &str, filename: &str, opts: &LintOptions) -> Vec<PositionedComme
         optional_checks: opts.enable.clone(),
         ..empty_check_spec()
     };
-    check_script(&mocked_system_interface(vec![]), &spec).comments
+    let inputs: &[&str] = if is_file { &[filename] } else { &[] };
+    let sys = McpSystem::new(inputs);
+    check_script(&sys, &spec).comments
 }
 
-fn check_text(script: &str, filename: &str, args: &Value) -> ToolOutput {
+fn check_text(script: &str, filename: &str, is_file: bool, args: &Value) -> ToolOutput {
     if script.len() > MAX_BYTES {
         return ToolOutput::error("Script is larger than 1 MiB; split it or lint the file with check_file.");
     }
@@ -295,7 +299,7 @@ fn check_text(script: &str, filename: &str, args: &Value) -> ToolOutput {
         Ok(o) => o,
         Err(e) => return ToolOutput::error(e),
     };
-    let comments = lint(script, filename, &opts);
+    let comments = lint(script, filename, is_file, &opts);
     report(filename, script, &comments)
 }
 
@@ -315,7 +319,7 @@ fn check_path(path: &str, args: &Value) -> ToolOutput {
         Err(e) => return ToolOutput::error(format!("Cannot read {path}: {e}")),
     };
     let script = decode_string(&bytes);
-    check_text(&script, path, args)
+    check_text(&script, path, true, args)
 }
 
 /// Build the diagnostics output for a lint run.
@@ -415,7 +419,7 @@ fn fix_text(script: &str, args: &Value) -> ToolOutput {
         Ok(o) => o,
         Err(e) => return ToolOutput::error(e),
     };
-    let raw = lint(script, DEFAULT_NAME, &opts);
+    let raw = lint(script, DEFAULT_NAME, false, &opts);
     let fixes: Vec<_> = raw.iter().filter_map(|c| c.fix.clone()).collect();
     let applied = fixes.len();
 
@@ -433,7 +437,7 @@ fn fix_text(script: &str, args: &Value) -> ToolOutput {
     };
 
     // Re-check the fixed script so `remaining` reflects what is left after the fixes.
-    let remaining = if fixes.is_empty() { raw.clone() } else { lint(&fixed, DEFAULT_NAME, &opts) };
+    let remaining = if fixes.is_empty() { raw.clone() } else { lint(&fixed, DEFAULT_NAME, false, &opts) };
     let remaining_comments = make_non_virtual(&remaining, &fixed);
     let diff = unified_diff(
         DEFAULT_NAME,
