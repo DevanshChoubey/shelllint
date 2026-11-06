@@ -6,6 +6,12 @@
 
 pub mod runner;
 
+// The checks register into the analyzer's `CHECKS` slice via linkme; nothing
+// references the checks crate by name, so without this it is not linked and
+// every check reads as `unported`.
+#[cfg(feature = "analyzer")]
+use shellcheck_checks as _;
+
 use serde::Deserialize;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::{Path, PathBuf};
@@ -20,6 +26,8 @@ pub struct Record {
     pub helper: Option<String>,
     #[serde(default)]
     pub target: Option<String>,
+    #[serde(default)]
+    pub source: Option<String>,
     #[serde(default)]
     pub script: Option<String>,
     #[serde(default)]
@@ -38,6 +46,35 @@ impl Record {
     /// Stable identifier used in the parity baseline.
     pub fn key(&self) -> String {
         format!("{}:{}", self.module, self.name)
+    }
+
+    /// The check expression the test applies its helper to. `target` is
+    /// cut at the first space, so for `verify (checkSudoArgs "sudo") ...` it
+    /// is `(checkSudoArgs`; the full expression (`checkSudoArgs "sudo"`) is
+    /// recovered from `source`.
+    pub fn check_expr(&self) -> Option<String> {
+        let t = self.target.as_deref()?;
+        if !t.starts_with('(') {
+            return Some(t.to_string());
+        }
+        let src = self.source.as_deref().unwrap_or("");
+        if let Some(i) = src.find(t) {
+            let (mut depth, mut in_str) = (0i32, false);
+            for (j, c) in src[i..].char_indices() {
+                match c {
+                    '"' => in_str = !in_str,
+                    '(' if !in_str => depth += 1,
+                    ')' if !in_str => {
+                        depth -= 1;
+                        if depth == 0 {
+                            return Some(src[i + 1..i + j].trim().to_string());
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Some(t.trim_start_matches('(').trim_end_matches(')').to_string())
     }
 
     /// Kinds the harness executes; `unit` and `unparsed` are skipped.
@@ -148,6 +185,21 @@ mod tests {
         // a directory is a read error, not "missing"
         assert!(load_baseline(&dir).is_err());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn check_expr_recovers_arguments() {
+        let mut r: Record = serde_json::from_str(
+            r#"{"module":"Checks/Commands.hs","name":"prop_checkSudoArgs1","kind":"node",
+                "target":"(checkSudoArgs","source":"prop_checkSudoArgs1 = verify (checkSudoArgs \"sudo\") \"sudo cd /root\""}"#,
+        )
+        .unwrap();
+        assert_eq!(r.check_expr().as_deref(), Some("checkSudoArgs \"sudo\""));
+        r.target = Some("checkTr".into());
+        assert_eq!(r.check_expr().as_deref(), Some("checkTr"));
+        let recs = load_corpus(&default_corpus_dir().join("tests.jsonl")).unwrap();
+        let e = recs.iter().find(|r| r.name == "prop_checkUnassignedReferences38").unwrap();
+        assert_eq!(e.check_expr().as_deref(), Some("checkUnassignedReferences' True"));
     }
 
     #[test]

@@ -20,7 +20,7 @@ fn analyzer_codes(rec: &Record, kind: &str, script: &str) -> Option<Vec<i64>> {
     {
         return shellcheck_analyzer::testing::run_check(
             &rec.module,
-            rec.target.as_deref()?,
+            &rec.check_expr()?,
             kind,
             script,
         );
@@ -223,6 +223,7 @@ mod tests {
             kind: kind.into(),
             helper: None,
             target: Some("checkX".into()),
+            source: None,
             script: Some("echo".into()),
             expect_fires: Some(true),
             expect_codes: None,

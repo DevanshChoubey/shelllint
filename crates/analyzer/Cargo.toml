@@ -7,3 +7,5 @@ license.workspace = true
 [dependencies]
 shellcheck-core = { path = "../core" }
 regex = "1"
+shellcheck-parser = { path = "../parser" }
+linkme = "0.3"
