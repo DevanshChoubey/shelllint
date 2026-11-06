@@ -1,0 +1,119 @@
+name: Release
+
+# Builds release binaries for a pushed version tag (for example v0.1.0) and
+# attaches them, with SHA-256 checksums, to a **draft** GitHub release. A
+# maintainer reviews the draft and publishes it by hand.
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  BIN: shellcheck-rust
+
+jobs:
+  build:
+    name: build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, musl: true, run: true }
+          # The ubuntu-24.04-arm runner is free for public repositories only.
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-24.04-arm, musl: true, run: true }
+          - { target: aarch64-apple-darwin, os: macos-latest, musl: false, run: true }
+          - { target: x86_64-apple-darwin, os: macos-latest, musl: false, run: false }
+          - { target: x86_64-pc-windows-msvc, os: windows-latest, musl: false, run: true }
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --target ${{ matrix.target }} --no-self-update
+          rustup default stable
+      - name: Install musl tools
+        if: matrix.musl
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends musl-tools
+      - name: Build
+        run: cargo build --release --locked -p shellcheck-rust --target ${{ matrix.target }}
+      - name: Smoke test
+        if: matrix.run
+        run: |
+          exe="target/${{ matrix.target }}/release/$BIN"
+          [ -f "$exe.exe" ] && exe="$exe.exe"
+          "$exe" --version
+          printf 'echo $1\n' > smoke.sh
+          # Exit code 1 means warnings were found, which is the expected result.
+          set +e; "$exe" -s bash -f gcc smoke.sh; rc=$?; set -e
+          [ "$rc" -eq 1 ]
+      - name: Package
+        id: package
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          name="$BIN-$tag-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          cp LICENSE NOTICE README.md CHANGELOG.md "dist/$name/"
+          if [ "${{ runner.os }}" = Windows ]; then
+            cp "target/${{ matrix.target }}/release/$BIN.exe" "dist/$name/"
+            (cd dist && 7z a -tzip "$name.zip" "$name" > /dev/null)
+            archive="$name.zip"
+          else
+            cp "target/${{ matrix.target }}/release/$BIN" "dist/$name/"
+            tar -C dist -czf "dist/$name.tar.gz" "$name"
+            archive="$name.tar.gz"
+          fi
+          cd dist
+          if command -v sha256sum > /dev/null; then
+            sha256sum "$archive" > "$archive.sha256"
+          else
+            shasum -a 256 "$archive" > "$archive.sha256"
+          fi
+          cat "$archive.sha256"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-${{ matrix.target }}
+          path: |
+            dist/${{ steps.package.outputs.archive }}
+            dist/${{ steps.package.outputs.archive }}.sha256
+          if-no-files-found: error
+
+  release:
+    name: draft GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+      - name: Combined checksum file
+        run: |
+          cd dist
+          cat ./*.sha256 | sort -k2 > SHA256SUMS
+          cat SHA256SUMS
+      - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/*.sha256
+            dist/SHA256SUMS

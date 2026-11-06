@@ -1,0 +1,88 @@
+shellcheck-rust
+An unofficial Rust port of ShellCheck.
+
+This project is not affiliated with, endorsed by, or supported by the
+ShellCheck project or by Vidar Holen.
+
+-------------------------------------------------------------------------------
+Upstream work
+-------------------------------------------------------------------------------
+
+shellcheck-rust is a derivative work of ShellCheck:
+
+    ShellCheck
+    https://github.com/koalaman/shellcheck
+    Copyright 2012 and later, Vidar 'koala_man' Holen and contributors.
+
+ShellCheck is free software, licensed under the GNU General Public License,
+version 3. Most upstream source files allow "version 3 of the License, or
+(at your option) any later version".
+
+Upstream files that name additional copyright holders:
+
+    src/ShellCheck/Fixer.hs            Copyright 2018-2019 Vidar Holen, Ng Zhi An
+    src/ShellCheck/Formatter/Quiet.hs  Copyright 2019 Austin Voecks
+
+The port follows upstream commit
+
+    e11f964f6f2cb0009dd259ec33d563c45aa3453d   (v0.11.0-171-ge11f964, 2026-11-05)
+
+which is vendored, unmodified, as the git submodule reference/shellcheck.
+
+All check logic, warning codes (SCxxxx), warning and fix messages, optional
+check descriptions, directive and configuration semantics, and output formats
+derive from ShellCheck. The wiki URLs that the tool prints
+(https://www.shellcheck.net/wiki/) point to the upstream ShellCheck wiki.
+
+-------------------------------------------------------------------------------
+Derived files
+-------------------------------------------------------------------------------
+
+Each derived Rust source file names its upstream source in its header, for
+example:
+
+    // Port of ShellCheck src/ShellCheck/Analytics.hs `checkEchoWc`, lines 483-494 (e11f964)
+
+To list the derived files and their upstream sources:
+
+    grep -rn -m1 'Port of' crates/
+
+Some files do not have such a header, such as crate roots and the test
+files. These can still contain material from ShellCheck, for example tests
+ported from its prop_ tests. Treat everything under crates/ as derived from
+ShellCheck unless its header says otherwise.
+
+The correspondence by crate:
+
+    crates/core/        AST.hs, ASTLib.hs, Interface.hs, Data.hs, Prelude.hs,
+                        Regex.hs
+    crates/parser/      Parser.hs
+    crates/analyzer/    Analyzer.hs, AnalyzerLib.hs, CFG.hs, CFGAnalysis.hs
+    crates/checks/      Analytics.hs, Checks/Commands.hs, Checks/ShellSupport.hs
+                        (one file per check)
+    crates/checker/     Checker.hs, EditorConfig.hs, and the EditorConfig
+                        lookup from shellcheck.hs
+    crates/formatter/   Formatter/*.hs, Fixer.hs
+    crates/cli/         shellcheck.hs
+
+Files whose header says "no Haskell counterpart" (for example the
+conformance harness in crates/conformance/) are original to this project.
+They are part of the same GPL-licensed work.
+
+corpus/tests.jsonl and corpus/checks.json contain test scripts and test
+sources extracted verbatim from ShellCheck's prop_ unit tests, together with
+the output of the real ShellCheck binary on those scripts (oracle_codes).
+corpus/tasks.json is derived from ShellCheck's check registration lists.
+
+-------------------------------------------------------------------------------
+License of this project
+-------------------------------------------------------------------------------
+
+shellcheck-rust is licensed under the GNU General Public License, version 3
+or (at your option) any later version (SPDX: GPL-3.0-or-later), the same terms
+as upstream ShellCheck. The full text of version 3 is in the LICENSE file. As a derivative work it must remain under
+the GPL. Anyone who distributes binaries or modified versions must make the
+corresponding source available under the same terms.
+
+Copyright of the Rust translation and of the original parts of this project
+belongs to the shellcheck-rust contributors.

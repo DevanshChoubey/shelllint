@@ -6,7 +6,13 @@ members = ["crates/*"]
 version = "0.0.1"
 edition = "2024"
 license = "GPL-3.0-only"
-repository = ""
+description = "An unofficial Rust port of ShellCheck, the shell script static analysis tool"
+repository = "https://github.com/DevanshChoubey/shellcheck-rust"
+homepage = "https://github.com/DevanshChoubey/shellcheck-rust"
+readme = "README.md"
+keywords = ["shellcheck", "shell", "bash", "linter", "static-analysis"]
+categories = ["command-line-utilities", "development-tools"]
+rust-version = "1.88"
 
 [profile.release]
 lto = true

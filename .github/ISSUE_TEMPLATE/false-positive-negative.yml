@@ -1,0 +1,84 @@
+name: Output differs from ShellCheck
+description: A false positive or false negative, or a different code, position, message or fix compared with upstream ShellCheck.
+title: "[parity] "
+labels: ["parity"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        shellcheck-rust should give **exactly** the output of upstream ShellCheck at the commit it ports.
+        Any difference is a bug, unless a `// DIVERGENCE:` note in the source explains it.
+
+        If upstream ShellCheck *also* gives the warning you think is wrong, that is upstream behaviour.
+        Please raise it with the [ShellCheck project](https://github.com/koalaman/shellcheck/issues) instead.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of difference
+      options:
+        - False positive (we warn and ShellCheck does not)
+        - False negative (ShellCheck warns and we do not)
+        - Different SC code
+        - Different position (line or column)
+        - Different message, severity or fix
+        - Crash, hang or excessive memory use on this input
+    validations:
+      required: true
+  - type: textarea
+    id: script
+    attributes:
+      label: Minimal script
+      description: The smallest script that shows the difference. Remove anything private.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command line
+      description: The flags you used, the same for both tools.
+      placeholder: shellcheck-rust -s bash -f gcc script.sh
+    validations:
+      required: true
+  - type: textarea
+    id: upstream
+    attributes:
+      label: Upstream ShellCheck output
+      description: |
+        For example: `docker run --rm -i koalaman/shellcheck:latest -s bash -f json1 - < script.sh`
+        Please prefer `-f json1`, which includes positions and fixes.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: upstream-version
+    attributes:
+      label: Upstream ShellCheck version
+      description: Output of `shellcheck --version`, or of the Docker image with `--version`.
+    validations:
+      required: true
+  - type: textarea
+    id: ours
+    attributes:
+      label: shellcheck-rust output
+      description: The same command with `shellcheck-rust` and the same flags.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: shellcheck-rust version
+      description: Output of `shellcheck-rust --version`, or the commit hash if you built from source.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration
+      description: Any `.shellcheckrc`, EditorConfig `shellcheck_*` keys, or directives that apply. Write "none" if there are none.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Optional. For example, the SC wiki page, or the place where you think the Rust and the Haskell differ.
