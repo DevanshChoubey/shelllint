@@ -139,20 +139,27 @@ of SC warning codes as the real ShellCheck binary.
    compares the resulting set of SC codes with the oracle's.
    `corpus/parity-baseline.json` records which scripts match, and CI fails on
    any regression.
+5. **Full parity gate.** `parity --full` compares the exact, ordered `json1`
+   output (every comment's code, level, line, column, end position, message
+   and fix) with the oracle's, stored in `corpus/oracle-full.jsonl`. Current
+   result: 2105 of 2105 identical.
 
 ```bash
 cargo run -q -p shellcheck-conformance -- report
 cargo run -q -p shellcheck-conformance --features checker -- parity
+cargo run -q -p shellcheck-conformance --features checker -- parity --full
 ```
 
-**What this does not prove yet:**
+Beyond the corpus, two rounds of differential testing compared the release
+binary with the original on tens of thousands of generated, mutated and
+real-world scripts, plus the CLI options, the LSP and the MCP server. The
+remaining known differences are listed in
+[`docs/divergences.md`](docs/divergences.md).
 
-- Parity compares *sets of codes* only. It does not yet check positions (line
-  and column), message text, severity or fix suggestions against the oracle. A
-  full-fidelity comparison is being built.
+**What this does not prove:**
+
 - The corpus is ShellCheck's own test suite, which is mostly small snippets.
-  So far, large real-world scripts are covered only by the pathological-input
-  tests, which check limits on time and memory and do not compare output.
+  Differential testing widens the coverage but cannot be exhaustive.
 
 ## Benchmarks
 
@@ -185,8 +192,9 @@ Other known differences:
 - The binary is called `shellcheck-rust`. `--version` reports both its own
   version and the upstream version it ports, and links to this project.
 - `--fix` and `--dry-run` are extensions (see [`--fix`](#--fix-extension)).
-- Positions, messages and fixes are not yet checked against the oracle in full
-  (see [Compatibility](#compatibility)).
+- A few edge cases differ where the original crashes or depends on the
+  locale (for example invalid UTF-8 in `--files-from`, lone surrogates, an
+  out-of-memory exit). [`docs/divergences.md`](docs/divergences.md) lists them.
 
 For the same input and the same upstream version, any output that differs from
 ShellCheck's is a bug, unless a `DIVERGENCE:` note explains it. Please report
