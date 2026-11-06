@@ -175,11 +175,25 @@ impl PropSet {
     pub(crate) fn from_bits(b: u8) -> PropSet {
         PropSet(b & 0xf)
     }
+    /// The position of this set among all 16 in Haskell `Set` order.
+    pub(crate) fn rank(self) -> u8 {
+        PROP_SET_RANK[self.0 as usize]
+    }
+    /// The set at `rank` in Haskell `Set` order.
+    pub(crate) fn from_rank(rank: u8) -> PropSet {
+        PropSet(PROP_SET_BY_RANK[rank as usize & 0xf])
+    }
 }
+
+/// `PropSet::rank` per bit pattern: the position of the pattern's ascending
+/// element list in lexicographic order (checked by `prop_set_rank_order`).
+const PROP_SET_RANK: [u8; 16] = [0, 1, 9, 2, 13, 6, 10, 3, 15, 8, 12, 5, 14, 7, 11, 4];
+/// The inverse of `PROP_SET_RANK`.
+const PROP_SET_BY_RANK: [u8; 16] = [0, 1, 3, 7, 15, 11, 5, 13, 9, 2, 6, 14, 10, 4, 12, 8];
 
 impl Ord for PropSet {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.to_asc_list().cmp(&other.to_asc_list())
+        self.rank().cmp(&other.rank())
     }
 }
 impl PartialOrd for PropSet {
@@ -332,6 +346,22 @@ impl CfgResult {
                 return false;
             }
             cur = self.post_idom[cur as usize];
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn prop_set_rank_order() {
+        for a in 0..16u8 {
+            assert_eq!(PropSet::from_rank(PropSet::from_bits(a).rank()), PropSet::from_bits(a));
+            for b in 0..16u8 {
+                let (x, y) = (PropSet::from_bits(a), PropSet::from_bits(b));
+                assert_eq!(x.cmp(&y), x.to_asc_list().cmp(&y.to_asc_list()), "{a} {b}");
+            }
         }
     }
 }
