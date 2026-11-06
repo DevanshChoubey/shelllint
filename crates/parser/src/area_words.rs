@@ -6,9 +6,7 @@ use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::interface::Severity::{ErrorC, InfoC, WarningC};
 
-use crate::area_spacing::{
-    DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS, QUOTABLE_CHARS, UNICODE_DOUBLE_QUOTES, UNICODE_SINGLE_QUOTES,
-};
+use crate::area_spacing::{QUOTABLE_CHARS, UNICODE_DOUBLE_QUOTES, UNICODE_SINGLE_QUOTES};
 use crate::engine::{Input, P, PR, SourcePos, is_alpha};
 use crate::{alt, choice};
 
@@ -27,6 +25,7 @@ const NORMAL_LITERAL_STANDARD_END: &str =
 #[cfg(test)]
 mod char_set_tests {
     use super::*;
+    use crate::area_spacing::{DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS};
 
     #[test]
     fn spelled_out_char_sets_match_their_definitions() {
