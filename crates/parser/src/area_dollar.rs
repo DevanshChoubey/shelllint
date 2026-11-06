@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1612-1835:
 // all $ expansions, variable names.
 

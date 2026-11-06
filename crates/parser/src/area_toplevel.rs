@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 918-1107
 // (readCondition, annotations, comments: between the BEGIN/END annotations
 // markers) and lines 3128-3673 (keywords and operators, shebang, EOF check,

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkConditionalAndOrs`, lines 1405-1422 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};

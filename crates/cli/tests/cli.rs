@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Tests for the CLI, a port of ShellCheck shellcheck.hs (e11f964).
 // Expected texts were captured from koalaman/shellcheck:latest.
 

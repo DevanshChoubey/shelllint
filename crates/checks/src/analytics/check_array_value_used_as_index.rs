@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkArrayValueUsedAsIndex`, lines 4947-5021 (e11f964)
 
 use std::collections::HashMap;

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs, Checks/Commands.hs and Checks/ShellSupport.hs (e11f964)
 //
 // One file per check: `src/<module>/<snake_name>.rs`, each registering a

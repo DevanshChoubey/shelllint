@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Golden tests against the output of koalaman/shellcheck (e11f964) run with
 // `--norc --color=never -f <fmt>` on tests/golden/in/{a,b,c}.sh.
 //

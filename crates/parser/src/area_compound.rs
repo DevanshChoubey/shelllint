@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 2439-2908:
 // if/while/until/for/select/case, functions, coproc, subshells, brace groups,
 // bats tests, compound commands and lists.

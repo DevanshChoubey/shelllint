@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the prop_ tests in ShellCheck src/ShellCheck/ASTLib.hs (e11f964)
 //
 // None of the 61 ASTLib unit tests parse a script: they are either on

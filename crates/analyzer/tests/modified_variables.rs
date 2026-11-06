@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Parser-backed tests of ShellCheck src/ShellCheck/AnalyzerLib.hs (e11f964)
 // `getModifiedVariableCommand`; no Haskell counterpart (upstream tests it
 // only through the checks).

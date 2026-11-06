@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkForDecimals`, lines 1543-1549 (e11f964)
 //
 // Not to be confused with Checks/ShellSupport.hs `checkForDecimals`, which

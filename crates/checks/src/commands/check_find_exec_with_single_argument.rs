@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkFindExecWithSingleArgument`, lines 528-542 (e11f964)
 
 use std::sync::LazyLock;

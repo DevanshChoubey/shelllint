@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUseBeforeDefinition`, lines 4034-4065 (e11f964)
 
 use std::cell::RefCell;

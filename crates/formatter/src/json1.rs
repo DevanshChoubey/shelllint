@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Formatter/JSON1.hs (e11f964)
 //
 // DIVERGENCE: see json.rs; the shared comment/fix encoders live there since

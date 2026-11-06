@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Resource bound for the diff formatter's `getDiff` (Data.Algorithm.Diff,
 // O((N+M)D)); no Haskell counterpart.
 //

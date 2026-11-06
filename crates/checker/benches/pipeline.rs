@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Criterion micro-benchmarks (no Haskell counterpart): parse-only versus the
 // full parse + analyze pipeline. Inputs: the hand-written scripts in
 // bench/handwritten, plus `echo $x` repeated to 1k and 10k lines.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkCatastrophicRm`, lines 1157-1206 (e11f964)
 
 use std::collections::HashSet;

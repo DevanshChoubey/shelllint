@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Tests for the port of ShellCheck src/ShellCheck/AST.hs (e11f964)
 #![allow(non_camel_case_types)]
 

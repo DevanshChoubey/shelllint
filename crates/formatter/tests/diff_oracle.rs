@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Oracle tests for the `diff` formatter against koalaman/shellcheck (e11f964).
 //
 // Fixtures live in tests/golden/diff/. For each `<name>.sh`:

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/ASTLib.hs (e11f964)
 //
 // Every function takes the `&Ast` arena first and refers to tokens by `Id`.

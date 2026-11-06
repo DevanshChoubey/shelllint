@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkNullaryExpansionTest`, lines 4256-4272 (e11f964)
 
 use crate::support::{fix_with, replace_start};

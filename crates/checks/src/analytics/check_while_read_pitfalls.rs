@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkWhileReadPitfalls`, lines 2777-2846 (e11f964)
 
 use crate::support::{fix_with, replace_end};

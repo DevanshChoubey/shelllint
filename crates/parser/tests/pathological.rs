@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Parser performance regressions (port of ShellCheck Parser.hs, e11f964).
 //
 // Each input must parse in under TIME_LIMIT inside an address-space-capped

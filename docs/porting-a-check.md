@@ -22,7 +22,7 @@ The file name is the Haskell name in snake_case. For example, `checkEchoWc` beco
 Each file starts with these two lines:
 
 ```rust
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkEchoWc`, lines 483-494 (e11f964)
 ```
 

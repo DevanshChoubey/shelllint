@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // The parts of fgl (Data.Graph.Inductive, PatriciaTree) that ShellCheck's
 // CFG.hs uses, plus CFG.hs `inlineSubshells`, `findTerminalNodes` and
 // `findPostDominators` (e11f964).

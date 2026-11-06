@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the prop_spacing*/prop_allspacing* tests of ShellCheck src/ShellCheck/Parser.hs (e11f964)
 
 use shellcheck_parser::testing::{is_ok, is_warning, named_parser};

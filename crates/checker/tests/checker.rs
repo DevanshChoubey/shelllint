@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the tests of ShellCheck src/ShellCheck/Checker.hs and
 // src/ShellCheck/EditorConfig.hs (e11f964), plus pipeline tests checked
 // against the oracle (koalaman/shellcheck v0.11.0-171-ge11f964).

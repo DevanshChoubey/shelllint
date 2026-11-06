@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checker.hs and src/ShellCheck/Analyzer.hs (e11f964),
 // plus `decodeString` from shellcheck.hs (the CLI's file decoding).
 //

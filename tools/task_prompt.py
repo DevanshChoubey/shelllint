@@ -108,7 +108,7 @@ def main():
         if c["uses_cfg"]:
             w("- Uses the CFG / data-flow layer.")
         w(f"- File to create: {path}")
-        w(f"  Header: `// SPDX-License-Identifier: GPL-3.0-only` then "
+        w(f"  Header: `// SPDX-License-Identifier: GPL-3.0-or-later` then "
           f"`// Port of ShellCheck src/ShellCheck/{mod} `{name}`, lines {lo}-{hi} ({manifest['source_commit']})`")
         regs = c.get("registrations") or [{"registry": c["registry"], "order": c["order"], "expr": name}]
         w(f"- Register {'one CheckEntry' if len(regs) == 1 else f'{len(regs)} CheckEntry statics'} "

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/EditorConfig.hs (e11f964), plus the
 // EditorConfig lookup of shellcheck.hs (`getEditorConfig`, `mergeConfigs`,
 // `isEditorConfigRejection`, lines 529-580) behind a filesystem trait.

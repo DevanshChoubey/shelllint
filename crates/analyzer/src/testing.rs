@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the check test helpers of ShellCheck (e11f964): Analytics.hs
 // `verify`/`verifyNot`/`verifyTree`/`verifyNotTree`/`verifyCodes`/
 // `verifyCodesTree`/`producesComments`/`runAndGetComments`,

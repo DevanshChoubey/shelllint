@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/AST.hs (e11f964)
 //
 // DIVERGENCE: Haskell's `Token = OuterToken Id (InnerToken Token)` is a tree of

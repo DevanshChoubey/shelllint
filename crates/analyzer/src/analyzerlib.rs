@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/AnalyzerLib.hs (e11f964)
 //
 // DIVERGENCE: the `RWS Parameters [TokenComment] Cache` monad (`AnalyzerM`)

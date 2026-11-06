@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkFindExec`, lines 793-828 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{is_command, Comments, Params};

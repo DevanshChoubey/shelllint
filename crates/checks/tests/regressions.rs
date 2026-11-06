@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Regression tests for checks of the port of ShellCheck (e11f964) whose
 // position, message or count diverged from the oracle; no Haskell
 // counterpart (the Haskell tests only check whether a check fires).

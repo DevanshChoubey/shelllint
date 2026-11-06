@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnpassedInFunctions`, lines 3025-3107 (e11f964)
 
 use std::collections::BTreeMap;

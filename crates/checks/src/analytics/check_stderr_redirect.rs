@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkStderrRedirect`, lines 1069-1090 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, is_parent_of};

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Formatter/Diff.hs (e11f964)
 //
 // `Data.Algorithm.Diff.getDiff` from the Diff package is ported below.

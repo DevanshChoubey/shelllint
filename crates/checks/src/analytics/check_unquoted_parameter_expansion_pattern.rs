@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnquotedParameterExpansionPattern`, lines 4917-4937 (e11f964)
 
 use crate::support::surround_with;

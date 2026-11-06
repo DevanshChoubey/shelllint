@@ -138,8 +138,7 @@ printf '%s\n' 'echo $foo' | shellcheck-rust -s bash -f gcc -
   ```
 
   For a file with no upstream source, write `; no Haskell counterpart` in
-  place of the line span. (Older files still say `GPL-3.0-only`. They will be
-  updated in one mechanical sweep, so do not change them in your pull request.)
+  place of the line span.
 
 ## Pull requests
 

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the prop_ tests in ShellCheck src/ShellCheck/AnalyzerLib.hs (e11f964),
 // plus tests of the check registry (src/api.rs) on hand-built trees.
 //

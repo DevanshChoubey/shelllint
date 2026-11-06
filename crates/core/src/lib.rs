@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Crate root for the ports of ShellCheck src/ShellCheck/{AST,Interface,Data,Regex,Prelude}.hs (e11f964)
 #![forbid(unsafe_code)]
 

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Tests of the pilot checks, the module checkers of ShellCheck (e11f964)
 // src/ShellCheck/Analytics.hs `checker`, Checks/Commands.hs `checker` and
 // Checks/ShellSupport.hs `checker` run on them, and crates/checks/src/support.rs.

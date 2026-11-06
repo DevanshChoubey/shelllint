@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the parts of ShellCheck src/ShellCheck/Fixer.hs (e11f964) that the
 // formatters need: removeTabStops, mapPositions, the Fix semigroup and applyFix.
 //

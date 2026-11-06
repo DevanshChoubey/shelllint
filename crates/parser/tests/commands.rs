@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Tests for the port of ShellCheck src/ShellCheck/Parser.hs (e11f964) lines 2054-2438
 // and 2909-3127 (separators, simple commands, source, pipelines, and/or;
 // assignments, arrays, let/eval/time suffixes).

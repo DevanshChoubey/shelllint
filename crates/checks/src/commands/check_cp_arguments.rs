@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkCpArguments`, lines 1240-1243 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};

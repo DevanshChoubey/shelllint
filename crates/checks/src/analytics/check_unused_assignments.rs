@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnusedAssignments`, lines 2567-2589 (e11f964)
 
 use std::collections::{BTreeMap, BTreeSet};

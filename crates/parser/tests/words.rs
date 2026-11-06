@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Tests for the port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1108-1611:
 // the `prop_` tests of the words area (words, quotes, backticks, globs,
 // extglobs, escapes, braces).

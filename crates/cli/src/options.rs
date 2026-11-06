@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck shellcheck.hs (e11f964): `Flag`, `options`, `usageInfo`
 // and System.Console.GetOpt's `getOpt Permute`.
 

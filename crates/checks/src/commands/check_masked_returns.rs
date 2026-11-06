@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkMaskedReturns`, lines 1408-1448 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_path_m};

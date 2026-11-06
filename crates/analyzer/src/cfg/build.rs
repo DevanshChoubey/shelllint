@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/CFG.hs (e11f964): `buildGraph`, the
 // `CFM` graph-building monad, `build`, `handleCommand`, `buildAssignment`,
 // `tokenToParts` and the graph post-processing (`removeUnnecessary-

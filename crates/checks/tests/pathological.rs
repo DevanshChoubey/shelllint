@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Pathological-input tests for single checks of the port of ShellCheck
 // (e11f964); no Haskell counterpart.
 //

@@ -5,7 +5,7 @@ members = ["crates/*"]
 [workspace.package]
 version = "0.0.1"
 edition = "2024"
-license = "GPL-3.0-only"
+license = "GPL-3.0-or-later"
 description = "An unofficial Rust port of ShellCheck, the shell script static analysis tool"
 repository = "https://github.com/DevanshChoubey/shellcheck-rust"
 homepage = "https://github.com/DevanshChoubey/shellcheck-rust"

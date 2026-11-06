@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Performance regression tests for the analyzer (CFG build, the cfIdToNodes
 // lookup, `builtin X` dispatch); no Haskell counterpart.
 //

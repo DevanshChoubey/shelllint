@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Regression tests: the parser's `upper`/`lower`/`letter`/`alphaNum` follow
 // GHC's general-category `Data.Char` predicates (Parser.hs e11f964), not
 // Rust's derived Uppercase/Lowercase/Alphabetic properties. Expected output

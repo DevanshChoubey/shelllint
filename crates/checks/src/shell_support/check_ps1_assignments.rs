@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/ShellSupport.hs `checkPS1Assignments`, lines 673-689 (e11f964)
 
 use std::sync::LazyLock;

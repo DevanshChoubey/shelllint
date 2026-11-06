@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Formatter/Format.hs (e11f964)
 //
 // DIVERGENCE: the Haskell `Formatter` record of IO actions becomes a trait.

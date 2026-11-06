@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkTestArgumentSplitting`, lines 3273-3351 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params};

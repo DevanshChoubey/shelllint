@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/ShellSupport.hs `checkBraceExpansionVars`, lines 619-642 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command_m, is_unqualified_command};

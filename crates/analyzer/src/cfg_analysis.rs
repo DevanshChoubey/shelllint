@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/CFGAnalysis.hs (e11f964)
 //
 // Data Flow Analysis on a Control Flow Graph.

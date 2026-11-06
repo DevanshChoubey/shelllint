@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck shellcheck.hs `ioInterface` and `inputFile` (e11f964);
 // `decodeString` is shellcheck_checker::decode_string.
 //

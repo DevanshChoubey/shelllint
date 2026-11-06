@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 //! Ports of the `Data.Char` predicates ShellCheck uses (GHC `GHC.Unicode`).
 //!
 //! GHC defines these by Unicode general category, while Rust's

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the check-registration machinery of ShellCheck (e11f964):
 // src/ShellCheck/Analytics.hs (`checker`, `mkChecker`, `nodeChecksToTreeCheck`,
 // `optionalChecks`), src/ShellCheck/Checks/Commands.hs (`CommandName`,

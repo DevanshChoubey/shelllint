@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Build script for the port of ShellCheck's checks (e11f964); no Haskell counterpart
 //
 // Every check lives in its own file, `src/<module>/<snake_name>.rs`. So that

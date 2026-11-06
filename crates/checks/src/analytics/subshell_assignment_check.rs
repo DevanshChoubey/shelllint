@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `subshellAssignmentCheck`, lines 2150-2154 (e11f964)
 
 use std::collections::HashMap;

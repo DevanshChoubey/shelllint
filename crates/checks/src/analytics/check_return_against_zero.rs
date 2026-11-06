@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkReturnAgainstZero`, lines 3533-3599 (e11f964)
 
 use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command};

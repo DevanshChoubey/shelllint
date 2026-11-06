@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Port of the shared check helpers of ShellCheck (e11f964):
 // src/ShellCheck/Analytics.hs (`runNodeAnalysis`,
 // `nodeChecksToTreeCheck`, `checkCommand`, `hasFloatingPoint`, `isCondition`,

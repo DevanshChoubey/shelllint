@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Conformance harness for the port of ShellCheck (e11f964); no Haskell counterpart
 
 use shellcheck_conformance::runner::{
