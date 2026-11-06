@@ -98,7 +98,9 @@ fn render_json1(result: &CheckResult, source: &str) -> String {
     let mut formatter = json1::format();
     let mut out: Vec<u8> = Vec::new();
     formatter.header(&mut out);
-    formatter.on_result(result, source, &mut out);
+    // The formatter re-reads the checked file's contents, as the CLI does.
+    let sys = shellcheck_core::interface::mocked_system_interface(vec![(result.filename.clone(), source.to_string())]);
+    formatter.on_result(result, &sys, &mut out);
     formatter.footer(&mut out);
     String::from_utf8(out).unwrap_or_default()
 }
