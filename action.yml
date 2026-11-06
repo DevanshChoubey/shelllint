@@ -1,0 +1,119 @@
+name: shellcheck-rust
+description: Lint shell scripts with shellcheck-rust, a Rust port of ShellCheck. Downloads the release binary for the runner OS and architecture.
+branding:
+  icon: check-circle
+  color: green
+
+inputs:
+  paths:
+    description: Space-separated files or globs to check (bash globstar syntax, e.g. "scripts/**/*.sh install.sh").
+    required: false
+    default: "**/*.sh"
+  severity:
+    description: Minimum severity to report - error, warning, info or style.
+    required: false
+    default: style
+  format:
+    description: Output format (gcc, tty, json, json1, checkstyle, diff, quiet). The gcc format enables the GitHub problem matcher.
+    required: false
+    default: gcc
+  extra-args:
+    description: Any other shellcheck-rust flags, e.g. "--enable=require-variable-braces --exclude=SC1091".
+    required: false
+    default: ""
+  version:
+    description: Release version to download (without the leading v). Use "latest" to follow the newest release.
+    required: false
+    default: "0.0.1"
+  repository:
+    description: GitHub repository that hosts the release assets, as OWNER/NAME.
+    required: false
+    default: OWNER/shellcheck-rust
+  fail-on-findings:
+    description: Fail the step when findings are reported (exit status 1). Set to false to only annotate.
+    required: false
+    default: "true"
+
+outputs:
+  binary:
+    description: Absolute path of the downloaded shellcheck-rust binary.
+    value: ${{ steps.install.outputs.binary }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install shellcheck-rust
+      id: install
+      shell: bash
+      env:
+        ACTION_VERSION: ${{ inputs.version }}
+        ACTION_REPO: ${{ inputs.repository }}
+        ACTION_RUNNER_OS: ${{ runner.os }}
+        ACTION_RUNNER_ARCH: ${{ runner.arch }}
+        ACTION_TEMP: ${{ runner.temp }}
+      run: |
+        set -euo pipefail
+        case "$ACTION_RUNNER_OS/$ACTION_RUNNER_ARCH" in
+          Linux/X64)     target=x86_64-unknown-linux-musl;  ext=tar.gz ;;
+          Linux/ARM64)   target=aarch64-unknown-linux-musl; ext=tar.gz ;;
+          macOS/X64)     target=x86_64-apple-darwin;        ext=tar.gz ;;
+          macOS/ARM64)   target=aarch64-apple-darwin;       ext=tar.gz ;;
+          Windows/X64)   target=x86_64-pc-windows-msvc;     ext=zip ;;
+          *) echo "::error::No shellcheck-rust binary for $ACTION_RUNNER_OS/$ACTION_RUNNER_ARCH"; exit 1 ;;
+        esac
+        if [ "$ACTION_VERSION" = "latest" ]; then
+          base="https://github.com/$ACTION_REPO/releases/latest/download"
+        else
+          base="https://github.com/$ACTION_REPO/releases/download/v$ACTION_VERSION"
+        fi
+        asset="shellcheck-rust-v${ACTION_VERSION}-${target}.${ext}"
+        [ "$ACTION_VERSION" = "latest" ] && asset="shellcheck-rust-latest-${target}.${ext}"
+        dir="$ACTION_TEMP/shellcheck-rust"
+        rm -rf "$dir" && mkdir -p "$dir"
+        curl -fsSL --retry 3 -o "$dir/$asset" "$base/$asset"
+        curl -fsSL --retry 3 -o "$dir/SHA256SUMS" "$base/SHA256SUMS"
+        # Verify the download against the published checksum.
+        (cd "$dir" && grep " $asset\$" SHA256SUMS | sha256sum -c -)
+        (cd "$dir" && if [ "$ext" = zip ]; then unzip -q "$asset"; else tar -xzf "$asset"; fi)
+        bin="$dir/shellcheck-rust"
+        [ "$ACTION_RUNNER_OS" = Windows ] && bin="$dir/shellcheck-rust.exe"
+        chmod +x "$bin" 2>/dev/null || true
+        echo "binary=$bin" >> "$GITHUB_OUTPUT"
+        echo "$dir" >> "$GITHUB_PATH"
+        "$bin" --version
+
+    - name: Register problem matcher
+      shell: bash
+      run: echo "::add-matcher::${{ github.action_path }}/packaging/action/problem-matcher.json"
+
+    - name: Run shellcheck-rust
+      shell: bash
+      env:
+        ACTION_PATHS: ${{ inputs.paths }}
+        ACTION_SEVERITY: ${{ inputs.severity }}
+        ACTION_FORMAT: ${{ inputs.format }}
+        ACTION_EXTRA: ${{ inputs.extra-args }}
+        ACTION_FAIL: ${{ inputs.fail-on-findings }}
+        ACTION_BIN: ${{ steps.install.outputs.binary }}
+      run: |
+        set -uo pipefail
+        shopt -s globstar nullglob
+        files=()
+        for pattern in $ACTION_PATHS; do
+          # Unquoted expansion is intentional: each pattern is a glob.
+          matches=( $pattern )
+          files+=( "${matches[@]}" )
+        done
+        if [ "${#files[@]}" -eq 0 ]; then
+          echo "No files matched: $ACTION_PATHS"
+          exit 0
+        fi
+        # Only a file list is passed; ACTION_EXTRA is word-split on purpose.
+        set +e
+        "$ACTION_BIN" --severity="$ACTION_SEVERITY" --format="$ACTION_FORMAT" $ACTION_EXTRA -- "${files[@]}"
+        status=$?
+        set -e
+        if [ "$ACTION_FAIL" != "true" ] && [ "$status" -eq 1 ]; then
+          exit 0
+        fi
+        exit "$status"

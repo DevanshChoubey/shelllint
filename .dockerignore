@@ -1,0 +1,8 @@
+.git
+**/target
+**/__pycache__
+bench/.bin
+bench/inputs
+packaging
+demo
+docs

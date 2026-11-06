@@ -1,0 +1,39 @@
+# Builds a wheel that ships the native shellcheck-rust binary as a console
+# script, so `pip install shellcheck-rust` puts `shellcheck-rust` on PATH.
+#
+#   cd packaging/pypi && maturin build --release -o dist
+#   pip install dist/shellcheck_rust-*.whl
+#
+# bindings = "bin" means maturin compiles the [[bin]] target of the cli crate
+# and does not generate any Python module; there is no Python API.
+
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "shellcheck-rust"
+version = "0.0.1"
+description = "A Rust port of ShellCheck: finds bugs in shell scripts."
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.8"
+keywords = ["shell", "shellcheck", "bash", "lint", "static-analysis"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Operating System :: POSIX",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Rust",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.urls]
+Homepage = "https://github.com/OWNER/shellcheck-rust"
+Repository = "https://github.com/OWNER/shellcheck-rust"
+
+[tool.maturin]
+bindings = "bin"
+manifest-path = "../../crates/cli/Cargo.toml"
+strip = true
+# Build the same LTO release profile as the other channels.

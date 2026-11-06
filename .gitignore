@@ -2,3 +2,8 @@ target/
 __pycache__/
 bench/.bin/
 bench/inputs/
+
+# build artifacts staged by packaging/npm/stage.sh
+packaging/npm/platforms/*/bin/shellcheck-rust*
+packaging/pypi/dist/
+packaging/pypi/build/

@@ -1,0 +1,35 @@
+# Maintainer: OWNER <you@example.com>
+# Source build of shellcheck-rust. The -bin variant (PKGBUILD-bin) installs the
+# release tarball instead.
+pkgname=shellcheck-rust
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="A Rust port of ShellCheck: finds bugs in shell scripts"
+arch=('x86_64' 'aarch64')
+url="https://github.com/OWNER/shellcheck-rust"
+license=('GPL-3.0-or-later')
+depends=('gcc-libs')
+makedepends=('cargo')
+provides=('shellcheck-rust')
+conflicts=('shellcheck-rust-bin')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('@SHA256_SOURCE@')
+
+prepare() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+  cargo build --frozen --release -p shellcheck-rust
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -Dm755 target/release/shellcheck-rust "$pkgdir/usr/bin/shellcheck-rust"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
