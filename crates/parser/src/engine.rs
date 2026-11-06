@@ -528,7 +528,7 @@ impl<'a> P<'a> {
 
     /// `alphaNum` (`isAlphaNum`)
     pub fn alpha_num(&mut self) -> PR<char> {
-        self.satisfy(|c| is_alpha(c) || c.is_numeric())
+        self.satisfy(is_alpha_num)
     }
 
     /// `space` (`isSpace`)
@@ -836,40 +836,7 @@ impl<'a> P<'a> {
     }
 }
 
-/// `Data.Char.isAlpha` (= `isLetter`: general categories L*).
-// DIVERGENCE: std has no general-category lookup; `is_alphabetic` (the
-// Alphabetic property) minus numerics differs from L* only for combining marks
-// and a few symbols with Other_Alphabetic (e.g. U+0345, U+24B6).
-pub fn is_alpha(c: char) -> bool {
-    c.is_alphabetic() && !c.is_numeric()
-}
-
-/// `Data.Char.isUpper` (Lu or Lt).
-// DIVERGENCE: approximated by the Uppercase property (Lu + Other_Uppercase);
-// differs for titlecase letters and Other_Uppercase symbols.
-pub fn is_upper(c: char) -> bool {
-    c.is_uppercase()
-}
-
-/// `Data.Char.isLower` (Ll).
-// DIVERGENCE: approximated by the Lowercase property (Ll + Other_Lowercase).
-pub fn is_lower(c: char) -> bool {
-    c.is_lowercase()
-}
-
-/// `Data.Char.isSpace`: `\t\n\v\f\r`, space, U+00A0, and category Zs.
-pub fn is_space(c: char) -> bool {
-    matches!(
-        c,
-        ' ' | '\t'..='\r'
-            | '\u{A0}'
-            | '\u{1680}'
-            | '\u{2000}'..='\u{200A}'
-            | '\u{202F}'
-            | '\u{205F}'
-            | '\u{3000}'
-    )
-}
+pub use shellcheck_core::unicode::{is_alpha, is_alpha_num, is_lower, is_space, is_upper};
 
 /// Run `f` on a fresh thread with a `stack_bytes` stack, for callers that
 /// parse deeply nested input (the readers are recursive, like the Haskell).

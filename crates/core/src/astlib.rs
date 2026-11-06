@@ -687,10 +687,9 @@ pub fn e4m(str: &str) -> String {
 
 /// Escape user data for messages.
 /// Messages generally avoid repeating user data, but sometimes it's helpful.
-// DIVERGENCE: Haskell's `isPrint`/`isLetter` use Unicode general categories,
-// which std does not expose. ASCII is exact; for non-ASCII only `isLetter`
-// matters (a non-ASCII char is kept iff it is a letter), approximated by
-// `is_alphabetic() && !is_numeric()` (differs only for a few combining marks).
+// `shouldEscape c = not (isPrint c) || (not (isAscii c) && not (isLetter c))`.
+// For ASCII, `isPrint` is ' '..='~'; a non-ASCII char is kept iff it is a
+// letter (letters are always printable).
 pub fn escape_for_message(str: &str) -> String {
     fn pad0(n: usize, s: String) -> String {
         let l = s.chars().count();
@@ -703,7 +702,7 @@ pub fn escape_for_message(str: &str) -> String {
         if c.is_ascii() {
             !(' '..='~').contains(&c)
         } else {
-            !(c.is_alphabetic() && !c.is_numeric())
+            !crate::unicode::is_letter(c)
         }
     }
     let mut out = String::new();

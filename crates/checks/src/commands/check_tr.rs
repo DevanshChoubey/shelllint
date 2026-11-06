@@ -50,10 +50,29 @@ fn f(p: &Params<'_>, word: Id, c: &mut Comments) {
 }
 
 /// `relevant /= nub relevant` for the letters of `s`.
-// DIVERGENCE: Haskell `isAlpha` is Unicode general category L*; Rust's
-// `is_alphabetic` (the Alphabetic property) also admits a few marks and
-// letter-like numerals. Equal for ASCII and the common scripts.
 fn duplicated(s: &str) -> bool {
-    let relevant: Vec<char> = s.chars().filter(|c| c.is_alphabetic()).collect();
+    let relevant: Vec<char> = s.chars().filter(|&c| shellcheck_core::unicode::is_alpha(c)).collect();
     relevant.iter().enumerate().any(|(i, c)| relevant[..i].contains(c))
+}
+
+#[cfg(test)]
+mod tests {
+    use shellcheck_analyzer::testing::run_check;
+
+    fn codes(script: &str) -> Vec<u32> {
+        run_check("Checks/Commands.hs", "checkTr", "node", script)
+            .expect("registered")
+            .into_iter()
+            .map(|c| c as u32)
+            .collect()
+    }
+
+    #[test]
+    fn duplicated_letters_use_general_category() {
+        // Repeated Devanagari vowel signs (Mc) are not `isAlpha`: no SC2020.
+        assert!(!codes("tr xाा y").contains(&2020));
+        // Repeated letters in other scripts are.
+        assert!(codes("tr नाना ab").contains(&2020));
+        assert!(codes("tr ǅaǅ x").contains(&2020));
+    }
 }

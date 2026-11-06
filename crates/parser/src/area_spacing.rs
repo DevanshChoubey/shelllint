@@ -64,7 +64,8 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn special_variable(&mut self) -> PR<char> {
-        self.one_of(&SPECIAL_VARIABLES.concat())
+        // oneOf (concat specialVariables)
+        self.satisfy(|c| SPECIAL_VARIABLES.iter().any(|v| v.contains(c)))
     }
 
     pub(crate) fn param_sub_special_chars(&mut self) -> PR<char> {

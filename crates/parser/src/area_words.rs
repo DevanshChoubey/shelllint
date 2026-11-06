@@ -6,11 +6,38 @@ use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_core::interface::Severity::{ErrorC, InfoC, WarningC};
 
-use crate::area_spacing::{
-    DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS, QUOTABLE_CHARS, UNICODE_DOUBLE_QUOTES, UNICODE_SINGLE_QUOTES,
-};
+use crate::area_spacing::{QUOTABLE_CHARS, UNICODE_DOUBLE_QUOTES, UNICODE_SINGLE_QUOTES};
 use crate::engine::{Input, P, PR, SourcePos, is_alpha};
 use crate::{alt, choice};
+
+// The char sets the Haskell readers build with `++` on every call, spelled
+// out once (checked against the definitions in the tests below).
+/// `"'\\" ++ unicodeSingleQuotes`
+const SINGLE_QUOTED_PART_END: &str = "'\\\u{2018}\u{2019}";
+/// `doubleQuotableChars ++ unicodeDoubleQuotes`
+const DOUBLE_LITERAL_PART_END: &str = "\\\"$`\u{201C}\u{201D}\u{2033}\u{2036}";
+/// `"![" ++ extglobStartChars`
+const GLOB_CLASS_CHARS: &str = "![?*@!+";
+/// `standardEnd = "[{}" ++ quotableChars ++ extglobStartChars ++ unicodeDoubleQuotes ++ unicodeSingleQuotes`
+const NORMAL_LITERAL_STANDARD_END: &str =
+    "[{}|&;<>()\\ '\t\n\r\u{A0}\\\"$`?*@!+\u{201C}\u{201D}\u{2033}\u{2036}\u{2018}\u{2019}";
+
+#[cfg(test)]
+mod char_set_tests {
+    use super::*;
+    use crate::area_spacing::{DOUBLE_QUOTABLE_CHARS, EXTGLOB_START_CHARS};
+
+    #[test]
+    fn spelled_out_char_sets_match_their_definitions() {
+        assert_eq!(SINGLE_QUOTED_PART_END, format!("'\\{UNICODE_SINGLE_QUOTES}"));
+        assert_eq!(DOUBLE_LITERAL_PART_END, format!("{DOUBLE_QUOTABLE_CHARS}{UNICODE_DOUBLE_QUOTES}"));
+        assert_eq!(GLOB_CLASS_CHARS, format!("![{EXTGLOB_START_CHARS}"));
+        assert_eq!(
+            NORMAL_LITERAL_STANDARD_END,
+            format!("[{{}}{QUOTABLE_CHARS}{EXTGLOB_START_CHARS}{UNICODE_DOUBLE_QUOTES}{UNICODE_SINGLE_QUOTES}")
+        );
+    }
+}
 
 impl<'a> P<'a> {
     pub(crate) fn read_normal_word(&mut self) -> PR<Id> {
@@ -198,11 +225,10 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_single_quoted_part(&mut self) -> PR<String> {
-        let not_these = format!("'\\{UNICODE_SINGLE_QUOTES}");
         alt!(
             self,
             |p: &mut Self| p.read_single_escaped(),
-            |p: &mut Self| p.many1(|p| p.none_of(&not_these)).map(|v| v.into_iter().collect()),
+            |p: &mut Self| p.many1(|p| p.none_of(SINGLE_QUOTED_PART_END)).map(|v| v.into_iter().collect()),
             // readUnicodeQuote
             |p: &mut Self| {
                 let pos = p.get_position();
@@ -337,20 +363,20 @@ impl<'a> P<'a> {
         also_on_success: bool,
         parser: impl FnOnce(&mut Self) -> PR<T>,
     ) -> PR<T> {
-        let mut context = self.sys.clone();
+        let mut context = self.sys.save();
         self.alt_with(
             &mut context,
             // success
             |p, c| {
                 let res = p.try_(parser)?;
                 if also_on_success {
-                    p.sys = c.clone();
+                    p.sys.restore(c);
                 }
                 Ok(res)
             },
             // failure
             |p, c| {
-                p.sys = c.clone();
+                p.sys.restore(c);
                 p.fail("")
             },
         )
@@ -422,11 +448,10 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_double_literal_part(&mut self) -> PR<String> {
-        let not_these = format!("{DOUBLE_QUOTABLE_CHARS}{UNICODE_DOUBLE_QUOTES}");
         let x = self.many1(|p| {
             p.alt(
                 |p| p.read_double_escaped(),
-                |p| p.many1(|p| p.none_of(&not_these)).map(|v| v.into_iter().collect()),
+                |p| p.many1(|p| p.none_of(DOUBLE_LITERAL_PART_END)).map(|v| v.into_iter().collect()),
             )
         })?;
         Ok(x.concat())
@@ -452,7 +477,6 @@ impl<'a> P<'a> {
                 p.char_('[')?;
                 let negation = p.alt(|p| p.one_of("!^").map(String::from), |_| Ok(String::new()))?;
                 let leading_bracket = p.alt(|p| p.one_of("]").map(String::from), |_| Ok(String::new()))?;
-                let globchars = format!("![{EXTGLOB_START_CHARS}");
                 let s = p.many(|p| {
                     alt!(
                         p,
@@ -465,7 +489,7 @@ impl<'a> P<'a> {
                         },
                         |p: &mut Self| p.read_normal_literal_part("]"),
                         // globchars
-                        |p: &mut Self| p.one_of(&globchars).map(String::from),
+                        |p: &mut Self| p.one_of(GLOB_CLASS_CHARS).map(String::from),
                     )
                 })?;
                 p.guard(!leading_bracket.is_empty() || !s.is_empty())?;
@@ -485,12 +509,11 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_normal_literal_part(&mut self, custom_end: &str) -> PR<String> {
-        let standard_end =
-            format!("[{{}}{QUOTABLE_CHARS}{EXTGLOB_START_CHARS}{UNICODE_DOUBLE_QUOTES}{UNICODE_SINGLE_QUOTES}");
-        let not_these = format!("{custom_end}{standard_end}");
+        // noneOf (customEnd ++ standardEnd)
+        let not_these = |c: char| custom_end.contains(c) || NORMAL_LITERAL_STANDARD_END.contains(c);
         self.alt(
             |p| p.read_normal_escaped(),
-            |p| p.many1(|p| p.none_of(&not_these)).map(|v| v.into_iter().collect()),
+            |p| p.many1(|p| p.satisfy(|c| !not_these(c))).map(|v| v.into_iter().collect()),
         )
     }
 
@@ -649,11 +672,12 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_generic_literal(&mut self, end_chars: &str) -> PR<String> {
-        let not_these = format!("\\{end_chars}");
+        // noneOf ('\\':endChars)
+        let not_these = |c: char| c == '\\' || end_chars.contains(c);
         let strings = self.many(|p| {
             p.alt(
                 |p| p.read_generic_escaped(),
-                |p| p.many1(|p| p.none_of(&not_these)).map(|v| v.into_iter().collect()),
+                |p| p.many1(|p| p.satisfy(|c| !not_these(c))).map(|v| v.into_iter().collect()),
             )
         })?;
         Ok(strings.concat())
