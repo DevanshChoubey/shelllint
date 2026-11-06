@@ -98,8 +98,7 @@ impl Formatter for DiffFormatter {
         if !comments.is_empty() {
             self.found_issues = true;
         }
-        let suggested: Vec<Fix> = comments.iter().filter_map(|c| c.fix.clone()).collect();
-        let fixmap = build_fix_map(&suggested);
+        let fixmap = fixes_by_file(result);
         for (name, fix) in fixmap {
             match sys.read_file(Some(true), &name) {
                 Ok(contents) => {
@@ -419,6 +418,41 @@ fn format_doc(color: bool, doc: &DiffDoc<String>) -> String {
     s
 }
 
+/// The fixes `-f diff` would print for a check result: merged with the Fix
+/// semigroup and grouped by file name, exactly as the diff formatter does.
+/// (Extension: used by the CLI's `--fix`.)
+pub fn fixes_by_file(result: &CheckResult) -> BTreeMap<String, Fix> {
+    let suggested: Vec<Fix> = result.comments.iter().filter_map(|c| c.fix.clone()).collect();
+    build_fix_map(&suggested)
+}
+
+/// The contents that `patch -p1` produces when it applies the `-f diff`
+/// output for `fix` to `contents`, or `None` if the fix changes nothing.
+/// (Extension: used by the CLI's `--fix`.)
+///
+/// The new lines are those `apply_fix` returns, each ending in a newline.
+/// The diff marks a missing final newline only on the last old line it
+/// prints, so the result keeps that missing newline only when its last line
+/// is an unchanged old line (a `Both` at the end of the diff).
+pub fn apply_fix_to_contents(contents: &str, fix: &Fix) -> Option<String> {
+    let old = haskell_lines(contents);
+    let new = apply_fix(fix, &old);
+    if new.len() == old.len() && new.iter().zip(&old).all(|(a, b)| a == b) {
+        return None;
+    }
+    let old: Vec<String> = old.into_iter().map(String::from).collect();
+    let diffs = get_diff(&old, &new);
+    let mut out = String::with_capacity(contents.len() + 16);
+    for line in &new {
+        out.push_str(line);
+        out.push('\n');
+    }
+    if !has_trailing_linefeed(contents) && matches!(diffs.last(), Some(Diff::Both(..))) {
+        out.pop();
+    }
+    Some(out)
+}
+
 /// Create a Map from filename to Fix
 fn build_fix_map(fixes: &[Fix]) -> BTreeMap<String, Fix> {
     let all = merge_fixes(fixes);
@@ -531,6 +565,47 @@ mod tests {
         assert_eq!(get_diff(&[1, 2], &[]), vec![l(1), l(2)]);
         assert_eq!(get_diff(&[], &[1, 2]), vec![r(1), r(2)]);
         assert_eq!(get_diff(&[1, 2, 3], &[1, 2, 3]), vec![b(1), b(2), b(3)]);
+    }
+
+    fn rep(line: i64, sc: i64, ec: i64, text: &str) -> Fix {
+        use shellcheck_core::interface::{InsertionPoint, Position, Replacement};
+        let pos = |c| Position { file: "f".into(), line, column: c };
+        Fix {
+            replacements: vec![Replacement {
+                start_pos: pos(sc),
+                end_pos: pos(ec),
+                string: text.into(),
+                precedence: 1,
+                insertion_point: InsertionPoint::InsertAfter,
+            }],
+        }
+    }
+
+    #[test]
+    fn apply_fix_to_contents_like_patch() {
+        // Quote `$1` on line 2.
+        let fix = rep(2, 6, 8, "\"$1\"");
+        assert_eq!(
+            apply_fix_to_contents("#!/bin/sh\necho $1\ntrue\n", &fix).as_deref(),
+            Some("#!/bin/sh\necho \"$1\"\ntrue\n")
+        );
+        // The last line unchanged: its missing newline stays missing.
+        assert_eq!(
+            apply_fix_to_contents("#!/bin/sh\necho $1\ntrue", &fix).as_deref(),
+            Some("#!/bin/sh\necho \"$1\"\ntrue")
+        );
+        // The last line changed: the `+` line of the diff ends in a newline.
+        assert_eq!(
+            apply_fix_to_contents("#!/bin/sh\necho $1", &fix).as_deref(),
+            Some("#!/bin/sh\necho \"$1\"\n")
+        );
+        // CRs stay part of the line.
+        assert_eq!(
+            apply_fix_to_contents("#!/bin/sh\r\necho $1\r\n", &fix).as_deref(),
+            Some("#!/bin/sh\r\necho \"$1\"\r\n")
+        );
+        // A no-op fix changes nothing.
+        assert_eq!(apply_fix_to_contents("#!/bin/sh\necho $1\n", &rep(2, 6, 8, "$1")), None);
     }
 
     #[test]
