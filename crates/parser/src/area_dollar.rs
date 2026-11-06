@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1612-1835:
 // all $ expansions, variable names.
-// Some readers here are only called from other areas' readers, which may still
-// be stubs.
 
 use shellcheck_core::ast::{Id, Piped, Token};
 use shellcheck_core::interface::Severity;

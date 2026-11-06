@@ -1107,7 +1107,7 @@ impl<'a> P<'a> {
             Err(err) => {
                 debug_assert!(
                     end_state.ast.len() >= snapshot.ast_len(),
-                    "try_with_errors: inner parse shrank the AST below the snapshot"
+                    "try_with_errors: inner parse shrank the AST below the snapshot (sanity check only; the no-set-below-snapshot invariant is not enforced)"
                 );
                 end_state.restore(&snapshot);
                 self.user = end_state;

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 2054-2438:
 // separators, simple commands, `source`, pipelines, and/or lists, terms.
-// Some readers here are only called from other areas' readers, which may still
-// be stubs.
-#![allow(dead_code)]
 
 use shellcheck_core::astlib::{get_literal_string, get_word_parts, is_string_expansion};
 use shellcheck_core::ast::{Annotation, Ast, Id, Token};
@@ -438,6 +435,7 @@ impl<'a> P<'a> {
         if annotations.is_empty() { Ok(and_or) } else { Ok(self.node(aid, Token::T_Annotation(annotations, and_or))) }
     }
 
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn read_term_or_none(&mut self) -> PR<Vec<Id>> {
         self.allspacing()?;
         self.alt(

@@ -2,9 +2,6 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 2909-3127:
 // command prefixes/suffixes (let/eval/time/declare), assignments, arrays,
 // token helpers.
-// Some readers here are only called from other areas' readers, which may still
-// be stubs.
-#![allow(dead_code)]
 
 use shellcheck_core::ast::{AssignmentMode, Id, Token};
 use shellcheck_core::interface::Severity::{ErrorC, WarningC};

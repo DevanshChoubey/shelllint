@@ -82,7 +82,7 @@ pub struct UserSnapshot {
 }
 
 impl UserSnapshot {
-    pub fn ast_len(&self) -> u32 {
+    pub(crate) fn ast_len(&self) -> u32 {
         self.ast_len
     }
 }

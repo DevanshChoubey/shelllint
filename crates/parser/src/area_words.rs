@@ -226,6 +226,7 @@ impl<'a> P<'a> {
         self.read_back_ticked(false)
     }
 
+    #[doc(hidden)] // pub for tests/gate.rs
     pub fn read_back_ticked(&mut self, quoted: bool) -> PR<Id> {
         fn un_escape(quoted: bool, s: &[char]) -> String {
             let mut out = String::new();
@@ -320,11 +321,13 @@ impl<'a> P<'a> {
     }
 
     /// Parse something, but forget all parseProblems
+    #[doc(hidden)] // pub for tests/gate.rs
     pub fn in_separate_context<T>(&mut self, parser: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         self.parse_forgetting_context(true, parser)
     }
 
     /// Parse something, but forget all parseProblems on failure
+    #[doc(hidden)] // pub for tests/gate.rs
     pub fn forget_on_failure<T>(&mut self, parser: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         self.parse_forgetting_context(false, parser)
     }
