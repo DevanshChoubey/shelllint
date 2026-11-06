@@ -520,9 +520,9 @@ pub fn is_quote_free_node(ast: &Ast, strict: bool, shell: Shell, t: Id) -> bool 
         }
     };
     is_quote_free_element(t)
-        || get_path(ast, t)[1..]
-            .iter()
-            .find_map(|&p| is_quote_free_context(p))
+        || path_iter(ast, t)
+            .skip(1)
+            .find_map(is_quote_free_context)
             .unwrap_or(false)
 }
 
@@ -551,7 +551,14 @@ pub fn get_closest_command(ast: &Ast, t: Id) -> Option<Id> {
         Token::T_Script(..) => Some(false),
         _ => None,
     };
-    find_first(find_command, &get_path(ast, t)).copied()
+    for x in path_iter(ast, t) {
+        match find_command(&x) {
+            Some(true) => return Some(x),
+            Some(false) => return None,
+            None => {}
+        }
+    }
+    None
 }
 
 /// Like above, if koala_man knew Haskell when starting this project.
@@ -561,9 +568,8 @@ pub fn get_closest_command_m(params: &Params<'_>, t: Id) -> Option<Id> {
 
 /// Is the token used as a command name (the first word in a T_SimpleCommand)?
 pub fn used_as_command_name(ast: &Ast, token: Id) -> bool {
-    let path = get_path(ast, token);
     let mut current_id = token;
-    for &t in &path[1..] {
+    for t in path_iter(ast, token).skip(1) {
         match ast.get(t) {
             Token::T_NormalWord(l) | Token::T_DoubleQuoted(l) if l.len() == 1 && l[0] == current_id => {
                 current_id = t;
@@ -577,6 +583,13 @@ pub fn used_as_command_name(ast: &Ast, token: Id) -> bool {
     false
 }
 
+/// `getPath` as a lazy iterator (the token, then its parents), for the
+/// callers that stop early: Haskell's `getPath` list is lazy, and
+/// materialising it is O(depth) per call.
+fn path_iter(ast: &Ast, t: Id) -> impl Iterator<Item = Id> + '_ {
+    std::iter::successors(Some(t), |&x| ast.parent(x))
+}
+
 /// Version of the above taking the map from the current context
 /// Todo: give this the name "getPath"
 pub fn get_path_m(params: &Params<'_>, t: Id) -> Vec<Id> {
@@ -584,7 +597,7 @@ pub fn get_path_m(params: &Params<'_>, t: Id) -> Vec<Id> {
 }
 
 pub fn is_parent_of(ast: &Ast, parent: Id, child: Id) -> bool {
-    get_path(ast, child).contains(&parent)
+    path_iter(ast, child).any(|x| x == parent)
 }
 
 pub fn parents(params: &Params<'_>, t: Id) -> Vec<Id> {
@@ -1321,8 +1334,7 @@ pub fn filter_by_annotation(
     let should_ignore = |note: &TokenComment| {
         // `getPath parents (T_Bang $ tcId note)`: the dummy T_Bang stands in
         // for the note's token, so only its parents are tested.
-        get_path(ast, note.id)
-            .into_iter()
+        path_iter(ast, note.id)
             .skip(1)
             .any(|t| should_ignore_for(note.comment.code, t))
     };
@@ -1330,8 +1342,7 @@ pub fn filter_by_annotation(
 }
 
 pub fn should_ignore_code(params: &Params<'_>, code: Code, t: Id) -> bool {
-    get_path(params.ast, t)
-        .into_iter()
+    path_iter(params.ast, t)
         .any(|p| is_annotation_ignoring_code(params.ast, code, p))
 }
 
