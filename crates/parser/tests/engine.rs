@@ -230,16 +230,10 @@ fn named_parser_covers_corpus_targets() {
 }
 
 #[test]
-fn parses_cleanly_on_stub_panics_unported() {
+fn parses_cleanly_on_ported_reader() {
+    // All parser areas are ported (Phase 1 parser gate), so no reader is a stub any more.
     let f = testing::named_parser("readSimpleCommand").expect("named parser");
-    let r = std::panic::catch_unwind(|| testing::parses_cleanly(f, "echo foo"));
-    let err = r.expect_err("a stubbed reader must panic");
-    let msg = err
-        .downcast_ref::<String>()
-        .cloned()
-        .or_else(|| err.downcast_ref::<&str>().map(|s| s.to_string()))
-        .unwrap_or_default();
-    assert!(msg.starts_with("unported:"), "{msg}");
+    assert_eq!(testing::parses_cleanly(f, "echo foo"), Some(true));
 }
 
 #[test]
