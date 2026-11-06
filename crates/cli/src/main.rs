@@ -2,6 +2,7 @@
 // Port of ShellCheck shellcheck.hs (e11f964)
 
 mod fix;
+mod oom;
 mod options;
 mod sys;
 
@@ -12,6 +13,9 @@ use shellcheck_checker::{check_script_owned, optional_checks};
 use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
 use shellcheck_core::interface::{CheckSpec, ColorOption, Severity, SystemInterface};
 use shellcheck_formatter::{Formatter, by_name, tty::WIKI_LINK};
+
+#[global_allocator]
+static ALLOC: oom::ExitOnOom = oom::ExitOnOom;
 
 use options::{Flag, Options, default_options, get_opt, get_usage_info, options as option_table};
 use sys::io_interface;
@@ -37,7 +41,7 @@ pub(crate) fn print_err(s: &str) {
 fn parse_file_list_lines(contents: &str) -> Vec<String> {
     contents
         .lines()
-        .map(|l| l.trim_matches(|c: char| c.is_whitespace()))
+        .map(|l| l.trim_matches(shellcheck_core::unicode::is_space))
         .filter(|l| !l.is_empty() && !l.starts_with('#'))
         .map(String::from)
         .collect()

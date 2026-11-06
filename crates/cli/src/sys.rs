@@ -53,13 +53,169 @@ pub fn show_io_error_in(func: &str, file: &str, e: &std::io::Error) -> String {
     if let Some(closed) = e.get_ref().and_then(|x| x.downcast_ref::<StdinClosed>()) {
         return closed.to_string();
     }
+    if let Some(r) = e.get_ref().and_then(|x| x.downcast_ref::<ReadFailed>()) {
+        return show_io_error_in("hGetContents", file, &r.0);
+    }
     let desc = match e.kind() {
         NotFound => "does not exist (No such file or directory)".to_string(),
         PermissionDenied => "permission denied (Permission denied)".to_string(),
         _ if e.raw_os_error() == Some(21) => "inappropriate type (is a directory)".to_string(),
-        _ => format!("failed ({})", e),
+        _ => match e.raw_os_error() {
+            Some(n) => format!("{} ({})", ghc_errno_type(n), strerror(e)),
+            None => format!("failed ({})", e),
+        },
     };
     format!("{}: {}: {}", file, func, desc)
+}
+
+/// A failure while reading an already opened file: GHC reports it from
+/// `hGetContents` rather than `openBinaryFile`.
+#[derive(Debug)]
+pub struct ReadFailed(pub std::io::Error);
+
+impl std::fmt::Display for ReadFailed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl std::error::Error for ReadFailed {}
+
+/// musl `strerror` text for the errnos `ghc_errno_type` classifies. The
+/// reference binary is statically linked against musl, whose wording differs
+/// from glibc's for several of them (e.g. ELOOP, ENAMETOOLONG).
+#[cfg(target_os = "linux")]
+fn musl_strerror(n: i32) -> Option<&'static str> {
+    use libc::*;
+    Some(match n {
+        E2BIG => "Argument list too long",
+        EACCES => "Permission denied",
+        EADDRINUSE => "Address in use",
+        EADDRNOTAVAIL => "Address not available",
+        EAFNOSUPPORT => "Address family not supported by protocol",
+        EAGAIN => "Resource temporarily unavailable",
+        EALREADY => "Operation already in progress",
+        EBADF => "Bad file descriptor",
+        EBUSY => "Resource busy",
+        ECHILD => "No child process",
+        ECONNREFUSED => "Connection refused",
+        ECONNRESET => "Connection reset by peer",
+        EDEADLK => "Resource deadlock would occur",
+        EDESTADDRREQ => "Destination address required",
+        EDOM => "Domain error",
+        EDQUOT => "Quota exceeded",
+        EEXIST => "File exists",
+        EFBIG => "File too large",
+        EHOSTUNREACH => "Host is unreachable",
+        EIDRM => "Identifier removed",
+        EILSEQ => "Illegal byte sequence",
+        EINPROGRESS => "Operation in progress",
+        EINTR => "Interrupted system call",
+        EINVAL => "Invalid argument",
+        EIO => "I/O error",
+        EISCONN => "Socket is connected",
+        EISDIR => "Is a directory",
+        ELOOP => "Symbolic link loop",
+        EMFILE | ENFILE => "No file descriptors available",
+        EMLINK => "Too many links",
+        EMSGSIZE => "Message too long",
+        ENAMETOOLONG => "Filename too long",
+        ENETDOWN => "Network is down",
+        ENETRESET => "Connection reset by network",
+        ENETUNREACH => "Network unreachable",
+        ENOBUFS => "No buffer space available",
+        ENODATA => "No data available",
+        ENODEV => "No such device",
+        ENOENT => "No such file or directory",
+        ENOEXEC => "Exec format error",
+        ENOLCK => "No locks available",
+        ENOLINK => "Link has been severed",
+        ENOMEM => "Out of memory",
+        ENOMSG => "No message of desired type",
+        ENONET => "Machine is not on the network",
+        ENOPROTOOPT => "Protocol not available",
+        ENOSPC => "No space left on device",
+        ENOSR => "Out of streams resources",
+        ENOSTR => "Device not a stream",
+        ENOSYS => "Function not implemented",
+        ENOTBLK => "Block device required",
+        ENOTCONN => "Socket not connected",
+        ENOTDIR => "Not a directory",
+        ENOTEMPTY => "Directory not empty",
+        ENOTSOCK => "Socket operation on non-socket",
+        ENOTTY => "Not a tty",
+        ENXIO => "No such device or address",
+        EOPNOTSUPP => "Not supported",
+        EPERM => "Operation not permitted",
+        EPIPE => "Broken pipe",
+        EPROTO => "Protocol error",
+        EPROTONOSUPPORT => "Protocol not supported",
+        EPROTOTYPE => "Protocol wrong type for socket",
+        ERANGE => "Result not representable",
+        EROFS => "Read-only file system",
+        ESPIPE => "Invalid seek",
+        ESRCH => "No such process",
+        ESTALE => "Stale file handle",
+        ETIME => "Timer expired",
+        ETIMEDOUT => "Operation timed out",
+        ETXTBSY => "Text file busy",
+        EXDEV => "Cross-device link",
+        _ => return None,
+    })
+}
+
+#[cfg(not(target_os = "linux"))]
+fn musl_strerror(_n: i32) -> Option<&'static str> {
+    None
+}
+
+/// C `strerror` text of an OS error: Rust's `Display` is `"<strerror> (os error N)"`.
+fn strerror(e: &std::io::Error) -> String {
+    if let Some(m) = e.raw_os_error().and_then(musl_strerror) {
+        return m.to_string();
+    }
+    let t = e.to_string();
+    match t.rfind(" (os error ") {
+        Some(i) => t[..i].to_string(),
+        None => t,
+    }
+}
+
+/// GHC's `IOErrorType` `show` text for an errno, per `errnoToIOError`
+/// (Foreign.C.Error). Errnos it does not list are `OtherError` ("failed").
+#[cfg(target_os = "linux")]
+fn ghc_errno_type(n: i32) -> &'static str {
+    use libc::*;
+    match n {
+        E2BIG | EAGAIN | EMFILE | EMLINK | EMSGSIZE | ENFILE | ENOBUFS | ENOLCK | ENOMEM | ENOSPC | ENOSR => {
+            "resource exhausted"
+        }
+        EACCES | EDQUOT | EFBIG | EPERM | EROFS => "permission denied",
+        EADDRINUSE | EBUSY | EDEADLK | ETXTBSY => "resource busy",
+        EADDRNOTAVAIL | EAFNOSUPPORT | ENODEV | ENOPROTOOPT | ENOSYS | EOPNOTSUPP | ERANGE | ESPIPE | EXDEV => {
+            "unsupported operation"
+        }
+        EALREADY | EEXIST | EINPROGRESS | EISCONN => "already exists",
+        EBADF | EDESTADDRREQ | EDOM | EILSEQ | EINVAL | ELOOP | ENAMETOOLONG | ENOEXEC | ENOSTR | ENOTBLK | ENOTCONN
+        | ENOTSOCK => "invalid argument",
+        ECHILD | ECONNREFUSED | EHOSTUNREACH | ENETUNREACH | ENODATA | ENOENT | ENOMSG | ENONET | ENXIO | ESRCH => {
+            "does not exist"
+        }
+        ECONNRESET | EIDRM | ENETDOWN | ENETRESET | ENOLINK | EPIPE | ESTALE => "resource vanished",
+        EISDIR | ENOTDIR => "inappropriate type",
+        EINTR => "interrupted",
+        EIO => "hardware fault",
+        ENOTEMPTY => "unsatisfied constraints",
+        ENOTTY => "illegal operation",
+        EPROTO | EPROTONOSUPPORT | EPROTOTYPE => "protocol error",
+        ETIME | ETIMEDOUT => "timeout",
+        _ => "failed",
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn ghc_errno_type(_n: i32) -> &'static str {
+    "failed"
 }
 
 /// Whether stdin has been read to the end. Haskell's `getContents` and
@@ -104,7 +260,10 @@ pub fn input_file(file: &str) -> Result<(String, bool), std::io::Error> {
     } else {
         let mut f = std::fs::File::open(file)?;
         let meta = f.metadata()?;
-        f.read_to_end(&mut bytes)?;
+        f.read_to_end(&mut bytes).map_err(|e| match e.raw_os_error() {
+            Some(n) if n != 21 => std::io::Error::new(e.kind(), ReadFailed(e)),
+            _ => e,
+        })?;
         // hIsSeekable: regular files can be re-read, pipes cannot.
         !meta.is_file()
     };
@@ -544,5 +703,22 @@ mod tests {
         assert!(x.read_file(Some(false), &lib).unwrap_err().contains("disabled via directive"));
         let e = x.read_file(None, "/nonexistent/q.sh").unwrap_err();
         assert_eq!(e, "/nonexistent/q.sh: openBinaryFile: does not exist (No such file or directory)");
+    }
+
+    #[test]
+    fn ghc_error_text_for_other_errnos() {
+        let show = |n: i32| show_io_error("f", &std::io::Error::from_raw_os_error(n));
+        assert_eq!(show(libc::ENOTDIR), "f: openBinaryFile: inappropriate type (Not a directory)");
+        assert_eq!(show(libc::ENAMETOOLONG), "f: openBinaryFile: invalid argument (Filename too long)");
+        assert_eq!(show(libc::ELOOP), "f: openBinaryFile: invalid argument (Symbolic link loop)");
+        assert_eq!(show(libc::EIO), "f: openBinaryFile: hardware fault (I/O error)");
+        assert_eq!(show(libc::EMFILE), "f: openBinaryFile: resource exhausted (No file descriptors available)");
+        assert_eq!(show(libc::EROFS), "f: openBinaryFile: permission denied (Read-only file system)");
+        assert_eq!(show(libc::ETXTBSY), "f: openBinaryFile: resource busy (Text file busy)");
+        assert_eq!(show(libc::EINVAL), "f: openBinaryFile: invalid argument (Invalid argument)");
+        // Not in errnoToIOError's table: OtherError, "failed".
+        assert!(show(libc::EFAULT).starts_with("f: openBinaryFile: failed ("));
+        let read = std::io::Error::other(ReadFailed(std::io::Error::from_raw_os_error(libc::EIO)));
+        assert_eq!(show_io_error("f", &read), "f: hGetContents: hardware fault (I/O error)");
     }
 }
