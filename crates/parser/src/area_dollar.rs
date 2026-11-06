@@ -3,7 +3,6 @@
 // all $ expansions, variable names.
 // Some readers here are only called from other areas' readers, which may still
 // be stubs.
-#![allow(dead_code)]
 
 use shellcheck_core::ast::{Id, Piped, Token};
 use shellcheck_core::interface::Severity;

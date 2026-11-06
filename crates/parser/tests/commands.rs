@@ -2,45 +2,22 @@
 // Tests for the port of ShellCheck src/ShellCheck/Parser.hs (e11f964) lines 2054-2438
 // and 2909-3127 (separators, simple commands, source, pipelines, and/or;
 // assignments, arrays, let/eval/time suffixes).
-//
-// A test whose call chain reaches another area's `unported!` stub is skipped
-// (the panic message starts with "unported"), matching the conformance
-// harness's "blocked" classification; any other panic fails the test.
-
-use std::panic::{AssertUnwindSafe, catch_unwind};
 
 use shellcheck_parser::engine::{P, PR};
 use shellcheck_parser::testing::{self, named_parser};
 
 type Reader = fn(&mut P<'_>) -> PR<()>;
 
-/// Some(result), or None when blocked on another area's stub.
-fn guarded<T>(f: impl FnOnce() -> T) -> Option<T> {
-    match catch_unwind(AssertUnwindSafe(f)) {
-        Ok(v) => Some(v),
-        Err(e) => {
-            let msg = e
-                .downcast_ref::<String>()
-                .cloned()
-                .or_else(|| e.downcast_ref::<&str>().map(|s| s.to_string()))
-                .unwrap_or_default();
-            if msg.starts_with("unported") { None } else { std::panic::resume_unwind(e) }
-        }
-    }
-}
-
 fn ok(n: &str, s: &str) {
     let r: Reader = named_parser(n).unwrap();
-    if let Some(b) = guarded(|| testing::is_ok(r, s)) {
-        assert!(b, "{n}: expected clean parse of {s:?}");
-    }
+    let b = testing::is_ok(r, s);
+    assert!(b, "{n}: expected clean parse of {s:?}");
 }
 
 fn warn(n: &str, s: &str) {
     let r: Reader = named_parser(n).unwrap();
-    if let Some(b) = guarded(|| testing::is_warning(r, s)) {
-        assert!(b, "{n}: expected parse with warnings of {s:?}");
-    }
+    let b = testing::is_warning(r, s);
+    assert!(b, "{n}: expected parse with warnings of {s:?}");
 }
 
 #[test]

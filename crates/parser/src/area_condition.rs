@@ -4,9 +4,9 @@
 //
 // The `where` clause of readConditionContents becomes the `cond_*` methods
 // below, each taking `single` (the Haskell closure variable) explicitly.
-#![allow(dead_code)]
 
 use shellcheck_core::ast::{Ast, ConditionType, Id, Token};
+use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::data::{BINARY_TEST_OPS, COMMON_COMMANDS};
 use shellcheck_core::interface::Severity::ErrorC;
 use shellcheck_core::interface::Severity::WarningC;
@@ -485,125 +485,4 @@ fn cond_not_array_index(ast: &Ast, t: Id) -> bool {
         },
         _ => true,
     }
-}
-
-// DIVERGENCE: Parser.hs uses ASTLib's `onlyLiteralString`; the parser crate
-// cannot depend on the analyzer crate, so the part of it needed here is
-// duplicated (with `decode_escapes`, which `$'..'` words need).
-fn only_literal_string(ast: &Ast, t: Id) -> String {
-    let all = |l: &[Id]| l.iter().map(|&p| only_literal_string(ast, p)).collect::<String>();
-    match ast.get(t) {
-        Token::T_DoubleQuoted(l) => all(l),
-        Token::T_DollarDoubleQuoted(l) => all(l),
-        Token::T_NormalWord(l) => all(l),
-        Token::TA_Expansion(l) => all(l),
-        Token::T_SingleQuoted(s) => s.clone(),
-        Token::T_Literal(s) => s.clone(),
-        Token::T_ParamSubSpecialChar(s) => s.clone(),
-        Token::T_DollarSingleQuoted(s) => decode_escapes(s),
-        _ => String::new(),
-    }
-}
-
-// Haskell's readHex/readOct on a prefix: the value and the number of digits
-// consumed, or None if there is not a single digit (readHex returns []).
-fn read_radix(s: &[char], radix: u32) -> Option<(u64, usize)> {
-    let mut n: u64 = 0;
-    let mut k = 0;
-    for &c in s {
-        match c.to_digit(radix) {
-            Some(d) if c.is_ascii() => {
-                n = n.wrapping_mul(radix as u64).wrapping_add(d as u64);
-                k += 1;
-            }
-            _ => break,
-        }
-    }
-    if k == 0 { None } else { Some((n, k)) }
-}
-
-// DIVERGENCE: Haskell's `chr` accepts surrogates and crashes above U+10FFFF;
-// Rust's `char` cannot hold surrogates, so any invalid code point becomes
-// U+FFFD instead.
-fn chr(n: u64) -> char {
-    u32::try_from(n).ok().and_then(char::from_u32).unwrap_or('\u{FFFD}')
-}
-
-/// Bash style $'..' decoding
-fn decode_escapes(s: &str) -> String {
-    let cs: Vec<char> = s.chars().collect();
-    let len = cs.len();
-    let mut out = String::new();
-    let mut i = 0;
-    while i < len {
-        if cs[i] == '\\' && i + 1 < len {
-            let c = cs[i + 1];
-            let rest = i + 2;
-            let simple = match c {
-                'a' => Some('\x07'),
-                'b' => Some('\x08'),
-                'e' | 'E' => Some('\x1B'),
-                'f' => Some('\x0C'),
-                'n' => Some('\n'),
-                'r' => Some('\r'),
-                't' => Some('\t'),
-                'v' => Some('\x0B'),
-                '\\' => Some('\\'),
-                '\'' => Some('\''),
-                '"' => Some('"'),
-                '?' => Some('?'),
-                _ => None,
-            };
-            if let Some(ch) = simple {
-                out.push(ch);
-                i = rest;
-                continue;
-            }
-            match c {
-                'x' | 'u' | 'U' => {
-                    let n = match c {
-                        'x' => 2,
-                        'u' => 4,
-                        _ => 8,
-                    };
-                    let end = (rest + n).min(len);
-                    let taken = &cs[rest..end];
-                    match read_radix(taken, 16) {
-                        Some((v, k)) => {
-                            out.push(chr(v));
-                            out.extend(&taken[k..]);
-                            i = end;
-                        }
-                        None => {
-                            // sic: ShellCheck emits \x for \u and \U as well
-                            out.push('\\');
-                            out.push('x');
-                            i = rest;
-                        }
-                    }
-                }
-                _ => {
-                    let end = (rest + 2).min(len);
-                    let mut taken = vec![c];
-                    taken.extend_from_slice(&cs[rest..end]);
-                    match read_radix(&taken, 8) {
-                        Some((v, k)) => {
-                            out.push(chr(v % 256));
-                            out.extend(&taken[k..]);
-                            i = end;
-                        }
-                        None => {
-                            out.push('\\');
-                            out.push(c);
-                            i = rest;
-                        }
-                    }
-                }
-            }
-        } else {
-            out.push(cs[i]);
-            i += 1;
-        }
-    }
-    out
 }

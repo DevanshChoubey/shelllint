@@ -7,30 +7,10 @@
 // `prop_readDollarVariable2..5` combinator expressions the corpus could not
 // parse, ported by hand, plus checks of the tokens and Ids readDollarVariable
 // builds.
-//
-// A test whose call chain reaches another area's `unported!` stub is reported
-// as blocked on stderr and passes, mirroring the harness's `blocked` outcome.
 
 use shellcheck_core::ast::{Id, Token};
 use shellcheck_parser::engine::{P, PR};
 use shellcheck_parser::testing::{self, is_ok, is_warning, named_parser};
-
-/// Runs `f`; an `unported!` panic counts as blocked, any other panic fails.
-fn unless_blocked(name: &str, f: impl FnOnce() + std::panic::UnwindSafe) {
-    let r = std::panic::catch_unwind(f);
-    if let Err(e) = r {
-        let msg = e
-            .downcast_ref::<String>()
-            .cloned()
-            .or_else(|| e.downcast_ref::<&str>().map(|s| s.to_string()))
-            .unwrap_or_default();
-        if msg.starts_with("unported: ") {
-            eprintln!("{name}: blocked ({msg})");
-        } else {
-            std::panic::resume_unwind(e);
-        }
-    }
-}
 
 fn read_dollar_variable(p: &mut P<'_>) -> PR<()> {
     (named_parser("readDollarVariable").unwrap())(p)
@@ -39,57 +19,49 @@ fn read_dollar_variable(p: &mut P<'_>) -> PR<()> {
 // prop_readDollarVariable2 = isOk (readDollarVariable >> anyChar) "$?!"
 #[test]
 fn prop_read_dollar_variable2() {
-    unless_blocked("prop_readDollarVariable2", || {
-        assert!(is_ok(
-            |p| {
-                read_dollar_variable(p)?;
-                p.any_char().map(drop)
-            },
-            "$?!"
-        ))
-    });
+    assert!(is_ok(
+        |p| {
+            read_dollar_variable(p)?;
+            p.any_char().map(drop)
+        },
+        "$?!"
+    ));
 }
 
 // prop_readDollarVariable3 = isWarning (readDollarVariable >> anyChar) "$10"
 #[test]
 fn prop_read_dollar_variable3() {
-    unless_blocked("prop_readDollarVariable3", || {
-        assert!(is_warning(
-            |p| {
-                read_dollar_variable(p)?;
-                p.any_char().map(drop)
-            },
-            "$10"
-        ))
-    });
+    assert!(is_warning(
+        |p| {
+            read_dollar_variable(p)?;
+            p.any_char().map(drop)
+        },
+        "$10"
+    ));
 }
 
 // prop_readDollarVariable4 = isWarning (readDollarVariable >> string "[@]") "$arr[@]"
 #[test]
 fn prop_read_dollar_variable4() {
-    unless_blocked("prop_readDollarVariable4", || {
-        assert!(is_warning(
-            |p| {
-                read_dollar_variable(p)?;
-                p.string("[@]").map(drop)
-            },
-            "$arr[@]"
-        ))
-    });
+    assert!(is_warning(
+        |p| {
+            read_dollar_variable(p)?;
+            p.string("[@]").map(drop)
+        },
+        "$arr[@]"
+    ));
 }
 
 // prop_readDollarVariable5 = isWarning (readDollarVariable >> string "[f") "$arr[f"
 #[test]
 fn prop_read_dollar_variable5() {
-    unless_blocked("prop_readDollarVariable5", || {
-        assert!(is_warning(
-            |p| {
-                read_dollar_variable(p)?;
-                p.string("[f").map(drop)
-            },
-            "$arr[f"
-        ))
-    });
+    assert!(is_warning(
+        |p| {
+            read_dollar_variable(p)?;
+            p.string("[f").map(drop)
+        },
+        "$arr[f"
+    ));
 }
 
 /// `$name` builds `T_DollarBraced id3 False (T_NormalWord id1 [T_Literal id2 name])`
@@ -110,15 +82,15 @@ fn check_dollar_variable_tokens(input: &str, name: &str, end_col: u32) {
 
 #[test]
 fn dollar_variable_regular_tokens() {
-    unless_blocked("dollar_variable_regular_tokens", || check_dollar_variable_tokens("$foo_1", "foo_1", 7));
+    check_dollar_variable_tokens("$foo_1", "foo_1", 7);
 }
 
 #[test]
 fn dollar_variable_positional_tokens() {
-    unless_blocked("dollar_variable_positional_tokens", || check_dollar_variable_tokens("$1", "1", 3));
+    check_dollar_variable_tokens("$1", "1", 3);
 }
 
 #[test]
 fn dollar_variable_special_tokens() {
-    unless_blocked("dollar_variable_special_tokens", || check_dollar_variable_tokens("$@", "@", 3));
+    check_dollar_variable_tokens("$@", "@", 3);
 }

@@ -1,43 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Tests for the port of ShellCheck src/ShellCheck/Parser.hs (e11f964) lines 918-1107
 // (readCondition, annotations, comments).
-//
-// A test whose call chain reaches another area's `unported!` stub is skipped
-// (the panic message starts with "unported"), matching the conformance
-// harness's "blocked" classification; any other panic fails the test.
-
-use std::panic::{AssertUnwindSafe, catch_unwind};
 
 use shellcheck_parser::engine::{P, PR};
 use shellcheck_parser::testing::{self, named_parser};
 
 type Reader = fn(&mut P<'_>) -> PR<()>;
 
-/// Some(result), or None when blocked on another area's stub.
-fn guarded<T>(f: impl FnOnce() -> T) -> Option<T> {
-    match catch_unwind(AssertUnwindSafe(f)) {
-        Ok(v) => Some(v),
-        Err(e) => {
-            let msg = e
-                .downcast_ref::<String>()
-                .cloned()
-                .or_else(|| e.downcast_ref::<&str>().map(|s| s.to_string()))
-                .unwrap_or_default();
-            if msg.starts_with("unported") { None } else { std::panic::resume_unwind(e) }
-        }
-    }
-}
-
 fn ok(r: Reader, s: &str) {
-    if let Some(b) = guarded(|| testing::is_ok(r, s)) {
-        assert!(b, "expected clean parse of {s:?}");
-    }
+    let b = testing::is_ok(r, s);
+    assert!(b, "expected clean parse of {s:?}");
 }
 
 fn warn(r: Reader, s: &str) {
-    if let Some(b) = guarded(|| testing::is_warning(r, s)) {
-        assert!(b, "expected parse with warnings of {s:?}");
-    }
+    let b = testing::is_warning(r, s);
+    assert!(b, "expected parse with warnings of {s:?}");
 }
 
 fn named(n: &str) -> Reader {
@@ -106,4 +83,11 @@ fn read_annotation() {
 #[test]
 fn read_any_comment() {
     ok(named("readAnyComment"), "# Comment");
+}
+
+#[test]
+fn read_annotation_huge_code_does_not_overflow() {
+    // The code saturates at i64::MAX; `from + 1` must not panic in debug builds.
+    ok(named("readAnnotation"), "# shellcheck disable=SC99999999999999999999999\n");
+    ok(named("readAnnotation"), "# shellcheck disable=99999999999999999999999-99999999999999999999999\n");
 }

@@ -3,58 +3,11 @@
 // the `prop_` tests of the words area (words, quotes, backticks, globs,
 // extglobs, escapes, braces).
 //
-// Each test runs its target through `testing::named_parser`. A test whose
-// call chain reaches another area's `unported!` stub is blocked and passes
-// vacuously; reaching a stub of THIS area, or a wrong result, fails.
+// Each test runs its target through `testing::named_parser`; a wrong result
+// (or a panic, including an `unported:` stub) fails the test.
 
-use std::panic::{AssertUnwindSafe, catch_unwind};
-use std::sync::Once;
 
 use shellcheck_parser::testing::{named_parser, parses_cleanly};
-
-/// Haskell names of the readers this area ports.
-const OWN: &[&str] = &[
-    "readNormalWord",
-    "readPatternWord",
-    "readNormalishWord",
-    "readIndexSpan",
-    "checkPossibleTermination",
-    "readNormalWordPart",
-    "readSpacePart",
-    "readDollarBracedWord",
-    "readDollarBracedPart",
-    "readDollarBracedLiteral",
-    "readParamSubSpecialChar",
-    "readProcSub",
-    "readSingleQuoted",
-    "readSingleQuotedLiteral",
-    "readSingleQuotedPart",
-    "readQuotedBackTicked",
-    "readUnquotedBackTicked",
-    "readBackTicked",
-    "subParse",
-    "inSeparateContext",
-    "forgetOnFailure",
-    "parseForgettingContext",
-    "readDoubleQuoted",
-    "suggestForgotClosingQuote",
-    "doubleQuotedPart",
-    "readDoubleLiteral",
-    "readDoubleLiteralPart",
-    "readNormalLiteral",
-    "readGlob",
-    "readNormalLiteralPart",
-    "readNormalEscaped",
-    "readExtglob",
-    "readExtglobPart",
-    "readSingleEscaped",
-    "readDoubleEscaped",
-    "readBraceEscaped",
-    "readGenericLiteral",
-    "readGenericLiteral1",
-    "readGenericEscaped",
-    "readBraced",
-];
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 enum Expect {
@@ -63,51 +16,15 @@ enum Expect {
     NotOk,
 }
 
-fn quiet_panics() {
-    static ONCE: Once = Once::new();
-    ONCE.call_once(|| {
-        let default = std::panic::take_hook();
-        std::panic::set_hook(Box::new(move |info| {
-            let msg = info
-                .payload()
-                .downcast_ref::<String>()
-                .map(String::as_str)
-                .or_else(|| info.payload().downcast_ref::<&str>().copied())
-                .unwrap_or("");
-            if !msg.starts_with("unported: ") {
-                default(info);
-            }
-        }));
-    });
-}
-
 /// `isOk` / `isWarning` / `isNotOk` on a named reader.
 fn check(target: &str, script: &str, want: Expect) {
-    quiet_panics();
     let parser = named_parser(target).unwrap_or_else(|| panic!("no named parser {target}"));
-    let r = catch_unwind(AssertUnwindSafe(|| parses_cleanly(parser, script)));
-    match r {
-        Ok(got) => {
-            let got = match got {
-                Some(true) => Expect::Ok,
-                Some(false) => Expect::Warning,
-                None => Expect::NotOk,
-            };
-            assert_eq!(got, want, "{target} {script:?}");
-        }
-        Err(e) => {
-            let msg = e
-                .downcast_ref::<String>()
-                .cloned()
-                .or_else(|| e.downcast_ref::<&str>().map(|s| s.to_string()))
-                .unwrap_or_default();
-            let Some(name) = msg.strip_prefix("unported: ") else {
-                std::panic::resume_unwind(e);
-            };
-            assert!(!OWN.contains(&name), "{target} {script:?} reached this area's stub {name}");
-            eprintln!("blocked: {target} {script:?} reaches {name}");
-        }
-    }
+    let got = match parses_cleanly(parser, script) {
+        Some(true) => Expect::Ok,
+        Some(false) => Expect::Warning,
+        None => Expect::NotOk,
+    };
+    assert_eq!(got, want, "{target} {script:?}");
 }
 
 macro_rules! props {
