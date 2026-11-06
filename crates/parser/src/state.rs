@@ -81,6 +81,12 @@ pub struct UserSnapshot {
     pending_here_docs: Vec<HereDocContext>,
 }
 
+impl UserSnapshot {
+    pub fn ast_len(&self) -> u32 {
+        self.ast_len
+    }
+}
+
 impl UserState {
     pub fn snapshot(&self) -> UserSnapshot {
         UserSnapshot {

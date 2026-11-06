@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1108-1611:
 // words, quotes, backticks, globs, extglobs, escapes, brace expansions.
-#![allow(dead_code)] // some callers are other areas' stubs until those areas land
 
 use shellcheck_core::astlib::only_literal_string;
 use shellcheck_core::ast::{Id, Token};
@@ -190,6 +189,7 @@ impl<'a> P<'a> {
         })
     }
 
+    #[allow(dead_code)] // unused in Parser.hs too
     pub(crate) fn read_single_quoted_literal(&mut self) -> PR<String> {
         self.single_quote()?;
         let strs = self.many1(|p| p.read_single_quoted_part())?;
@@ -226,7 +226,7 @@ impl<'a> P<'a> {
         self.read_back_ticked(false)
     }
 
-    pub(crate) fn read_back_ticked(&mut self, quoted: bool) -> PR<Id> {
+    pub fn read_back_ticked(&mut self, quoted: bool) -> PR<Id> {
         fn un_escape(quoted: bool, s: &[char]) -> String {
             let mut out = String::new();
             let mut rest = s;
@@ -320,12 +320,12 @@ impl<'a> P<'a> {
     }
 
     /// Parse something, but forget all parseProblems
-    pub(crate) fn in_separate_context<T>(&mut self, parser: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
+    pub fn in_separate_context<T>(&mut self, parser: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         self.parse_forgetting_context(true, parser)
     }
 
     /// Parse something, but forget all parseProblems on failure
-    pub(crate) fn forget_on_failure<T>(&mut self, parser: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
+    pub fn forget_on_failure<T>(&mut self, parser: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         self.parse_forgetting_context(false, parser)
     }
 

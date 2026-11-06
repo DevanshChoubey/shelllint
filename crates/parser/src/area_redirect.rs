@@ -36,7 +36,6 @@ impl<'a> P<'a> {
     }
 
     // Its callers (linefeed, readScript) are still stubs.
-    #[allow(dead_code)] // remove once area_spacing / area_toplevel are ported
     pub(crate) fn read_pending_here_docs(&mut self) -> PR<()> {
         let docs = self.pop_pending_here_docs();
         for doc in docs {
