@@ -96,10 +96,13 @@ fn main() -> ExitCode {
                 println!("baseline updated ({} entries)", res.matches.len());
                 return ExitCode::SUCCESS;
             }
-            let baseline: std::collections::BTreeMap<String, bool> = std::fs::read_to_string(&path)
-                .ok()
-                .and_then(|t| serde_json::from_str(&t).ok())
-                .unwrap_or_default();
+            let baseline = match shellcheck_conformance::load_baseline(&path) {
+                Ok(b) => b,
+                Err(e) => {
+                    eprintln!("error: {e}");
+                    return ExitCode::from(2);
+                }
+            };
             let regressed: Vec<_> = baseline
                 .iter()
                 .filter(|(k, v)| **v && !res.matches.contains_key(*k))

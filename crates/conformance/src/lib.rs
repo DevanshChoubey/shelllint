@@ -63,6 +63,18 @@ pub fn load_corpus(path: &Path) -> Result<Vec<Record>, String> {
     parse_corpus(&text).map_err(|e| format!("{}: {e}", path.display()))
 }
 
+/// Loads the parity baseline. A missing file is an empty baseline; any other
+/// read error or a parse failure is an `Err` (so the regression gate cannot
+/// be silently disabled by a corrupt file).
+pub fn load_baseline(path: &Path) -> Result<std::collections::BTreeMap<String, bool>, String> {
+    let text = match std::fs::read_to_string(path) {
+        Ok(t) => t,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Default::default()),
+        Err(e) => return Err(format!("{}: {e}", path.display())),
+    };
+    serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Outcome {
     Pass,
@@ -120,6 +132,22 @@ mod tests {
         assert_eq!(recs.len(), 2334);
         assert_eq!(recs.iter().filter(|r| r.kind == "node").count(), 1386);
         assert_eq!(recs.iter().filter(|r| r.oracle_codes.is_some()).count(), 2105);
+    }
+
+    #[test]
+    fn baseline_loading() {
+        let dir = std::env::temp_dir().join(format!("sc-baseline-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        assert!(load_baseline(&dir.join("missing.json")).unwrap().is_empty());
+        let ok = dir.join("ok.json");
+        std::fs::write(&ok, r#"{"A.hs:prop_a": true}"#).unwrap();
+        assert_eq!(load_baseline(&ok).unwrap().len(), 1);
+        let bad = dir.join("bad.json");
+        std::fs::write(&bad, "<<<<<<< HEAD\n{}").unwrap();
+        assert!(load_baseline(&bad).is_err());
+        // a directory is a read error, not "missing"
+        assert!(load_baseline(&dir).is_err());
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
