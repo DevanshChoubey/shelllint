@@ -92,15 +92,26 @@ mod tests {
     }
 
 
+    #[test]
     fn t1() { yes("f; f() { true; }"); }
+    #[test]
     fn t2() { no("f() { true; }; f"); }
+    #[test]
     fn t3() { no("if ! mycmd --version; then mycmd() { true; }; fi"); }
+    #[test]
     fn t4() { no("mycmd || mycmd() { f; }"); }
+    #[test]
     fn t5() { yes("false || mycmd; mycmd() { f; }"); }
+    #[test]
     fn t6() { no("f() { one; }; f; f() { two; }; f"); }
+    #[test]
     fn t7() { no("f() { true; }\nreturn\necho \"$(f)\"\necho \"$(f)\""); }
+    #[test]
     fn t8() { no("#!/usr/bin/env bats\n@test 'foo' { f; }\nf() { true; }"); }
+    #[test]
     fn t9() { no("#!/usr/bin/env bats\n@test 'foo' { f; }\nsetup() { f() { true; }; }"); }
+    #[test]
     fn t10() { yes("#!/usr/bin/env bats\n@test 'foo' {\n f\n f() { true; }\n}"); }
+    #[test]
     fn t11() { yes("#!/usr/bin/env bats\nf\n@test 'foo' { true; }\nf() { true; }"); }
 }

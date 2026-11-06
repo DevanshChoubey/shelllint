@@ -24,7 +24,7 @@ fn check_timed_command(p: &Params<'_>, t: Id, c: &mut Comments) {
     }
     let cid = words[0];
     let args = &words[1..];
-    // DIVERGENCE: whenShell takes no Comments handle, so test the shell directly.
+    // `whenShell [Sh, Dash, BusyboxSh]`, tested directly.
     if ![Shell::Sh, Shell::Dash, Shell::BusyboxSh].contains(&p.shell_type) {
         return;
     }
