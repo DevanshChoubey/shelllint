@@ -113,6 +113,13 @@ pub fn input_file(file: &str) -> Result<(String, bool), std::io::Error> {
     Ok((decode_string(&bytes), should_cache))
 }
 
+/// System.Directory `doesFileExist`: the path exists (following symlinks)
+/// and is not a directory, so fifos, devices and `/proc/self/fd/N` (process
+/// substitution) count.
+fn does_file_exist(path: &str) -> bool {
+    std::fs::metadata(path).map(|m| !m.is_dir()).unwrap_or(false)
+}
+
 fn dir_of(path: &str) -> String {
     // System.FilePath takeDirectory
     match Path::new(path).parent() {
@@ -132,7 +139,7 @@ impl IoInterface {
     }
 
     fn read_config(file: &str) -> Option<(String, String)> {
-        if !Path::new(file).is_file() {
+        if !does_file_exist(file) {
             return None;
         }
         match input_file(file) {
@@ -290,7 +297,7 @@ impl SystemInterface for IoInterface {
                 candidates.push(Path::new(&adjust(sp)).join(filename).to_string_lossy().into_owned());
             }
             for c in candidates {
-                if self.allowable(rc_suggests_external, &c) && Path::new(&c).is_file() {
+                if self.allowable(rc_suggests_external, &c) && does_file_exist(&c) {
                     return c;
                 }
             }
@@ -444,6 +451,22 @@ mod tests {
         assert_eq!(paths[1], format!("{}/q/shellcheckrc", d.to_string_lossy()));
         assert!(paths.contains(&"/.shellcheckrc".to_string()));
         assert_eq!(IoInterface::read_config(&home_rc).unwrap().1, "enable=all");
+    }
+
+    #[test]
+    fn does_file_exist_accepts_non_regular_files() {
+        let d = tmp();
+        let f = write(&d.join("f"), "");
+        assert!(does_file_exist(&f));
+        assert!(does_file_exist("/dev/null"));
+        assert!(!does_file_exist(&d.to_string_lossy()));
+        assert!(!does_file_exist("/nonexistent/x"));
+        // /dev/null as --rcfile is read (empty), with no warning.
+        let sys = iface(false, &[], Some("/dev/null"), &[]);
+        assert_eq!(sys.get_config(&f), Some(("/dev/null".into(), String::new())));
+        // find_source accepts a device too.
+        let sys = iface(true, &[], None, &[]);
+        assert_eq!(sys.find_source(&f, None, &["/dev".into()], "null"), "/dev/null");
     }
 
     #[test]

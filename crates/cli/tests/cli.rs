@@ -415,3 +415,29 @@ fn internal_error_exits_1() {
     assert!(o.stderr.starts_with("shellcheck-rust: "), "{}", o.stderr);
     assert!(!o.stderr.contains("panicked") && !o.stderr.contains("RUST_BACKTRACE"), "{}", o.stderr);
 }
+
+// --rcfile accepts anything `doesFileExist` does, such as a fifo (or a
+// process substitution's /proc/self/fd/N). Oracle: SC2148 and SC2154 only.
+#[test]
+fn rcfile_may_be_a_fifo() {
+    let d = tmpdir("rc-fifo");
+    let fifo = d.join("p");
+    let _ = std::fs::remove_file(&fifo);
+    assert!(Command::new("mkfifo").arg(&fifo).status().unwrap().success());
+    std::fs::write(d.join("t.sh"), "echo $x\n").unwrap();
+    let fifo2 = fifo.clone();
+    let writer = std::thread::spawn(move || std::fs::write(&fifo2, "disable=SC2086\n").unwrap());
+    let o = run_in(&d, &["-f", "gcc", "--rcfile", fifo.to_str().unwrap(), "t.sh"]);
+    // If the fifo was never opened, unblock the writer instead of hanging.
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        let _r = std::fs::OpenOptions::new().read(true).custom_flags(0o4000 /* O_NONBLOCK */).open(&fifo);
+        writer.join().unwrap();
+    }
+    assert_eq!(o.stderr, "");
+    assert_eq!(
+        o.stdout,
+        "t.sh:1:1: error: Tips depend on target shell and yours is unknown. Add a shebang or a 'shell' directive. [SC2148]\n\
+         t.sh:1:6: warning: x is referenced but not assigned. [SC2154]\n"
+    );
+}
