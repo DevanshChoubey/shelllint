@@ -6,4 +6,3 @@ license.workspace = true
 
 [dependencies]
 shellcheck-core = { path = "../core" }
-shellcheck-analyzer = { path = "../analyzer" }
