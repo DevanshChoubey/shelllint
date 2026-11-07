@@ -367,11 +367,7 @@ fn xdg_config_path(home: Option<&str>, xdg: Option<&str>, suffix: &str) -> Optio
 /// System.FilePath `</>` for a relative right-hand side.
 fn join_path(a: &str, b: &str) -> String {
     let drive_only = cfg!(windows) && a.len() == 2 && a.ends_with(':');
-    if a.is_empty() || drive_only || a.ends_with(is_sep) {
-        format!("{}{}", a, b)
-    } else {
-        format!("{}{}{}", a, SEP, b)
-    }
+    if a.is_empty() || drive_only || a.ends_with(is_sep) { format!("{}{}", a, b) } else { format!("{}{}{}", a, SEP, b) }
 }
 
 /// System.Directory's `simplify` (`normalise`): collapses repeated separators
@@ -535,11 +531,7 @@ impl SystemInterface for IoInterface {
             }
             deflt.to_string()
         };
-        if Path::new(original).is_absolute() {
-            find(drop_drive(original), original)
-        } else {
-            find(original, original)
-        }
+        if Path::new(original).is_absolute() { find(drop_drive(original), original) } else { find(original, original) }
     }
 
     fn get_config(&self, filename: &str) -> Option<(String, String)> {
