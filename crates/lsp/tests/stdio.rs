@@ -156,7 +156,8 @@ fn has_code(diags: &Value, code: &str) -> bool {
 }
 
 fn file_uri(name: &str) -> String {
-    format!("file://{}", std::env::temp_dir().join(name).display())
+    // A real file URI on every platform (file:///C:/... on Windows).
+    lsp_types::Url::from_file_path(std::env::temp_dir().join(name)).unwrap().to_string()
 }
 
 #[test]

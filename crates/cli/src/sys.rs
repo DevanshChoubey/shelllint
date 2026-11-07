@@ -650,6 +650,7 @@ mod tests {
         assert_eq!(IoInterface::read_config(&home_rc).unwrap().1, "enable=all");
     }
 
+    #[cfg(unix)] // uses /dev/null
     #[test]
     fn does_file_exist_accepts_non_regular_files() {
         let d = tmp();
