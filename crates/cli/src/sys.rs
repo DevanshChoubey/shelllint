@@ -40,7 +40,57 @@ pub fn io_interface(options: &Options, files: &[String]) -> IoInterface {
 }
 
 fn normalize(x: &str) -> String {
-    std::fs::canonicalize(x).map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| x.to_string())
+    std::fs::canonicalize(x).map(|p| strip_verbatim(&p.to_string_lossy())).unwrap_or_else(|_| x.to_string())
+}
+
+/// System.Directory `canonicalizePath` on Windows drops the `\\?\` prefix
+/// that `GetFinalPathNameByHandle` returns; keeping it would also turn off
+/// `/` translation for every path later joined onto the result.
+fn strip_verbatim(p: &str) -> String {
+    if cfg!(windows) {
+        if let Some(rest) = p.strip_prefix(r"\\?\UNC\") {
+            return format!(r"\\{}", rest);
+        }
+        if let Some(rest) = p.strip_prefix(r"\\?\") {
+            return rest.to_string();
+        }
+    }
+    p.to_string()
+}
+
+/// System.FilePath `isPathSeparator`: `/` on POSIX; `/` or `\` on Windows.
+fn is_sep(c: char) -> bool {
+    c == '/' || (cfg!(windows) && c == '\\')
+}
+
+/// System.FilePath `pathSeparator`.
+const SEP: char = std::path::MAIN_SEPARATOR;
+
+/// System.FilePath `splitDrive` (the path after the drive). POSIX: the
+/// leading slashes. Windows: a drive, UNC or device prefix and its root.
+fn drop_drive(p: &str) -> &str {
+    if cfg!(windows) {
+        let mut comps = Path::new(p).components();
+        let mut rest = comps.as_path();
+        while let Some(c) = comps.next() {
+            match c {
+                std::path::Component::Prefix(_) | std::path::Component::RootDir => rest = comps.as_path(),
+                _ => break,
+            }
+        }
+        rest.to_str().unwrap_or(p)
+    } else {
+        p.trim_start_matches('/')
+    }
+}
+
+/// System.FilePath `dropFileName`: everything up to and including the last
+/// separator (or, on Windows, a drive's colon).
+fn drop_file_name(p: &str) -> &str {
+    match p.rfind(|c| is_sep(c) || (cfg!(windows) && c == ':')) {
+        Some(i) => &p[..=i],
+        None => "",
+    }
 }
 
 /// Haskell `show` of the IOException `openBinaryFile` raises.
@@ -286,44 +336,52 @@ fn dir_of(path: &str) -> String {
     }
 }
 
-/// System.Directory `getHomeDirectory` (POSIX): `$HOME` when it is set, even
-/// to the empty string, else the passwd entry's home directory.
+/// The base directory the config defaults hang off. POSIX: System.Directory
+/// `getHomeDirectory` (`$HOME` when it is set, even to the empty string, else
+/// the passwd entry's home directory). Windows: the roaming AppData folder
+/// (`CSIDL_APPDATA`), which both `getAppUserDataDirectory` and the XdgConfig
+/// fallback use there.
 fn home_directory() -> Option<String> {
-    #[allow(deprecated)]
-    std::env::home_dir().map(|p| p.to_string_lossy().into_owned())
+    if cfg!(windows) {
+        std::env::var("APPDATA").ok().filter(|a| !a.is_empty())
+    } else {
+        #[allow(deprecated)]
+        std::env::home_dir().map(|p| p.to_string_lossy().into_owned())
+    }
 }
 
 /// System.Directory `getXdgDirectory XdgConfig suffix`: `$XDG_CONFIG_HOME`
 /// when it is absolute, otherwise (unset, empty or relative, as the XDG Base
-/// Directory spec says) `home </> ".config"`; then `simplify (dir </> suffix)`.
-/// `None` when the fallback needs a home directory and there is none.
+/// Directory spec says) `home </> ".config"` (Windows: AppData itself); then
+/// `simplify (dir </> suffix)`. `None` when the fallback needs a home
+/// directory and there is none.
 fn xdg_config_path(home: Option<&str>, xdg: Option<&str>, suffix: &str) -> Option<String> {
     let dir = match xdg {
-        Some(x) if x.starts_with('/') => x.to_string(),
+        Some(x) if Path::new(x).is_absolute() => x.to_string(),
+        _ if cfg!(windows) => home?.to_string(),
         _ => join_path(home?, ".config"),
     };
     Some(simplify_path(&join_path(&dir, suffix)))
 }
 
-/// System.FilePath `</>` (POSIX) for a relative right-hand side.
+/// System.FilePath `</>` for a relative right-hand side.
 fn join_path(a: &str, b: &str) -> String {
-    if a.is_empty() {
-        b.to_string()
-    } else if a.ends_with('/') {
+    let drive_only = cfg!(windows) && a.len() == 2 && a.ends_with(':');
+    if a.is_empty() || drive_only || a.ends_with(is_sep) {
         format!("{}{}", a, b)
     } else {
-        format!("{}/{}", a, b)
+        format!("{}{}{}", a, SEP, b)
     }
 }
 
-/// System.Directory's `simplify` (POSIX `normalise`): collapses repeated
-/// slashes and drops `.` components; `..` is kept.
+/// System.Directory's `simplify` (`normalise`): collapses repeated separators
+/// and drops `.` components; `..` is kept. Windows also turns `/` into `\`.
 fn simplify_path(p: &str) -> String {
-    let parts: Vec<&str> = p.split('/').filter(|c| !c.is_empty() && *c != ".").collect();
-    let body = parts.join("/");
-    let trailing = if p.ends_with('/') && !body.is_empty() { "/" } else { "" };
-    match (p.starts_with('/'), body.is_empty()) {
-        (true, _) => format!("/{}{}", body, trailing),
+    let parts: Vec<&str> = p.split(is_sep).filter(|c| !c.is_empty() && *c != ".").collect();
+    let body = parts.join(&SEP.to_string());
+    let trailing = if p.ends_with(is_sep) && !body.is_empty() { SEP.to_string() } else { String::new() };
+    match (p.starts_with(is_sep), body.is_empty()) {
+        (true, _) => format!("{}{}{}", SEP, body, trailing),
         (false, true) => ".".to_string(),
         (false, false) => format!("{}{}", body, trailing),
     }
@@ -351,14 +409,16 @@ impl IoInterface {
         Self::default_paths_from(home_directory(), std::env::var("XDG_CONFIG_HOME").ok())
     }
 
-    /// `defaultPaths`: `getAppUserDataDirectory "shellcheckrc"` (`home ++
-    /// "/.shellcheckrc"`) and `getXdgDirectory XdgConfig "shellcheckrc"`. No
-    /// home directory throws, and the handler gives `[]`.
+    /// `defaultPaths`: `getAppUserDataDirectory "shellcheckrc"` (POSIX `home
+    /// ++ "/.shellcheckrc"`; Windows `appdata </> "shellcheckrc"`) and
+    /// `getXdgDirectory XdgConfig "shellcheckrc"`. No home directory throws,
+    /// and the handler gives `[]`.
     fn default_paths_from(home: Option<String>, xdg: Option<String>) -> Vec<String> {
         match home {
             Some(h) => {
                 let x = xdg_config_path(Some(&h), xdg.as_deref(), "shellcheckrc").unwrap_or_default();
-                vec![format!("{}/.shellcheckrc", h), x]
+                let app = if cfg!(windows) { join_path(&h, "shellcheckrc") } else { format!("{}/.shellcheckrc", h) };
+                vec![app, x]
             }
             None => vec![],
         }
@@ -371,10 +431,7 @@ impl IoInterface {
     fn config_paths_with(dir: &str, defaults: &[String]) -> Vec<String> {
         let next = dir_of(dir);
         let rest = if next != dir { Self::config_paths_with(&next, defaults) } else { defaults.to_vec() };
-        let join = |name: &str| {
-            if dir.ends_with('/') { format!("{}{}", dir, name) } else { format!("{}/{}", dir, name) }
-        };
-        let mut v = vec![join(".shellcheckrc"), join("shellcheckrc")];
+        let mut v = vec![join_path(dir, ".shellcheckrc"), join_path(dir, "shellcheckrc")];
         v.extend(rest);
         v
     }
@@ -452,19 +509,12 @@ impl SystemInterface for IoInterface {
         source_path_annotation: &[String],
         original: &str,
     ) -> String {
-        let scriptdir = {
-            // dropFileName
-            match current_script.rfind('/') {
-                Some(i) => &current_script[..=i],
-                None => "",
-            }
-            .to_string()
-        };
+        let scriptdir = drop_file_name(current_script);
         let adjust = |s: &str| -> String {
-            let mut parts = s.split('/').filter(|p| !p.is_empty());
+            let mut parts = s.split(is_sep).filter(|p| !p.is_empty());
             if s.starts_with("SCRIPTDIR") && parts.next() == Some("SCRIPTDIR") {
                 let rest: Vec<&str> = parts.collect();
-                let mut p = PathBuf::from(&scriptdir);
+                let mut p = PathBuf::from(scriptdir);
                 for r in rest {
                     p.push(r);
                 }
@@ -485,9 +535,8 @@ impl SystemInterface for IoInterface {
             }
             deflt.to_string()
         };
-        if original.starts_with('/') {
-            let relative = original.trim_start_matches('/');
-            find(relative, original)
+        if Path::new(original).is_absolute() {
+            find(drop_drive(original), original)
         } else {
             find(original, original)
         }
@@ -516,7 +565,13 @@ mod tests {
             N.fetch_add(1, Ordering::SeqCst)
         ));
         fs::create_dir_all(&d).unwrap();
-        d.canonicalize().unwrap()
+        PathBuf::from(normalize(&d.to_string_lossy()))
+    }
+
+    /// `base` joined with a `/`-separated relative path, the way the port
+    /// joins it: native separators throughout.
+    fn native(base: &Path, rel: &str) -> String {
+        join_path(&base.to_string_lossy(), &rel.replace('/', &SEP.to_string()))
     }
 
     fn write(p: &Path, c: &str) -> String {
@@ -537,8 +592,7 @@ mod tests {
     #[test]
     fn find_source_search_order() {
         let d = tmp();
-        let ds = d.to_string_lossy().into_owned();
-        let s = |p: &str| format!("{}/{}", ds, p);
+        let s = |p: &str| native(&d, p);
         // The same name in both -P dirs, so the order is observable.
         write(&d.join("p1/dup.sh"), "");
         write(&d.join("p2/dup.sh"), "");
@@ -569,9 +623,13 @@ mod tests {
         // Absolute path: found as-is; a missing one falls back to itself.
         assert_eq!(sys2.find_source(&cur, None, &[], &s("p2/dup.sh")), s("p2/dup.sh"));
         assert_eq!(sys2.find_source(&cur, None, &[], "/nonexistent/zz.sh"), "/nonexistent/zz.sh");
-        // An absolute name is also searched with its leading slash dropped, under
-        // each search path (splitDrive).
-        assert_eq!(sys.find_source(&cur, None, &[], "/dup.sh"), s("p1/dup.sh"));
+        // An absolute name is also searched with its drive dropped, under each
+        // search path (splitDrive). On Windows `/dup.sh` has no drive, so it is
+        // not absolute, and `p1 </> "/dup.sh"` is `/dup.sh` itself.
+        let want = if cfg!(windows) { "/dup.sh".to_string() } else { s("p1/dup.sh") };
+        assert_eq!(sys.find_source(&cur, None, &[], "/dup.sh"), want);
+        let abs = s("dup.sh");
+        assert_eq!(sys.find_source(&cur, None, &[], &abs), abs); // missing: itself
     }
 
     #[test]
@@ -599,20 +657,48 @@ mod tests {
         let sys = iface(false, &[], None, &[]);
         // Only the undotted file exists up the tree.
         let (path, c) = sys.get_config(&script).unwrap();
-        assert_eq!(path, format!("{}/shellcheckrc", d.to_string_lossy()));
+        assert_eq!(path, native(&d, "shellcheckrc"));
         assert_eq!(c, "disable=SC1");
         // A dotted one closer wins; and .shellcheckrc beats shellcheckrc in one dir.
         write(&d.join("a/.shellcheckrc"), "disable=SC2");
         write(&d.join("a/shellcheckrc"), "disable=SC3");
         let sys = iface(false, &[], None, &[]);
         let (path, c) = sys.get_config(&script).unwrap();
-        assert_eq!(path, format!("{}/a/.shellcheckrc", d.to_string_lossy()));
+        assert_eq!(path, native(&d, "a/.shellcheckrc"));
         assert_eq!(c, "disable=SC2");
         // Same-directory lookups are served from the cache even if the file vanishes.
         fs::remove_file(d.join("a/.shellcheckrc")).unwrap();
         assert_eq!(sys.get_config(&script).unwrap().1, "disable=SC2");
     }
 
+    #[cfg(windows)]
+    #[test]
+    fn config_default_paths_appdata_and_xdg() {
+        let v = IoInterface::default_paths_from(Some(r"C:\a".into()), None);
+        assert_eq!(v, vec![r"C:\a\shellcheckrc", r"C:\a\shellcheckrc"]);
+        let v = IoInterface::default_paths_from(Some(r"C:\a".into()), Some("D:/x//y".into()));
+        assert_eq!(v, vec![r"C:\a\shellcheckrc", r"D:\x\y\shellcheckrc"]);
+        // A drive-less XDG_CONFIG_HOME is not absolute on Windows.
+        let v = IoInterface::default_paths_from(Some(r"C:\a".into()), Some("/x".into()));
+        assert_eq!(v[1], r"C:\a\shellcheckrc");
+        assert!(IoInterface::default_paths_from(None, None).is_empty());
+    }
+
+    #[test]
+    fn config_walks_up_to_the_root_then_defaults() {
+        let d = tmp();
+        let home_rc = write(&d.join("home/.shellcheckrc"), "enable=all");
+        let defaults = vec![home_rc.clone()];
+        let paths = IoInterface::config_paths_with(&d.join("q").to_string_lossy(), &defaults);
+        assert_eq!(paths.last().unwrap(), &home_rc);
+        assert_eq!(paths[0], native(&d, "q/.shellcheckrc"));
+        assert_eq!(paths[1], native(&d, "q/shellcheckrc"));
+        let root = d.ancestors().last().unwrap().to_string_lossy().into_owned();
+        assert!(paths.contains(&join_path(&root, ".shellcheckrc")), "{:?}", paths);
+        assert_eq!(IoInterface::read_config(&home_rc).unwrap().1, "enable=all");
+    }
+
+    #[cfg(unix)]
     #[test]
     fn config_default_paths_home_and_xdg() {
         let v = IoInterface::default_paths_from(Some("/h".into()), None);
@@ -638,16 +724,6 @@ mod tests {
             xdg_config_path(Some("/h/"), Some("x"), "editorconfig.ini").as_deref(),
             Some("/h/.config/editorconfig.ini")
         );
-        // They are searched after every directory up to the root.
-        let d = tmp();
-        let home_rc = write(&d.join("home/.shellcheckrc"), "enable=all");
-        let defaults = vec![home_rc.clone()];
-        let paths = IoInterface::config_paths_with(&d.join("q").to_string_lossy(), &defaults);
-        assert_eq!(paths.last().unwrap(), &home_rc);
-        assert_eq!(paths[0], format!("{}/q/.shellcheckrc", d.to_string_lossy()));
-        assert_eq!(paths[1], format!("{}/q/shellcheckrc", d.to_string_lossy()));
-        assert!(paths.contains(&"/.shellcheckrc".to_string()));
-        assert_eq!(IoInterface::read_config(&home_rc).unwrap().1, "enable=all");
     }
 
     #[cfg(unix)] // uses /dev/null
