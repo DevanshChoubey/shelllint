@@ -1,0 +1,5 @@
+# Keep LF line endings on every platform: test fixtures, corpus scripts and
+# expected outputs are compared byte-for-byte (Windows CI checks out CRLF otherwise).
+* text=auto eol=lf
+# These fixtures test CRLF input on purpose; never convert them.
+crates/formatter/tests/golden/diff/crlf.* -text
