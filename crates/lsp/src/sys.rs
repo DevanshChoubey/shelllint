@@ -142,6 +142,10 @@ mod tests {
             LspSystem.read_file(Some(true), "/nonexistent/lib.sh"),
             Err("/nonexistent/lib.sh: openBinaryFile: does not exist (No such file or directory)".to_string())
         );
+        // Opening a directory fails with EISDIR only on Unix; Windows reports it differently.
+        if !cfg!(unix) {
+            return;
+        }
         let dir = std::env::temp_dir();
         let d = dir.to_string_lossy();
         assert_eq!(
