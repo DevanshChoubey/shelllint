@@ -22,6 +22,10 @@ struct Lsp {
 
 impl Lsp {
     fn start(init_options: Value) -> Lsp {
+        Self::start_with_root(init_options, Value::Null)
+    }
+
+    fn start_with_root(init_options: Value, root_uri: Value) -> Lsp {
         let mut child = Command::new(env!("CARGO_BIN_EXE_shelllint-lsp"))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -64,7 +68,7 @@ impl Lsp {
         let mut lsp = Lsp { child, stdin, rx, stash: vec![], next_id: 1 };
         let id = lsp.request(
             "initialize",
-            json!({"processId": null, "rootUri": null, "capabilities": {},
+            json!({"processId": null, "rootUri": root_uri, "capabilities": {},
                    "initializationOptions": init_options}),
         );
         assert_eq!(id["result"]["capabilities"]["hoverProvider"], true, "{id}");
@@ -157,7 +161,17 @@ fn has_code(diags: &Value, code: &str) -> bool {
 
 fn file_uri(name: &str) -> String {
     // A real file URI on every platform (file:///C:/... on Windows).
-    lsp_types::Url::from_file_path(std::env::temp_dir().join(name)).unwrap().to_string()
+    let path = std::env::temp_dir().join(name).to_string_lossy().replace('\\', "/").replace(' ', "%20");
+    let root = if path.starts_with('/') { "" } else { "/" };
+    format!("file://{root}{path}")
+}
+
+#[test]
+fn an_unencoded_root_uri_does_not_end_the_session() {
+    let mut lsp = Lsp::start_with_root(json!({}), json!("file:///tmp/has space/caf\u{e9}"));
+    let uri = "untitled:root.sh";
+    open(&mut lsp, uri, "#!/bin/sh\necho $foo\n");
+    lsp.diagnostics(uri, |d| has_code(d, "SC2086"));
 }
 
 #[test]

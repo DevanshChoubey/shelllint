@@ -7,6 +7,7 @@
 
 use std::path::{Path, PathBuf};
 
+use lsp_types::Uri;
 use shelllint_checker::decode_string;
 use shelllint_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
 use shelllint_checker::filepath::{combine, drop_file_name, is_path_separator, strip_verbatim};
@@ -132,9 +133,64 @@ impl SystemInterface for LspSystem {
     }
 }
 
+/// The filesystem path a `file:` URI names, or `None` when it names none here.
+/// Same rules as `url::Url::to_file_path`: Unix rejects a remote host, Windows
+/// needs a drive or a host (`\\\\host\\share`) and accepts `c%3A`, the form
+/// VS Code sends. `windows` is a parameter so every platform can test both.
+pub fn file_uri_path(uri: &Uri, windows: bool) -> Option<String> {
+    let host = uri.authority().map(|a| a.as_str()).filter(|h| !h.is_empty() && !h.eq_ignore_ascii_case("localhost"));
+    if !windows {
+        return match host {
+            Some(_) => None,
+            None => Some(uri.path().as_estr().decode().into_string_lossy().into_owned()),
+        };
+    }
+    let mut segments = uri.path().segments();
+    let mut out = match host {
+        Some(h) => format!(r"\\{h}"),
+        None => {
+            let drive = segments.next()?.decode().into_string().ok()?;
+            let is_drive = matches!(drive.as_bytes(), [letter, b':'] if letter.is_ascii_alphabetic());
+            if !is_drive {
+                return None;
+            }
+            drive.into_owned()
+        }
+    };
+    for segment in segments {
+        out.push('\\');
+        out.push_str(&segment.decode().into_string().ok()?);
+    }
+    Some(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn path_of(uri: &str, windows: bool) -> Option<String> {
+        file_uri_path(&uri.parse().unwrap(), windows)
+    }
+
+    #[test]
+    fn file_uris_decode_to_unix_paths() {
+        assert_eq!(path_of("file:///tmp/a%20b.sh", false).as_deref(), Some("/tmp/a b.sh"));
+        assert_eq!(path_of("file://localhost/tmp/x.sh", false).as_deref(), Some("/tmp/x.sh"));
+        assert_eq!(path_of("file:///caf%C3%A9.sh", false).as_deref(), Some("/caf\u{e9}.sh"));
+        assert_eq!(path_of("file://server/tmp/x.sh", false), None);
+    }
+
+    #[test]
+    fn file_uris_decode_to_windows_paths() {
+        assert_eq!(path_of("file:///C:/a/b%20c.sh", true).as_deref(), Some(r"C:\a\b c.sh"));
+        assert_eq!(path_of("file:///c%3A/x.sh", true).as_deref(), Some(r"c:\x.sh"));
+        assert_eq!(path_of("file:///C%3a/", true).as_deref(), Some("C:\\"));
+        assert_eq!(path_of("file://server/share/x.sh", true).as_deref(), Some(r"\\server\share\x.sh"));
+        assert_eq!(path_of("file://localhost/C:/x.sh", true).as_deref(), Some(r"C:\x.sh"));
+        assert_eq!(path_of("file:///nodrive/x.sh", true), None);
+        assert_eq!(path_of("file:///1:/x.sh", true), None);
+        assert_eq!(path_of("file:///", true), None);
+    }
 
     #[test]
     fn read_errors_use_the_cli_wording() {

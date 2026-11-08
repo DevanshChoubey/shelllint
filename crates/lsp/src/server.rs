@@ -20,14 +20,15 @@ use lsp_types::{
     CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability, CodeDescription,
     Diagnostic, DidChangeConfigurationParams, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
     DidOpenTextDocumentParams, DidSaveTextDocumentParams, Hover, HoverContents, HoverParams, HoverProviderCapability,
-    InitializeParams, MarkupContent, MarkupKind, NumberOrString, Position, PublishDiagnosticsParams, Range,
-    SaveOptions, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-    TextDocumentSyncSaveOptions, TextEdit, Url, WorkspaceEdit,
+    MarkupContent, MarkupKind, NumberOrString, Position, PublishDiagnosticsParams, Range, SaveOptions,
+    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TextDocumentSyncSaveOptions, TextEdit, Uri, WorkspaceEdit,
 };
 
 use crate::check::{Finding, WIKI_LINK, disable_edits, run_check};
 use crate::config::Settings;
 use crate::document::Document;
+use crate::sys::file_uri_path;
 
 /// Quiet period after the last edit before a check runs.
 pub const DEBOUNCE: Duration = Duration::from_millis(250);
@@ -35,7 +36,7 @@ pub const DEBOUNCE: Duration = Duration::from_millis(250);
 type BoxErr = Box<dyn Error + Sync + Send>;
 
 struct Job {
-    uri: Url,
+    uri: Uri,
     version: i32,
     text: String,
     filename: String,
@@ -44,7 +45,7 @@ struct Job {
 }
 
 struct Done {
-    uri: Url,
+    uri: Uri,
     version: i32,
     findings: Vec<Finding>,
 }
@@ -81,8 +82,10 @@ pub fn run_stdio() -> Result<(), BoxErr> {
 /// Serve LSP over an existing connection (used by the tests as well).
 pub fn serve(connection: Connection) -> Result<(), BoxErr> {
     let init = connection.initialize(serde_json::to_value(server_capabilities())?)?;
-    let params: InitializeParams = serde_json::from_value(init)?;
-    let settings = params.initialization_options.as_ref().map(Settings::from_json).unwrap_or_default();
+    // Only the options are used. Parsing all of `InitializeParams` would end the
+    // session over a root URI that the strict `Uri` type rejects.
+    let settings =
+        init.get("initializationOptions").filter(|v| !v.is_null()).map(Settings::from_json).unwrap_or_default();
 
     let (job_tx, job_rx) = unbounded::<Job>();
     let (done_tx, done_rx) = unbounded::<Done>();
@@ -133,9 +136,9 @@ fn worker(jobs: Receiver<Job>, out: Sender<Done>) {
 struct Server {
     sender: Sender<Message>,
     jobs: Sender<Job>,
-    docs: HashMap<Url, Document>,
-    cache: HashMap<Url, Cached>,
-    pending: HashMap<Url, Instant>,
+    docs: HashMap<Uri, Document>,
+    cache: HashMap<Uri, Cached>,
+    pending: HashMap<Uri, Instant>,
     settings: Settings,
 }
 
@@ -147,14 +150,14 @@ impl Server {
 
     fn flush_due(&mut self) {
         let now = Instant::now();
-        let due: Vec<Url> = self.pending.iter().filter(|(_, t)| **t <= now).map(|(u, _)| u.clone()).collect();
+        let due: Vec<Uri> = self.pending.iter().filter(|(_, t)| **t <= now).map(|(u, _)| u.clone()).collect();
         for u in due {
             self.pending.remove(&u);
             self.submit(&u);
         }
     }
 
-    fn submit(&self, uri: &Url) {
+    fn submit(&self, uri: &Uri) {
         if let Some(doc) = self.docs.get(uri) {
             let _ = self.jobs.send(Job {
                 uri: uri.clone(),
@@ -167,7 +170,7 @@ impl Server {
         }
     }
 
-    fn publish(&self, uri: Url, diagnostics: Vec<Diagnostic>, version: Option<i32>) {
+    fn publish(&self, uri: Uri, diagnostics: Vec<Diagnostic>, version: Option<i32>) {
         let params = PublishDiagnosticsParams { uri, diagnostics, version };
         let _ =
             self.sender.send(Message::Notification(Notification::new(PublishDiagnostics::METHOD.to_string(), params)));
@@ -193,7 +196,7 @@ impl Server {
 
     /// Findings for the document's current version: cached when the worker
     /// has already checked it, otherwise checked now.
-    fn findings(&mut self, uri: &Url) -> Vec<Finding> {
+    fn findings(&mut self, uri: &Uri) -> Vec<Finding> {
         let Some(doc) = self.docs.get(uri) else { return vec![] };
         let version = doc.version;
         if let Some(c) = self.cache.get(uri) {
@@ -236,7 +239,7 @@ impl Server {
     }
 
     /// Hover lists every finding under the position, one block each.
-    fn hover(&mut self, uri: &Url, pos: Position) -> Option<Hover> {
+    fn hover(&mut self, uri: &Uri, pos: Position) -> Option<Hover> {
         let findings = self.findings(uri);
         let blocks: Vec<String> = findings
             .iter()
@@ -270,7 +273,9 @@ impl Server {
         })
     }
 
-    fn code_actions(&mut self, uri: &Url, range: Range) -> Vec<CodeActionOrCommand> {
+    // `WorkspaceEdit` keys by `Uri`. Its interior `Cell` is a parse cache that `Hash` and `Eq` ignore.
+    #[allow(clippy::mutable_key_type)]
+    fn code_actions(&mut self, uri: &Uri, range: Range) -> Vec<CodeActionOrCommand> {
         let findings = self.findings(uri);
         let Some(doc) = self.docs.get(uri) else { return vec![] };
         let mut out = vec![];
@@ -355,7 +360,7 @@ impl Server {
                     if new != self.settings {
                         self.settings = new;
                         self.cache.clear();
-                        let uris: Vec<Url> = self.docs.keys().cloned().collect();
+                        let uris: Vec<Uri> = self.docs.keys().cloned().collect();
                         for u in uris {
                             self.pending.remove(&u);
                             self.submit(&u);
@@ -368,13 +373,14 @@ impl Server {
     }
 }
 
-fn new_document(uri: Url, version: i32, text: String) -> Document {
-    let is_file = uri.scheme() == "file";
+fn new_document(uri: Uri, version: i32, text: String) -> Document {
+    let is_file = uri.scheme().is_some_and(|s| s.as_str().eq_ignore_ascii_case("file"));
+    let path = uri.path().as_str();
     let filename = if is_file {
-        uri.to_file_path().map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| uri.path().to_string())
+        file_uri_path(&uri, cfg!(windows)).unwrap_or_else(|| path.to_string())
     } else {
-        uri.path_segments()
-            .and_then(|mut s| s.next_back())
+        path.strip_prefix('/')
+            .and_then(|p| p.rsplit('/').next())
             .filter(|s| !s.is_empty())
             .unwrap_or("untitled.sh")
             .to_string()
@@ -392,13 +398,13 @@ fn severity_name(f: &Finding) -> &'static str {
     }
 }
 
-fn to_diagnostic(f: &Finding, uri: &Url) -> Diagnostic {
+fn to_diagnostic(f: &Finding, uri: &Uri) -> Diagnostic {
     let _ = uri;
     Diagnostic {
         range: f.range,
         severity: Some(f.severity),
         code: Some(NumberOrString::String(format!("SC{}", f.code))),
-        code_description: Url::parse(&format!("{}SC{}", WIKI_LINK, f.code)).ok().map(|href| CodeDescription { href }),
+        code_description: format!("{}SC{}", WIKI_LINK, f.code).parse().ok().map(|href| CodeDescription { href }),
         source: Some("shellcheck".to_string()),
         message: f.message.clone(),
         related_information: None,
