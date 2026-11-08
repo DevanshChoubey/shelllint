@@ -362,9 +362,9 @@ checksum = "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c"
 
 [[package]]
 name = "lsp-server"
-version = "0.7.9"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d6ada348dbc2703cbe7637b2dda05cff84d3da2819c24abcb305dd613e0ba2e"
+checksum = "3ee25a31f2e571e426eef2896179450cafc7e2f5be00d8a93b1c2d21c0ff7656"
 dependencies = [
  "crossbeam-channel",
  "log",
@@ -555,6 +555,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "shelllint"
+version = "0.0.1"
+dependencies = [
+ "libc",
+ "shelllint-analyzer",
+ "shelllint-checker",
+ "shelllint-core",
+ "shelllint-formatter",
+]
+
+[[package]]
 name = "shelllint-analyzer"
 version = "0.0.1"
 dependencies = [
@@ -614,6 +625,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "shelllint-lib"
+version = "0.0.1"
+dependencies = [
+ "serde",
+ "serde_json",
+ "shelllint-analyzer",
+ "shelllint-checker",
+ "shelllint-checks",
+ "shelllint-core",
+ "shelllint-formatter",
+]
+
+[[package]]
 name = "shelllint-lsp"
 version = "0.0.1"
 dependencies = [
@@ -643,30 +667,6 @@ name = "shelllint-parser"
 version = "0.0.1"
 dependencies = [
  "shelllint-core",
-]
-
-[[package]]
-name = "shelllint-lib"
-version = "0.0.1"
-dependencies = [
- "serde",
- "serde_json",
- "shelllint-analyzer",
- "shelllint-checker",
- "shelllint-checks",
- "shelllint-core",
- "shelllint-formatter",
-]
-
-[[package]]
-name = "shelllint"
-version = "0.0.1"
-dependencies = [
- "libc",
- "shelllint-analyzer",
- "shelllint-checker",
- "shelllint-core",
- "shelllint-formatter",
 ]
 
 [[package]]
