@@ -43,6 +43,11 @@ fn run_in(dir: &std::path::Path, args: &[&str]) -> Out {
     }
 }
 
+/// `getProgName`, which keeps the `.exe` on Windows.
+fn prog() -> String {
+    format!("shellcheck-rust{}", std::env::consts::EXE_SUFFIX)
+}
+
 fn run(args: &[&str], stdin: &str) -> Out {
     run_with(args, stdin, &[])
 }
@@ -133,7 +138,14 @@ fn every_help_flag_is_accepted() {
         ("--fix", &["--fix", "--files-from=/dev/null"]),
         ("--dry-run", &["--fix", "--dry-run", "--files-from=/dev/null"]),
     ];
+    // An empty file list; `/dev/null` does not exist on Windows.
+    let empty = tmpdir("empty-list").join("list");
+    std::fs::write(&empty, "").unwrap();
+    let list = format!("--files-from={}", empty.to_str().unwrap());
     for (flag, args) in cases {
+        let args: Vec<&str> =
+            args.iter().map(|a| if *a == "--files-from=/dev/null" { list.as_str() } else { *a }).collect();
+        let args = &args[..];
         let o = run(args, CLEAN);
         assert_eq!(o.code, 0, "{} -> {:?}: {}", flag, args, o.stderr);
         assert!(!o.stderr.contains("unrecognized"), "{}: {}", flag, o.stderr);
@@ -421,7 +433,7 @@ fn stdin_is_read_only_once() {
     let o = run(&["--norc", "-f", "gcc", "--files-from=-", "--files-from=-"], &format!("{}\n", a));
     assert_eq!(o.code, 1);
     assert_eq!(o.stdout, "");
-    assert_eq!(o.stderr, "shellcheck-rust: <stdin>: hGetContents: illegal operation (handle is semi-closed)\n");
+    assert_eq!(o.stderr, format!("{}: <stdin>: hGetContents: illegal operation (handle is semi-closed)\n", prog()));
     // Reading '-' twice as a script uses the cached contents.
     let o = run(&["--norc", "-f", "gcc", "-", "-"], "#!/bin/sh\necho $x\n");
     assert_eq!(o.code, 1);
@@ -437,7 +449,7 @@ fn internal_error_exits_1() {
     std::fs::write(d.join("a.sh"), "#!/bin/sh\ntrue\n").unwrap();
     let o = run_in(&d, &["-f", "gcc", "a.sh"]);
     assert_eq!(o.code, 1, "{}", o.stderr);
-    assert!(o.stderr.starts_with("shellcheck-rust: "), "{}", o.stderr);
+    assert!(o.stderr.starts_with(&format!("{}: ", prog())), "{}", o.stderr);
     assert!(!o.stderr.contains("panicked") && !o.stderr.contains("RUST_BACKTRACE"), "{}", o.stderr);
 }
 
@@ -506,16 +518,21 @@ fn relative_or_empty_xdg_config_home_falls_back_to_home_config() {
     std::fs::write(w.join("xdg/editorconfig.ini"), "[*]\nshellcheck.disable=SC2006\n").unwrap();
     std::fs::write(h.join(".config/shellcheckrc"), "disable=SC2034\n").unwrap();
     let home = h.to_string_lossy().into_owned();
+    // On Windows the config defaults live in AppData, not under HOME.
+    let appdata = h.join(".config").to_string_lossy().into_owned();
     let home_only = "a.sh:2:6: note: Double quote to prevent globbing and word splitting. [SC2086]\n\
                      a.sh:3:5: note: Use $(...) notation instead of legacy backticks `...`. [SC2006]\n";
     for xdg in ["xdg", "./xdg", "xdg/", "../w/xdg", ""] {
-        let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("XDG_CONFIG_HOME", xdg)]);
+        let o =
+            run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("APPDATA", &appdata), ("XDG_CONFIG_HOME", xdg)]);
         assert_eq!(o.stdout, home_only, "XDG_CONFIG_HOME={:?}", xdg);
         assert_eq!(o.code, 1);
     }
     // An absolute one is used, and its editorconfig.ini too.
     let abs = format!("{}/./", w.join("xdg").to_string_lossy());
-    let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &[("HOME", &home), ("XDG_CONFIG_HOME", &abs)]);
+    let no_appdata = d.join("no-appdata").to_string_lossy().into_owned();
+    let env = [("HOME", home.as_str()), ("APPDATA", no_appdata.as_str()), ("XDG_CONFIG_HOME", abs.as_str())];
+    let o = run_in_env(&w, &["-f", "gcc", "a.sh"], &env);
     assert_eq!(
         o.stdout,
         "a.sh:3:1: warning: foo appears unused. Verify use (or export if used externally). [SC2034]\n"

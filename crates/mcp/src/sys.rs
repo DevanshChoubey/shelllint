@@ -7,6 +7,7 @@
 use std::path::{Path, PathBuf};
 
 use shellcheck_checker::decode_string;
+use shellcheck_checker::filepath::{drop_drive, drop_file_name, is_path_separator, strip_verbatim};
 use shellcheck_core::interface::{ErrorMessage, SystemInterface};
 
 pub struct McpSystem {
@@ -26,7 +27,7 @@ impl McpSystem {
 }
 
 fn normalize(x: &str) -> String {
-    std::fs::canonicalize(x).map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| x.to_string())
+    std::fs::canonicalize(x).map(|p| strip_verbatim(&p.to_string_lossy())).unwrap_or_else(|_| x.to_string())
 }
 
 /// Haskell `show` of the IOException `openBinaryFile` raises.
@@ -57,14 +58,11 @@ impl SystemInterface for McpSystem {
 
     /// The CLI's `findSource`, with no `--source-path` options.
     fn find_source(&self, current: &str, external: Option<bool>, source_paths: &[String], original: &str) -> String {
-        let scriptdir = match current.rfind('/') {
-            Some(i) => current[..=i].to_string(),
-            None => String::new(),
-        };
+        let scriptdir = drop_file_name(current);
         let adjust = |s: &str| -> String {
-            let mut parts = s.split('/').filter(|p| !p.is_empty());
+            let mut parts = s.split(is_path_separator).filter(|p| !p.is_empty());
             if s.starts_with("SCRIPTDIR") && parts.next() == Some("SCRIPTDIR") {
-                let mut p = PathBuf::from(&scriptdir);
+                let mut p = PathBuf::from(scriptdir);
                 for r in parts {
                     p.push(r);
                 }
@@ -83,10 +81,7 @@ impl SystemInterface for McpSystem {
                 .find(|c| self.allowable(external, c) && std::fs::metadata(c).is_ok_and(|m| !m.is_dir()))
                 .unwrap_or_else(|| deflt.to_string())
         };
-        match original.strip_prefix('/') {
-            Some(_) => find(original.trim_start_matches('/'), original),
-            None => find(original, original),
-        }
+        if Path::new(original).is_absolute() { find(drop_drive(original), original) } else { find(original, original) }
     }
 
     fn get_config(&self, _filename: &str) -> Option<(String, String)> {

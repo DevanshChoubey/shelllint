@@ -15,6 +15,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use shellcheck_checker::decode_string;
 use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
+use shellcheck_checker::filepath::{
+    PATH_SEPARATOR, combine, drop_drive, drop_file_name, is_path_separator, strip_verbatim,
+};
 use shellcheck_core::interface::{ErrorMessage, SystemInterface};
 
 use crate::options::Options;
@@ -41,56 +44,6 @@ pub fn io_interface(options: &Options, files: &[String]) -> IoInterface {
 
 fn normalize(x: &str) -> String {
     std::fs::canonicalize(x).map(|p| strip_verbatim(&p.to_string_lossy())).unwrap_or_else(|_| x.to_string())
-}
-
-/// System.Directory `canonicalizePath` on Windows drops the `\\?\` prefix
-/// that `GetFinalPathNameByHandle` returns; keeping it would also turn off
-/// `/` translation for every path later joined onto the result.
-fn strip_verbatim(p: &str) -> String {
-    if cfg!(windows) {
-        if let Some(rest) = p.strip_prefix(r"\\?\UNC\") {
-            return format!(r"\\{}", rest);
-        }
-        if let Some(rest) = p.strip_prefix(r"\\?\") {
-            return rest.to_string();
-        }
-    }
-    p.to_string()
-}
-
-/// System.FilePath `isPathSeparator`: `/` on POSIX; `/` or `\` on Windows.
-fn is_sep(c: char) -> bool {
-    c == '/' || (cfg!(windows) && c == '\\')
-}
-
-/// System.FilePath `pathSeparator`.
-const SEP: char = std::path::MAIN_SEPARATOR;
-
-/// System.FilePath `splitDrive` (the path after the drive). POSIX: the
-/// leading slashes. Windows: a drive, UNC or device prefix and its root.
-fn drop_drive(p: &str) -> &str {
-    if cfg!(windows) {
-        let mut comps = Path::new(p).components();
-        let mut rest = comps.as_path();
-        while let Some(c) = comps.next() {
-            match c {
-                std::path::Component::Prefix(_) | std::path::Component::RootDir => rest = comps.as_path(),
-                _ => break,
-            }
-        }
-        rest.to_str().unwrap_or(p)
-    } else {
-        p.trim_start_matches('/')
-    }
-}
-
-/// System.FilePath `dropFileName`: everything up to and including the last
-/// separator (or, on Windows, a drive's colon).
-fn drop_file_name(p: &str) -> &str {
-    match p.rfind(|c| is_sep(c) || (cfg!(windows) && c == ':')) {
-        Some(i) => &p[..=i],
-        None => "",
-    }
 }
 
 /// Haskell `show` of the IOException `openBinaryFile` raises.
@@ -359,25 +312,20 @@ fn xdg_config_path(home: Option<&str>, xdg: Option<&str>, suffix: &str) -> Optio
     let dir = match xdg {
         Some(x) if Path::new(x).is_absolute() => x.to_string(),
         _ if cfg!(windows) => home?.to_string(),
-        _ => join_path(home?, ".config"),
+        _ => combine(home?, ".config"),
     };
-    Some(simplify_path(&join_path(&dir, suffix)))
-}
-
-/// System.FilePath `</>` for a relative right-hand side.
-fn join_path(a: &str, b: &str) -> String {
-    let drive_only = cfg!(windows) && a.len() == 2 && a.ends_with(':');
-    if a.is_empty() || drive_only || a.ends_with(is_sep) { format!("{}{}", a, b) } else { format!("{}{}{}", a, SEP, b) }
+    Some(simplify_path(&combine(&dir, suffix)))
 }
 
 /// System.Directory's `simplify` (`normalise`): collapses repeated separators
 /// and drops `.` components; `..` is kept. Windows also turns `/` into `\`.
 fn simplify_path(p: &str) -> String {
-    let parts: Vec<&str> = p.split(is_sep).filter(|c| !c.is_empty() && *c != ".").collect();
-    let body = parts.join(&SEP.to_string());
-    let trailing = if p.ends_with(is_sep) && !body.is_empty() { SEP.to_string() } else { String::new() };
-    match (p.starts_with(is_sep), body.is_empty()) {
-        (true, _) => format!("{}{}{}", SEP, body, trailing),
+    let parts: Vec<&str> = p.split(is_path_separator).filter(|c| !c.is_empty() && *c != ".").collect();
+    let body = parts.join(&PATH_SEPARATOR.to_string());
+    let trailing =
+        if p.ends_with(is_path_separator) && !body.is_empty() { PATH_SEPARATOR.to_string() } else { String::new() };
+    match (p.starts_with(is_path_separator), body.is_empty()) {
+        (true, _) => format!("{}{}{}", PATH_SEPARATOR, body, trailing),
         (false, true) => ".".to_string(),
         (false, false) => format!("{}{}", body, trailing),
     }
@@ -413,7 +361,7 @@ impl IoInterface {
         match home {
             Some(h) => {
                 let x = xdg_config_path(Some(&h), xdg.as_deref(), "shellcheckrc").unwrap_or_default();
-                let app = if cfg!(windows) { join_path(&h, "shellcheckrc") } else { format!("{}/.shellcheckrc", h) };
+                let app = if cfg!(windows) { combine(&h, "shellcheckrc") } else { format!("{}/.shellcheckrc", h) };
                 vec![app, x]
             }
             None => vec![],
@@ -427,7 +375,7 @@ impl IoInterface {
     fn config_paths_with(dir: &str, defaults: &[String]) -> Vec<String> {
         let next = dir_of(dir);
         let rest = if next != dir { Self::config_paths_with(&next, defaults) } else { defaults.to_vec() };
-        let mut v = vec![join_path(dir, ".shellcheckrc"), join_path(dir, "shellcheckrc")];
+        let mut v = vec![combine(dir, ".shellcheckrc"), combine(dir, "shellcheckrc")];
         v.extend(rest);
         v
     }
@@ -507,7 +455,7 @@ impl SystemInterface for IoInterface {
     ) -> String {
         let scriptdir = drop_file_name(current_script);
         let adjust = |s: &str| -> String {
-            let mut parts = s.split(is_sep).filter(|p| !p.is_empty());
+            let mut parts = s.split(is_path_separator).filter(|p| !p.is_empty());
             if s.starts_with("SCRIPTDIR") && parts.next() == Some("SCRIPTDIR") {
                 let rest: Vec<&str> = parts.collect();
                 let mut p = PathBuf::from(scriptdir);
@@ -563,7 +511,7 @@ mod tests {
     /// `base` joined with a `/`-separated relative path, the way the port
     /// joins it: native separators throughout.
     fn native(base: &Path, rel: &str) -> String {
-        join_path(&base.to_string_lossy(), &rel.replace('/', &SEP.to_string()))
+        combine(&base.to_string_lossy(), &rel.replace('/', &PATH_SEPARATOR.to_string()))
     }
 
     fn write(p: &Path, c: &str) -> String {
@@ -686,7 +634,7 @@ mod tests {
         assert_eq!(paths[0], native(&d, "q/.shellcheckrc"));
         assert_eq!(paths[1], native(&d, "q/shellcheckrc"));
         let root = d.ancestors().last().unwrap().to_string_lossy().into_owned();
-        assert!(paths.contains(&join_path(&root, ".shellcheckrc")), "{:?}", paths);
+        assert!(paths.contains(&combine(&root, ".shellcheckrc")), "{:?}", paths);
         assert_eq!(IoInterface::read_config(&home_rc).unwrap().1, "enable=all");
     }
 

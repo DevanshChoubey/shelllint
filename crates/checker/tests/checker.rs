@@ -10,8 +10,8 @@
 use shellcheck_checker::editorconfig::{
     EditorConfigFs, editor_config_directives, get_editor_config, invalid_directive_lines, invalid_root_lines,
     is_editor_config_rejection, is_editor_config_root, matches_glob, merge_configs, parse_editor_config,
-    take_directory,
 };
+use shellcheck_checker::filepath::take_directory;
 use shellcheck_checker::{check_script, check_script_codes, decode_string, sort_messages};
 use shellcheck_core::interface::{
     CheckSpec, Code, Comment, ErrorMessage, MockedSystemInterface, Position, PositionedComment, Severity, Shell,

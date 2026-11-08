@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 
 use shellcheck_checker::decode_string;
 use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
+use shellcheck_checker::filepath::{combine, drop_file_name, is_path_separator, strip_verbatim};
 use shellcheck_core::interface::SystemInterface;
 
 #[derive(Default)]
@@ -30,9 +31,14 @@ fn read_config(file: &str) -> Option<(String, String)> {
     Some((file.to_string(), String::from_utf8_lossy(&bytes).into_owned()))
 }
 
+/// `$HOME`, or on Windows the AppData folder the Haskell directory package uses.
+fn user_dir() -> Option<String> {
+    std::env::var(if cfg!(windows) { "APPDATA" } else { "HOME" }).ok().filter(|h| !h.is_empty())
+}
+
 fn xdg_dir() -> Option<String> {
-    let home = std::env::var("HOME").ok().filter(|h| !h.is_empty());
-    std::env::var("XDG_CONFIG_HOME").ok().filter(|h| !h.is_empty()).or_else(|| home.map(|h| format!("{}/.config", h)))
+    let fallback = user_dir().map(|h| if cfg!(windows) { h } else { combine(&h, ".config") });
+    std::env::var("XDG_CONFIG_HOME").ok().filter(|h| !h.is_empty()).or(fallback)
 }
 
 /// Candidate rc paths for `filename`: nearest directory first, then the
@@ -41,22 +47,19 @@ fn rc_candidates(filename: &str) -> Vec<String> {
     let mut out = vec![];
     let mut dir = dir_of(filename);
     loop {
-        let join = |name: &str| {
-            if dir.ends_with('/') { format!("{}{}", dir, name) } else { format!("{}/{}", dir, name) }
-        };
-        out.push(join(".shellcheckrc"));
-        out.push(join("shellcheckrc"));
+        out.push(combine(&dir, ".shellcheckrc"));
+        out.push(combine(&dir, "shellcheckrc"));
         let next = dir_of(&dir);
         if next == dir {
             break;
         }
         dir = next;
     }
-    if let Some(home) = std::env::var("HOME").ok().filter(|h| !h.is_empty()) {
-        out.push(format!("{}/.shellcheckrc", home));
+    if let Some(home) = user_dir() {
+        out.push(combine(&home, if cfg!(windows) { "shellcheckrc" } else { ".shellcheckrc" }));
     }
     if let Some(x) = xdg_dir() {
-        out.push(format!("{}/shellcheckrc", x));
+        out.push(combine(&x, "shellcheckrc"));
     }
     out
 }
@@ -79,7 +82,7 @@ pub fn show_io_error(file: &str, e: &std::io::Error) -> String {
 
 impl EditorConfigFs for LspSystem {
     fn normalize(&self, path: &str) -> String {
-        std::fs::canonicalize(path).map(|p| p.to_string_lossy().into_owned()).unwrap_or_else(|_| path.to_string())
+        std::fs::canonicalize(path).map(|p| strip_verbatim(&p.to_string_lossy())).unwrap_or_else(|_| path.to_string())
     }
 
     fn read_config(&self, file: &str) -> Option<(String, String)> {
@@ -87,7 +90,7 @@ impl EditorConfigFs for LspSystem {
     }
 
     fn global_editor_config_path(&self) -> Option<String> {
-        Some(format!("{}/editorconfig.ini", xdg_dir()?))
+        Some(combine(&xdg_dir()?, "editorconfig.ini"))
     }
 }
 
@@ -108,12 +111,9 @@ impl SystemInterface for LspSystem {
     /// Resolves `SCRIPTDIR` and the `source-path` annotations against the
     /// script's directory; returns `original` when nothing exists.
     fn find_source(&self, current: &str, external: Option<bool>, source_paths: &[String], original: &str) -> String {
-        let scriptdir = match current.rfind('/') {
-            Some(i) => current[..=i].to_string(),
-            None => String::new(),
-        };
+        let scriptdir = drop_file_name(current);
         let adjust = |s: &str| match s.strip_prefix("SCRIPTDIR") {
-            Some(rest) => format!("{}{}", scriptdir, rest.trim_start_matches('/')),
+            Some(rest) => format!("{}{}", scriptdir, rest.trim_start_matches(is_path_separator)),
             None => s.to_string(),
         };
         let allowed = external == Some(true);

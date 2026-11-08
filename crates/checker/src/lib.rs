@@ -8,6 +8,7 @@
 #![forbid(unsafe_code)]
 
 pub mod editorconfig;
+pub mod filepath;
 
 use std::collections::HashMap;
 

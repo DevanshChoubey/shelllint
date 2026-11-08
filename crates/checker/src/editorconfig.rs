@@ -21,6 +21,7 @@
 // Not ported: the TemplateHaskell `runTests` footer (the `prop_` definitions
 // live in `crates/checker/tests/checker.rs`).
 
+use crate::filepath::{combine, take_directory, take_file_name};
 use shellcheck_core::data::shell_for_executable;
 use shellcheck_core::regex::{matches, mk_regex};
 use shellcheck_parser::engine::is_space;
@@ -458,6 +459,8 @@ fn make_relative_to(dir: &str, path: &str) -> String {
     }
 }
 
+// As upstream, this appends `/` on every platform: on Windows the prefix then
+// does not match, and the glob is tested against the bare file name.
 fn add_trailing_slash(dir: &str) -> String {
     if dir.is_empty() || dir.ends_with('/') { dir.to_string() } else { format!("{dir}/") }
 }
@@ -468,37 +471,4 @@ fn collect_dir_configs(fs: &dyn EditorConfigFs, dir: &str) -> Vec<(String, Strin
     let next = take_directory(dir);
     let rest = if next != dir && !is_root { collect_dir_configs(fs, &next) } else { vec![] };
     current.into_iter().chain(rest).collect()
-}
-
-// System.FilePath (POSIX) helpers used above.
-
-/// `takeFileName`
-pub fn take_file_name(path: &str) -> &str {
-    match path.rfind('/') {
-        Some(i) => &path[i + 1..],
-        None => path,
-    }
-}
-
-/// `takeDirectory`: `dropTrailingPathSeparator . dropFileName`, "." if empty.
-pub fn take_directory(path: &str) -> String {
-    let dir = match path.rfind('/') {
-        Some(i) => &path[..=i],
-        None => "",
-    };
-    // dropTrailingPathSeparator keeps a path made only of separators.
-    let trimmed = dir.trim_end_matches('/');
-    let res = if trimmed.is_empty() && !dir.is_empty() { &dir[..1] } else { trimmed };
-    if res.is_empty() { ".".to_string() } else { res.to_string() }
-}
-
-/// `</>`
-pub fn combine(a: &str, b: &str) -> String {
-    if b.starts_with('/') || a.is_empty() {
-        b.to_string()
-    } else if a.ends_with('/') {
-        format!("{a}{b}")
-    } else {
-        format!("{a}/{b}")
-    }
 }
