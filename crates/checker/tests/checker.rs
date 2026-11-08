@@ -1409,6 +1409,7 @@ fn take_directory_cases() {
     assert_eq!(take_directory("foo//bar"), "foo");
 }
 
+#[cfg(unix)] // the mock filesystem is keyed by POSIX paths
 #[test]
 fn get_editor_config_walks_parents() {
     let fs = MockFs(
@@ -1430,6 +1431,7 @@ fn get_editor_config_walks_parents() {
     assert_eq!(get_editor_config(&fs, "b.sh"), None);
 }
 
+#[cfg(unix)] // the mock filesystem is keyed by POSIX paths
 #[test]
 fn get_editor_config_global_and_bad_root() {
     let fs = MockFs(

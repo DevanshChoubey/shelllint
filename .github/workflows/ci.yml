@@ -96,7 +96,7 @@ jobs:
       - name: Test (macOS / Windows)
         if: runner.os != 'Linux'
         run: |
-          cargo test --workspace --locked --exclude shelllint-conformance -- --test-threads=2
+          cargo test --workspace --locked --no-fail-fast --exclude shelllint-conformance -- --test-threads=2
           cargo test -p shelllint-conformance --locked --lib --test linkage -- --test-threads=2
 
   conformance:
