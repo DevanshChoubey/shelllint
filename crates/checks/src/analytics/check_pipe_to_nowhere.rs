@@ -3,11 +3,11 @@
 
 use std::collections::BTreeMap;
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::astlib::{get_all_flags, get_command, get_command_basename, has_flag};
-use shellcheck_core::data::NON_READING_COMMANDS;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::astlib::{get_all_flags, get_command, get_command_basename, has_flag};
+use shelllint_core::data::NON_READING_COMMANDS;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

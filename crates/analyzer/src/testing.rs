@@ -12,10 +12,10 @@
 
 use crate::analyzerlib::run_and_get_codes;
 use crate::api::{CheckEntry, CheckKind, CommandName, entry_test_checker};
-use shellcheck_core::interface::Code;
+use shelllint_core::interface::Code;
 
 /// Resolve a test's check expression to entries of `checks` (the registry,
-/// normally `shellcheck_checks::CHECKS`).
+/// normally `shelllint_checks::CHECKS`).
 ///
 /// `name` is the Haskell expression the test applies its helper to, without
 /// the outer parentheses: `checkEchoWc`, or for parametrised command checks

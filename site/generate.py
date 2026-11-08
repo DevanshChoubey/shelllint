@@ -125,7 +125,7 @@ def main():
     real = real_section(notes)
     out = {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "project": "shellcheck-rust",
+        "project": "shelllint",
         "reference": "ShellCheck v0.11.0-171-ge11f964 (Haskell, koalaman/shellcheck:latest)",
         "notes": notes,
         "conformance": {k: v for k, v in conf.items() if k != "failures"},

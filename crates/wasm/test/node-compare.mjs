@@ -3,21 +3,21 @@
 // CLI's `-f json1` output, byte for byte, for a set of scripts and options.
 //
 //   scripts/build-wasm.sh                 # produces playground/pkg/
-//   cargo build -p shellcheck-rust        # native CLI (CARGO_TARGET_DIR respected)
+//   cargo build -p shelllint        # native CLI (CARGO_TARGET_DIR respected)
 //   node crates/wasm/test/node-compare.mjs
 //
-// Env: NATIVE_BIN (default: $CARGO_TARGET_DIR or ./target)/debug/shellcheck-rust).
+// Env: NATIVE_BIN (default: $CARGO_TARGET_DIR or ./target)/debug/shelllint).
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { initSync, check, fix, list_checks, version } from "../../../playground/pkg/shellcheck_wasm.js";
+import { initSync, check, fix, list_checks, version } from "../../../playground/pkg/shelllint_wasm.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "../../..");
 const targetDir = process.env.CARGO_TARGET_DIR ?? join(root, "target");
-const nativeBin = process.env.NATIVE_BIN ?? join(targetDir, "debug", "shellcheck-rust");
+const nativeBin = process.env.NATIVE_BIN ?? join(targetDir, "debug", "shelllint");
 
 initSync({ module: readFileSync(join(root, "playground/pkg/shellcheck_wasm_bg.wasm")) });
 

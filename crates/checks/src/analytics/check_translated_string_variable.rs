@@ -2,10 +2,10 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkTranslatedStringVariable`, lines 4290-4298 (e11f964)
 
 use crate::support::{fix_with, replace_start};
-use shellcheck_analyzer::analyzerlib::{Comments, Params, StackData};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{is_variable_char, is_variable_name};
+use shelllint_analyzer::analyzerlib::{Comments, Params, StackData};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{is_variable_char, is_variable_name};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

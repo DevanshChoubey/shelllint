@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Tests for the Parsec engine underlying the port of ShellCheck src/ShellCheck/Parser.hs (e11f964)
 
-use shellcheck_core::interface::Severity;
-use shellcheck_parser::engine::{Fail, P, PR, ParseError};
-use shellcheck_parser::testing::{self, test_environment};
-use shellcheck_parser::{alt, choice};
+use shelllint_core::interface::Severity;
+use shelllint_parser::engine::{Fail, P, PR, ParseError};
+use shelllint_parser::testing::{self, test_environment};
+use shelllint_parser::{alt, choice};
 
 fn run<T>(input: &str, f: impl FnOnce(&mut P<'_>) -> PR<T>) -> (PR<T>, usize, usize, usize, u32) {
     let mut p = P::new(test_environment(), "-", input);
@@ -285,6 +285,6 @@ fn with_stack_runs_deep_recursion() {
     }
     let depth = 5000;
     let input = format!("{}{}", "(".repeat(depth), ")".repeat(depth));
-    let r = shellcheck_parser::engine::with_stack(256 << 20, move || run(&input, nest).0);
+    let r = shelllint_parser::engine::with_stack(256 << 20, move || run(&input, nest).0);
     assert_eq!(r, Ok(depth as u32));
 }

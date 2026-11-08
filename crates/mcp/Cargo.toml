@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-mcp"
+name = "shelllint-mcp"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -15,15 +15,15 @@ description = "MCP (Model Context Protocol) server exposing the ShellCheck port 
 path = "src/lib.rs"
 
 [[bin]]
-name = "shellcheck-rust-mcp"
+name = "shelllint-mcp"
 path = "src/main.rs"
 
 [dependencies]
 serde_json = "1"
-shellcheck-core.workspace = true
-shellcheck-analyzer.workspace = true
-shellcheck-checker.workspace = true
-shellcheck-formatter.workspace = true
+shelllint-core.workspace = true
+shelllint-analyzer.workspace = true
+shelllint-checker.workspace = true
+shelllint-formatter.workspace = true
 
 [lints]
 workspace = true

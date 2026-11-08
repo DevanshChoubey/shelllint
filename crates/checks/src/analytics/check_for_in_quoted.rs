@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkForInQuoted`, lines 730-751 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{
     get_literal_string, get_trailing_unquoted_literal, get_unquoted_literal,
     may_become_multiple_args, will_split,
 };

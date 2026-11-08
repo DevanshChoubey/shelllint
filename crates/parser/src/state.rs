@@ -22,9 +22,9 @@
 use std::collections::BTreeMap;
 use std::rc::Rc;
 
-use shellcheck_core::ast::{Annotation, Ast, Dashed, Id, Quoted, Token};
-use shellcheck_core::interface::{Code, Severity, Shell, SystemInterface};
-use shellcheck_core::prelude::please_report;
+use shelllint_core::ast::{Annotation, Ast, Dashed, Id, Quoted, Token};
+use shelllint_core::interface::{Code, Severity, Shell, SystemInterface};
+use shelllint_core::prelude::please_report;
 
 use crate::engine::{FileId, P, PR, SourcePos};
 

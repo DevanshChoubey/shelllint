@@ -1,11 +1,11 @@
-# Contributing to shellcheck-rust
+# Contributing to shelllint
 
 Thank you for helping. This project is a **faithful port** of
 [ShellCheck](https://github.com/koalaman/shellcheck), so most work here is
 about matching upstream exactly, not about designing new behaviour. Please read
 this whole page before you open a pull request.
 
-shellcheck-rust is not affiliated with the ShellCheck project. Report problems
+shelllint is not affiliated with the ShellCheck project. Report problems
 with this port here, not upstream.
 
 ## The one rule
@@ -29,8 +29,8 @@ The pinned commit is `e11f964`, in the submodule `reference/shellcheck`.
 ## Getting set up
 
 ```bash
-git clone https://github.com/DevanshChoubey/shellcheck-rust
-cd shellcheck-rust
+git clone https://github.com/DevanshChoubey/shelllint
+cd shelllint
 git submodule update --init      # the upstream Haskell source, for reading
 cargo build
 ```
@@ -62,18 +62,18 @@ Every pull request must keep these green. CI runs them on Linux.
 
 | Gate | Command | What it checks |
 |---|---|---|
-| **report** | `cargo run -q -p shellcheck-conformance -- report` | Each ported check against its own upstream `prop_` tests. Must print `fail 0`. |
-| **parity** | `cargo run -q -p shellcheck-conformance --features checker -- parity` | Runs the full pipeline on each corpus script and compares its SC code set with the stored output of real ShellCheck. Fails on any regression against `corpus/parity-baseline.json`. |
-| **pathological** | `cargo test -p shellcheck-conformance --test pathological -- --test-threads=2` | Huge or deeply nested inputs must finish in under 10 s and stay under a peak RSS limit. Linux only, because it reads `/proc`. |
+| **report** | `cargo run -q -p shelllint-conformance -- report` | Each ported check against its own upstream `prop_` tests. Must print `fail 0`. |
+| **parity** | `cargo run -q -p shelllint-conformance --features checker -- parity` | Runs the full pipeline on each corpus script and compares its SC code set with the stored output of real ShellCheck. Fails on any regression against `corpus/parity-baseline.json`. |
+| **pathological** | `cargo test -p shelllint-conformance --test pathological -- --test-threads=2` | Huge or deeply nested inputs must finish in under 10 s and stay under a peak RSS limit. Linux only, because it reads `/proc`. |
 
 Useful variants:
 
 ```bash
 # One check, as in the porting guide (always pass --module)
-cargo run -q -p shellcheck-conformance -- report --module Analytics.hs --target checkEchoWc
+cargo run -q -p shelllint-conformance -- report --module Analytics.hs --target checkEchoWc
 
 # List every parity mismatch
-cargo run -q -p shellcheck-conformance --features checker -- parity --verbose
+cargo run -q -p shelllint-conformance --features checker -- parity --verbose
 ```
 
 When parity improves, for example after a fix that makes a previously
@@ -81,7 +81,7 @@ mismatching script match, update the baseline in the same pull request and
 say so in the description:
 
 ```bash
-cargo run -q -p shellcheck-conformance --features checker -- parity --update-baseline
+cargo run -q -p shelllint-conformance --features checker -- parity --update-baseline
 ```
 
 Never update the baseline to hide a regression.
@@ -96,7 +96,7 @@ it lists are worked examples.
 To fix a check that produces wrong output:
 
 1. Reproduce the problem with the oracle (see below) and with
-   `shellcheck-rust`.
+   `shelllint`.
 2. Find the Haskell definition in `reference/shellcheck/src/ShellCheck/`. The
    header of the Rust file names the source file and the line span.
 3. Make the Rust match the Haskell. If the corpus did not catch the bug, add a
@@ -110,7 +110,7 @@ the unit tests do not cover:
 
 ```bash
 printf '%s\n' 'echo $foo' | docker run --rm -i koalaman/shellcheck:latest -s bash -f gcc -
-printf '%s\n' 'echo $foo' | shellcheck-rust -s bash -f gcc -
+printf '%s\n' 'echo $foo' | shelllint -s bash -f gcc -
 ```
 
 - Compare with `-f json1` when you need exact positions and fixes.
@@ -159,7 +159,7 @@ update the `(e11f964)` provenance markers. Do not mix it with other changes.
 
 ## Licensing of contributions
 
-shellcheck-rust is a derivative work of ShellCheck and is licensed under the
+shelllint is a derivative work of ShellCheck and is licensed under the
 GNU GPL, version 3 or (at your option) any later version (`GPL-3.0-or-later`,
 the same terms as upstream; see [LICENSE](LICENSE) and [NOTICE](NOTICE)). By
 submitting a contribution, you agree to license it under the same terms. You

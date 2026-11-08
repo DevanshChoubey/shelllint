@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/ShellSupport.hs `checkBraceExpansionVars`, lines 619-642 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command_m, is_unqualified_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::get_literal_string_ext;
-use shellcheck_core::interface::Shell;
+use shelllint_analyzer::analyzerlib::{Comments, Params, get_closest_command_m, is_unqualified_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::get_literal_string_ext;
+use shelllint_core::interface::Shell;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/ShellSupport.hs",

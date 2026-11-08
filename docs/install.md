@@ -1,18 +1,18 @@
-# Installing shellcheck-rust
+# Installing shelllint
 
-shellcheck-rust is a single native binary, `shellcheck-rust`. Pick the method
+shelllint is a single native binary, `shelllint`. Pick the method
 that fits your setup; all of them put the same binary on your `PATH`.
 
 | Method | Command | Needs |
 |---|---|---|
 | Release binary | download + extract | nothing |
-| Docker / Podman | `docker run --rm -i ghcr.io/devanshchoubey/shellcheck-rust -f gcc - < script.sh` | Docker |
-| cargo | `cargo install --git https://github.com/DevanshChoubey/shellcheck-rust shellcheck-rust` | Rust |
-| npm | `npm install -g shellcheck-rust` | Node 16+ |
-| pip | `pip install shellcheck-rust` | Python 3.8+ |
-| Homebrew | `brew install DevanshChoubey/tap/shellcheck-rust` | Homebrew |
-| Arch (AUR) | `yay -S shellcheck-rust-bin` (or `shellcheck-rust` to build) | an AUR helper |
-| Nix | `nix run github:DevanshChoubey/shellcheck-rust` | Nix flakes/`nix-build` |
+| Docker / Podman | `docker run --rm -i ghcr.io/devanshchoubey/shelllint -f gcc - < script.sh` | Docker |
+| cargo | `cargo install --git https://github.com/DevanshChoubey/shelllint shelllint` | Rust |
+| npm | `npm install -g shelllint` | Node 16+ |
+| pip | `pip install shelllint` | Python 3.8+ |
+| Homebrew | `brew install DevanshChoubey/tap/shelllint` | Homebrew |
+| Arch (AUR) | `yay -S shelllint-bin` (or `shelllint` to build) | an AUR helper |
+| Nix | `nix run github:DevanshChoubey/shelllint` | Nix flakes/`nix-build` |
 | pre-commit | see [pre-commit](#pre-commit) | pre-commit |
 | GitHub Actions | see [GitHub Action](#github-action) | a workflow |
 
@@ -30,15 +30,15 @@ Every release attaches one archive per target plus a `SHA256SUMS` file:
 V=0.0.1
 T=x86_64-unknown-linux-musl          # or aarch64-unknown-linux-musl,
                                      # x86_64-apple-darwin, aarch64-apple-darwin
-curl -fsSLO "https://github.com/DevanshChoubey/shellcheck-rust/releases/download/v$V/shellcheck-rust-v$V-$T.tar.gz"
-curl -fsSLO "https://github.com/DevanshChoubey/shellcheck-rust/releases/download/v$V/SHA256SUMS"
-grep "shellcheck-rust-v$V-$T.tar.gz" SHA256SUMS | sha256sum -c -
-tar -xzf "shellcheck-rust-v$V-$T.tar.gz"
-install -m755 "shellcheck-rust-v$V-$T/shellcheck-rust" ~/.local/bin/
+curl -fsSLO "https://github.com/DevanshChoubey/shelllint/releases/download/v$V/shelllint-v$V-$T.tar.gz"
+curl -fsSLO "https://github.com/DevanshChoubey/shelllint/releases/download/v$V/SHA256SUMS"
+grep "shelllint-v$V-$T.tar.gz" SHA256SUMS | sha256sum -c -
+tar -xzf "shelllint-v$V-$T.tar.gz"
+install -m755 "shelllint-v$V-$T/shelllint" ~/.local/bin/
 ```
 
-Windows: download `shellcheck-rust-v<V>-x86_64-pc-windows-msvc.zip`, extract,
-and put `shellcheck-rust.exe` on your `PATH`.
+Windows: download `shelllint-v<V>-x86_64-pc-windows-msvc.zip`, extract,
+and put `shelllint.exe` on your `PATH`.
 
 ## Docker
 
@@ -46,14 +46,14 @@ The image is built `FROM scratch` around a static musl binary (a few MB, no
 shell, no libc). It takes the same arguments as the binary:
 
 ```sh
-docker run --rm -i ghcr.io/devanshchoubey/shellcheck-rust:0.0.1 -f gcc - < script.sh
-docker run --rm -v "$PWD:/src" -w /src ghcr.io/devanshchoubey/shellcheck-rust:0.0.1 -f tty scripts/*.sh
+docker run --rm -i ghcr.io/devanshchoubey/shelllint:0.0.1 -f gcc - < script.sh
+docker run --rm -v "$PWD:/src" -w /src ghcr.io/devanshchoubey/shelllint:0.0.1 -f tty scripts/*.sh
 ```
 
 To build it locally from a checkout:
 
 ```sh
-docker build --memory=6g -t shellcheck-rust .
+docker build --memory=6g -t shelllint .
 ```
 
 The `-i` flag is needed for `-` (read the script from stdin). Because the
@@ -64,13 +64,13 @@ image has no shell, pass file paths as arguments, not as a shell glob.
 From crates.io once the crates are published (not yet, see below):
 
 ```sh
-cargo install shellcheck-rust
+cargo install shelllint
 ```
 
 From git, today:
 
 ```sh
-cargo install --git https://github.com/DevanshChoubey/shellcheck-rust shellcheck-rust
+cargo install --git https://github.com/DevanshChoubey/shelllint shelllint
 # or from a checkout:
 cargo install --path crates/cli
 ```
@@ -79,13 +79,13 @@ Build your own fast binary with `--locked` so the workspace `Cargo.lock` is used
 
 ## npm
 
-The `shellcheck-rust` package is a launcher. The binary comes from one of the
-`@shellcheck-rust/<os>-<arch>` optional dependencies, so npm installs only the
+The `shelllint` package is a launcher. The binary comes from one of the
+`@shelllint/<os>-<arch>` optional dependencies, so npm installs only the
 one for your platform.
 
 ```sh
-npm install -g shellcheck-rust        # global
-npx shellcheck-rust -f gcc script.sh  # one-off, no install
+npm install -g shelllint        # global
+npx shelllint -f gcc script.sh  # one-off, no install
 ```
 
 Do not pass `--omit=optional` (or `--no-optional`), or the binary is missing.
@@ -95,27 +95,27 @@ Do not pass `--omit=optional` (or `--no-optional`), or the binary is missing.
 The wheel ships the native binary as a console script, with no Python API:
 
 ```sh
-pip install shellcheck-rust
-shellcheck-rust --version
+pip install shelllint
+shelllint --version
 ```
 
-Or into an isolated tool environment: `pipx install shellcheck-rust`.
+Or into an isolated tool environment: `pipx install shelllint`.
 
 ## Homebrew
 
 ```sh
-brew install DevanshChoubey/tap/shellcheck-rust
+brew install DevanshChoubey/tap/shelllint
 ```
 
-The formula is in `packaging/homebrew/shellcheck-rust.rb`, a template that the
+The formula is in `packaging/homebrew/shelllint.rb`, a template that the
 release job fills in (version and sha256 values). Copy it into your tap's
 `Formula/` directory.
 
 ## Arch Linux (AUR)
 
 ```sh
-yay -S shellcheck-rust-bin   # prebuilt static binary
-yay -S shellcheck-rust       # build from source with cargo
+yay -S shelllint-bin   # prebuilt static binary
+yay -S shelllint       # build from source with cargo
 ```
 
 The PKGBUILDs are in `packaging/aur/`. The checksums are placeholders until a
@@ -124,7 +124,7 @@ release is cut.
 ## Nix
 
 ```sh
-nix run github:DevanshChoubey/shellcheck-rust
+nix run github:DevanshChoubey/shelllint
 nix-build packaging/nix      # from a checkout
 ```
 
@@ -136,11 +136,11 @@ the workspace `Cargo.lock`.
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/DevanshChoubey/shellcheck-rust
+  - repo: https://github.com/DevanshChoubey/shelllint
     rev: v0.0.1
     hooks:
-      - id: shellcheck-rust          # language: rust, builds with cargo
-      # - id: shellcheck-rust-docker # language: docker_image, needs Docker
+      - id: shelllint          # language: rust, builds with cargo
+      # - id: shelllint-docker # language: docker_image, needs Docker
 ```
 
 The `rust` hook builds the tool the first time pre-commit runs, so it needs a
@@ -151,7 +151,7 @@ flags with `args: [--severity=warning]` in your config.
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: DevanshChoubey/shellcheck-rust@v0.0.1
+- uses: DevanshChoubey/shelllint@v0.0.1
   with:
     paths: "scripts/**/*.sh install.sh"
     severity: warning
@@ -166,8 +166,8 @@ annotations on the PR), and runs the tool. Inputs: `paths`, `severity`,
 ## Verifying the install
 
 ```sh
-shellcheck-rust --version
-printf '#!/bin/sh\necho $x\n' | shellcheck-rust -f gcc -
+shelllint --version
+printf '#!/bin/sh\necho $x\n' | shelllint -f gcc -
 ```
 
 The second command should report SC2154 and SC2086 and exit with status 1.

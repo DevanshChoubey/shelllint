@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkTimeParameters`, lines 987-996 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, when_shell};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::oversimplify;
-use shellcheck_core::interface::Shell;
+use shelllint_analyzer::analyzerlib::{Comments, Params, when_shell};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, CommandName};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::oversimplify;
+use shelllint_core::interface::Shell;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",

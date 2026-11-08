@@ -36,7 +36,7 @@ fn run_pipeline(script: &str) {
     #[cfg(feature = "checker")]
     {
         // check_script runs on its own big-stack thread.
-        let _ = shellcheck_checker::check_script_codes(script, None);
+        let _ = shelllint_checker::check_script_codes(script, None);
     }
     #[cfg(not(feature = "checker"))]
     {

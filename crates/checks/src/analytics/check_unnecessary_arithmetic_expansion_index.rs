@@ -2,9 +2,9 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnnecessaryArithmeticExpansionIndex`, lines 5322-5335 (e11f964)
 
 use crate::support::{fix_with, replace_end, replace_start};
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -33,7 +33,7 @@ fn check_unnecessary_arithmetic_expansion_index(params: &Params<'_>, t: Id, c: &
     );
 }
 
-fn fix(id: Id, params: &Params<'_>) -> shellcheck_core::interface::Fix {
+fn fix(id: Id, params: &Params<'_>) -> shelllint_core::interface::Fix {
     fix_with(vec![
         replace_start(id, params, 3, ""), // Remove "$(("
         replace_end(id, params, 2, ""),   // Remove "))"

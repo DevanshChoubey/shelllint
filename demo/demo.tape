@@ -1,9 +1,9 @@
-# vhs demo for shellcheck-rust. Render from the repo root with the release
+# vhs demo for shelllint. Render from the repo root with the release
 # binary mounted into the vhs image (git must be present in it too):
 #
 #   docker run --rm --memory=4g \
 #     -v "$PWD:/vhs" \
-#     -v "$PWD/target/release/shellcheck-rust:/usr/local/bin/shellcheck-rust:ro" \
+#     -v "$PWD/target/release/shelllint:/usr/local/bin/shelllint:ro" \
 #     ghcr.io/charmbracelet/vhs demo/demo.tape
 #
 # The fixture is copied to a scratch dir first, because `git apply` below
@@ -30,13 +30,13 @@ Enter
 Sleep 2s
 
 # 2. Lint it. --color=always forces colors when the output is not a terminal.
-Type "shellcheck-rust --color=always buggy.sh"
+Type "shelllint --color=always buggy.sh"
 Enter
 Sleep 4s
 
 # 3. Emit a patch and apply it with git.
 Type "clear"
 Enter
-Type "shellcheck-rust -f diff buggy.sh | git apply && cat buggy.sh"
+Type "shelllint -f diff buggy.sh | git apply && cat buggy.sh"
 Enter
 Sleep 4s

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnnecessarilyInvertedTest`, lines 4183-4239 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
-use shellcheck_core::ast::{ConditionType, Id, Token};
-use shellcheck_core::astlib::get_literal_string;
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
+use shelllint_core::ast::{ConditionType, Id, Token};
+use shelllint_core::astlib::get_literal_string;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

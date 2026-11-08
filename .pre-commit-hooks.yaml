@@ -1,33 +1,33 @@
-# pre-commit hooks for shellcheck-rust. Consume from another repo with:
+# pre-commit hooks for shelllint. Consume from another repo with:
 #
 #   repos:
-#     - repo: https://github.com/DevanshChoubey/shellcheck-rust
+#     - repo: https://github.com/DevanshChoubey/shelllint
 #       rev: v0.0.1
 #       hooks:
-#         - id: shellcheck-rust          # runs shellcheck-rust from your PATH
+#         - id: shelllint          # runs shelllint from your PATH
 #         # or
-#         - id: shellcheck-rust-docker   # pulls the static image (needs Docker)
+#         - id: shelllint-docker   # pulls the static image (needs Docker)
 #
-# `shellcheck-rust` is a `language: system` hook: install the binary first
-# (a release archive, Homebrew, AUR, or `cargo install shellcheck-rust`).
+# `shelllint` is a `language: system` hook: install the binary first
+# (a release archive, Homebrew, AUR, or `cargo install shelllint`).
 # Both hooks run with the repo's default settings; add `args: [...]` in the
 # consumer config to pass flags such as `--severity=warning`.
 
-- id: shellcheck-rust
-  name: shellcheck-rust
-  description: Lint shell scripts with shellcheck-rust (a Rust port of ShellCheck), installed on PATH.
-  entry: shellcheck-rust
+- id: shelllint
+  name: shelllint
+  description: Lint shell scripts with shelllint (a Rust port of ShellCheck), installed on PATH.
+  entry: shelllint
   language: system
   types: [shell]
   require_serial: true
   args: [--format=gcc]
 
-- id: shellcheck-rust-docker
-  name: shellcheck-rust (docker)
-  description: Lint shell scripts with the static shellcheck-rust image; no local install needed.
+- id: shelllint-docker
+  name: shelllint (docker)
+  description: Lint shell scripts with the static shelllint image; no local install needed.
   # Image is built from the repo Dockerfile and pushed by the release
   # workflow's docker-image job (ghcr.io names are lowercase).
-  entry: ghcr.io/devanshchoubey/shellcheck-rust:0.0.1
+  entry: ghcr.io/devanshchoubey/shelllint:0.0.1
   language: docker_image
   types: [shell]
   require_serial: true

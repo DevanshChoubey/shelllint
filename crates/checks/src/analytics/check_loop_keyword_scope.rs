@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkLoopKeywordScope`, lines 2952-2971 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, Scope, get_path_m, lead_type};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::Id;
-use shellcheck_core::astlib::{get_command_name, is_function, is_loop};
+use shelllint_analyzer::analyzerlib::{Comments, Params, Scope, get_path_m, lead_type};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::Id;
+use shelllint_core::astlib::{get_command_name, is_function, is_loop};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

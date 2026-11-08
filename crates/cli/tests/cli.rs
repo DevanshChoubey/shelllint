@@ -12,7 +12,7 @@ struct Out {
 }
 
 fn run_with(args: &[&str], stdin: &str, env: &[(&str, &str)]) -> Out {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_shelllint"));
     cmd.args(args).env_remove("SHELLCHECK_OPTS").stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
     for (k, v) in env {
         cmd.env(k, v);
@@ -29,7 +29,7 @@ fn run_with(args: &[&str], stdin: &str, env: &[(&str, &str)]) -> Out {
 
 /// Run with `dir` as the working directory and no stdin.
 fn run_in(dir: &std::path::Path, args: &[&str]) -> Out {
-    let o = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"))
+    let o = Command::new(env!("CARGO_BIN_EXE_shelllint"))
         .args(args)
         .current_dir(dir)
         .env_remove("SHELLCHECK_OPTS")
@@ -45,7 +45,7 @@ fn run_in(dir: &std::path::Path, args: &[&str]) -> Out {
 
 /// `getProgName`, which keeps the `.exe` on Windows.
 fn prog() -> String {
-    format!("shellcheck-rust{}", std::env::consts::EXE_SUFFIX)
+    format!("shelllint{}", std::env::consts::EXE_SUFFIX)
 }
 
 fn run(args: &[&str], stdin: &str) -> Out {
@@ -57,7 +57,7 @@ const CLEAN: &str = "#!/bin/sh\ntrue\n";
 const WARN: &str = "echo hi\n";
 
 fn tmpfile(name: &str, contents: &str) -> String {
-    let dir = std::env::temp_dir().join(format!("shellcheck-rust-cli-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("shelllint-cli-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     let p = dir.join(name);
     std::fs::write(&p, contents).unwrap();
@@ -90,7 +90,7 @@ fn help_matches_oracle() {
 fn version_names_project_and_upstream() {
     let o = run(&["-V"], "");
     assert_eq!(o.code, 0);
-    assert!(o.stdout.starts_with("shellcheck-rust"), "{}", o.stdout);
+    assert!(o.stdout.starts_with("shelllint"), "{}", o.stdout);
     assert!(o.stdout.contains("v0.11.0-171-ge11f964"), "{}", o.stdout);
     assert!(o.stdout.contains("license: GNU General Public License, version 3\n"));
     // The website line points at this project, not shellcheck.net.
@@ -334,7 +334,7 @@ fn missing_plus_clean_file_exits_2() {
 }
 
 fn tmpdir(name: &str) -> std::path::PathBuf {
-    let d = std::env::temp_dir().join(format!("shellcheck-rust-cli-{}-{}", std::process::id(), name));
+    let d = std::env::temp_dir().join(format!("shelllint-cli-{}-{}", std::process::id(), name));
     std::fs::create_dir_all(&d).unwrap();
     d
 }
@@ -401,7 +401,7 @@ fn sourced_file_groups_use_their_own_contents() {
 
 const TTY_GROUPS: &str = "\nIn ./lib.sh line 2:\nfoo=1\n^-^ SC2034 (warning): foo appears unused. Verify use (or export if used externally).\n\n\nIn ./lib.sh line 3:\necho $bar\n     ^--^ SC2154 (warning): bar is referenced but not assigned.\n     ^--^ SC2086 (info): Double quote to prevent globbing and word splitting.\n\nDid you mean:\necho \"$bar\"\n\n\nIn main.sh line 3:\necho \"$y\"\n      ^-- SC2154 (warning): y is referenced but not assigned.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC2034 -- foo appears unused. Verify use (o...\n  https://www.shellcheck.net/wiki/SC2154 -- bar is referenced but not assigned.\n  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ...\n";
 
-// The CLI decodes input with shellcheck_checker::decode_string: a UTF-8
+// The CLI decodes input with shelllint_checker::decode_string: a UTF-8
 // encoded surrogate is one character, as Haskell's `chr` makes it, so later
 // columns match the oracle's (2:10, not 2:12).
 #[test]
@@ -481,11 +481,11 @@ fn rcfile_may_be_a_fifo() {
 }
 
 // --list-optional is `sortOn cdName ShellCheck.Analyzer.optionalChecks`,
-// with shellcheck_checker::optional_checks as the one source of truth.
+// with shelllint_checker::optional_checks as the one source of truth.
 #[test]
 fn list_optional_is_checker_optional_checks() {
     let o = run(&["--list-optional"], "");
-    let mut names: Vec<String> = shellcheck_checker::optional_checks().into_iter().map(|c| c.name).collect();
+    let mut names: Vec<String> = shelllint_checker::optional_checks().into_iter().map(|c| c.name).collect();
     names.sort();
     let listed: Vec<&str> = o.stdout.lines().filter_map(|l| l.strip_prefix("name:    ")).collect();
     assert_eq!(listed, names);
@@ -493,7 +493,7 @@ fn list_optional_is_checker_optional_checks() {
 
 /// Like `run_in`, with extra environment variables.
 fn run_in_env(dir: &std::path::Path, args: &[&str], env: &[(&str, &str)]) -> Out {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_shelllint"));
     cmd.args(args).current_dir(dir).env_remove("SHELLCHECK_OPTS").stdin(Stdio::null());
     for (k, v) in env {
         cmd.env(k, v);
@@ -597,12 +597,12 @@ fn allocation_failure_exits_251_with_message() {
     let o = Command::new("sh")
         .arg("-c")
         .arg("ulimit -v 1500000 && exec \"$0\" --norc big.sh")
-        .arg(env!("CARGO_BIN_EXE_shellcheck-rust"))
+        .arg(env!("CARGO_BIN_EXE_shelllint"))
         .current_dir(&d)
         .stdin(Stdio::null())
         .output()
         .unwrap();
     let _ = std::fs::remove_dir_all(&d);
     assert_eq!(o.status.code(), Some(251));
-    assert_eq!(String::from_utf8_lossy(&o.stderr), "shellcheck-rust: out of memory\n");
+    assert_eq!(String::from_utf8_lossy(&o.stderr), "shelllint: out of memory\n");
 }

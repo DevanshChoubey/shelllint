@@ -5,7 +5,7 @@
 
 use std::alloc::{GlobalAlloc, Layout, System};
 
-pub const OOM_MESSAGE: &[u8] = b"shellcheck-rust: out of memory\n";
+pub const OOM_MESSAGE: &[u8] = b"shelllint: out of memory\n";
 pub const OOM_EXIT_CODE: i32 = 251;
 
 pub struct ExitOnOom;

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkFlagAsCommand`, lines 3820-3826 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::is_unquoted_flag;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::is_unquoted_flag;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

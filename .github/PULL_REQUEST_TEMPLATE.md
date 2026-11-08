@@ -15,7 +15,7 @@ For behaviour changes, show the oracle output and ours for the same input:
 ```
 $ printf '%s\n' '...' | docker run --rm -i koalaman/shellcheck:latest -s bash -f gcc -
 
-$ printf '%s\n' '...' | shellcheck-rust -s bash -f gcc -
+$ printf '%s\n' '...' | shelllint -s bash -f gcc -
 
 ```
 
@@ -23,8 +23,8 @@ $ printf '%s\n' '...' | shellcheck-rust -s bash -f gcc -
 
 <!-- Paste the summary lines. Run cargo inside (ulimit -v 8000000; ...). -->
 
-- [ ] `cargo run -q -p shellcheck-conformance -- report`: `pass N / fail 0 / ...`
-- [ ] `cargo run -q -p shellcheck-conformance --features checker -- parity`: no regressions
+- [ ] `cargo run -q -p shelllint-conformance -- report`: `pass N / fail 0 / ...`
+- [ ] `cargo run -q -p shelllint-conformance --features checker -- parity`: no regressions
 - [ ] `cargo test --workspace -- --test-threads=2` passes
 - [ ] `cargo fmt --check` and `cargo clippy --workspace --all-targets -- -D warnings` are clean for the files I touched
 - [ ] I updated `corpus/parity-baseline.json` only for improvements, and I say so above

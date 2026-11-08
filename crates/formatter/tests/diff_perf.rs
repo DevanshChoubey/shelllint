@@ -13,7 +13,7 @@
 use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
-use shellcheck_formatter::diff::{Diff, get_diff};
+use shelllint_formatter::diff::{Diff, get_diff};
 
 const CHILD_ENV: &str = "SC_DIFF_PERF_CHILD";
 const TIME_LIMIT: Duration = Duration::from_secs(30);

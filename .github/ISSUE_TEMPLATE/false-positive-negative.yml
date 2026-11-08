@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        shellcheck-rust should give **exactly** the output of upstream ShellCheck at the commit it ports.
+        shelllint should give **exactly** the output of upstream ShellCheck at the commit it ports.
         Any difference is a bug, unless a `// DIVERGENCE:` note in the source explains it.
 
         If upstream ShellCheck *also* gives the warning you think is wrong, that is upstream behaviour.
@@ -37,7 +37,7 @@ body:
     attributes:
       label: Command line
       description: The flags you used, the same for both tools.
-      placeholder: shellcheck-rust -s bash -f gcc script.sh
+      placeholder: shelllint -s bash -f gcc script.sh
     validations:
       required: true
   - type: textarea
@@ -60,16 +60,16 @@ body:
   - type: textarea
     id: ours
     attributes:
-      label: shellcheck-rust output
-      description: The same command with `shellcheck-rust` and the same flags.
+      label: shelllint output
+      description: The same command with `shelllint` and the same flags.
       render: text
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: shellcheck-rust version
-      description: Output of `shellcheck-rust --version`, or the commit hash if you built from source.
+      label: shelllint version
+      description: Output of `shelllint --version`, or the commit hash if you built from source.
     validations:
       required: true
   - type: textarea

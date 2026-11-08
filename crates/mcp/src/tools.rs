@@ -6,12 +6,12 @@
 use std::fmt::Write as _;
 
 use serde_json::{Value, json};
-use shellcheck_checker::{check_script, decode_string};
-use shellcheck_core::data::shell_for_executable;
-use shellcheck_core::interface::{CheckResult, CheckSpec, Code, PositionedComment, Severity, Shell, empty_check_spec};
-use shellcheck_formatter::diff::{apply_fix_to_contents, fixes_by_file, format_doc, make_diff};
-use shellcheck_formatter::tty::WIKI_LINK;
-use shellcheck_formatter::{
+use shelllint_checker::{check_script, decode_string};
+use shelllint_core::data::shell_for_executable;
+use shelllint_core::interface::{CheckResult, CheckSpec, Code, PositionedComment, Severity, Shell, empty_check_spec};
+use shelllint_formatter::diff::{apply_fix_to_contents, fixes_by_file, format_doc, make_diff};
+use shelllint_formatter::tty::WIKI_LINK;
+use shelllint_formatter::{
     code_no, col_no, end_col_no, end_line_no, line_no, make_non_virtual, message_text, severity_text,
 };
 

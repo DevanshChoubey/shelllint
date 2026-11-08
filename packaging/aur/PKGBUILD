@@ -1,17 +1,17 @@
 # Maintainer: devansh choubey <devanshc13 at gmail dot com>
-# Source build of shellcheck-rust. The -bin variant (PKGBUILD-bin) installs the
+# Source build of shelllint. The -bin variant (PKGBUILD-bin) installs the
 # release tarball instead.
-pkgname=shellcheck-rust
+pkgname=shelllint
 pkgver=0.0.1
 pkgrel=1
 pkgdesc="A Rust port of ShellCheck: finds bugs in shell scripts"
 arch=('x86_64' 'aarch64')
-url="https://github.com/DevanshChoubey/shellcheck-rust"
+url="https://github.com/DevanshChoubey/shelllint"
 license=('GPL-3.0-or-later')
 depends=('gcc-libs')
 makedepends=('cargo')
-provides=('shellcheck-rust')
-conflicts=('shellcheck-rust-bin')
+provides=('shelllint')
+conflicts=('shelllint-bin')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('@SHA256_SOURCE@')
 
@@ -25,11 +25,11 @@ build() {
   cd "$pkgname-$pkgver"
   export RUSTUP_TOOLCHAIN=stable
   export CARGO_TARGET_DIR=target
-  cargo build --frozen --release -p shellcheck-rust
+  cargo build --frozen --release -p shelllint
 }
 
 package() {
   cd "$pkgname-$pkgver"
-  install -Dm755 target/release/shellcheck-rust "$pkgdir/usr/bin/shellcheck-rust"
+  install -Dm755 target/release/shelllint "$pkgdir/usr/bin/shelllint"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

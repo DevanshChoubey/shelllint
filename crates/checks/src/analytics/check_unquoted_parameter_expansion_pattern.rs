@@ -2,10 +2,10 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnquotedParameterExpansionPattern`, lines 4917-4937 (e11f964)
 
 use crate::support::surround_with;
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_braced_modifier, oversimplify};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{get_braced_modifier, oversimplify};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkFindRedirections`, lines 1252-1265 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, get_closest_command_m};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
-use shellcheck_core::ast::{Id, Token};
+use shelllint_analyzer::analyzerlib::{Comments, Params, get_closest_command_m};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, CommandName};
+use shelllint_core::ast::{Id, Token};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",

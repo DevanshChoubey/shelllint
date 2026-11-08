@@ -269,7 +269,7 @@ def mb(kb):
 def write_markdown(out, path):
     m, t = out["machine"], out["totals"]
     L = []
-    L.append("# Real-repo benchmark: Haskell ShellCheck vs shellcheck-rust")
+    L.append("# Real-repo benchmark: Haskell ShellCheck vs shelllint")
     L.append("")
     L.append(f"Generated {m['date_utc']} by `bench/run_real.sh`. Raw data: `bench/results/real-repos.json`.")
     L.append("")

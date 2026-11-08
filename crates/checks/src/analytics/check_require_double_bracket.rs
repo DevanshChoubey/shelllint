@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkRequireDoubleBracket`, lines 4864-4895 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
-use shellcheck_core::ast::{ConditionType, Id, Token};
-use shellcheck_core::interface::{Shell, TokenComment};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
+use shelllint_core::ast::{ConditionType, Id, Token};
+use shelllint_core::interface::{Shell, TokenComment};
 
 use crate::support::{fix_with, node_checks_to_tree_check, replace_end, replace_start};
 
@@ -42,7 +42,7 @@ fn check(params: &Params<'_>, t: Id, c: &mut Comments) {
     }
 }
 
-fn fix_for(params: &Params<'_>, t: Id) -> shellcheck_core::interface::Fix {
+fn fix_for(params: &Params<'_>, t: Id) -> shelllint_core::interface::Fix {
     let mut v = vec![];
     if is_simple(params, t) {
         v.push(replace_start(t, params, 0, "["));

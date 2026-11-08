@@ -32,9 +32,9 @@ fn main() {
     let out = PathBuf::from(env::var("OUT_DIR").unwrap());
     let mut registry = String::from(
         "/// Every registered check (see `build.rs` for how files register and\n\
-         /// the order). Pass it to the `shellcheck_analyzer::api` and\n\
-         /// `shellcheck_analyzer::testing` functions that take a registry.\n\
-         pub static CHECKS: &[&::shellcheck_analyzer::api::CheckEntry] = &[\n",
+         /// the order). Pass it to the `shelllint_analyzer::api` and\n\
+         /// `shelllint_analyzer::testing` functions that take a registry.\n\
+         pub static CHECKS: &[&::shelllint_analyzer::api::CheckEntry] = &[\n",
     );
     let mut asserts = String::new();
     for module in MODULES {

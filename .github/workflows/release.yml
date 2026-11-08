@@ -4,12 +4,12 @@ name: Release
 # attaches them, with SHA-256 checksums, to a **draft** GitHub release. A
 # maintainer reviews the draft and publishes it by hand.
 #
-# Assets: shellcheck-rust-<tag>-<target>.tar.gz (.zip on Windows), one
+# Assets: shelllint-<tag>-<target>.tar.gz (.zip on Windows), one
 # .sha256 per archive, a combined SHA256SUMS, and version-less copies
-# shellcheck-rust-latest-<target>.* (listed in SHA256SUMS too) so that
+# shelllint-latest-<target>.* (listed in SHA256SUMS too) so that
 # `releases/latest/download/...` works for action.yml `version: latest`.
 # The docker-image job pushes the static image (repo Dockerfile) to
-# ghcr.io/<owner>/shellcheck-rust:<version> and :latest for the
+# ghcr.io/<owner>/shelllint:<version> and :latest for the
 # pre-commit docker hook.
 
 on:
@@ -23,7 +23,7 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
-  BIN: shellcheck-rust
+  BIN: shelllint
 
 jobs:
   build:
@@ -55,7 +55,7 @@ jobs:
         if: matrix.musl
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends musl-tools
       - name: Build
-        run: cargo build --release --locked -p shellcheck-rust --target ${{ matrix.target }}
+        run: cargo build --release --locked -p shelllint --target ${{ matrix.target }}
       - name: Smoke test
         if: matrix.run
         run: |
@@ -115,7 +115,7 @@ jobs:
         run: |
           set -euo pipefail
           cd dist
-          # shellcheck-rust-v1.2.3-<target>.tar.gz -> shellcheck-rust-latest-<target>.tar.gz
+          # shelllint-v1.2.3-<target>.tar.gz -> shelllint-latest-<target>.tar.gz
           for f in "$BIN-$GITHUB_REF_NAME"-*.tar.gz "$BIN-$GITHUB_REF_NAME"-*.zip; do
             [ -f "$f" ] || continue
             cp "$f" "$BIN-latest-${f#"$BIN-$GITHUB_REF_NAME"-}"
@@ -149,7 +149,7 @@ jobs:
         id: meta
         run: |
           # ghcr.io names must be lowercase; tags drop the leading v.
-          image="ghcr.io/$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')/shellcheck-rust"
+          image="ghcr.io/$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')/shelllint"
           version="${GITHUB_REF_NAME#v}"
           {
             echo "tags<<EOF"

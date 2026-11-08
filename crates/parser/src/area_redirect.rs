@@ -2,10 +2,10 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1836-2053:
 // here documents, pending here documents, IO redirections, here strings.
 
-use shellcheck_core::ast::{Dashed, Id, Quoted, Token};
-use shellcheck_core::astlib::e4m;
-use shellcheck_core::interface::Severity::ErrorC;
-use shellcheck_core::prelude::please_report;
+use shelllint_core::ast::{Dashed, Id, Quoted, Token};
+use shelllint_core::astlib::e4m;
+use shelllint_core::interface::Severity::ErrorC;
+use shelllint_core::prelude::please_report;
 
 use crate::engine::{P, PR, SourcePos};
 use crate::state::HereDocContext;

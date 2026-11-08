@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkPipePitfalls`, lines 600-656 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::Id;
-use shellcheck_core::astlib::{get_all_flags, get_command, get_command_token_or_this, oversimplify};
-use shellcheck_core::prelude::head_or_default;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::Id;
+use shelllint_core::astlib::{get_all_flags, get_command, get_command_token_or_this, oversimplify};
+use shelllint_core::prelude::head_or_default;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -17,7 +17,7 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_pipe_pitfalls(p: &Params<'_>, t: Id, c: &mut Comments) {
-    let shellcheck_core::ast::Token::T_Pipeline(_, commands) = p.ast.get(t) else { return };
+    let shelllint_core::ast::Token::T_Pipeline(_, commands) = p.ast.get(t) else { return };
     let commands: Vec<Id> = commands.clone();
 
     // for l f

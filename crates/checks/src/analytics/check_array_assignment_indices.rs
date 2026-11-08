@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkArrayAssignmentIndices`, lines 3646-3677 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::get_associative_arrays;
-use shellcheck_core::interface::TokenComment;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::get_associative_arrays;
+use shelllint_core::interface::TokenComment;
 
 use crate::support::{run_node_analysis, surround_with};
 

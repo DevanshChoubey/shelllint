@@ -2,9 +2,9 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkBadTestAndOr`, lines 4513-4545 (e11f964)
 
 use crate::support::{fix_with, replace_end};
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_test_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_test_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

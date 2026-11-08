@@ -8,9 +8,9 @@
 // parse, ported by hand, plus checks of the tokens and Ids readDollarVariable
 // builds.
 
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_parser::engine::{P, PR};
-use shellcheck_parser::testing::{self, is_ok, is_warning, named_parser};
+use shelllint_core::ast::{Id, Token};
+use shelllint_parser::engine::{P, PR};
+use shelllint_parser::testing::{self, is_ok, is_warning, named_parser};
 
 fn read_dollar_variable(p: &mut P<'_>) -> PR<()> {
     (named_parser("readDollarVariable").unwrap())(p)

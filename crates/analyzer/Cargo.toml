@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-analyzer"
+name = "shelllint-analyzer"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,12 +9,12 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Analyzer for shellcheck-rust (a Rust port of ShellCheck): analysis parameters, data flow, CFG and the check-registry machinery"
+description = "Analyzer for shelllint (a Rust port of ShellCheck): analysis parameters, data flow, CFG and the check-registry machinery"
 
 [dependencies]
-shellcheck-core.workspace = true
+shelllint-core.workspace = true
 regex = "1"
-shellcheck-parser.workspace = true
+shelllint-parser.workspace = true
 rpds = { version = "1.2.1", default-features = false, features = ["std"] }
 
 [lints]

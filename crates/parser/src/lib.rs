@@ -6,8 +6,8 @@
 // module per range of readers.
 #![forbid(unsafe_code)]
 
-use shellcheck_core::ast::{Ast, Id};
-use shellcheck_core::interface::{ParseSpec, Position, PositionedComment, SystemInterface};
+use shelllint_core::ast::{Ast, Id};
+use shelllint_core::interface::{ParseSpec, Position, PositionedComment, SystemInterface};
 
 pub mod engine;
 pub mod state;

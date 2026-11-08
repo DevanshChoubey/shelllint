@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkFindExec`, lines 793-828 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{is_command, Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::astlib::get_literal_string;
+use shelllint_analyzer::analyzerlib::{is_command, Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::astlib::get_literal_string;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

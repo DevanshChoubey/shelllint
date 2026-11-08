@@ -13,9 +13,9 @@ use std::collections::HashSet;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use shellcheck_checker::check_script_owned;
-use shellcheck_core::interface::{CheckSpec, Fix, SystemInterface};
-use shellcheck_formatter::{Formatter, by_name, diff};
+use shelllint_checker::check_script_owned;
+use shelllint_core::interface::{CheckSpec, Fix, SystemInterface};
+use shelllint_formatter::{Formatter, by_name, diff};
 
 use crate::options::Options;
 use crate::sys::{self, io_interface};

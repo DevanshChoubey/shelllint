@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-parser"
+name = "shelllint-parser"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,10 +9,10 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Shell script parser for shellcheck-rust, a Rust port of ShellCheck's Parsec parser"
+description = "Shell script parser for shelllint, a Rust port of ShellCheck's Parsec parser"
 
 [dependencies]
-shellcheck-core.workspace = true
+shelllint-core.workspace = true
 
 [lints]
 workspace = true

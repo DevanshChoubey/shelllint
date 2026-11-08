@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Drives the real `shellcheck-rust-lsp` binary over stdio JSON-RPC.
+//! Drives the real `shelllint-lsp` binary over stdio JSON-RPC.
 
 use std::io::{BufRead, BufReader, Read, Write};
 use std::process::{Child, ChildStdin, Command, Stdio};
@@ -22,12 +22,12 @@ struct Lsp {
 
 impl Lsp {
     fn start(init_options: Value) -> Lsp {
-        let mut child = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust-lsp"))
+        let mut child = Command::new(env!("CARGO_BIN_EXE_shelllint-lsp"))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
             .spawn()
-            .expect("spawn shellcheck-rust-lsp");
+            .expect("spawn shelllint-lsp");
         let stdin = child.stdin.take().unwrap();
         let stdout = child.stdout.take().unwrap();
         let (tx, rx) = channel();

@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 #
-# Static, musl-linked shellcheck-rust in a scratch image (~ a few MB).
+# Static, musl-linked shelllint in a scratch image (~ a few MB).
 #
-#   docker build --memory=6g -t shellcheck-rust .
-#   docker run --rm -i shellcheck-rust -f gcc - < script.sh
+#   docker build --memory=6g -t shelllint .
+#   docker run --rm -i shelllint -f gcc - < script.sh
 #
 # The build stage runs on Alpine's Rust toolchain, whose host target is
 # x86_64-unknown-linux-musl, so the binary is fully static with no libc
@@ -18,15 +18,15 @@ COPY . .
 # CARGO_BUILD_JOBS keeps peak memory bounded under `docker build --memory=6g`
 # (the release profile uses fat LTO and a single codegen unit).
 ENV CARGO_BUILD_JOBS=4
-RUN cargo build --release --locked -p shellcheck-rust \
- && strip target/release/shellcheck-rust \
+RUN cargo build --release --locked -p shelllint \
+ && strip target/release/shelllint \
  && mkdir -p /out \
- && cp target/release/shellcheck-rust /out/shellcheck-rust
+ && cp target/release/shelllint /out/shelllint
 
 FROM scratch
-LABEL org.opencontainers.image.title="shellcheck-rust" \
+LABEL org.opencontainers.image.title="shelllint" \
       org.opencontainers.image.description="A Rust port of ShellCheck" \
       org.opencontainers.image.licenses="GPL-3.0-or-later"
-COPY --from=build /out/shellcheck-rust /shellcheck-rust
-ENTRYPOINT ["/shellcheck-rust"]
+COPY --from=build /out/shelllint /shelllint
+ENTRYPOINT ["/shelllint"]
 CMD ["--help"]

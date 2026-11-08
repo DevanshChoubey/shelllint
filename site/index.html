@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>shellcheck-rust: conformance and performance</title>
+  <title>shelllint: conformance and performance</title>
   <meta name="description" content="Conformance, real-repo agreement, speed and memory of the Rust port of ShellCheck against the Haskell original.">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="style.css">
@@ -13,7 +13,7 @@
   <header class="top">
     <div class="wrap top-row">
       <div>
-        <p class="eyebrow">shellcheck-rust</p>
+        <p class="eyebrow">shelllint</p>
         <h1>Conformance and performance</h1>
         <p class="lede">How the Rust port compares with ShellCheck&nbsp;<span id="ref-version">(Haskell)</span> on the upstream test corpus, on pinned real-world shell repositories, and on speed and peak memory.</p>
       </div>
@@ -103,7 +103,7 @@
       <p class="muted">Total wall time to check every shell file in each repo, one process per file, sequential. Lower is better.</p>
       <ul class="legend" aria-hidden="true">
         <li><span class="swatch hs"></span>Haskell ShellCheck</li>
-        <li><span class="swatch rs"></span>shellcheck-rust</li>
+        <li><span class="swatch rs"></span>shelllint</li>
       </ul>
       <div id="speed-chart" class="chart"></div>
     </section>
@@ -113,7 +113,7 @@
       <p class="muted">Largest resident set of any single process in the repo run (from <code>/usr/bin/time -v</code>). Lower is better.</p>
       <ul class="legend" aria-hidden="true">
         <li><span class="swatch hs"></span>Haskell ShellCheck</li>
-        <li><span class="swatch rs"></span>shellcheck-rust</li>
+        <li><span class="swatch rs"></span>shelllint</li>
       </ul>
       <div id="memory-chart" class="chart"></div>
     </section>

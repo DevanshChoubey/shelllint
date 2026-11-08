@@ -2,9 +2,9 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 59-155:
 // character classes, spacing, unicode quotes and spaces.
 
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::data::SPECIAL_VARIABLES;
-use shellcheck_core::interface::Severity::{ErrorC, WarningC};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::data::SPECIAL_VARIABLES;
+use shelllint_core::interface::Severity::{ErrorC, WarningC};
 
 use crate::alt;
 use crate::engine::{P, PR};

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkCdAndBack`, lines 2921-2944 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_command_sequences, oversimplify};
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{get_command_sequences, oversimplify};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

@@ -18,8 +18,8 @@ if [ ! -x bench/.bin/shellcheck-hs ]; then
 fi
 
 # 2. Rust side: the real CLI.
-cargo build --release -p shellcheck-rust
-export RUST_BIN=$CARGO_TARGET_DIR/release/shellcheck-rust
+cargo build --release -p shelllint
+export RUST_BIN=$CARGO_TARGET_DIR/release/shelllint
 
 # 3. Inputs.
 python3 bench/gen_inputs.py
@@ -40,5 +40,5 @@ if [ -n "${PARALLEL:-}" ]; then
 fi
 
 if [ -n "${CRITERION:-}" ]; then
-  cargo bench -p shellcheck-checker
+  cargo bench -p shelllint-checker
 fi

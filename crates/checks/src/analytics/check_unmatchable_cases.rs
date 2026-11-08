@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUnmatchableCases`, lines 3687-3729 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{CaseType, Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{CaseType, Id, Token};
+use shelllint_core::astlib::{
     is_constant, pseudo_glob_is_superset_of, pseudo_globs_can_overlap, word_to_exact_pseudo_glob,
     word_to_pseudo_glob,
 };

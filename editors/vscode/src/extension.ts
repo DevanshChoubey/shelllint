@@ -2,12 +2,12 @@
 import * as vscode from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 
-const SECTION = 'shellcheck-rust';
+const SECTION = 'shelllint';
 let client: LanguageClient | undefined;
 
 function serverCommand(): string {
   const configured = vscode.workspace.getConfiguration(SECTION).get<string>('server.path', '').trim();
-  return configured.length > 0 ? configured : 'shellcheck-rust-lsp';
+  return configured.length > 0 ? configured : 'shelllint-lsp';
 }
 
 /** The settings the server reads: the flat section, so the same shape is
@@ -43,14 +43,14 @@ async function startClient(): Promise<void> {
     client = undefined;
     const msg = err instanceof Error ? err.message : String(err);
     vscode.window.showErrorMessage(
-      `ShellCheck (Rust): could not start "${command}". Set shellcheck-rust.server.path to the binary. (${msg})`,
+      `ShellCheck (Rust): could not start "${command}". Set shelllint.server.path to the binary. (${msg})`,
     );
   }
 }
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   context.subscriptions.push(
-    vscode.commands.registerCommand('shellcheck-rust.restart', async () => {
+    vscode.commands.registerCommand('shelllint.restart', async () => {
       if (client) {
         await client.stop();
         client = undefined;

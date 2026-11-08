@@ -6,10 +6,10 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, StackData};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::regex::{match_regex, mk_regex};
+use shelllint_analyzer::analyzerlib::{Comments, Params, StackData};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::regex::{match_regex, mk_regex};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

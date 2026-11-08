@@ -5,15 +5,15 @@ use std::collections::HashSet;
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_analyzer::analyzerlib::{Comments, Params, StackData};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{AssignmentMode, ConditionType, Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params, StackData};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{AssignmentMode, ConditionType, Id, Token};
+use shelllint_core::astlib::{
     get_braced_reference, get_command_name, get_leading_flags, get_literal_string, is_flag, is_glob,
     is_only_redirection, is_variable_name, only_literal_string, oversimplify,
 };
-use shellcheck_core::interface::Shell;
-use shellcheck_core::regex::{match_regex, matches, mk_regex};
+use shelllint_core::interface::Shell;
+use shelllint_core::regex::{match_regex, matches, mk_regex};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/ShellSupport.hs",
@@ -319,7 +319,7 @@ impl Ctx<'_, '_> {
             if words.len() >= 2 {
                 let (cmd, arg) = (words[0], words[1]);
                 let arg_string: String = oversimplify(ast, arg).concat();
-                if shellcheck_analyzer::analyzerlib::is_command(ast, t, "echo")
+                if shelllint_analyzer::analyzerlib::is_command(ast, t, "echo")
                     && matches(&arg_string, &ECHO_FLAG_RE)
                 {
                     if self.is_busybox_sh {
@@ -341,10 +341,10 @@ impl Ctx<'_, '_> {
                     return self.warn_msg(c, arg, 3038, "exec flags are");
                 }
             }
-            if shellcheck_analyzer::analyzerlib::is_command(ast, t, "let") {
+            if shelllint_analyzer::analyzerlib::is_command(ast, t, "let") {
                 return self.warn_msg(c, id, 3039, "'let' is");
             }
-            if !words.is_empty() && shellcheck_analyzer::analyzerlib::is_command(ast, t, "set") {
+            if !words.is_empty() && shelllint_analyzer::analyzerlib::is_command(ast, t, "set") {
                 if !self.is_dash {
                     self.check_options(c, &get_literal_args(ast, &words[1..]));
                 }
@@ -513,7 +513,7 @@ impl Ctx<'_, '_> {
 
 // Get the literal options from a list of arguments,
 // up until the first non-literal one
-fn get_literal_args(ast: &shellcheck_core::ast::Ast, args: &[Id]) -> Vec<(Id, String)> {
+fn get_literal_args(ast: &shelllint_core::ast::Ast, args: &[Id]) -> Vec<(Id, String)> {
     let mut out = Vec::new();
     for &a in args {
         match get_literal_string(ast, a) {

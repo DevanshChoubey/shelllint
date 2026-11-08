@@ -2,10 +2,10 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkShorthandIf`, lines 932-943 (e11f964)
 
 use crate::support::is_condition;
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_test_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_command_basename, get_path, is_assignment};
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_test_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{get_command_basename, get_path, is_assignment};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

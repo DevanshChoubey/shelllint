@@ -1,13 +1,13 @@
 {
-  "name": "shellcheck-rust",
+  "name": "shelllint",
   "displayName": "ShellCheck (Rust)",
-  "description": "ShellCheck diagnostics, quick fixes and hovers via the shellcheck-rust language server.",
+  "description": "ShellCheck diagnostics, quick fixes and hovers via the shelllint language server.",
   "version": "0.0.1",
-  "publisher": "shellcheck-rust",
+  "publisher": "shelllint",
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shellcheck-rust/shellcheck-rust"
+    "url": "https://github.com/shelllint/shelllint"
   },
   "private": true,
   "categories": [
@@ -32,7 +32,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "shellcheck-rust.restart",
+        "command": "shelllint.restart",
         "title": "Restart Language Server",
         "category": "ShellCheck (Rust)"
       }
@@ -40,12 +40,12 @@
     "configuration": {
       "title": "ShellCheck (Rust)",
       "properties": {
-        "shellcheck-rust.server.path": {
+        "shelllint.server.path": {
           "type": "string",
-          "default": "shellcheck-rust-lsp",
-          "description": "Path to the shellcheck-rust-lsp binary. A bare name is looked up on PATH."
+          "default": "shelllint-lsp",
+          "description": "Path to the shelllint-lsp binary. A bare name is looked up on PATH."
         },
-        "shellcheck-rust.dialect": {
+        "shelllint.dialect": {
           "type": "string",
           "enum": [
             "auto",
@@ -66,7 +66,7 @@
           ],
           "description": "Shell dialect to check against when the script does not say."
         },
-        "shellcheck-rust.enable": {
+        "shelllint.enable": {
           "type": "array",
           "items": {
             "type": "string"
@@ -74,7 +74,7 @@
           "default": [],
           "description": "Optional checks to enable by name (for example 'require-variable-braces'), or 'all'."
         },
-        "shellcheck-rust.exclude": {
+        "shelllint.exclude": {
           "type": "array",
           "items": {
             "type": "string"
@@ -82,7 +82,7 @@
           "default": [],
           "description": "Codes to suppress everywhere, for example SC2034."
         },
-        "shellcheck-rust.severity": {
+        "shelllint.severity": {
           "type": "string",
           "enum": [
             "error",

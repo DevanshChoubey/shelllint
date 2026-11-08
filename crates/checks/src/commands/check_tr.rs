@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkTr`, lines 236-255 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
-use shellcheck_core::ast::Id;
-use shellcheck_core::astlib::{arguments, get_literal_string, is_glob};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, CommandName};
+use shelllint_core::ast::Id;
+use shelllint_core::astlib::{arguments, get_literal_string, is_glob};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
@@ -50,13 +50,13 @@ fn f(p: &Params<'_>, word: Id, c: &mut Comments) {
 
 /// `relevant /= nub relevant` for the letters of `s`.
 fn duplicated(s: &str) -> bool {
-    let relevant: Vec<char> = s.chars().filter(|&c| shellcheck_core::unicode::is_alpha(c)).collect();
+    let relevant: Vec<char> = s.chars().filter(|&c| shelllint_core::unicode::is_alpha(c)).collect();
     relevant.iter().enumerate().any(|(i, c)| relevant[..i].contains(c))
 }
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn codes(script: &str) -> Vec<u32> {
         run_check(crate::CHECKS, "Checks/Commands.hs", "checkTr", "node", script)

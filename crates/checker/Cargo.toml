@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-checker"
+name = "shelllint-checker"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,13 +9,13 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Checker pipeline for shellcheck-rust (a Rust port of ShellCheck): parse, analyze and report a script"
+description = "Checker pipeline for shelllint (a Rust port of ShellCheck): parse, analyze and report a script"
 
 [dependencies]
-shellcheck-core.workspace = true
-shellcheck-parser.workspace = true
-shellcheck-analyzer.workspace = true
-shellcheck-checks.workspace = true
+shelllint-core.workspace = true
+shelllint-parser.workspace = true
+shelllint-analyzer.workspace = true
+shelllint-checks.workspace = true
 
 [dev-dependencies]
 criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }

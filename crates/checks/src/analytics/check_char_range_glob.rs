@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkCharRangeGlob`, lines 2878-2912 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{
+use shelllint_analyzer::analyzerlib::{
     Comments, Params, get_closest_command, is_command_match, is_dereferencing_binary_op,
 };
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{ConditionType, Id, Token};
-use shellcheck_core::astlib::get_path;
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{ConditionType, Id, Token};
+use shelllint_core::astlib::get_path;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

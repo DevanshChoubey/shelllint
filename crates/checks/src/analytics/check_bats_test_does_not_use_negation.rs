@@ -2,9 +2,9 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkBatsTestDoesNotUseNegation`, lines 5216-5240 (e11f964)
 
 use crate::support::{fix_with, replace_start};
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

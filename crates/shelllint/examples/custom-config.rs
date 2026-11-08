@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Build a linter with a custom configuration and check a file.
 //!
-//! Run with `cargo run -p shellcheck-rs --example custom-config -- path/to/script.sh`.
+//! Run with `cargo run -p shelllint-lib --example custom-config -- path/to/script.sh`.
 
-use shellcheck::{Linter, Severity, Shell, list_checks};
+use shelllint::{Linter, Severity, Shell, list_checks};
 
 fn main() -> std::io::Result<()> {
     // Show which optional checks exist.

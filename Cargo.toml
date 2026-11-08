@@ -7,8 +7,8 @@ version = "0.0.1"
 edition = "2024"
 license = "GPL-3.0-or-later"
 description = "An unofficial Rust port of ShellCheck, the shell script static analysis tool"
-repository = "https://github.com/DevanshChoubey/shellcheck-rust"
-homepage = "https://github.com/DevanshChoubey/shellcheck-rust"
+repository = "https://github.com/DevanshChoubey/shelllint"
+homepage = "https://github.com/DevanshChoubey/shelllint"
 readme = "README.md"
 keywords = ["shellcheck", "shell", "bash", "linter", "static-analysis"]
 categories = ["command-line-utilities", "development-tools"]
@@ -17,12 +17,12 @@ rust-version = "1.88"
 # The internal crates, with the version crates.io needs to resolve them
 # once published (bump together with workspace.package.version).
 [workspace.dependencies]
-shellcheck-core = { path = "crates/core", version = "0.0.1" }
-shellcheck-parser = { path = "crates/parser", version = "0.0.1" }
-shellcheck-analyzer = { path = "crates/analyzer", version = "0.0.1" }
-shellcheck-checks = { path = "crates/checks", version = "0.0.1" }
-shellcheck-checker = { path = "crates/checker", version = "0.0.1" }
-shellcheck-formatter = { path = "crates/formatter", version = "0.0.1" }
+shelllint-core = { path = "crates/core", version = "0.0.1" }
+shelllint-parser = { path = "crates/parser", version = "0.0.1" }
+shelllint-analyzer = { path = "crates/analyzer", version = "0.0.1" }
+shelllint-checks = { path = "crates/checks", version = "0.0.1" }
+shelllint-checker = { path = "crates/checker", version = "0.0.1" }
+shelllint-formatter = { path = "crates/formatter", version = "0.0.1" }
 
 [profile.release]
 lto = true
@@ -31,11 +31,11 @@ codegen-units = 1
 # The pathological-input tests (crates/conformance/tests/pathological.rs)
 # must finish in 10 s under `cargo test`; unoptimised, the parser takes
 # ~15-20 s on 50,000 lines. Optimise the pipeline crates in dev/test builds.
-[profile.dev.package.shellcheck-parser]
+[profile.dev.package.shelllint-parser]
 opt-level = 2
-[profile.dev.package.shellcheck-core]
+[profile.dev.package.shelllint-core]
 opt-level = 2
-[profile.dev.package.shellcheck-analyzer]
+[profile.dev.package.shelllint-analyzer]
 opt-level = 2
 [profile.dev.package.regex-automata]
 opt-level = 2

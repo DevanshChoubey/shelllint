@@ -15,11 +15,11 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_core::ast::{AssignmentMode, Ast, CaseType, ConditionType, Id, Token};
-use shellcheck_core::astlib::*;
-use shellcheck_core::data::{FLAGS_FOR_MAPFILE, FLAGS_FOR_READ};
-use shellcheck_core::prelude::please_report;
-use shellcheck_core::regex::{match_regex, mk_regex};
+use shelllint_core::ast::{AssignmentMode, Ast, CaseType, ConditionType, Id, Token};
+use shelllint_core::astlib::*;
+use shelllint_core::data::{FLAGS_FOR_MAPFILE, FLAGS_FOR_READ};
+use shelllint_core::prelude::please_report;
+use shelllint_core::regex::{match_regex, mk_regex};
 
 use super::CFEdge::*;
 use super::CFEffect::*;

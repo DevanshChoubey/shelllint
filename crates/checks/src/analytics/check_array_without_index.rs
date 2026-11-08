@@ -3,12 +3,12 @@
 
 use std::collections::HashSet;
 
-use shellcheck_analyzer::analyzerlib::{DataType, Params, make_comment};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{AssignmentMode, Id, Token};
-use shellcheck_core::astlib::get_literal_string;
-use shellcheck_core::data::ARRAY_VARIABLES;
-use shellcheck_core::interface::{Severity, Shell, TokenComment};
+use shelllint_analyzer::analyzerlib::{DataType, Params, make_comment};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{AssignmentMode, Id, Token};
+use shelllint_core::astlib::get_literal_string;
+use shelllint_core::data::ARRAY_VARIABLES;
+use shelllint_core::interface::{Severity, Shell, TokenComment};
 
 use crate::support::do_variable_flow_analysis;
 

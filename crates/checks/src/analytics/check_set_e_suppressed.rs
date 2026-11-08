@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSetESuppressed`, lines 5041-5082 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, contains_errexit};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_path, get_unquoted_literal};
-use shellcheck_core::interface::TokenComment;
+use shelllint_analyzer::analyzerlib::{Comments, Params, contains_errexit};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{get_path, get_unquoted_literal};
+use shelllint_core::interface::TokenComment;
 
 use crate::support::{functions, run_node_analysis};
 

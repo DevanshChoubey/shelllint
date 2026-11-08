@@ -2,8 +2,8 @@
 // Tests for the port of ShellCheck src/ShellCheck/Parser.hs (e11f964) lines 918-1107
 // (readCondition, annotations, comments).
 
-use shellcheck_parser::engine::{P, PR};
-use shellcheck_parser::testing::{self, named_parser};
+use shelllint_parser::engine::{P, PR};
+use shelllint_parser::testing::{self, named_parser};
 
 type Reader = fn(&mut P<'_>) -> PR<()>;
 

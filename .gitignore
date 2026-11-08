@@ -5,7 +5,7 @@ bench/inputs/
 bench/real/
 
 # build artifacts staged by packaging/npm/stage.sh
-packaging/npm/platforms/*/bin/shellcheck-rust*
+packaging/npm/platforms/*/bin/shelllint*
 packaging/pypi/dist/
 packaging/pypi/build/
 playground/pkg/

@@ -3,7 +3,7 @@
 
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, FormatterOptions, SystemInterface};
+use shelllint_core::interface::{CheckResult, FormatterOptions, SystemInterface};
 
 use crate::Formatter;
 

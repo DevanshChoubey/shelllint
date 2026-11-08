@@ -2,15 +2,15 @@
 //! The `SystemInterface` the server checks with. Config discovery mirrors the
 //! CLI (`crates/cli/src/sys.rs`): `.shellcheckrc` / `shellcheckrc` walking up
 //! from the script, then the home and XDG config files, merged with
-//! `.editorconfig` through `shellcheck_checker::editorconfig`.
+//! `.editorconfig` through `shelllint_checker::editorconfig`.
 //! Files are read from disk on every check, so rc edits apply on the next run.
 
 use std::path::{Path, PathBuf};
 
-use shellcheck_checker::decode_string;
-use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
-use shellcheck_checker::filepath::{combine, drop_file_name, is_path_separator, strip_verbatim};
-use shellcheck_core::interface::SystemInterface;
+use shelllint_checker::decode_string;
+use shelllint_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
+use shelllint_checker::filepath::{combine, drop_file_name, is_path_separator, strip_verbatim};
+use shelllint_core::interface::SystemInterface;
 
 #[derive(Default)]
 pub struct LspSystem;

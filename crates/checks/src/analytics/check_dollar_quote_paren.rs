@@ -2,9 +2,9 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkDollarQuoteParen`, lines 4277-4284 (e11f964)
 
 use crate::support::{fix_with, replace_start};
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -31,6 +31,6 @@ fn check_dollar_quote_paren(p: &Params<'_>, t: Id, c: &mut Comments) {
     }
 }
 
-fn fix(id: Id, params: &Params<'_>) -> shellcheck_core::interface::Fix {
+fn fix(id: Id, params: &Params<'_>) -> shelllint_core::interface::Fix {
     fix_with(vec![replace_start(id, params, 2, "\"$")])
 }

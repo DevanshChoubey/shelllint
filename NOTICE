@@ -1,4 +1,4 @@
-shellcheck-rust
+shelllint
 An unofficial Rust port of ShellCheck.
 
 This project is not affiliated with, endorsed by, or supported by the
@@ -8,7 +8,7 @@ ShellCheck project or by Vidar Holen.
 Upstream work
 -------------------------------------------------------------------------------
 
-shellcheck-rust is a derivative work of ShellCheck:
+shelllint is a derivative work of ShellCheck:
 
     ShellCheck
     https://github.com/koalaman/shellcheck
@@ -78,11 +78,11 @@ corpus/tasks.json is derived from ShellCheck's check registration lists.
 License of this project
 -------------------------------------------------------------------------------
 
-shellcheck-rust is licensed under the GNU General Public License, version 3
+shelllint is licensed under the GNU General Public License, version 3
 or (at your option) any later version (SPDX: GPL-3.0-or-later), the same terms
 as upstream ShellCheck. The full text of version 3 is in the LICENSE file. As a derivative work it must remain under
 the GPL. Anyone who distributes binaries or modified versions must make the
 corresponding source available under the same terms.
 
 Copyright of the Rust translation and of the original parts of this project
-belongs to the shellcheck-rust contributors.
+belongs to the shelllint contributors.

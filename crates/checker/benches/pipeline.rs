@@ -3,9 +3,9 @@
 // full parse + analyze pipeline. Inputs: the hand-written scripts in
 // bench/handwritten, plus `echo $x` repeated to 1k and 10k lines.
 use criterion::{Criterion, Throughput, criterion_group, criterion_main};
-use shellcheck_checker::check_script;
-use shellcheck_core::interface::{CheckSpec, empty_check_spec, mocked_system_interface, new_parse_spec};
-use shellcheck_parser::parse_script;
+use shelllint_checker::check_script;
+use shelllint_core::interface::{CheckSpec, empty_check_spec, mocked_system_interface, new_parse_spec};
+use shelllint_parser::parse_script;
 use std::hint::black_box;
 
 fn inputs() -> Vec<(String, String)> {
@@ -25,7 +25,7 @@ fn bench(c: &mut Criterion) {
     let mut parse = c.benchmark_group("parse_only");
     for (name, script) in &inputs {
         parse.throughput(Throughput::Bytes(script.len() as u64));
-        let pspec = shellcheck_core::interface::ParseSpec {
+        let pspec = shelllint_core::interface::ParseSpec {
             filename: "script.sh".into(),
             script: script.clone(),
             ignore_rc: true,

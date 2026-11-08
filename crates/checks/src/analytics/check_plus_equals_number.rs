@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkPlusEqualsNumber`, lines 5376-5406 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_analyzer::cfg_analysis::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_analyzer::cfg_analysis::{
     ProgramState, get_incoming_state, variable_may_be_assigned_integer,
     variable_may_be_declared_integer,
 };
-use shellcheck_core::ast::{AssignmentMode, Id, Token};
-use shellcheck_core::astlib::{get_unmodified_parameter_expansion, get_unquoted_literal};
+use shelllint_core::ast::{AssignmentMode, Id, Token};
+use shelllint_core::astlib::{get_unmodified_parameter_expansion, get_unquoted_literal};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -58,7 +58,7 @@ fn is_number(p: &Params<'_>, state: &ProgramState, word: Id) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn fires(script: &str) -> bool {
         let codes = run_check(crate::CHECKS, "Analytics.hs", "checkPlusEqualsNumber", "node", script).unwrap();

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkRequireDoubleEquals`, lines 4901-4911 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{
     CheckEntry, CheckKind, StaticCheckDescription, node_checks_to_tree_check,
 };
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::interface::{Shell, TokenComment};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::interface::{Shell, TokenComment};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

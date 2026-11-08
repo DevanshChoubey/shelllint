@@ -5,15 +5,15 @@ use std::collections::BTreeMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_analyzer::analyzerlib::{Params, StackData, make_comment};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Params, StackData, make_comment};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{
     get_braced_modifier, get_braced_reference, get_path, is_variable_char, is_variable_name, oversimplify,
 };
-use shellcheck_core::data::{COMMON_COMMANDS, INTERNAL_VARIABLES};
-use shellcheck_core::interface::{Severity, TokenComment};
-use shellcheck_core::regex::{matches, mk_regex};
+use shelllint_core::data::{COMMON_COMMANDS, INTERNAL_VARIABLES};
+use shelllint_core::interface::{Severity, TokenComment};
+use shelllint_core::regex::{matches, mk_regex};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

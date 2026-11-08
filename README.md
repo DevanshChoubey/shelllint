@@ -1,9 +1,9 @@
-# shellcheck-rust
+# shelllint
 
 **An unofficial, faithful Rust port of [ShellCheck](https://github.com/koalaman/shellcheck): the same warnings, SC codes and CLI, in a single native binary.**
 
-[![CI](https://github.com/DevanshChoubey/shellcheck-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/DevanshChoubey/shellcheck-rust/actions/workflows/ci.yml)
-[![crates.io](https://img.shields.io/crates/v/shellcheck-rust.svg)](https://crates.io/crates/shellcheck-rust)
+[![CI](https://github.com/DevanshChoubey/shelllint/actions/workflows/ci.yml/badge.svg)](https://github.com/DevanshChoubey/shelllint/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/shelllint.svg)](https://crates.io/crates/shelllint)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 ![Status: pre-release](https://img.shields.io/badge/status-pre--release-orange.svg)
 
@@ -14,7 +14,7 @@
 > our output (`https://www.shellcheck.net/wiki/SCxxxx`) point to the
 > **upstream ShellCheck wiki**, which documents ShellCheck, not this port.
 > Please do not report bugs in this port to the ShellCheck project. Report
-> them [here](https://github.com/DevanshChoubey/shellcheck-rust/issues).
+> them [here](https://github.com/DevanshChoubey/shelllint/issues).
 
 ## Why this exists
 
@@ -45,15 +45,15 @@ and the crates are not published.
 Build from source. This needs Rust 1.88 or newer:
 
 ```bash
-git clone https://github.com/DevanshChoubey/shellcheck-rust
-cd shellcheck-rust
+git clone https://github.com/DevanshChoubey/shelllint
+cd shelllint
 cargo install --locked --path crates/cli
 ```
 
 Once releases exist, you will also be able to install it these ways:
 
 ```bash
-cargo install --locked shellcheck-rust            # from crates.io
+cargo install --locked shelllint            # from crates.io
 # or download a prebuilt binary (with SHA-256 checksums) from GitHub Releases
 ```
 
@@ -62,15 +62,15 @@ and a Docker image are planned. See [docs/launch-plan.md](docs/launch-plan.md).
 
 ## Usage
 
-The binary is called `shellcheck-rust` and takes the same flags as
+The binary is called `shelllint` and takes the same flags as
 `shellcheck`:
 
 ```bash
-shellcheck-rust myscript.sh
-shellcheck-rust -s bash -f gcc scripts/*.sh
-shellcheck-rust -e SC2086,SC2034 -S warning deploy.sh
-shellcheck-rust -f diff broken.sh | git apply      # apply the suggested fixes
-shellcheck-rust --list-optional
+shelllint myscript.sh
+shelllint -s bash -f gcc scripts/*.sh
+shelllint -e SC2086,SC2034 -S warning deploy.sh
+shelllint -f diff broken.sh | git apply      # apply the suggested fixes
+shelllint --list-optional
 ```
 
 - **Output formats** (`-f`): `tty` (the default), `gcc`, `json`, `json1`,
@@ -81,7 +81,7 @@ shellcheck-rust --list-optional
   `shellcheck_*` keys in EditorConfig files.
 - **Directives.** `# shellcheck disable=...`, `source=...`, `shell=...`,
   `enable=...` and the other directives work as in ShellCheck.
-- Run `shellcheck-rust --help` to see every flag.
+- Run `shelllint --help` to see every flag.
 
 ### `--fix` (extension)
 
@@ -90,8 +90,8 @@ in place and then prints what is left in the chosen `-f` format (nothing with
 `-f quiet`). It exits 0 if no issues remain and 1 if some do.
 
 ```bash
-shellcheck-rust --fix deploy.sh lib/*.sh
-shellcheck-rust --fix --dry-run deploy.sh   # print the diff (same as -f diff), change nothing
+shelllint --fix deploy.sh lib/*.sh
+shelllint --fix --dry-run deploy.sh   # print the diff (same as -f diff), change nothing
 ```
 
 - It uses the same fix merging and application as `-f diff`, so one round is
@@ -107,7 +107,7 @@ shellcheck-rust --fix --dry-run deploy.sh   # print the diff (same as -f diff), 
 To use it as a drop-in replacement, symlink it as `shellcheck`:
 
 ```bash
-ln -s "$(command -v shellcheck-rust)" ~/.local/bin/shellcheck
+ln -s "$(command -v shelllint)" ~/.local/bin/shellcheck
 ```
 
 ## Compatibility
@@ -129,11 +129,11 @@ of SC warning codes as the real ShellCheck binary.
    record, as `oracle_codes`. The binary comes from the `koalaman/shellcheck`
    Docker image, which reported the same version as the pinned source. The
    stored corpus already holds these results, so the gates do not need Docker.
-3. **Unit gate.** `shellcheck-conformance report` runs each ported check
+3. **Unit gate.** `shelllint-conformance report` runs each ported check
    against its own upstream tests, of the form "this check fires on this
    snippet" or "this check stays silent on that one". Current result: pass
    2105, fail 0.
-4. **Parity gate.** `shellcheck-conformance parity` takes each of the 2,105
+4. **Parity gate.** `shelllint-conformance parity` takes each of the 2,105
    scripts that have oracle data and runs it through the complete pipeline:
    the parser, the analyzer, every check, directives and filtering. It then
    compares the resulting set of SC codes with the oracle's.
@@ -145,9 +145,9 @@ of SC warning codes as the real ShellCheck binary.
    result: 2105 of 2105 identical.
 
 ```bash
-cargo run -q -p shellcheck-conformance -- report
-cargo run -q -p shellcheck-conformance --features checker -- parity
-cargo run -q -p shellcheck-conformance --features checker -- parity --full
+cargo run -q -p shelllint-conformance -- report
+cargo run -q -p shelllint-conformance --features checker -- parity
+cargo run -q -p shelllint-conformance --features checker -- parity --full
 ```
 
 Beyond the corpus, two rounds of differential testing compared the release
@@ -170,7 +170,7 @@ memory against the Haskell binary are promising but **not final**. Published
 benchmarks will state the machine, the inputs, the versions of both binaries
 and the exact commands, so anyone can reproduce them.
 
-| Workload | ShellCheck (Haskell) | shellcheck-rust | Ratio |
+| Workload | ShellCheck (Haskell) | shelllint | Ratio |
 |---|---|---|---|
 | <!-- BENCH: workload --> | <!-- BENCH --> | <!-- BENCH --> | <!-- BENCH --> |
 
@@ -189,7 +189,7 @@ grep -rn 'DIVERGENCE:' crates/
 
 Other known differences:
 
-- The binary is called `shellcheck-rust`. `--version` reports both its own
+- The binary is called `shelllint`. `--version` reports both its own
   version and the upstream version it ports, and links to this project.
 - `--fix` and `--dry-run` are extensions (see [`--fix`](#--fix-extension)).
 - A few edge cases differ where the original crashes or depends on the
@@ -208,13 +208,13 @@ A Cargo workspace whose crates mirror ShellCheck's Haskell modules:
 
 | Crate | Ports | Role |
 |---|---|---|
-| `crates/core` (`shellcheck-core`) | `AST.hs`, `ASTLib.hs`, `Interface.hs`, `Data.hs`, `Prelude.hs`, `Regex.hs` | The arena AST, shared types, data tables and regex helpers |
-| `crates/parser` (`shellcheck-parser`) | `Parser.hs` | The shell parser: turns a script into an AST plus parse diagnostics |
-| `crates/analyzer` (`shellcheck-analyzer`) | `Analyzer.hs`, `AnalyzerLib.hs`, `CFG.hs`, `CFGAnalysis.hs` | The analysis framework, the check registry, and control-flow and data-flow analysis |
-| `crates/checks` (`shellcheck-checks`) | `Analytics.hs`, `Checks/*.hs` | The checks, one file each, collected into a generated `CHECKS` registry by `build.rs` |
-| `crates/checker` (`shellcheck-checker`) | `Checker.hs`, `EditorConfig.hs` | Runs the parser, analyzer and checks, then applies directives, filters and severities |
-| `crates/formatter` (`shellcheck-formatter`) | `Formatter/*.hs`, `Fixer.hs` | The output formats and the code that applies fixes |
-| `crates/cli` (`shellcheck-rust`) | `shellcheck.hs` | The `shellcheck-rust` binary: flags, rc files and file handling |
+| `crates/core` (`shelllint-core`) | `AST.hs`, `ASTLib.hs`, `Interface.hs`, `Data.hs`, `Prelude.hs`, `Regex.hs` | The arena AST, shared types, data tables and regex helpers |
+| `crates/parser` (`shelllint-parser`) | `Parser.hs` | The shell parser: turns a script into an AST plus parse diagnostics |
+| `crates/analyzer` (`shelllint-analyzer`) | `Analyzer.hs`, `AnalyzerLib.hs`, `CFG.hs`, `CFGAnalysis.hs` | The analysis framework, the check registry, and control-flow and data-flow analysis |
+| `crates/checks` (`shelllint-checks`) | `Analytics.hs`, `Checks/*.hs` | The checks, one file each, collected into a generated `CHECKS` registry by `build.rs` |
+| `crates/checker` (`shelllint-checker`) | `Checker.hs`, `EditorConfig.hs` | Runs the parser, analyzer and checks, then applies directives, filters and severities |
+| `crates/formatter` (`shelllint-formatter`) | `Formatter/*.hs`, `Fixer.hs` | The output formats and the code that applies fixes |
+| `crates/cli` (`shelllint`) | `shellcheck.hs` | The `shelllint` binary: flags, rc files and file handling |
 | `crates/conformance` | none | The corpus runner: the `report` and `parity` gates and the pathological-input tests |
 
 Other directories:
@@ -238,7 +238,7 @@ gates must stay green. Everyone taking part follows the
 
 ## License and credits
 
-shellcheck-rust is a derivative work of ShellCheck, licensed under the
+shelllint is a derivative work of ShellCheck, licensed under the
 **GNU General Public License, version 3 or (at your option) any later version**
 (`GPL-3.0-or-later`, the same terms as upstream; see [LICENSE](LICENSE)). The
 [NOTICE](NOTICE) file holds the upstream copyright and lists which files derive

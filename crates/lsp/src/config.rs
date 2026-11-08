@@ -3,8 +3,8 @@
 //! `workspace/didChangeConfiguration`.
 
 use serde_json::Value;
-use shellcheck_core::data::shell_for_executable;
-use shellcheck_core::interface::{Code, Severity, Shell};
+use shelllint_core::data::shell_for_executable;
+use shelllint_core::interface::{Code, Severity, Shell};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Settings {
@@ -23,12 +23,11 @@ impl Default for Settings {
 
 impl Settings {
     /// Accepts a flat object (`{"dialect": ...}`) or one nested under
-    /// `"shellcheck-rust"` / `"shellcheck"`. Unknown or malformed values are
+    /// `"shelllint"` / `"shellcheck"`. Unknown or malformed values are
     /// ignored, so a bad setting never stops the server.
     pub fn from_json(v: &Value) -> Settings {
         let mut s = Settings::default();
-        let obj =
-            ["shellcheck-rust", "shellcheck"].iter().find_map(|k| v.get(*k).filter(|x| x.is_object())).unwrap_or(v);
+        let obj = ["shelllint", "shellcheck"].iter().find_map(|k| v.get(*k).filter(|x| x.is_object())).unwrap_or(v);
         if let Some(d) = obj.get("dialect").and_then(Value::as_str) {
             s.dialect = if d.is_empty() || d == "auto" { None } else { shell_for_executable(d) };
         }

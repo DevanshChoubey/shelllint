@@ -2,12 +2,12 @@
 
 ## Supported versions
 
-shellcheck-rust has no stable release yet. Security fixes go to the `main`
+shelllint has no stable release yet. Security fixes go to the `main`
 branch and to the latest release, once there is one.
 
 ## What counts as a security issue
 
-shellcheck-rust reads untrusted shell scripts, and many people run it in CI
+shelllint reads untrusted shell scripts, and many people run it in CI
 on code from pull requests. We treat these as security issues:
 
 - Memory-safety bugs. The project has no `unsafe` code, but dependencies might
@@ -16,7 +16,7 @@ on code from pull requests. We treat these as security issues:
   way that a CI job's own timeout would not reasonably contain. The
   pathological-input tests are meant to catch these.
 - Anything that makes the linter **execute**, write or delete files, or reach
-  the network. shellcheck-rust only reads the files you pass to it, the files
+  the network. shelllint only reads the files you pass to it, the files
   they `source` (with `-x` / `--external-sources`) and its configuration files.
 - A vulnerability in a release artifact or in the release process.
 
@@ -34,7 +34,7 @@ Please **do not open a public issue.**
 - Or email: devanshc13@gmail.com
 
 Please include the input that triggers the problem, the exact command line,
-the version (`shellcheck-rust --version`) and the platform.
+the version (`shelllint --version`) and the platform.
 
 We aim to acknowledge reports within 7 days and to agree on a disclosure date
 with the reporter. If ShellCheck has the same issue, we will coordinate with

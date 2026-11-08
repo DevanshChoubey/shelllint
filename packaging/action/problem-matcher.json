@@ -1,7 +1,7 @@
 {
   "problemMatcher": [
     {
-      "owner": "shellcheck-rust-gcc",
+      "owner": "shelllint-gcc",
       "pattern": [
         {
           "regexp": "^(.+?):(\\d+):(\\d+): (error|warning|note|info|style): (.+)$",

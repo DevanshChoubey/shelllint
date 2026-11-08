@@ -4,8 +4,8 @@
 // Rust's derived Uppercase/Lowercase/Alphabetic properties. Expected output
 // was taken from ShellCheck e11f964.
 
-use shellcheck_core::interface::{ParseSpec, mocked_system_interface, new_parse_spec};
-use shellcheck_parser::parse_script;
+use shelllint_core::interface::{ParseSpec, mocked_system_interface, new_parse_spec};
+use shelllint_parser::parse_script;
 
 /// (line, column, code) of every parse comment, sorted.
 fn parse_codes(script: &str) -> Vec<(i64, i64, i64)> {
@@ -40,7 +40,7 @@ fn titlecase_letter_is_a_variable_char() {
     pr.ast.analyze(
         pr.root.unwrap(),
         &mut |id| {
-            if let shellcheck_core::ast::Token::T_Assignment(_, name, ..) = pr.ast.get(id) {
+            if let shelllint_core::ast::Token::T_Assignment(_, name, ..) = pr.ast.get(id) {
                 assigns.push(name.clone());
             }
         },

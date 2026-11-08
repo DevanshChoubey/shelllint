@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSplittingInArrays`, lines 3766-3794 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{
+use shelllint_analyzer::analyzerlib::{
     Comments, Params, is_counting_reference, is_quoted_alternative_reference,
 };
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_braced_reference, oversimplify};
-use shellcheck_core::data::VARIABLES_WITHOUT_SPACES;
-use shellcheck_core::interface::Shell;
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{get_braced_reference, oversimplify};
+use shelllint_core::data::VARIABLES_WITHOUT_SPACES;
+use shelllint_core::interface::Shell;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

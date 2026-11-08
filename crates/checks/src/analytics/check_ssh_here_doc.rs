@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSshHereDoc`, lines 2099-2110 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Quoted, Token};
-use shellcheck_core::astlib::{e4m, is_constant};
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Quoted, Token};
+use shelllint_core::astlib::{e4m, is_constant};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

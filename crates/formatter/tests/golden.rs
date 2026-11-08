@@ -5,8 +5,8 @@
 // Inputs are rebuilt from the oracle's `json` output, which (unlike json1)
 // keeps the parser's virtual tab-8 columns, i.e. what a formatter receives.
 
-use shellcheck_core::interface::*;
-use shellcheck_formatter::by_name;
+use shelllint_core::interface::*;
+use shelllint_formatter::by_name;
 
 const DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/golden");
 

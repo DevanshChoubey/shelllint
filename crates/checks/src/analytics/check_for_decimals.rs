@@ -6,10 +6,10 @@
 // upstream) but has prop_ tests, so it is registered under "unregistered",
 // which `run_check` reaches and the module checkers never run.
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::get_literal_string;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::get_literal_string;
 
 use crate::support::has_floating_point;
 

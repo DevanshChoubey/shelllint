@@ -9,7 +9,7 @@
 
 use std::io::{IsTerminal, Write};
 
-use shellcheck_core::interface::{ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface};
+use shelllint_core::interface::{ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface};
 
 pub mod checkstyle;
 pub mod diff;
@@ -22,12 +22,7 @@ pub mod tty;
 
 pub trait Formatter {
     fn header(&mut self, out: &mut dyn Write);
-    fn on_result(
-        &mut self,
-        r: &shellcheck_core::interface::CheckResult,
-        sys: &dyn SystemInterface,
-        out: &mut dyn Write,
-    );
+    fn on_result(&mut self, r: &shelllint_core::interface::CheckResult, sys: &dyn SystemInterface, out: &mut dyn Write);
     fn on_failure(&mut self, file: &str, msg: &str, out: &mut dyn Write);
     fn footer(&mut self, out: &mut dyn Write);
 

@@ -15,16 +15,16 @@ Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`).
 - A complete port of ShellCheck's parser, analyzer and every registered check
   (`Analytics.hs`, `Checks/Commands.hs`, `Checks/ShellSupport.hs`), including
   control-flow and data-flow analysis.
-- The `shellcheck-rust` command-line tool, with ShellCheck's flags and the
+- The `shelllint` command-line tool, with ShellCheck's flags and the
   `tty`, `gcc`, `json`, `json1`, `checkstyle`, `diff` and `quiet` output
   formats.
 - Support for `.shellcheckrc` and `shellcheckrc` lookup, `--rcfile`, `--norc`,
   EditorConfig `shellcheck_*` keys, and in-script directives.
-- A conformance harness (`shellcheck-conformance`) with the `report` and
+- A conformance harness (`shelllint-conformance`) with the `report` and
   `parity` gates, and pathological-input tests for time and memory.
   2105 of 2105 corpus scripts match the warning codes of upstream ShellCheck.
 - Project documentation: README, NOTICE, CONTRIBUTING, Code of Conduct,
   security policy, issue and pull request templates, and CI and release
   workflows.
 
-[Unreleased]: https://github.com/DevanshChoubey/shellcheck-rust/commits/main
+[Unreleased]: https://github.com/DevanshChoubey/shelllint/commits/main

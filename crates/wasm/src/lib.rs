@@ -20,11 +20,11 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use wasm_bindgen::prelude::*;
 
-use shellcheck_checker::{check_script, optional_checks};
-use shellcheck_core::data::{SHELLCHECK_VERSION, shell_for_executable};
-use shellcheck_core::interface::{CheckResult, CheckSpec, Fix, Severity, empty_check_spec, new_system_interface};
-use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
-use shellcheck_formatter::{Formatter, haskell_lines, json1};
+use shelllint_checker::{check_script, optional_checks};
+use shelllint_core::data::{SHELLCHECK_VERSION, shell_for_executable};
+use shelllint_core::interface::{CheckResult, CheckSpec, Fix, Severity, empty_check_spec, new_system_interface};
+use shelllint_formatter::fixer::{apply_fix, merge_fixes};
+use shelllint_formatter::{Formatter, haskell_lines, json1};
 
 /// The name the script is checked under when `filename` is not given.
 /// It has no extension, so the shell is taken from the shebang only.
@@ -94,7 +94,7 @@ fn render_json1(result: &CheckResult, source: &str) -> String {
     let mut out: Vec<u8> = Vec::new();
     formatter.header(&mut out);
     // The formatter re-reads the checked file's contents, as the CLI does.
-    let sys = shellcheck_core::interface::mocked_system_interface(vec![(result.filename.clone(), source.to_string())]);
+    let sys = shelllint_core::interface::mocked_system_interface(vec![(result.filename.clone(), source.to_string())]);
     formatter.on_result(result, &sys, &mut out);
     formatter.footer(&mut out);
     String::from_utf8(out).unwrap_or_default()

@@ -2,7 +2,7 @@
 // ShellCheck playground: a textarea over a highlighted backdrop, live lint
 // through the wasm module, diagnostics with wiki links, fixes, and a
 // base64 script in the URL hash.
-import init, { check, fix, list_checks, version } from "./pkg/shellcheck_wasm.js";
+import init, { check, fix, list_checks, version } from "./pkg/shelllint_wasm.js";
 
 const WIKI = "https://www.shellcheck.net/wiki/";
 const DEBOUNCE_MS = 150;

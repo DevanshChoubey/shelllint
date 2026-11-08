@@ -3,11 +3,11 @@
 
 use std::collections::BTreeMap;
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::cfg::{CFEffect, CFNode, IdTagged};
-use shellcheck_analyzer::cfg_analysis::CfgAnalysis;
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::arguments;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::cfg::{CFEffect, CFNode, IdTagged};
+use shelllint_analyzer::cfg_analysis::CfgAnalysis;
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::arguments;
 
 use crate::support::parametrised_command_checks;
 
@@ -110,7 +110,7 @@ fn ref_from_effect(e: &IdTagged<CFEffect>) -> Option<(String, Id)> {
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn fires(cmd: &str, script: &str) -> bool {
         let name = format!("checkBackreferencingDeclaration \"{cmd}\"");

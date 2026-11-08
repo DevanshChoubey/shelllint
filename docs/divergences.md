@@ -32,7 +32,7 @@ would make the port worse without making it more correct.
   fallback case and dies with `Non-exhaustive patterns`; we ignore it.
 - **Out of memory.** GHC prints `<prog>: out of memory` and exits 251. The CLI
   binary installs a global allocator wrapper (`crates/cli/src/oom.rs`) that
-  prints `shellcheck-rust: out of memory` and exits 251. Library users keep
+  prints `shelllint: out of memory` and exits 251. Library users keep
   Rust's default abort behaviour.
 - **File-open error text.** `show_io_error` reproduces GHC's `IOErrorType`
   wording from `errnoToIOError` together with the musl `strerror` text that the
@@ -40,5 +40,5 @@ would make the port worse without making it more correct.
   Errnos GHC does not classify print `failed (<text>)`; for those the text comes
   from the host libc and may differ from upstream's.
 - **Whitespace.** `--files-from` lines are trimmed with GHC's `isSpace`
-  (`shellcheck_core::unicode::is_space`): ASCII whitespace, U+00A0 and Unicode
+  (`shelllint_core::unicode::is_space`): ASCII whitespace, U+00A0 and Unicode
   space separators, but not U+0085, U+2028 or U+2029.

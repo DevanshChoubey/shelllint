@@ -4,12 +4,12 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_analyzer::analyzerlib::{Params, make_comment};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::interface::{Severity, TokenComment};
-use shellcheck_core::regex::{matches, mk_regex};
-use shellcheck_core::unicode::words;
+use shelllint_analyzer::analyzerlib::{Params, make_comment};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::interface::{Severity, TokenComment};
+use shelllint_core::regex::{matches, mk_regex};
+use shelllint_core::unicode::words;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

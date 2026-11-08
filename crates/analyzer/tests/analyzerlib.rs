@@ -2,11 +2,11 @@
 // Port of the prop_ tests in ShellCheck src/ShellCheck/AnalyzerLib.hs (e11f964),
 // plus tests of the check registry (src/api.rs) on hand-built trees.
 //
-use shellcheck_analyzer::analyzerlib::*;
-use shellcheck_analyzer::api::*;
-use shellcheck_analyzer::testing::{find_entries, run_check};
-use shellcheck_core::ast::{AssignmentMode, Ast, Id, Pos, Token};
-use shellcheck_core::interface::*;
+use shelllint_analyzer::analyzerlib::*;
+use shelllint_analyzer::api::*;
+use shelllint_analyzer::testing::{find_entries, run_check};
+use shelllint_core::ast::{AssignmentMode, Ast, Id, Pos, Token};
+use shelllint_core::interface::*;
 
 // ---- prop_ tests ----
 
@@ -327,7 +327,7 @@ fn filter_by_annotation_drops_disabled_codes() {
     let sb = b.lit("");
     let w = b.word("ls");
     let sc = b.t(Token::T_SimpleCommand(vec![], vec![w]));
-    let ann = b.t(Token::T_Annotation(vec![shellcheck_core::ast::Annotation::DisableComment(2000, 2001)], sc));
+    let ann = b.t(Token::T_Annotation(vec![shelllint_core::ast::Annotation::DisableComment(2000, 2001)], sc));
     let root = b.t(Token::T_Script(sb, vec![ann]));
     let mut ast = b.0;
     ast.compute_parents(root);

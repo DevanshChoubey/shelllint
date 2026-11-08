@@ -22,9 +22,9 @@
 // live in `crates/checker/tests/checker.rs`).
 
 use crate::filepath::{combine, take_directory, take_file_name};
-use shellcheck_core::data::shell_for_executable;
-use shellcheck_core::regex::{matches, mk_regex};
-use shellcheck_parser::engine::is_space;
+use shelllint_core::data::shell_for_executable;
+use shelllint_core::regex::{matches, mk_regex};
+use shelllint_parser::engine::is_space;
 
 /// Haskell `lines`: split on '\n', without a trailing empty line. Unlike
 /// `str::lines`, a '\r' is kept.

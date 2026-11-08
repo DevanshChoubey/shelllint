@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck shellcheck.hs `ioInterface` and `inputFile` (e11f964);
-// `decodeString` is shellcheck_checker::decode_string.
+// `decodeString` is shelllint_checker::decode_string.
 //
-// EditorConfig lookup lives in shellcheck_checker::editorconfig; this file
+// EditorConfig lookup lives in shelllint_checker::editorconfig; this file
 // supplies its filesystem (`EditorConfigFs`) and merges the results.
 // DIVERGENCE: caches live in `Mutex`es instead of `IORef`s so the interface is
 // `Sync`.
@@ -13,12 +13,12 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use shellcheck_checker::decode_string;
-use shellcheck_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
-use shellcheck_checker::filepath::{
+use shelllint_checker::decode_string;
+use shelllint_checker::editorconfig::{EditorConfigFs, get_editor_config, merge_configs};
+use shelllint_checker::filepath::{
     PATH_SEPARATOR, combine, drop_drive, drop_file_name, is_path_separator, strip_verbatim,
 };
-use shellcheck_core::interface::{ErrorMessage, SystemInterface};
+use shelllint_core::interface::{ErrorMessage, SystemInterface};
 
 use crate::options::Options;
 
@@ -500,7 +500,7 @@ mod tests {
 
     fn tmp() -> PathBuf {
         let d = std::env::temp_dir().join(format!(
-            "shellcheck-rust-sys-{}-{}",
+            "shelllint-sys-{}-{}",
             std::process::id(),
             N.fetch_add(1, Ordering::SeqCst)
         ));

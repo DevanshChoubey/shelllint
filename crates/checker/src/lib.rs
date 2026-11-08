@@ -14,20 +14,20 @@ use std::collections::HashMap;
 
 // The check registry: every `CheckEntry`, passed to the analyzer's module
 // checkers.
-use shellcheck_checks::CHECKS;
+use shelllint_checks::CHECKS;
 
-use shellcheck_analyzer::analyzerlib::{Checker, Params, filter_by_annotation, make_parameters, run_checker};
-use shellcheck_analyzer::api::{
+use shelllint_analyzer::analyzerlib::{Checker, Params, filter_by_annotation, make_parameters, run_checker};
+use shelllint_analyzer::api::{
     analytics_checker, analytics_optional_checks, commands_checker, commands_optional_checks, shell_support_checker,
 };
-use shellcheck_core::ast::{Ast, Id};
-use shellcheck_core::astlib::get_enable_directives;
-use shellcheck_core::interface::{
+use shelllint_core::ast::{Ast, Id};
+use shelllint_core::astlib::get_enable_directives;
+use shelllint_core::interface::{
     AnalysisResult, AnalysisSpec, CheckDescription, CheckResult, CheckSpec, Code, ExecutionMode, ParseSpec,
     PositionedComment, Severity, Shell, SystemInterface, TokenComment, empty_check_result, empty_check_spec,
     mocked_system_interface, new_analysis_result, new_analysis_spec, new_parse_spec, new_positioned_comment,
 };
-use shellcheck_parser::{ParseResult, parse_script};
+use shelllint_parser::{ParseResult, parse_script};
 
 // ---- Analyzer.hs ---------------------------------------------------------
 
@@ -152,7 +152,7 @@ pub fn check_script_owned(sys: &dyn SystemInterface, mut spec: CheckSpec) -> Che
 /// Runs `f` on a thread with a `CHECK_STACK_BYTES` stack.
 #[cfg(not(target_arch = "wasm32"))]
 fn run_on_check_stack<R: Send>(f: impl FnOnce() -> R + Send) -> R {
-    shellcheck_parser::engine::with_stack(CHECK_STACK_BYTES, f)
+    shelllint_parser::engine::with_stack(CHECK_STACK_BYTES, f)
 }
 
 /// `wasm32-unknown-unknown` has no threads, so `f` runs on the caller's stack.
@@ -329,7 +329,7 @@ fn construct(mut x: u32, n: usize, rest: &[u8]) -> Option<(u32, usize)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use shellcheck_core::interface::{Comment, Position};
+    use shelllint_core::interface::{Comment, Position};
 
     fn pc(line: i64, code: Code, end: i64) -> PositionedComment {
         let pos = |column| Position { file: "f".into(), line, column };

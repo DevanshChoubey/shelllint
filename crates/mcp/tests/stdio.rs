@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Drives the real `shellcheck-rust-mcp` binary over stdio.
+//! Drives the real `shelllint-mcp` binary over stdio.
 
 use std::io::Write;
 use std::process::{Command, Stdio};
@@ -9,12 +9,12 @@ use serde_json::{Value, json};
 /// Send `messages` (one JSON-RPC message per line), close stdin, and return
 /// every reply the server wrote, parsed.
 fn session(messages: &[Value]) -> Vec<Value> {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust-mcp"))
+    let mut child = Command::new(env!("CARGO_BIN_EXE_shelllint-mcp"))
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
-        .expect("spawn shellcheck-rust-mcp");
+        .expect("spawn shelllint-mcp");
     {
         let mut stdin = child.stdin.take().unwrap();
         for m in messages {
@@ -54,7 +54,7 @@ fn handshake_list_and_check_script_finds_sc2086() {
     let init = &reply(&replies, 1)["result"];
     assert_eq!(init["protocolVersion"], "2025-06-18");
     assert!(init["capabilities"]["tools"].is_object());
-    assert_eq!(init["serverInfo"]["name"], "shellcheck-rust-mcp");
+    assert_eq!(init["serverInfo"]["name"], "shelllint-mcp");
     assert_eq!(replies.len(), 3, "notification must not be answered: {replies:?}");
 
     // tools/list: the five tools, each with a description and an input schema.
@@ -156,11 +156,8 @@ fn protocol_errors_have_json_rpc_codes() {
 
 #[test]
 fn unparsable_line_gets_parse_error_and_server_keeps_going() {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust-mcp"))
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
+    let mut child =
+        Command::new(env!("CARGO_BIN_EXE_shelllint-mcp")).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().unwrap();
     {
         let stdin = child.stdin.as_mut().unwrap();
         writeln!(stdin, "{{not json").unwrap();
@@ -276,7 +273,7 @@ fn fuzzed_malformed_and_unicode_arguments_never_kill_the_server() {
     input.extend(json!({"jsonrpc": "2.0", "id": 100_000, "method": "ping"}).to_string().as_bytes());
     input.push(b'\n');
 
-    let mut child = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust-mcp"))
+    let mut child = Command::new(env!("CARGO_BIN_EXE_shelllint-mcp"))
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

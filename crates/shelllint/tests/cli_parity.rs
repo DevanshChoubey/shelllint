@@ -5,7 +5,7 @@
 mod common;
 
 use common::{fixture, require_cli, run_cli};
-use shellcheck::{Linter, Shell};
+use shelllint::{Linter, Shell};
 
 /// (fixture, shell name for the CLI, shell for the facade)
 const CASES: &[(&str, &str, Shell)] = &[

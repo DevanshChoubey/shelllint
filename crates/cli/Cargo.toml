@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-rust"
+name = "shelllint"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,17 +10,19 @@ readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "A Rust port of ShellCheck (work in progress)"
-documentation = "https://github.com/DevanshChoubey/shellcheck-rust/blob/main/docs/install.md"
+documentation = "https://github.com/DevanshChoubey/shelllint/blob/main/docs/install.md"
 
 [[bin]]
-name = "shellcheck-rust"
+name = "shelllint"
 path = "src/main.rs"
+# The library facade (crates/shelllint) documents under this name.
+doc = false
 
 [dependencies]
-shellcheck-core.workspace = true
-shellcheck-analyzer.workspace = true
-shellcheck-formatter.workspace = true
-shellcheck-checker.workspace = true
+shelllint-core.workspace = true
+shelllint-analyzer.workspace = true
+shelllint-formatter.workspace = true
+shelllint-checker.workspace = true
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

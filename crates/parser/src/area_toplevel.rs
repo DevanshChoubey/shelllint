@@ -9,13 +9,13 @@
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 
-use shellcheck_core::ast::{Annotation, Id};
-use shellcheck_core::astlib::{e4m, executable_from_shebang, get_associative_arrays};
-use shellcheck_core::interface::Severity::{ErrorC, InfoC};
-use shellcheck_core::interface::{
+use shelllint_core::ast::{Annotation, Id};
+use shelllint_core::astlib::{e4m, executable_from_shebang, get_associative_arrays};
+use shelllint_core::interface::Severity::{ErrorC, InfoC};
+use shelllint_core::interface::{
     Code, Comment, ParseSpec, Position, PositionedComment, SystemInterface, new_positioned_comment,
 };
-use shellcheck_core::prelude::please_report;
+use shelllint_core::prelude::please_report;
 
 use crate::ParseResult;
 use crate::engine::{Input, P, PR, ParseError, SourcePos};
@@ -26,9 +26,9 @@ use crate::state::{
 
 // annotations imports
 use crate::{alt, choice};
-use shellcheck_core::ast::{ConditionType, Token};
-use shellcheck_core::data::shell_for_executable;
-use shellcheck_core::interface::Severity;
+use shelllint_core::ast::{ConditionType, Token};
+use shelllint_core::data::shell_for_executable;
+use shelllint_core::interface::Severity;
 
 // BEGIN annotations
 impl<'a> P<'a> {
@@ -1116,7 +1116,7 @@ impl<'a> P<'a> {
 mod tests {
     use super::*;
     use crate::testing::test_environment;
-    use shellcheck_core::interface::{mock_rc_file, mocked_system_interface};
+    use shelllint_core::interface::{mock_rc_file, mocked_system_interface};
 
     fn pos(p: &mut P<'_>, line: u32, column: u32) -> SourcePos {
         SourcePos { line, column, ..p.initial_pos("-") }

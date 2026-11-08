@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkXargsDashi`, lines 1346-1354 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
-use shellcheck_core::ast::Id;
-use shellcheck_core::astlib::{arguments, get_bsd_opts};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, CommandName};
+use shelllint_core::ast::Id;
+use shelllint_core::astlib::{arguments, get_bsd_opts};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",
@@ -21,6 +21,6 @@ fn check_xargs_dashi(p: &Params<'_>, t: Id, c: &mut Comments) {
     c.info(*option, 2267, "GNU xargs -i is deprecated in favor of -I{}");
 }
 
-fn parse_opts(p: &Params<'_>, args: &[Id]) -> Option<Vec<shellcheck_core::astlib::Opt>> {
+fn parse_opts(p: &Params<'_>, args: &[Id]) -> Option<Vec<shelllint_core::astlib::Opt>> {
     get_bsd_opts(p.ast, "0oprtxadR:S:J:L:l:n:P:s:e:E:i:I:", args)
 }

@@ -4,15 +4,15 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{
     get_braced_modifier, get_braced_reference, get_literal_string_ext, get_unquoted_literal,
     is_quotes, is_variable_char, is_variable_name, oversimplify, will_become_multiple_args,
 };
-use shellcheck_core::interface::Shell;
-use shellcheck_core::regex::{matches, mk_regex};
+use shelllint_core::interface::Shell;
+use shelllint_core::regex::{matches, mk_regex};
 
 use crate::support::{fix_with, replace_end, replace_start, replace_token};
 
@@ -97,7 +97,7 @@ fn is_leading_number_var(s: &str) -> bool {
     }
 }
 
-fn assign0_msg(params: &Params<'_>, id: Id, bashfix: shellcheck_core::interface::Fix, c: &mut Comments) {
+fn assign0_msg(params: &Params<'_>, id: Id, bashfix: shelllint_core::interface::Fix, c: &mut Comments) {
     match params.shell_type {
         Shell::Bash => c.err_with_fix(
             id,

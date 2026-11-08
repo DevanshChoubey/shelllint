@@ -6,11 +6,11 @@
 // Expected values come from the oracle (shellcheck v0.11.0-171-ge11f964,
 // `-f gcc --norc -o all`).
 
-use shellcheck_analyzer::analyzerlib::*;
-use shellcheck_analyzer::api::entry_test_checker;
-use shellcheck_analyzer::testing::find_entries;
-use shellcheck_checks::CHECKS;
-use shellcheck_core::interface::{AnalysisSpec, Shell, TokenComment};
+use shelllint_analyzer::analyzerlib::*;
+use shelllint_analyzer::api::entry_test_checker;
+use shelllint_analyzer::testing::find_entries;
+use shelllint_checks::CHECKS;
+use shelllint_core::interface::{AnalysisSpec, Shell, TokenComment};
 
 /// A comment as the oracle reports it: code, start (line, column), end
 /// (line, column), message.

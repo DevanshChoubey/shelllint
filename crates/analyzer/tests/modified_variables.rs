@@ -3,9 +3,9 @@
 // `getModifiedVariableCommand`; no Haskell counterpart (upstream tests it
 // only through the checks).
 
-use shellcheck_analyzer::analyzerlib::*;
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::only_literal_string;
+use shelllint_analyzer::analyzerlib::*;
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::only_literal_string;
 
 /// `name:S` / `name:A` (DataString / DataArray) plus the source kind, and
 /// the literal text of the token the variable is attributed to.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! MCP server for the shellcheck-rust linter.
+//! MCP server for the shelllint linter.
 //!
 //! The transport is stdio: one JSON-RPC 2.0 message per line. The protocol
 //! layer is hand-written (about 150 lines) because the surface is small:
@@ -15,7 +15,7 @@ use std::io::{self, BufRead, Read, Write};
 use serde_json::{Value, json};
 
 /// Name and version reported to clients. The name is the binary name.
-pub const SERVER_NAME: &str = "shellcheck-rust-mcp";
+pub const SERVER_NAME: &str = "shelllint-mcp";
 pub const SERVER_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Protocol revisions this server speaks, newest first. `2026-07-28` is

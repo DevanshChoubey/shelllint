@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkInteractiveSu`, lines 689-703 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, get_path_m};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::arguments;
+use shelllint_analyzer::analyzerlib::{Comments, Params, get_path_m};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, CommandName};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::arguments;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",

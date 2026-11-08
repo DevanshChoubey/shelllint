@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkMaskedReturns`, lines 1408-1448 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, get_path_m};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{arguments, get_all_flags, get_command_name, get_word_parts};
-use shellcheck_core::interface::Shell;
+use shelllint_analyzer::analyzerlib::{Comments, Params, get_path_m};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{arguments, get_all_flags, get_command_name, get_word_parts};
+use shelllint_core::interface::Shell;
 
 use crate::support::parametrised_command_checks;
 

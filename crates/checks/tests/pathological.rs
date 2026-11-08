@@ -22,8 +22,8 @@ use std::process::{Command, Stdio};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use shellcheck_analyzer::testing::run_check;
-use shellcheck_checks::CHECKS;
+use shelllint_analyzer::testing::run_check;
+use shelllint_checks::CHECKS;
 
 const CHILD_ENV: &str = "SC_CHECK_PATHOLOGICAL_CHILD";
 const TIME_LIMIT: Duration = Duration::from_secs(10);

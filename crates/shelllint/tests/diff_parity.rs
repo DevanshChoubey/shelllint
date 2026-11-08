@@ -6,7 +6,7 @@
 mod common;
 
 use common::{fixture, require_cli, run_cli};
-use shellcheck::{Linter, Shell, apply_fixes};
+use shelllint::{Linter, Shell, apply_fixes};
 
 /// Applies the hunks of a unified diff as printed by the diff formatter
 /// (`--- a/..`, `+++ b/..`, `@@ -a,b +c,d @@`, ` `/`-`/`+` lines and

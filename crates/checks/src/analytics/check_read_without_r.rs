@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkReadWithoutR`, lines 3358-3369 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_unqualified_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_unqualified_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{
     arguments, get_all_flags, get_command_token_or_this, get_gnu_opts, get_literal_string,
 };
-use shellcheck_core::data::FLAGS_FOR_READ;
+use shelllint_core::data::FLAGS_FOR_READ;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

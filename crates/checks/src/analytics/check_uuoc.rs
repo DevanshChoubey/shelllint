@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUuoc`, lines 570-578 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{may_become_multiple_args, only_literal_string};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{may_become_multiple_args, only_literal_string};
 
 use crate::support::check_command;
 

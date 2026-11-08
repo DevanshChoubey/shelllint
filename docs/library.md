@@ -1,18 +1,18 @@
-# Using shellcheck-rs as a library
+# Using shelllint-lib as a library
 
-The `shellcheck-rs` crate (library name `shellcheck`) is the embeddable
+The `shelllint-lib` crate (library name `shellcheck`) is the embeddable
 facade over the linter. It exposes a small, stable surface and keeps the
 internal crates (parser, analyzer, formatter) private.
 
 ```toml
 [dependencies]
-shellcheck-rs = "0.0.1"              # add features = ["serde"] for JSON
+shelllint-lib = "0.0.1"              # add features = ["serde"] for JSON
 ```
 
 ## Quick start
 
 ```rust
-use shellcheck::{Linter, Severity, Shell};
+use shelllint::{Linter, Severity, Shell};
 
 let linter = Linter::builder()
     .shell(Shell::Bash)
@@ -66,7 +66,7 @@ A `Diagnostic` may carry a `Fix`:
   kept.
 
 ```rust
-use shellcheck::{Linter, apply_fixes};
+use shelllint::{Linter, apply_fixes};
 
 let src = "rm $file\n";
 let diags = Linter::new().check_str(src);
@@ -75,7 +75,7 @@ assert_eq!(apply_fixes(src, &diags), "rm \"$file\"\n");
 
 ## Listing checks
 
-`shellcheck::list_checks()` returns the optional checks, sorted by name, with
+`shelllint::list_checks()` returns the optional checks, sorted by name, with
 their codes and descriptions. Pass a name to `enable` to turn one on.
 
 ## Serialisation (`serde` feature)
@@ -97,7 +97,7 @@ The `examples/` directory of the crate has three programs:
 - `fix-all`: apply all fixes, and a single fix.
 - `custom-config`: a configured linter that checks a file.
 
-Run one with `cargo run -p shellcheck-rs --example basic`.
+Run one with `cargo run -p shelllint-lib --example basic`.
 
 ## Errors
 

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkUuoeVar`, lines 1793-1818 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{
+use shelllint_analyzer::analyzerlib::{
     Comments, Params, is_unqualified_command, token_is_just_command_output,
 };
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::astlib::only_literal_string;
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::astlib::only_literal_string;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

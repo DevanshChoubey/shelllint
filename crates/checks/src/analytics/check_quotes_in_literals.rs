@@ -5,14 +5,14 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_analyzer::analyzerlib::{
+use shelllint_analyzer::analyzerlib::{
     DataSource, DataType, Params, is_param_to, is_quote_free, make_comment, supports_arrays,
 };
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::oversimplify;
-use shellcheck_core::interface::{Severity, TokenComment};
-use shellcheck_core::regex::{matches, mk_regex};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::oversimplify;
+use shelllint_core::interface::{Severity, TokenComment};
+use shelllint_core::regex::{matches, mk_regex};
 
 use crate::support::do_variable_flow_analysis;
 

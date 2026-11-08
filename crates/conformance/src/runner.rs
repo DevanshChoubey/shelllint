@@ -18,8 +18,8 @@ fn code_set(v: &[i64]) -> Vec<i64> {
 fn analyzer_codes(rec: &Record, kind: &str, script: &str) -> Option<Vec<i64>> {
     #[cfg(feature = "analyzer")]
     {
-        return shellcheck_analyzer::testing::run_check(
-            shellcheck_checks::CHECKS,
+        return shelllint_analyzer::testing::run_check(
+            shelllint_checks::CHECKS,
             &rec.module,
             &rec.check_expr()?,
             kind,
@@ -36,8 +36,8 @@ fn analyzer_codes(rec: &Record, kind: &str, script: &str) -> Option<Vec<i64>> {
 fn parser_result(target: &str, script: &str) -> Option<Option<bool>> {
     #[cfg(feature = "parser")]
     {
-        let p = shellcheck_parser::testing::named_parser(target)?;
-        return Some(shellcheck_parser::testing::parses_cleanly(p, script));
+        let p = shelllint_parser::testing::named_parser(target)?;
+        return Some(shelllint_parser::testing::parses_cleanly(p, script));
     }
     #[allow(unreachable_code)]
     None
@@ -152,14 +152,14 @@ pub fn run_all<'a>(
 fn pipeline_codes(rec: &Record) -> Option<Vec<i64>> {
     #[cfg(feature = "checker")]
     {
-        use shellcheck_core::interface::Shell;
+        use shelllint_core::interface::Shell;
         let script = rec.script.as_deref()?;
         let shell = match rec.oracle_shell.as_deref() {
             Some("sh") => Some(Shell::Sh),
             Some("bash") => Some(Shell::Bash),
             _ => None,
         };
-        return classify_codes(|| shellcheck_checker::check_script_codes(script, shell));
+        return classify_codes(|| shelllint_checker::check_script_codes(script, shell));
     }
     #[allow(unreachable_code)]
     None
@@ -358,7 +358,7 @@ pub fn diff_lines(ours: &[Value], oracle: &[Value]) -> Vec<String> {
 struct OracleRunInterface;
 
 #[cfg(feature = "checker")]
-impl shellcheck_core::interface::SystemInterface for OracleRunInterface {
+impl shelllint_core::interface::SystemInterface for OracleRunInterface {
     fn read_file(&self, external: Option<bool>, file: &str) -> Result<String, String> {
         Err(match external {
             Some(true) => format!("{file}: openBinaryFile: does not exist (No such file or directory)"),
@@ -376,7 +376,7 @@ impl shellcheck_core::interface::SystemInterface for OracleRunInterface {
 struct ScriptContents<'a>(&'a str);
 
 #[cfg(feature = "checker")]
-impl shellcheck_core::interface::SystemInterface for ScriptContents<'_> {
+impl shelllint_core::interface::SystemInterface for ScriptContents<'_> {
     fn read_file(&self, _external: Option<bool>, file: &str) -> Result<String, String> {
         if file == "script.sh" { Ok(self.0.to_string()) } else { OracleRunInterface.read_file(None, file) }
     }
@@ -389,8 +389,8 @@ impl shellcheck_core::interface::SystemInterface for ScriptContents<'_> {
 pub fn pipeline_json1(rec: &Record) -> Option<Vec<Value>> {
     #[cfg(feature = "checker")]
     {
-        use shellcheck_core::interface::{CheckSpec, Shell, empty_check_spec};
-        use shellcheck_formatter::Formatter;
+        use shelllint_core::interface::{CheckSpec, Shell, empty_check_spec};
+        use shelllint_formatter::Formatter;
         let script = rec.script.as_deref()?;
         let shell = match rec.oracle_shell.as_deref() {
             Some("sh") => Some(Shell::Sh),
@@ -406,8 +406,8 @@ pub fn pipeline_json1(rec: &Record) -> Option<Vec<Value>> {
                 optional_checks: vec!["all".to_string()],
                 ..empty_check_spec()
             };
-            let result = shellcheck_checker::check_script(&OracleRunInterface, &spec);
-            let mut f = shellcheck_formatter::json1::format();
+            let result = shelllint_checker::check_script(&OracleRunInterface, &spec);
+            let mut f = shelllint_formatter::json1::format();
             let mut buf: Vec<u8> = vec![];
             f.on_result(&result, &ScriptContents(script), &mut buf);
             f.footer(&mut buf);

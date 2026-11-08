@@ -1,8 +1,8 @@
-# Builds a wheel that ships the native shellcheck-rust binary as a console
-# script, so `pip install shellcheck-rust` puts `shellcheck-rust` on PATH.
+# Builds a wheel that ships the native shelllint binary as a console
+# script, so `pip install shelllint` puts `shelllint` on PATH.
 #
 #   cd packaging/pypi && maturin build --release -o dist
-#   pip install dist/shellcheck_rust-*.whl
+#   pip install dist/shelllint-*.whl
 #
 # bindings = "bin" means maturin compiles the [[bin]] target of the cli crate
 # and does not generate any Python module; there is no Python API.
@@ -12,7 +12,7 @@ requires = ["maturin>=1.7,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "shellcheck-rust"
+name = "shelllint"
 version = "0.0.1"
 description = "A Rust port of ShellCheck: finds bugs in shell scripts."
 license = { text = "GPL-3.0-or-later" }
@@ -29,8 +29,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/DevanshChoubey/shellcheck-rust"
-Repository = "https://github.com/DevanshChoubey/shellcheck-rust"
+Homepage = "https://github.com/DevanshChoubey/shelllint"
+Repository = "https://github.com/DevanshChoubey/shelllint"
 
 [tool.maturin]
 bindings = "bin"

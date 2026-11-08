@@ -555,66 +555,66 @@ dependencies = [
 ]
 
 [[package]]
-name = "shellcheck-analyzer"
+name = "shelllint-analyzer"
 version = "0.0.1"
 dependencies = [
  "regex",
  "rpds",
- "shellcheck-core",
- "shellcheck-parser",
+ "shelllint-core",
+ "shelllint-parser",
 ]
 
 [[package]]
-name = "shellcheck-checker"
+name = "shelllint-checker"
 version = "0.0.1"
 dependencies = [
  "criterion",
- "shellcheck-analyzer",
- "shellcheck-checks",
- "shellcheck-core",
- "shellcheck-parser",
+ "shelllint-analyzer",
+ "shelllint-checks",
+ "shelllint-core",
+ "shelllint-parser",
 ]
 
 [[package]]
-name = "shellcheck-checks"
+name = "shelllint-checks"
 version = "0.0.1"
 dependencies = [
  "regex",
- "shellcheck-analyzer",
- "shellcheck-core",
+ "shelllint-analyzer",
+ "shelllint-core",
 ]
 
 [[package]]
-name = "shellcheck-conformance"
+name = "shelllint-conformance"
 version = "0.0.1"
 dependencies = [
  "serde",
  "serde_json",
- "shellcheck-analyzer",
- "shellcheck-checker",
- "shellcheck-checks",
- "shellcheck-core",
- "shellcheck-formatter",
- "shellcheck-parser",
+ "shelllint-analyzer",
+ "shelllint-checker",
+ "shelllint-checks",
+ "shelllint-core",
+ "shelllint-formatter",
+ "shelllint-parser",
 ]
 
 [[package]]
-name = "shellcheck-core"
+name = "shelllint-core"
 version = "0.0.1"
 dependencies = [
  "regex",
 ]
 
 [[package]]
-name = "shellcheck-formatter"
+name = "shelllint-formatter"
 version = "0.0.1"
 dependencies = [
  "serde_json",
- "shellcheck-core",
+ "shelllint-core",
 ]
 
 [[package]]
-name = "shellcheck-lsp"
+name = "shelllint-lsp"
 version = "0.0.1"
 dependencies = [
  "crossbeam-channel",
@@ -622,63 +622,63 @@ dependencies = [
  "lsp-types",
  "serde",
  "serde_json",
- "shellcheck-checker",
- "shellcheck-core",
- "shellcheck-parser",
+ "shelllint-checker",
+ "shelllint-core",
+ "shelllint-parser",
 ]
 
 [[package]]
-name = "shellcheck-mcp"
+name = "shelllint-mcp"
 version = "0.0.1"
 dependencies = [
  "serde_json",
- "shellcheck-analyzer",
- "shellcheck-checker",
- "shellcheck-core",
- "shellcheck-formatter",
+ "shelllint-analyzer",
+ "shelllint-checker",
+ "shelllint-core",
+ "shelllint-formatter",
 ]
 
 [[package]]
-name = "shellcheck-parser"
+name = "shelllint-parser"
 version = "0.0.1"
 dependencies = [
- "shellcheck-core",
+ "shelllint-core",
 ]
 
 [[package]]
-name = "shellcheck-rs"
+name = "shelllint-lib"
 version = "0.0.1"
 dependencies = [
  "serde",
  "serde_json",
- "shellcheck-analyzer",
- "shellcheck-checker",
- "shellcheck-checks",
- "shellcheck-core",
- "shellcheck-formatter",
+ "shelllint-analyzer",
+ "shelllint-checker",
+ "shelllint-checks",
+ "shelllint-core",
+ "shelllint-formatter",
 ]
 
 [[package]]
-name = "shellcheck-rust"
+name = "shelllint"
 version = "0.0.1"
 dependencies = [
  "libc",
- "shellcheck-analyzer",
- "shellcheck-checker",
- "shellcheck-core",
- "shellcheck-formatter",
+ "shelllint-analyzer",
+ "shelllint-checker",
+ "shelllint-core",
+ "shelllint-formatter",
 ]
 
 [[package]]
-name = "shellcheck-wasm"
+name = "shelllint-wasm"
 version = "0.0.1"
 dependencies = [
  "serde",
  "serde_json",
- "shellcheck-checker",
- "shellcheck-checks",
- "shellcheck-core",
- "shellcheck-formatter",
+ "shelllint-checker",
+ "shelllint-checks",
+ "shelllint-core",
+ "shelllint-formatter",
  "wasm-bindgen",
 ]
 

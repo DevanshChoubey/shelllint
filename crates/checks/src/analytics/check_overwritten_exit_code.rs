@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkOverwrittenExitCode`, lines 5281-5317 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_analyzer::cfg_analysis::{CfgAnalysis, does_post_dominate, get_incoming_state};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_command_basename, get_command_name, get_literal_string};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_analyzer::cfg_analysis::{CfgAnalysis, does_post_dominate, get_incoming_state};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{get_command_basename, get_command_name, get_literal_string};
 use std::collections::BTreeSet;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
@@ -72,7 +72,7 @@ fn is_printing(params: &Params<'_>, t: Id) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn codes(s: &str) -> Vec<u32> {
         run_check(crate::CHECKS, "Analytics.hs", "checkOverwrittenExitCode", "node", s)

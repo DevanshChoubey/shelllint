@@ -19,18 +19,18 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use shellcheck_analyzer::analyzerlib::{
+use shelllint_analyzer::analyzerlib::{
     Comments, DataType, Params, StackData, is_command, is_counting_reference, is_param_to, is_quote_free,
     is_quoted_alternative_reference, used_as_command_name,
 };
-use shellcheck_analyzer::cfg_analysis::{CFVariableProp, SpaceStatus, VariableState, get_incoming_state};
-use shellcheck_core::ast::{Ast, Id, Pos, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::cfg_analysis::{CFVariableProp, SpaceStatus, VariableState, get_incoming_state};
+use shelllint_core::ast::{Ast, Id, Pos, Token};
+use shelllint_core::astlib::{
     arguments, brace_expand, get_all_flags, get_braced_modifier, get_braced_reference, get_literal_string_ext,
     get_opts, get_path, get_word_parts, is_array_expansion, may_become_multiple_args, oversimplify,
 };
-use shellcheck_core::data::SPECIAL_VARIABLES_WITHOUT_SPACES;
-use shellcheck_core::interface::{Fix, InsertionPoint, Position, Replacement, Shell, TokenComment};
+use shelllint_core::data::SPECIAL_VARIABLES_WITHOUT_SPACES;
+use shelllint_core::interface::{Fix, InsertionPoint, Position, Replacement, Shell, TokenComment};
 
 // ---- Analytics.hs ----
 
@@ -44,7 +44,7 @@ pub fn run_node_analysis(f: &dyn Fn(&Params<'_>, Id, &mut Comments), p: &Params<
 
 /// `nodeChecksToTreeCheck checkList`: one walk running every node check at
 /// each node.
-pub use shellcheck_analyzer::api::node_checks_to_tree_check;
+pub use shelllint_analyzer::api::node_checks_to_tree_check;
 
 /// `checkCommand str f t`: if `t` is the command `str` (or `.../str`), run
 /// `f cmd rest` on its name word and arguments.
@@ -486,21 +486,21 @@ impl Scratch {
 /// ```
 macro_rules! parametrised_command_checks {
     ($name:literal, $order:literal, $kind:ident, $check:path, [$($cmd:literal),+ $(,)?]) => {
-        pub(crate) static ENTRIES: [::shellcheck_analyzer::api::CheckEntry; [$($cmd),+].len()] = [
+        pub(crate) static ENTRIES: [::shelllint_analyzer::api::CheckEntry; [$($cmd),+].len()] = [
             $(
-                ::shellcheck_analyzer::api::CheckEntry {
+                ::shelllint_analyzer::api::CheckEntry {
                     module: "Checks/Commands.hs",
                     name: concat!($name, " \"", $cmd, "\""),
                     registry: "command",
                     order: $order,
                     optional: None,
-                    kind: ::shellcheck_analyzer::api::CheckKind::Command(
-                        ::shellcheck_analyzer::api::CommandName::$kind($cmd),
+                    kind: ::shelllint_analyzer::api::CheckKind::Command(
+                        ::shelllint_analyzer::api::CommandName::$kind($cmd),
                         {
                             fn run(
-                                p: &::shellcheck_analyzer::analyzerlib::Params<'_>,
-                                t: ::shellcheck_core::ast::Id,
-                                c: &mut ::shellcheck_analyzer::analyzerlib::Comments,
+                                p: &::shelllint_analyzer::analyzerlib::Params<'_>,
+                                t: ::shelllint_core::ast::Id,
+                                c: &mut ::shelllint_analyzer::analyzerlib::Comments,
                             ) {
                                 $check($cmd, p, t, c)
                             }

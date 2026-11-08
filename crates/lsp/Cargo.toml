@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-lsp"
+name = "shelllint-lsp"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,20 +9,20 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Language Server (LSP over stdio) for shellcheck-rust"
+description = "Language Server (LSP over stdio) for shelllint"
 
 [lib]
-name = "shellcheck_lsp"
+name = "shelllint_lsp"
 path = "src/lib.rs"
 
 [[bin]]
-name = "shellcheck-rust-lsp"
+name = "shelllint-lsp"
 path = "src/main.rs"
 
 [dependencies]
-shellcheck-core.workspace = true
-shellcheck-checker.workspace = true
-shellcheck-parser.workspace = true
+shelllint-core.workspace = true
+shelllint-checker.workspace = true
+shelllint-parser.workspace = true
 lsp-server = "0.7"
 lsp-types = "0.95"
 crossbeam-channel = "0.5"

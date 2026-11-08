@@ -3,11 +3,11 @@
 
 use std::collections::BTreeMap;
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_unqualified_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{basename, get_command_name_and_token, get_unquoted_literal, only_literal_string};
-use shellcheck_core::interface::TokenComment;
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_unqualified_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{basename, get_command_name_and_token, get_unquoted_literal, only_literal_string};
+use shelllint_core::interface::TokenComment;
 
 use crate::support::{analyse, functions, run_node_analysis};
 
@@ -23,7 +23,7 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
 // aliases t = Map.fromList $ analyse findAliases t
 // `Map.fromList` over the reversed (prepended) list keeps the first
 // alias in pre-order for each name.
-fn aliases(ast: &shellcheck_core::ast::Ast, t: Id) -> BTreeMap<String, Id> {
+fn aliases(ast: &shelllint_core::ast::Ast, t: Id) -> BTreeMap<String, Id> {
     let mut map = BTreeMap::new();
     for (name, id) in analyse(ast, &mut |x, st| find_aliases(ast, x, st), t) {
         map.entry(name).or_insert(id);
@@ -31,7 +31,7 @@ fn aliases(ast: &shellcheck_core::ast::Ast, t: Id) -> BTreeMap<String, Id> {
     map
 }
 
-fn find_aliases(ast: &shellcheck_core::ast::Ast, t: Id, st: &mut Vec<(String, Id)>) {
+fn find_aliases(ast: &shelllint_core::ast::Ast, t: Id, st: &mut Vec<(String, Id)>) {
     if let Token::T_SimpleCommand(_, words) = ast.get(t)
         && !words.is_empty()
         && is_unqualified_command(ast, t, "alias")
@@ -42,7 +42,7 @@ fn find_aliases(ast: &shellcheck_core::ast::Ast, t: Id, st: &mut Vec<(String, Id
     }
 }
 
-fn get_alias(ast: &shellcheck_core::ast::Ast, arg: Id, st: &mut Vec<(String, Id)>) {
+fn get_alias(ast: &shelllint_core::ast::Ast, arg: Id, st: &mut Vec<(String, Id)>) {
     let string = only_literal_string(ast, arg);
     if string.contains('=') {
         let name: String = string.chars().take_while(|&c| c != '=').collect();

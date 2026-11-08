@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Apply every automatic fix to a script, the way `shellcheck -f diff` does.
 //!
-//! Run with `cargo run -p shellcheck-rs --example fix-all`.
+//! Run with `cargo run -p shelllint-lib --example fix-all`.
 
-use shellcheck::{Linter, apply_fixes};
+use shelllint::{Linter, apply_fixes};
 
 fn main() {
     let script = "#!/bin/sh\necho $1\nrm $file\n";

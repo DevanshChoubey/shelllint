@@ -4,17 +4,17 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_analyzer::analyzerlib::{Comments, Params, StackData};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_analyzer::cfg_analysis::{NumericalStatus, get_incoming_state};
-use shellcheck_core::ast::{ConditionType, Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params, StackData};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_analyzer::cfg_analysis::{NumericalStatus, get_incoming_state};
+use shelllint_core::ast::{ConditionType, Id, Token};
+use shelllint_core::astlib::{
     get_braced_reference, get_literal_string_def, get_word_parts, is_quotes, is_variable_name, only_literal_string,
     oversimplify,
 };
-use shellcheck_core::data::ARITHMETIC_BINARY_TEST_OPS;
-use shellcheck_core::interface::Shell;
-use shellcheck_core::regex::{match_regex, mk_regex};
+use shelllint_core::data::ARITHMETIC_BINARY_TEST_OPS;
+use shelllint_core::interface::Shell;
+use shelllint_core::regex::{match_regex, mk_regex};
 
 use crate::support::has_floating_point;
 
@@ -223,7 +223,7 @@ fn check_number_comparisons(p: &Params<'_>, id: Id, c: &mut Comments) {
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn fires(script: &str) -> bool {
         !run_check(crate::CHECKS, "Analytics.hs", "checkNumberComparisons", "node", script).expect("check runs").is_empty()

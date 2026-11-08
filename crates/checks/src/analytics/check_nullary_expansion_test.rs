@@ -2,10 +2,10 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkNullaryExpansionTest`, lines 4256-4272 (e11f964)
 
 use crate::support::{fix_with, replace_start};
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{get_word_parts, is_command_substitution, is_constant};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{get_word_parts, is_command_substitution, is_constant};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

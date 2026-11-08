@@ -17,11 +17,11 @@ use std::process::{Command, Stdio};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, default_spec, make_parameters, p_script, run_checker};
-use shellcheck_analyzer::api::{CommandName, NodeFn, get_checker};
-use shellcheck_analyzer::cfg::{CfgParameters, build_graph};
-use shellcheck_analyzer::cfg_analysis::analyze_control_flow;
-use shellcheck_core::ast::{Id, Token};
+use shelllint_analyzer::analyzerlib::{Comments, Params, default_spec, make_parameters, p_script, run_checker};
+use shelllint_analyzer::api::{CommandName, NodeFn, get_checker};
+use shelllint_analyzer::cfg::{CfgParameters, build_graph};
+use shelllint_analyzer::cfg_analysis::analyze_control_flow;
+use shelllint_core::ast::{Id, Token};
 
 const CHILD_ENV: &str = "SC_ANALYZER_PATHOLOGICAL_CHILD";
 const TIME_LIMIT: Duration = Duration::from_secs(10);
@@ -76,7 +76,7 @@ fn check(name: &str, work: impl FnOnce()) {
     assert!(elapsed < TIME_LIMIT, "{name}: took {elapsed:?}");
 }
 
-fn parse(script: &str) -> (shellcheck_parser::ParseResult, Id) {
+fn parse(script: &str) -> (shelllint_parser::ParseResult, Id) {
     let mut pr = p_script(script);
     let root = pr.root.expect("script parses");
     pr.ast.compute_parents(root);
@@ -158,10 +158,10 @@ fn record_word_counts(p: &Params<'_>, t: Id, c: &mut Comments) {
         },
         &mut |_| {},
     );
-    c.0.push(shellcheck_core::interface::TokenComment {
+    c.0.push(shelllint_core::interface::TokenComment {
         id: t,
-        comment: shellcheck_core::interface::Comment {
-            severity: shellcheck_core::interface::Severity::InfoC,
+        comment: shelllint_core::interface::Comment {
+            severity: shelllint_core::interface::Severity::InfoC,
             code: 0,
             message: counts.join(" "),
         },

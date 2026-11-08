@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Lint a script from a string and print each diagnostic.
 //!
-//! Run with `cargo run -p shellcheck-rs --example basic`.
+//! Run with `cargo run -p shelllint-lib --example basic`.
 
-use shellcheck::{Linter, Shell};
+use shelllint::{Linter, Shell};
 
 fn main() {
     let script = "#!/bin/bash\nfiles=$(ls)\nfor f in $files; do\n  echo $f\ndone\n";

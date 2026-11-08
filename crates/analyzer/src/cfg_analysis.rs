@@ -26,7 +26,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
-use shellcheck_core::ast::{Ast, Id};
+use shelllint_core::ast::{Ast, Id};
 
 use crate::cfg::CfgResult;
 pub use crate::cfg::{CFVariableProp, CfGraph, CfgParameters, Node, PropSet};

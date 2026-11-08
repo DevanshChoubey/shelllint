@@ -1,11 +1,11 @@
 {
-  "name": "@shellcheck-rust/linux-arm64",
+  "name": "@shelllint/linux-arm64",
   "version": "0.0.1",
-  "description": "shellcheck-rust prebuilt binary for linux-arm64 (used via the shellcheck-rust package)",
+  "description": "shelllint prebuilt binary for linux-arm64 (used via the shelllint package)",
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DevanshChoubey/shellcheck-rust.git"
+    "url": "git+https://github.com/DevanshChoubey/shelllint.git"
   },
   "os": ["linux"],
   "cpu": ["arm64"],

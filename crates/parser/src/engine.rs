@@ -45,7 +45,7 @@
 use std::cmp::Ordering;
 use std::rc::Rc;
 
-use shellcheck_core::ast::Pos;
+use shelllint_core::ast::Pos;
 
 use crate::state::{Environment, SystemState, UserState};
 
@@ -827,7 +827,7 @@ impl<'a> P<'a> {
     }
 }
 
-pub use shellcheck_core::unicode::{is_alpha, is_alpha_num, is_lower, is_space, is_upper};
+pub use shelllint_core::unicode::{is_alpha, is_alpha_num, is_lower, is_space, is_upper};
 
 /// Run `f` on a fresh thread with a `stack_bytes` stack, for callers that
 /// parse deeply nested input (the readers are recursive, like the Haskell).

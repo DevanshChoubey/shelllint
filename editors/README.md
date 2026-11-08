@@ -1,6 +1,6 @@
 # Editor integration
 
-`shellcheck-rust-lsp` is a Language Server (LSP over stdio) for ShellCheck
+`shelllint-lsp` is a Language Server (LSP over stdio) for ShellCheck
 diagnostics. It provides:
 
 - diagnostics on open, on save, and on edit (debounced by 250 ms);
@@ -15,8 +15,8 @@ diagnostics. It provides:
 Build and install the server first:
 
 ```sh
-cargo build --release -p shellcheck-lsp
-install -m 0755 target/release/shellcheck-rust-lsp ~/.local/bin/   # any dir on PATH
+cargo build --release -p shelllint-lsp
+install -m 0755 target/release/shelllint-lsp ~/.local/bin/   # any dir on PATH
 ```
 
 The server reads these settings (from `initializationOptions`, or from
@@ -29,7 +29,7 @@ The server reads these settings (from `initializationOptions`, or from
 | `exclude`  | list of codes, for example `SC2034` or `2034`         | codes never reported                      |
 | `severity` | `error`, `warning`, `info`, `style`                  | minimum severity reported (default `style`) |
 
-Subcommands: `shellcheck-rust-lsp --version`, `--help`. With no arguments it
+Subcommands: `shelllint-lsp --version`, `--help`. With no arguments it
 speaks LSP on stdin and stdout.
 
 The VS Code extension lives in `editors/vscode/`.
@@ -39,9 +39,9 @@ The VS Code extension lives in `editors/vscode/`.
 Native (no plugin needed on 0.11+):
 
 ```lua
--- ~/.config/nvim/lsp/shellcheck_rust.lua
+-- ~/.config/nvim/lsp/shelllint.lua
 return {
-  cmd = { 'shellcheck-rust-lsp' },
+  cmd = { 'shelllint-lsp' },
   filetypes = { 'sh', 'bash' },
   root_markers = { '.shellcheckrc', '.git' },
   single_file_support = true,
@@ -51,7 +51,7 @@ return {
 
 ```lua
 -- init.lua
-vim.lsp.enable('shellcheck_rust')
+vim.lsp.enable('shelllint')
 ```
 
 With nvim-lspconfig (custom config, works on older Neovim too):
@@ -59,10 +59,10 @@ With nvim-lspconfig (custom config, works on older Neovim too):
 ```lua
 local lspconfig = require('lspconfig')
 local configs = require('lspconfig.configs')
-if not configs.shellcheck_rust then
-  configs.shellcheck_rust = {
+if not configs.shelllint then
+  configs.shelllint = {
     default_config = {
-      cmd = { 'shellcheck-rust-lsp' },
+      cmd = { 'shelllint-lsp' },
       filetypes = { 'sh', 'bash' },
       root_dir = lspconfig.util.root_pattern('.shellcheckrc', '.git'),
       single_file_support = true,
@@ -70,7 +70,7 @@ if not configs.shellcheck_rust then
     },
   }
 end
-lspconfig.shellcheck_rust.setup({})
+lspconfig.shelllint.setup({})
 ```
 
 Quick fixes: `vim.lsp.buf.code_action()`. Hover: `vim.lsp.buf.hover()`.
@@ -78,11 +78,11 @@ Quick fixes: `vim.lsp.buf.code_action()`. Hover: `vim.lsp.buf.hover()`.
 ## Helix (`~/.config/helix/languages.toml`)
 
 ```toml
-[language-server.shellcheck-rust]
-command = "shellcheck-rust-lsp"
+[language-server.shelllint]
+command = "shelllint-lsp"
 
 # Optional: settings, sent as initialization options.
-[language-server.shellcheck-rust.config]
+[language-server.shelllint.config]
 dialect = "auto"
 enable = []
 exclude = []
@@ -90,12 +90,12 @@ severity = "style"
 
 [[language]]
 name = "bash"
-language-servers = ["shellcheck-rust"]
+language-servers = ["shelllint"]
 ```
 
 Helix's built-in `bash` language covers `sh` and `bash` files, so the
 language-level entry above is enough. Add the server to the list alongside
-any existing one, for example `language-servers = ["bash-language-server", "shellcheck-rust"]`.
+any existing one, for example `language-servers = ["bash-language-server", "shelllint"]`.
 
 ## Zed
 
@@ -106,23 +106,23 @@ point a registered server at this binary and set its arguments:
 // ~/.config/zed/settings.json
 {
   "lsp": {
-    "shellcheck-rust": {
-      "binary": { "path": "shellcheck-rust-lsp", "arguments": [] },
+    "shelllint": {
+      "binary": { "path": "shelllint-lsp", "arguments": [] },
       "initialization_options": { "dialect": "auto", "enable": [], "exclude": [] }
     }
   },
   "languages": {
     "Shell Script": {
-      "language_servers": ["shellcheck-rust", "..."]
+      "language_servers": ["shelllint", "..."]
     }
   }
 }
 ```
 
 Caveat: this only takes effect where an installed extension already defines a
-language server named `shellcheck-rust`. Zed has no built-in way to add a
+language server named `shelllint`. Zed has no built-in way to add a
 custom server from settings alone, so a small Zed extension (a `language_servers`
-entry in `extension.toml` with a `command` that runs `shellcheck-rust-lsp`) is
+entry in `extension.toml` with a `command` that runs `shelllint-lsp`) is
 needed first. Untested here.
 
 ## VS Code
@@ -134,5 +134,5 @@ cd editors/vscode && npm install && npm run compile
 npx @vscode/vsce package --no-yarn   # produces a .vsix; install with "Extensions: Install from VSIX"
 ```
 
-Settings: `shellcheck-rust.server.path`, `shellcheck-rust.dialect`,
-`shellcheck-rust.enable`, `shellcheck-rust.exclude`, `shellcheck-rust.severity`.
+Settings: `shelllint.server.path`, `shelllint.dialect`,
+`shelllint.enable`, `shelllint.exclude`, `shelllint.severity`.

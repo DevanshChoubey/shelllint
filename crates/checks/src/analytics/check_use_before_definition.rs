@@ -4,12 +4,12 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, parents};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_analyzer::cfg_analysis::does_post_dominate;
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::get_literal_string;
-use shellcheck_core::interface::TokenComment;
+use shelllint_analyzer::analyzerlib::{Comments, Params, parents};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_analyzer::cfg_analysis::does_post_dominate;
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::get_literal_string;
+use shelllint_core::interface::TokenComment;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -78,7 +78,7 @@ fn check_use_before_definition(params: &Params<'_>, t: Id) -> Vec<TokenComment> 
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn codes(s: &str) -> Vec<i64> {
         run_check(crate::CHECKS, "Analytics.hs", "checkUseBeforeDefinition", "tree", s).expect("registered")

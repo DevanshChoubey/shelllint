@@ -3,7 +3,7 @@
 
 use std::io::Write;
 
-use shellcheck_core::interface::{
+use shelllint_core::interface::{
     CheckResult, Code, ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface,
 };
 
@@ -140,7 +140,7 @@ fn slice_file<'a>(fix: &Fix, lines: &[&'a str]) -> (Fix, Vec<&'a str>) {
             max_line = max_line.max(pos.line);
         }
     }
-    let adjust = |pos: &shellcheck_core::interface::Position| {
+    let adjust = |pos: &shelllint_core::interface::Position| {
         let mut p = pos.clone();
         p.line = pos.line - min_line + 1;
         p

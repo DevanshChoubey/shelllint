@@ -2,8 +2,8 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1612-1835:
 // all $ expansions, variable names.
 
-use shellcheck_core::ast::{Id, Piped, Token};
-use shellcheck_core::interface::Severity;
+use shelllint_core::ast::{Id, Piped, Token};
+use shelllint_core::interface::Severity;
 
 use crate::alt;
 use crate::engine::{P, PR, SourcePos};

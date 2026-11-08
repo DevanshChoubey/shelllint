@@ -5,11 +5,11 @@
 // The `where` clause of readConditionContents becomes the `cond_*` methods
 // below, each taking `single` (the Haskell closure variable) explicitly.
 
-use shellcheck_core::ast::{Ast, ConditionType, Id, Token};
-use shellcheck_core::astlib::only_literal_string;
-use shellcheck_core::data::{BINARY_TEST_OPS, COMMON_COMMANDS};
-use shellcheck_core::interface::Severity::ErrorC;
-use shellcheck_core::interface::Severity::WarningC;
+use shelllint_core::ast::{Ast, ConditionType, Id, Token};
+use shelllint_core::astlib::only_literal_string;
+use shelllint_core::data::{BINARY_TEST_OPS, COMMON_COMMANDS};
+use shelllint_core::interface::Severity::ErrorC;
+use shelllint_core::interface::Severity::WarningC;
 
 use crate::alt;
 use crate::engine::{P, PR};

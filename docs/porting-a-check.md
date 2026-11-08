@@ -29,8 +29,8 @@ Each file starts with these two lines:
 ## 2. Register a `CheckEntry`
 
 ```rust
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",       // exactly as in corpus/tasks.json
@@ -42,7 +42,7 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
 };
 ```
 
-Write the declaration exactly like this, starting at the beginning of a line: `crates/checks/build.rs` scans each file for `pub(crate) static <NAME>: CheckEntry` and lists every one it finds in the generated `shellcheck_checks::CHECKS` registry, which the checker passes to the analyzer. A static written any other way (indented, `pub`, or without `pub(crate)`) is not registered.
+Write the declaration exactly like this, starting at the beginning of a line: `crates/checks/build.rs` scans each file for `pub(crate) static <NAME>: CheckEntry` and lists every one it finds in the generated `shelllint_checks::CHECKS` registry, which the checker passes to the analyzer. A static written any other way (indented, `pub`, or without `pub(crate)`) is not registered.
 
 Each registry needs a matching `kind` and function signature:
 
@@ -81,10 +81,10 @@ The brief gives a line span. The span covers the definition and its `where` clau
 
 - Haskell names become snake_case: `getLiteralString` becomes `get_literal_string`.
 - Many helpers are already ported:
-  - `shellcheck_core::astlib` has ASTLib.
-  - `shellcheck_analyzer::analyzerlib` has AnalyzerLib, including `Comments::warn`/`err`/`info`/`style` and their `_with_fix` versions.
-  - `shellcheck_core::regex` has Regex. Build each regex once with a `static RE: LazyLock<Regex> = LazyLock::new(|| mk_regex("..."))`.
-  - `shellcheck_core::prelude` and `shellcheck_core::data` cover Prelude and Data.
+  - `shelllint_core::astlib` has ASTLib.
+  - `shelllint_analyzer::analyzerlib` has AnalyzerLib, including `Comments::warn`/`err`/`info`/`style` and their `_with_fix` versions.
+  - `shelllint_core::regex` has Regex. Build each regex once with a `static RE: LazyLock<Regex> = LazyLock::new(|| mk_regex("..."))`.
+  - `shelllint_core::prelude` and `shelllint_core::data` cover Prelude and Data.
 - Haskell `getId t` is the `Id` you already hold.
 - Token `==` in Haskell compares structure, so use `ast.structurally_eq(a, b)`. Rust's `==` on `Token` compares child ids.
 - Haskell `isDigit` is ASCII-only, so use `is_ascii_digit`.
@@ -115,7 +115,7 @@ Some Haskell checks build tokens the parser never made, such as `braceExpand`, `
 Run this for every target in your brief:
 
 ```
-cargo run -q -p shellcheck-conformance -- report --module Analytics.hs --target checkEchoWc
+cargo run -q -p shelllint-conformance -- report --module Analytics.hs --target checkEchoWc
 ```
 
 The output must be `pass N / fail 0 / blocked 0 / unported 0`, where `N` is the test count in the brief. Always pass `--module`. Without it, names that exist in two modules mix their counts.

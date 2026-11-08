@@ -9,20 +9,20 @@ pub fn fixture(name: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name)
 }
 
-/// The shellcheck-rust CLI binary the parity tests compare against.
+/// The shelllint CLI binary the parity tests compare against.
 ///
-/// Honours `SHELLCHECK_RUST_CLI`, then `$CARGO_TARGET_DIR/debug`, then the
+/// Honours `SHELLLINT_CLI`, then `$CARGO_TARGET_DIR/debug`, then the
 /// workspace `target/debug`. Returns `None` when no binary is found; the
 /// parity tests then skip with a message. Build it with
-/// `cargo build -p shellcheck-rust` to run them.
+/// `cargo build -p shelllint` to run them.
 pub fn cli_bin() -> Option<PathBuf> {
-    if let Ok(p) = std::env::var("SHELLCHECK_RUST_CLI") {
+    if let Ok(p) = std::env::var("SHELLLINT_CLI") {
         return Some(PathBuf::from(p));
     }
     let target = std::env::var("CARGO_TARGET_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target"));
-    let bin = target.join("debug/shellcheck-rust");
+    let bin = target.join("debug/shelllint");
     bin.exists().then_some(bin)
 }
 
@@ -31,7 +31,7 @@ pub fn require_cli(test: &str) -> Option<PathBuf> {
     let bin = cli_bin();
     if bin.is_none() {
         eprintln!(
-            "SKIPPED {test}: shellcheck-rust CLI binary not found; run `cargo build -p shellcheck-rust` (or set SHELLCHECK_RUST_CLI)"
+            "SKIPPED {test}: shelllint CLI binary not found; run `cargo build -p shelllint` (or set SHELLLINT_CLI)"
         );
     }
     bin

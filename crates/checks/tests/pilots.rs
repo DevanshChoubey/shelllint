@@ -3,19 +3,19 @@
 // src/ShellCheck/Analytics.hs `checker`, Checks/Commands.hs `checker` and
 // Checks/ShellSupport.hs `checker` run on them, and crates/checks/src/support.rs.
 
-use shellcheck_analyzer::analyzerlib::*;
-use shellcheck_analyzer::api::*;
-use shellcheck_analyzer::testing::{find_entries, run_check};
-use shellcheck_checks::support::*;
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::interface::*;
+use shelllint_analyzer::analyzerlib::*;
+use shelllint_analyzer::api::*;
+use shelllint_analyzer::testing::{find_entries, run_check};
+use shelllint_checks::support::*;
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::interface::*;
 
 // ---- helpers ----
 
-/// `shellcheck_checks::CHECKS` plus this file's test-only optional checks.
+/// `shelllint_checks::CHECKS` plus this file's test-only optional checks.
 fn registry() -> &'static [&'static CheckEntry] {
     static R: std::sync::OnceLock<Vec<&'static CheckEntry>> = std::sync::OnceLock::new();
-    R.get_or_init(|| shellcheck_checks::CHECKS.iter().copied().chain([&OPT_A, &OPT_B, &OPT_CMD]).collect())
+    R.get_or_init(|| shelllint_checks::CHECKS.iter().copied().chain([&OPT_A, &OPT_B, &OPT_CMD]).collect())
 }
 
 struct Parsed {
@@ -214,7 +214,7 @@ fn selected_optionals_all_versus_keys() {
 #[test]
 fn is_condition_walks_parents() {
     let p = parse("if a; b; then c; fi; d && e; f || g; while h; do i; done");
-    let path = |s: &str| shellcheck_core::astlib::get_path(&p.ast, p.literal(s));
+    let path = |s: &str| shelllint_core::astlib::get_path(&p.ast, p.literal(s));
     // Only the last command of an if/while condition list counts.
     let want = [
         ("a", false),
@@ -247,7 +247,7 @@ fn replacements_and_fixes() {
     let p = parse("echo $foo");
     let params = p.params(&spec());
     let word = p.find(|t| matches!(t, Token::T_DollarBraced(..)))[0];
-    let depth = shellcheck_core::astlib::get_path(&p.ast, word).len() as i64;
+    let depth = shelllint_core::astlib::get_path(&p.ast, word).len() as i64;
     let at = |c| Position { file: String::new(), line: 1, column: c };
     let s = replace_start(word, &params, 1, "${");
     assert_eq!((s.start_pos, s.end_pos, s.string.as_str()), (at(6), at(7), "${"));
@@ -359,7 +359,7 @@ fn return_or_exit_classifies_arguments() {
 fn single_unmodified_braced_string() {
     let get = |s: &str| {
         let p = parse(&format!("echo {s}"));
-        let word = shellcheck_core::astlib::arguments(&p.ast, p.command())[0];
+        let word = shelllint_core::astlib::arguments(&p.ast, p.command())[0];
         get_single_unmodified_braced_string(&p.ast, word)
     };
     assert_eq!(get("$foo").as_deref(), Some("foo"));
@@ -400,7 +400,7 @@ fn scratch_maps_synthetic_ids_back() {
         assert_eq!(s.haskell_id(w), word);
         assert_eq!(s.parent(w), p.ast.parent(word));
     }
-    assert_eq!(shellcheck_core::astlib::only_literal_string(&s.ast, words[1]), "foo2");
+    assert_eq!(shelllint_core::astlib::only_literal_string(&s.ast, words[1]), "foo2");
     // A synthetic token built from another keeps the original id.
     let cmd = p.command();
     let Token::T_SimpleCommand(pre, w) = p.ast.get(cmd).clone() else { panic!() };

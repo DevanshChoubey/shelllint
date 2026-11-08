@@ -7,8 +7,8 @@
 // `arith_*` (the local `spacing` is `arith_spacing`, so it does not shadow the
 // global `spacing`).
 
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::interface::Severity;
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::interface::Severity;
 
 use crate::engine::{P, PR};
 use crate::{alt, choice};

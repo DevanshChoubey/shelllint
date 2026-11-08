@@ -2,9 +2,9 @@
 // Tests for the port of ShellCheck src/ShellCheck/AST.hs (e11f964)
 #![allow(non_camel_case_types)]
 
-use shellcheck_core::ast::{Ast, CaseType, Id, Pos, Token};
-use shellcheck_core::interface::Severity;
-use shellcheck_core::regex::{matches, mk_regex};
+use shelllint_core::ast::{Ast, CaseType, Id, Pos, Token};
+use shelllint_core::interface::Severity;
+use shelllint_core::regex::{matches, mk_regex};
 
 fn p() -> Pos {
     Pos { line: 1, column: 1 }

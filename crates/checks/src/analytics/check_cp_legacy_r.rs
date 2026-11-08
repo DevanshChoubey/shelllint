@@ -2,10 +2,10 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkCpLegacyR`, lines 3372-3380 (e11f964)
 
 use crate::support::{fix_with, replace_token};
-use shellcheck_analyzer::analyzerlib::{Comments, Params, is_unqualified_command};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::get_all_flags;
+use shelllint_analyzer::analyzerlib::{Comments, Params, is_unqualified_command};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::get_all_flags;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

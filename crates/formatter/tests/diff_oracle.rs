@@ -13,9 +13,9 @@
 // real cross-file fixes cannot be produced by the oracle; that path is covered
 // by the synthetic `cross_file_fix_uses_reader` test instead.
 
-use shellcheck_core::interface::*;
-use shellcheck_formatter::Formatter;
-use shellcheck_formatter::diff;
+use shelllint_core::interface::*;
+use shelllint_formatter::Formatter;
+use shelllint_formatter::diff;
 
 const DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/golden/diff");
 

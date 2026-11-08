@@ -5,7 +5,7 @@ mod common;
 
 use std::sync::Arc;
 
-use shellcheck::{Linter, Severity, Shell, apply_fixes, list_checks};
+use shelllint::{Linter, Severity, Shell, apply_fixes, list_checks};
 
 fn codes(src: &str, linter: &Linter) -> Vec<u32> {
     linter.check_str(src).iter().map(|d| d.code).collect()
@@ -140,7 +140,7 @@ fn deserialized_fix_applies_correctly_on_lines_with_tabs() {
         let diags = Linter::new().check_str(src);
         assert!(diags.iter().any(|d| d.fix.is_some()), "no fix for {src:?}");
         let json = serde_json::to_string(&diags).unwrap();
-        let back: Vec<shellcheck::Diagnostic> = serde_json::from_str(&json).unwrap();
+        let back: Vec<shelllint::Diagnostic> = serde_json::from_str(&json).unwrap();
         assert_eq!(back, diags, "round trip differs for {src:?}");
         assert_eq!(apply_fixes(src, &back), apply_fixes(src, &diags), "apply_fixes differs for {src:?}");
         for (a, b) in diags.iter().zip(&back) {
@@ -150,7 +150,7 @@ fn deserialized_fix_applies_correctly_on_lines_with_tabs() {
         }
     }
     let src = "#!/bin/bash\n\techo $1\n";
-    let back: Vec<shellcheck::Diagnostic> =
+    let back: Vec<shelllint::Diagnostic> =
         serde_json::from_str(&serde_json::to_string(&Linter::new().check_str(src)).unwrap()).unwrap();
     assert_eq!(apply_fixes(src, &back), "#!/bin/bash\n\techo \"$1\"\n");
 }

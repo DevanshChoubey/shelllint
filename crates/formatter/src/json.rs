@@ -8,7 +8,7 @@
 
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, Fix, InsertionPoint, PositionedComment, Replacement, SystemInterface};
+use shelllint_core::interface::{CheckResult, Fix, InsertionPoint, PositionedComment, Replacement, SystemInterface};
 
 use crate::*;
 

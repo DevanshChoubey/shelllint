@@ -3,8 +3,8 @@
 // and 2909-3127 (separators, simple commands, source, pipelines, and/or;
 // assignments, arrays, let/eval/time suffixes).
 
-use shellcheck_parser::engine::{P, PR};
-use shellcheck_parser::testing::{self, named_parser};
+use shelllint_parser::engine::{P, PR};
+use shelllint_parser::testing::{self, named_parser};
 
 type Reader = fn(&mut P<'_>) -> PR<()>;
 

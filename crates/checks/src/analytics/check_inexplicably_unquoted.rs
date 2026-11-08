@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkInexplicablyUnquoted`, lines 1958-2001 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::astlib::get_path;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::astlib::get_path;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -26,7 +26,7 @@ fn check(p: &Params<'_>, toks: &[Id], c: &mut Comments) {
     let ast = p.ast;
     if let [a, b, ..] = toks {
         if let (Token::T_SingleQuoted(_), Token::T_Literal(s)) = (ast.get(*a), ast.get(*b)) {
-            if !s.is_empty() && s.chars().all(shellcheck_core::unicode::is_alpha_num) {
+            if !s.is_empty() && s.chars().all(shelllint_core::unicode::is_alpha_num) {
                 c.info(
                     *b,
                     2026,
@@ -103,7 +103,7 @@ fn warn_about_literal(id: Id, c: &mut Comments) {
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn fires(script: &str) -> bool {
         let codes = run_check(crate::CHECKS, "Analytics.hs", "checkInexplicablyUnquoted", "node", script).unwrap();

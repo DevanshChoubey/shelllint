@@ -3,8 +3,8 @@
 // command prefixes/suffixes (let/eval/time/declare), assignments, arrays,
 // token helpers.
 
-use shellcheck_core::ast::{AssignmentMode, Id, Token};
-use shellcheck_core::interface::Severity::{ErrorC, WarningC};
+use shelllint_core::ast::{AssignmentMode, Id, Token};
+use shelllint_core::interface::Severity::{ErrorC, WarningC};
 
 use crate::engine::{P, PR, SourcePos, update_pos_char};
 use crate::{alt, choice};

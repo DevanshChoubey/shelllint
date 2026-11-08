@@ -1,36 +1,36 @@
 #!/usr/bin/env node
 // Thin launcher: finds the prebuilt binary shipped in the matching
-// @shellcheck-rust/<platform>-<arch> optional dependency and runs it with the
+// @shelllint/<platform>-<arch> optional dependency and runs it with the
 // caller's arguments, stdio and exit status.
 "use strict";
 
 const { spawnSync } = require("node:child_process");
 
 const PACKAGES = {
-  "linux-x64": "@shellcheck-rust/linux-x64",
-  "linux-arm64": "@shellcheck-rust/linux-arm64",
-  "darwin-x64": "@shellcheck-rust/darwin-x64",
-  "darwin-arm64": "@shellcheck-rust/darwin-arm64",
-  "win32-x64": "@shellcheck-rust/win32-x64",
+  "linux-x64": "@shelllint/linux-x64",
+  "linux-arm64": "@shelllint/linux-arm64",
+  "darwin-x64": "@shelllint/darwin-x64",
+  "darwin-arm64": "@shelllint/darwin-arm64",
+  "win32-x64": "@shelllint/win32-x64",
 };
 
 const key = `${process.platform}-${process.arch}`;
 const pkg = PACKAGES[key];
 if (!pkg) {
   console.error(
-    `shellcheck-rust: no prebuilt binary for ${key}. ` +
-      "Build from source instead: cargo install --git https://github.com/DevanshChoubey/shellcheck-rust shellcheck-rust"
+    `shelllint: no prebuilt binary for ${key}. ` +
+      "Build from source instead: cargo install --git https://github.com/DevanshChoubey/shelllint shelllint"
   );
   process.exit(1);
 }
 
-const exe = process.platform === "win32" ? "shellcheck-rust.exe" : "shellcheck-rust";
+const exe = process.platform === "win32" ? "shelllint.exe" : "shelllint";
 let binary;
 try {
   binary = require.resolve(`${pkg}/bin/${exe}`);
 } catch (err) {
   console.error(
-    `shellcheck-rust: the binary package ${pkg} is not installed. ` +
+    `shelllint: the binary package ${pkg} is not installed. ` +
       "Reinstall without --omit=optional / --no-optional."
   );
   process.exit(1);
@@ -38,7 +38,7 @@ try {
 
 const result = spawnSync(binary, process.argv.slice(2), { stdio: "inherit" });
 if (result.error) {
-  console.error(`shellcheck-rust: failed to start ${binary}: ${result.error.message}`);
+  console.error(`shelllint: failed to start ${binary}: ${result.error.message}`);
   process.exit(1);
 }
 if (result.signal) {

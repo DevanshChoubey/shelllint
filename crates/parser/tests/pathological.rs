@@ -21,7 +21,7 @@ use std::process::{Command, Stdio};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use shellcheck_core::interface::{ParseSpec, mocked_system_interface, new_parse_spec};
+use shelllint_core::interface::{ParseSpec, mocked_system_interface, new_parse_spec};
 
 const CHILD_ENV: &str = "SC_PARSER_PATHOLOGICAL_CHILD";
 const TIME_LIMIT: Duration = Duration::from_secs(10);
@@ -31,7 +31,7 @@ fn parse(script: &str) -> usize {
     let sys = mocked_system_interface(vec![]);
     let spec = ParseSpec { filename: "-".into(), script: script.into(), ..new_parse_spec() };
     // Parse on a big stack, as the checker does.
-    shellcheck_parser::engine::with_stack(256 << 20, || shellcheck_parser::parse_script(&sys, &spec).comments.len())
+    shelllint_parser::engine::with_stack(256 << 20, || shelllint_parser::parse_script(&sys, &spec).comments.len())
 }
 
 fn check(name: &str, script: impl FnOnce() -> String) {

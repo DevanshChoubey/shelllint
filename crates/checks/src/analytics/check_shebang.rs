@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkShebang`, lines 700-717 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Annotation, Id, Token};
-use shellcheck_core::astlib::executable_from_shebang;
-use shellcheck_core::interface::TokenComment;
-use shellcheck_core::unicode::words;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Annotation, Id, Token};
+use shelllint_core::astlib::executable_from_shebang;
+use shelllint_core::interface::TokenComment;
+use shelllint_core::unicode::words;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

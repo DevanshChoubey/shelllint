@@ -20,9 +20,9 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::rc::Rc;
 
-use shellcheck_core::ast::{Ast, Id};
-use shellcheck_core::data;
-use shellcheck_core::prelude::please_report;
+use shelllint_core::ast::{Ast, Id};
+use shelllint_core::data;
+use shelllint_core::prelude::please_report;
 
 use super::NumericalStatus::*;
 use super::SpaceStatus::*;

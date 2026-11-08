@@ -3,7 +3,7 @@
 // testEnvironment, isOk/isWarning/isNotOk, getParseOutput, parsesCleanly,
 // plus a name -> reader table for the conformance harness.
 
-use shellcheck_core::interface::MockedSystemInterface;
+use shelllint_core::interface::MockedSystemInterface;
 
 use crate::engine::{P, PR, ParseError};
 use crate::state::{Environment, ParseNote, SystemState, UserState};

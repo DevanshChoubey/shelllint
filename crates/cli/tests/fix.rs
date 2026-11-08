@@ -16,7 +16,7 @@ struct TempDir(PathBuf);
 
 impl TempDir {
     fn new(name: &str) -> Self {
-        let d = std::env::temp_dir().join(format!("shellcheck-rust-fix-{}-{}", std::process::id(), name));
+        let d = std::env::temp_dir().join(format!("shelllint-fix-{}-{}", std::process::id(), name));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).unwrap();
         TempDir(d)
@@ -42,7 +42,7 @@ impl Drop for TempDir {
 
 fn run_in(dir: &Path, args: &[&str], stdin: &str) -> Out {
     use std::io::Write;
-    let mut child = Command::new(env!("CARGO_BIN_EXE_shellcheck-rust"))
+    let mut child = Command::new(env!("CARGO_BIN_EXE_shelllint"))
         .args(args)
         .current_dir(dir)
         .env_remove("SHELLCHECK_OPTS")

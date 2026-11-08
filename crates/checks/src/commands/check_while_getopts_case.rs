@@ -3,10 +3,10 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, find_first, get_path_m, modifies_variable};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
-use shellcheck_core::ast::{CaseType, Id, Token};
-use shellcheck_core::astlib::{e4m, get_literal_string, get_word_parts};
+use shelllint_analyzer::analyzerlib::{Comments, Params, find_first, get_path_m, modifies_variable};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, CommandName};
+use shelllint_core::ast::{CaseType, Id, Token};
+use shelllint_core::astlib::{e4m, get_literal_string, get_word_parts};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Checks/Commands.hs",

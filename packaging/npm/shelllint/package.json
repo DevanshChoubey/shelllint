@@ -1,0 +1,26 @@
+{
+  "name": "shelllint",
+  "version": "0.0.1",
+  "description": "A Rust port of ShellCheck: finds bugs in shell scripts. Ships a prebuilt static binary per platform.",
+  "keywords": ["shell", "shellcheck", "bash", "lint", "linter", "static-analysis"],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/DevanshChoubey/shelllint",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevanshChoubey/shelllint.git"
+  },
+  "bin": {
+    "shelllint": "bin/shelllint.js"
+  },
+  "files": ["bin/shelllint.js", "README.md"],
+  "engines": {
+    "node": ">=16"
+  },
+  "optionalDependencies": {
+    "@shelllint/linux-x64": "0.0.1",
+    "@shelllint/linux-arm64": "0.0.1",
+    "@shelllint/darwin-x64": "0.0.1",
+    "@shelllint/darwin-arm64": "0.0.1",
+    "@shelllint/win32-x64": "0.0.1"
+  }
+}

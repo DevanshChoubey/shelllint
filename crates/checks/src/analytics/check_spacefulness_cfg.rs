@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSpacefulnessCfg`, lines 2298-2298 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::Id;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::Id;
 
 use crate::support::check_spacefulness_cfg_prime;
 
@@ -22,7 +22,7 @@ fn check_spacefulness_cfg(params: &Params<'_>, t: Id, c: &mut Comments) {
 
 #[cfg(test)]
 mod tests {
-    use shellcheck_analyzer::testing::run_check;
+    use shelllint_analyzer::testing::run_check;
 
     fn codes(script: &str) -> Vec<u32> {
         run_check(crate::CHECKS, "Analytics.hs", "checkSpacefulnessCfg", "node", script)

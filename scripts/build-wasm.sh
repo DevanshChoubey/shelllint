@@ -31,8 +31,8 @@ docker run --rm --memory=6g --cpus=4 \
   -e CARGO_HOME=/cargo-home \
   -e CARGO_TARGET_DIR=/cargo-target \
   -v "$ROOT":/src \
-  -v shellcheck-wasm-cargo-home:/cargo-home \
-  -v shellcheck-wasm-cargo-target:/cargo-target \
+  -v shelllint-wasm-cargo-home:/cargo-home \
+  -v shelllint-wasm-cargo-target:/cargo-target \
   -w /src \
   "$RUST_IMAGE" sh -eu -c '
     # `cargo install` puts wasm-bindgen in $CARGO_HOME/bin (the volume).
@@ -41,11 +41,11 @@ docker run --rm --memory=6g --cpus=4 \
     if ! wasm-bindgen --version 2>/dev/null | grep -q "$BINDGEN_VERSION"; then
       cargo install wasm-bindgen-cli --version "=$BINDGEN_VERSION" --locked -j 4
     fi
-    cargo build -p shellcheck-wasm --release --target wasm32-unknown-unknown -j 4 --locked
+    cargo build -p shelllint-wasm --release --target wasm32-unknown-unknown -j 4 --locked
     OUT=/src/playground/pkg
     rm -rf "$OUT" && mkdir -p "$OUT"
-    wasm-bindgen --target web --no-typescript --out-dir "$OUT" --out-name shellcheck_wasm \
-      /cargo-target/wasm32-unknown-unknown/release/shellcheck_wasm.wasm
+    wasm-bindgen --target web --no-typescript --out-dir "$OUT" --out-name shelllint_wasm \
+      /cargo-target/wasm32-unknown-unknown/release/shelllint_wasm.wasm
     if [ "$WASM_OPT" = 1 ]; then
       # Debian bookworm ships binaryen 108, which corrupts the wasm-bindgen
       # externref table (rustc >= 1.82 emits reference types). The wasm-opt

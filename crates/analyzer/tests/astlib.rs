@@ -4,8 +4,8 @@
 // None of the 61 ASTLib unit tests parse a script: they are either on
 // hand-built single-token trees or on plain strings, so none needs
 // `#[ignore = "needs parser"]`.
-use shellcheck_analyzer::astlib::*;
-use shellcheck_core::ast::{Ast, Id, Pos, Token};
+use shelllint_analyzer::astlib::*;
+use shelllint_core::ast::{Ast, Id, Pos, Token};
 
 fn dsq(s: &str) -> (Ast, Id) {
     let mut ast = Ast::new();

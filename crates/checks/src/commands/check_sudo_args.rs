@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkSudoArgs`, lines 1307-1318 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_core::ast::Id;
-use shellcheck_core::astlib::{arguments, get_bsd_opts, get_literal_string};
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_core::ast::Id;
+use shelllint_core::astlib::{arguments, get_bsd_opts, get_literal_string};
 
 use crate::support::parametrised_command_checks;
 

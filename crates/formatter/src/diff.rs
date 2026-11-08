@@ -9,7 +9,7 @@
 use std::collections::BTreeMap;
 use std::io::Write;
 
-use shellcheck_core::interface::{CheckResult, Fix, FormatterOptions, SystemInterface};
+use shelllint_core::interface::{CheckResult, Fix, FormatterOptions, SystemInterface};
 
 use crate::fixer::{apply_fix, merge_fixes};
 use crate::*;
@@ -551,7 +551,7 @@ mod tests {
     }
 
     fn rep(line: i64, sc: i64, ec: i64, text: &str) -> Fix {
-        use shellcheck_core::interface::{InsertionPoint, Position, Replacement};
+        use shelllint_core::interface::{InsertionPoint, Position, Replacement};
         let pos = |c| Position { file: "f".into(), line, column: c };
         Fix {
             replacements: vec![Replacement {

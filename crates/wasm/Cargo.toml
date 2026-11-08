@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-wasm"
+name = "shelllint-wasm"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,17 +9,17 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "WebAssembly bindings for shellcheck-rust (browser playground)"
+description = "WebAssembly bindings for shelllint (browser playground)"
 publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-shellcheck-core.workspace = true
-shellcheck-checker.workspace = true
-shellcheck-checks.workspace = true
-shellcheck-formatter.workspace = true
+shelllint-core.workspace = true
+shelllint-checker.workspace = true
+shelllint-checks.workspace = true
+shelllint-formatter.workspace = true
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Must match the wasm-bindgen-cli version in scripts/build-wasm.sh.

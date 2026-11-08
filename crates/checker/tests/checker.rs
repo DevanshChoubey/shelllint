@@ -7,13 +7,13 @@
 // `#[ignore = "needs <check>"]`; that includes `null` results that would
 // pass vacuously without the check.
 
-use shellcheck_checker::editorconfig::{
+use shelllint_checker::editorconfig::{
     EditorConfigFs, editor_config_directives, get_editor_config, invalid_directive_lines, invalid_root_lines,
     is_editor_config_rejection, is_editor_config_root, matches_glob, merge_configs, parse_editor_config,
 };
-use shellcheck_checker::filepath::take_directory;
-use shellcheck_checker::{check_script, check_script_codes, decode_string, sort_messages};
-use shellcheck_core::interface::{
+use shelllint_checker::filepath::take_directory;
+use shelllint_checker::{check_script, check_script_codes, decode_string, sort_messages};
+use shelllint_core::interface::{
     CheckSpec, Code, Comment, ErrorMessage, MockedSystemInterface, Position, PositionedComment, Severity, Shell,
     SystemInterface, empty_check_spec, mock_rc_file, mocked_system_interface, new_positioned_comment,
 };
@@ -1084,7 +1084,7 @@ fn same_position_order() {
 fn checks_crate_is_linked() {
     // checkEchoWc is in the registry and runs through the pipeline
     // (oracle: wc.sh 2:5-2:22 2000).
-    let entries = shellcheck_analyzer::api::registered(shellcheck_checks::CHECKS, "node");
+    let entries = shelllint_analyzer::api::registered(shelllint_checks::CHECKS, "node");
     assert!(entries.iter().any(|e| e.module == "Analytics.hs" && e.name == "checkEchoWc"));
     assert!(check_script_codes("#!/bin/bash\nn=$(echo $foo | wc -c)\n", None).contains(&2000));
 }
@@ -1462,23 +1462,23 @@ fn merge_configs_cases() {
 // ---- fix round 1 -------------------------------------------------------------
 
 /// Parse `main` (`source lib` with `-x`) and return the result.
-fn parse_with_lib(main: &str, lib: &str) -> shellcheck_parser::ParseResult {
+fn parse_with_lib(main: &str, lib: &str) -> shelllint_parser::ParseResult {
     let sys = mocked_system_interface(files(&[("lib", lib)]));
-    let spec = shellcheck_core::interface::ParseSpec {
+    let spec = shelllint_core::interface::ParseSpec {
         filename: "main".into(),
         script: main.into(),
         check_sourced: true,
-        ..shellcheck_core::interface::new_parse_spec()
+        ..shelllint_core::interface::new_parse_spec()
     };
-    shellcheck_parser::parse_script(&sys, &spec)
+    shelllint_parser::parse_script(&sys, &spec)
 }
 
-fn find_literal(pr: &shellcheck_parser::ParseResult, s: &str) -> shellcheck_core::ast::Id {
+fn find_literal(pr: &shelllint_parser::ParseResult, s: &str) -> shelllint_core::ast::Id {
     let mut found = None;
     pr.ast.analyze(
         pr.root.unwrap(),
         &mut |id| {
-            if matches!(pr.ast.get(id), shellcheck_core::ast::Token::T_Literal(l) if l == s) {
+            if matches!(pr.ast.get(id), shelllint_core::ast::Token::T_Literal(l) if l == s) {
                 found.get_or_insert(id);
             }
         },
@@ -1494,12 +1494,12 @@ fn token_positions_use_the_sourced_file_name() {
     assert_eq!((s.file.as_str(), s.line, s.column, e.file.as_str(), e.line, e.column), ("lib", 1, 6, "lib", 1, 13));
     let (s, e) = pr.token_positions(find_literal(&pr, "mainword")).unwrap();
     assert_eq!((s.file.as_str(), s.line, s.column, e.file.as_str(), e.column), ("main", 3, 6, "main", 14));
-    assert!(pr.token_positions(shellcheck_core::ast::Id(pr.ast.len())).is_none());
+    assert!(pr.token_positions(shelllint_core::ast::Id(pr.ast.len())).is_none());
 }
 
 #[test]
 fn fix_replacements_get_the_comment_file() {
-    use shellcheck_core::interface::{Fix, Replacement, TokenComment, new_replacement};
+    use shelllint_core::interface::{Fix, Replacement, TokenComment, new_replacement};
     let pr = parse_with_lib("#!/bin/bash\nsource lib\necho mainword", "echo libword");
     let rep = |file: &str, line, column| Replacement {
         start_pos: Position { file: file.into(), line, column },
@@ -1515,14 +1515,14 @@ fn fix_replacements_get_the_comment_file() {
         pc.fix.unwrap().replacements.into_iter().map(|r| (r.start_pos.file, r.end_pos.file)).collect()
     };
     // A token in the sourced file: empty files become "lib"; a set file is kept.
-    let pc = shellcheck_checker::token_to_position(
+    let pc = shelllint_checker::token_to_position(
         &pr,
         tc(find_literal(&pr, "libword"), vec![rep("", 1, 6), rep("other", 1, 13)]),
     );
     assert_eq!(pc.start_pos.file, "lib");
     assert_eq!(files_of(pc), vec![("lib".into(), "lib".into()), ("other".into(), "other".into())]);
     // A main-file token.
-    let pc = shellcheck_checker::token_to_position(&pr, tc(find_literal(&pr, "mainword"), vec![rep("", 3, 6)]));
+    let pc = shelllint_checker::token_to_position(&pr, tc(find_literal(&pr, "mainword"), vec![rep("", 3, 6)]));
     assert_eq!(files_of(pc), vec![("main".into(), "main".into())]);
 }
 

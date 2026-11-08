@@ -3,9 +3,9 @@
 // parseForgettingContext (inSeparateContext / forgetOnFailure) and the
 // un-escaping done by readBackTicked.
 
-use shellcheck_core::ast::Token;
-use shellcheck_core::interface::Severity::ErrorC;
-use shellcheck_parser::testing::run_test_parser;
+use shelllint_core::ast::Token;
+use shelllint_core::interface::Severity::ErrorC;
+use shelllint_parser::testing::run_test_parser;
 
 #[test]
 fn forget_on_failure_drops_problems_on_failure() {

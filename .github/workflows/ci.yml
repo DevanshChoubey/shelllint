@@ -96,8 +96,8 @@ jobs:
       - name: Test (macOS / Windows)
         if: runner.os != 'Linux'
         run: |
-          cargo test --workspace --locked --exclude shellcheck-conformance -- --test-threads=2
-          cargo test -p shellcheck-conformance --locked --lib --test linkage -- --test-threads=2
+          cargo test --workspace --locked --exclude shelllint-conformance -- --test-threads=2
+          cargo test -p shelllint-conformance --locked --lib --test linkage -- --test-threads=2
 
   conformance:
     name: conformance gates
@@ -113,6 +113,6 @@ jobs:
           rustup default stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - name: report (each check against its upstream unit tests)
-        run: cargo run -q --locked -p shellcheck-conformance -- report
+        run: cargo run -q --locked -p shelllint-conformance -- report
       - name: parity (full pipeline against stored oracle codes, no regressions)
-        run: cargo run -q --locked -p shellcheck-conformance --features checker -- parity
+        run: cargo run -q --locked -p shelllint-conformance --features checker -- parity

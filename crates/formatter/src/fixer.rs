@@ -7,7 +7,7 @@
 // prefix-sum tree is replaced by a flat list with identical semantics
 // (sum of the values whose key is <= target).
 
-use shellcheck_core::interface::{Fix, InsertionPoint, Position, PositionedComment, Replacement};
+use shelllint_core::interface::{Fix, InsertionPoint, Position, PositionedComment, Replacement};
 
 fn overlap(xs: &Position, xe: &Position, ys: &Position, ye: &Position) -> bool {
     xe > ys && ye > xs

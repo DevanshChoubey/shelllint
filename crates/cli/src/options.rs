@@ -2,7 +2,7 @@
 // Port of ShellCheck shellcheck.hs (e11f964): `Flag`, `options`, `usageInfo`
 // and System.Console.GetOpt's `getOpt Permute`.
 
-use shellcheck_core::interface::{
+use shelllint_core::interface::{
     CheckSpec, ColorOption, FormatterOptions, Severity, empty_check_spec, new_formatter_options,
 };
 

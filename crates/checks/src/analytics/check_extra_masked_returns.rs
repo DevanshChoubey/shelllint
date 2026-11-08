@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkExtraMaskedReturns`, lines 5125-5201 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params, parents};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params, parents};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, StaticCheckDescription};
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::astlib::{
     basename, get_all_flags, get_bsd_opts, get_command, get_command_basename, get_literal_string, is_flag,
 };
-use shellcheck_core::data::DECLARING_COMMANDS;
-use shellcheck_core::interface::TokenComment;
+use shelllint_core::data::DECLARING_COMMANDS;
+use shelllint_core::interface::TokenComment;
 
 use crate::support::run_node_analysis;
 

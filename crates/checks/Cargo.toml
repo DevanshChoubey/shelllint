@@ -1,5 +1,5 @@
 [package]
-name = "shellcheck-checks"
+name = "shelllint-checks"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,12 +9,12 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "The ShellCheck checks (Analytics, Commands, ShellSupport) ported to Rust for shellcheck-rust"
+description = "The ShellCheck checks (Analytics, Commands, ShellSupport) ported to Rust for shelllint"
 build = "build.rs"
 
 [dependencies]
-shellcheck-core.workspace = true
-shellcheck-analyzer.workspace = true
+shelllint-core.workspace = true
+shelllint-analyzer.workspace = true
 regex = "1"
 
 [lints]

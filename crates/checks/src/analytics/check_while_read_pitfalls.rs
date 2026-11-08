@@ -2,14 +2,14 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkWhileReadPitfalls`, lines 2777-2846 (e11f964)
 
 use crate::support::{fix_with, replace_end};
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{
     get_all_flags, get_command_argv, get_command_basename, get_command_sequences,
     get_command_token_or_this, get_literal_string, get_word_parts, oversimplify,
 };
-use shellcheck_core::prelude::head_or_default;
+use shelllint_core::prelude::head_or_default;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -75,7 +75,7 @@ fn run_check(p: &Params<'_>, k: Check, flag: &str, cmd: Id) -> bool {
     }
 }
 
-fn make_fix(p: &Params<'_>, k: Fix, string: &str, cmd: Id) -> shellcheck_core::interface::Fix {
+fn make_fix(p: &Params<'_>, k: Fix, string: &str, cmd: Id) -> shelllint_core::interface::Fix {
     let target = match k {
         Fix::AddFlag => get_command_token_or_this(p.ast, cmd),
         Fix::AddRedirect => cmd,

@@ -3,13 +3,13 @@
 
 use std::collections::HashMap;
 
-use shellcheck_analyzer::analyzerlib::{DataSource, DataType, Params, make_comment};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{DataSource, DataType, Params, make_comment};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{
     e4m, get_braced_modifier, get_braced_reference, get_path, get_word_parts, oversimplify,
 };
-use shellcheck_core::interface::{Severity, TokenComment};
+use shelllint_core::interface::{Severity, TokenComment};
 
 use crate::support::do_variable_flow_analysis;
 

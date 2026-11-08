@@ -4,11 +4,11 @@
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind, CommandName};
-use shellcheck_core::ast::{Ast, Id, Token};
-use shellcheck_core::prelude::please_report;
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind, CommandName};
+use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::prelude::please_report;
+use shelllint_core::astlib::{
     arguments, get_all_flags, get_literal_string_ext, only_literal_string,
 };
 

@@ -14,7 +14,7 @@
 
 use std::collections::BTreeSet;
 
-use shellcheck_core::ast::Id;
+use shelllint_core::ast::Id;
 
 mod build;
 mod fgl;

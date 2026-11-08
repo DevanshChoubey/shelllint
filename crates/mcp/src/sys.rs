@@ -6,9 +6,9 @@
 
 use std::path::{Path, PathBuf};
 
-use shellcheck_checker::decode_string;
-use shellcheck_checker::filepath::{drop_drive, drop_file_name, is_path_separator, strip_verbatim};
-use shellcheck_core::interface::{ErrorMessage, SystemInterface};
+use shelllint_checker::decode_string;
+use shelllint_checker::filepath::{drop_drive, drop_file_name, is_path_separator, strip_verbatim};
+use shelllint_core::interface::{ErrorMessage, SystemInterface};
 
 pub struct McpSystem {
     /// Canonical paths of the inputs (the `check_file` path; none for `check_script`).

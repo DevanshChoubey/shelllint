@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkArgComparison`, lines 1363-1392 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::{
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::{
     arguments, get_leading_unquoted_string, get_literal_string, get_trailing_unquoted_literal,
 };
 

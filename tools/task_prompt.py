@@ -34,11 +34,11 @@ KINDS = {
 }
 # Where already-ported Rust helpers live, searched for `pub fn <snake_name>`.
 RUST_HELPER_FILES = [
-    ("crates/checks/src/support.rs", "shellcheck_checks::support / crate::support"),
-    ("crates/core/src/astlib.rs", "shellcheck_core::astlib"),
-    ("crates/analyzer/src/analyzerlib.rs", "shellcheck_analyzer::analyzerlib"),
-    ("crates/core/src/prelude.rs", "shellcheck_core::prelude"),
-    ("crates/core/src/regex.rs", "shellcheck_core::regex"),
+    ("crates/checks/src/support.rs", "shelllint_checks::support / crate::support"),
+    ("crates/core/src/astlib.rs", "shelllint_core::astlib"),
+    ("crates/analyzer/src/analyzerlib.rs", "shelllint_analyzer::analyzerlib"),
+    ("crates/core/src/prelude.rs", "shelllint_core::prelude"),
+    ("crates/core/src/regex.rs", "shelllint_core::regex"),
 ]
 RUNNABLE = {"node", "tree", "codes"}
 
@@ -82,7 +82,7 @@ def main():
 
     w(f"# Task {task_id}: port {', '.join(names)} ({task['module']})")
     w("")
-    w(f"You are porting {len(names)} ShellCheck check(s) to Rust, in the shellcheck-rust workspace.")
+    w(f"You are porting {len(names)} ShellCheck check(s) to Rust, in the shelllint workspace.")
     w(f"Read {GUIDE} first; it is binding. Haskell source: {HASKELL}/{task['module']} (commit {manifest['source_commit']}).")
     w(f"Oracle (tiebreaker for behaviour): printf '%s\\n' 'SCRIPT' | docker run --rm -i koalaman/shellcheck:latest -s bash -f gcc -")
     if task["phase"] == "cfg":
@@ -145,7 +145,7 @@ def main():
     w("")
     w("Each command below must print `pass N / fail 0 / blocked 0 / unported 0` with the N shown:")
     for mod, target, n in gates:
-        w(f"    cargo run -q -p shellcheck-conformance -- report --module {mod} --target {shlex_quote(target)}   # pass {n}")
+        w(f"    cargo run -q -p shelllint-conformance -- report --module {mod} --target {shlex_quote(target)}   # pass {n}")
     w("Then `cargo test --workspace` with no failures and no warnings.")
     w("")
     w("## Rules (details in the guide)")

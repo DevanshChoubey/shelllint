@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Checks/Commands.hs `checkMultipleDeclaring`, lines 1038-1046 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_core::ast::Id;
-use shellcheck_core::astlib::{arguments, get_command_token_or_this, get_unquoted_literal};
-use shellcheck_core::data::DECLARING_COMMANDS;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_core::ast::Id;
+use shelllint_core::astlib::{arguments, get_command_token_or_this, get_unquoted_literal};
+use shelllint_core::data::DECLARING_COMMANDS;
 
 use crate::support::parametrised_command_checks;
 

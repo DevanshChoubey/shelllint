@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkCommandIsUnreachable`, lines 5246-5272 (e11f964)
 
-use shellcheck_analyzer::analyzerlib::{Comments, Params};
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_analyzer::cfg_analysis::get_incoming_state;
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::get_path;
+use shelllint_analyzer::analyzerlib::{Comments, Params};
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_analyzer::cfg_analysis::get_incoming_state;
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::get_path;
 
 use crate::support::is_sourced;
 

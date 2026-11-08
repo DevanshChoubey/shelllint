@@ -22,14 +22,14 @@ use std::cell::RefCell;
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shellcheck_core::ast::{Annotation, AssignmentMode, Ast, ConditionType, Id, Token};
-use shellcheck_core::data::{FLAGS_FOR_READ, shell_for_executable};
-use shellcheck_core::interface::{
+use shelllint_core::ast::{Annotation, AssignmentMode, Ast, ConditionType, Id, Token};
+use shelllint_core::data::{FLAGS_FOR_READ, shell_for_executable};
+use shelllint_core::interface::{
     AnalysisSpec, Code, Comment, Fix, ParseSpec, Severity, Shell, TokenComment, mocked_system_interface,
     new_analysis_spec, new_parse_spec,
 };
-use shellcheck_core::regex::{match_all_submatches, matches, mk_regex};
-use shellcheck_parser::{ParseResult, parse_script};
+use shelllint_core::regex::{match_all_submatches, matches, mk_regex};
+use shelllint_parser::{ParseResult, parse_script};
 
 use crate::astlib::*;
 use crate::cfg::CfgParameters;
@@ -214,7 +214,7 @@ pub fn default_spec(_pr: &ParseResult) -> AnalysisSpec {
     AnalysisSpec {
         shell_type: None,
         check_sourced: false,
-        execution_mode: shellcheck_core::interface::ExecutionMode::Executed,
+        execution_mode: shelllint_core::interface::ExecutionMode::Executed,
         ..new_analysis_spec()
     }
 }

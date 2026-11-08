@@ -2,9 +2,9 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 1108-1611:
 // words, quotes, backticks, globs, extglobs, escapes, brace expansions.
 
-use shellcheck_core::ast::{Id, Token};
-use shellcheck_core::astlib::only_literal_string;
-use shellcheck_core::interface::Severity::{ErrorC, InfoC, WarningC};
+use shelllint_core::ast::{Id, Token};
+use shelllint_core::astlib::only_literal_string;
+use shelllint_core::interface::Severity::{ErrorC, InfoC, WarningC};
 
 use crate::area_spacing::{QUOTABLE_CHARS, UNICODE_DOUBLE_QUOTES, UNICODE_SINGLE_QUOTES};
 use crate::engine::{Input, P, PR, SourcePos, is_alpha};

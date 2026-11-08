@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Embeddable ShellCheck linter.
 //!
-//! This crate is the stable library facade over the shellcheck-rust
+//! This crate is the stable library facade over the shelllint
 //! pipeline. Internal crates (parser, analyzer, formatter, ...) are not
 //! re-exported; everything you need is in this crate's root.
 //!
 //! # Quick start
 //!
 //! ```
-//! use shellcheck::{Linter, Severity, Shell};
+//! use shelllint::{Linter, Severity, Shell};
 //!
 //! let linter = Linter::builder()
 //!     .shell(Shell::Bash)
@@ -60,15 +60,15 @@ use std::io;
 use std::path::Path;
 use std::sync::OnceLock;
 
-use shellcheck_analyzer::api::CheckEntry;
-use shellcheck_checker::{check_script, decode_string};
-use shellcheck_checks::CHECKS;
-use shellcheck_core::interface::{
+use shelllint_analyzer::api::CheckEntry;
+use shelllint_checker::{check_script, decode_string};
+use shelllint_checks::CHECKS;
+use shelllint_core::interface::{
     CheckSpec, Fix as CoreFix, InsertionPoint as CoreInsertionPoint, NewSystemInterface, PositionedComment,
     Severity as CoreSeverity, Shell as CoreShell, empty_check_spec,
 };
-use shellcheck_formatter::fixer::{apply_fix, merge_fixes};
-use shellcheck_formatter::{haskell_lines, make_non_virtual};
+use shelllint_formatter::fixer::{apply_fix, merge_fixes};
+use shelllint_formatter::{haskell_lines, make_non_virtual};
 
 /// The shell dialect a script is written in.
 ///
@@ -241,7 +241,7 @@ impl Fix {
     /// that was checked.
     ///
     /// ```
-    /// use shellcheck::{Linter, apply_fixes};
+    /// use shelllint::{Linter, apply_fixes};
     ///
     /// let src = "rm $file\n";
     /// let diags = Linter::new().check_str(src);
@@ -259,7 +259,7 @@ impl Fix {
             return self.raw.clone();
         }
         let lines = haskell_lines(src);
-        let virt = |p: &shellcheck_core::interface::Position| {
+        let virt = |p: &shelllint_core::interface::Position| {
             let mut p = p.clone();
             let line = usize::try_from(p.line - 1).ok().and_then(|i| lines.get(i));
             if let (Some(line), true) = (line, p.column > 1) {
@@ -282,7 +282,7 @@ impl Fix {
                 .raw
                 .replacements
                 .iter()
-                .map(|r| shellcheck_core::interface::Replacement {
+                .map(|r| shelllint_core::interface::Replacement {
                     start_pos: virt(&r.start_pos),
                     end_pos: virt(&r.end_pos),
                     ..r.clone()
@@ -313,7 +313,7 @@ impl From<FixRepr> for Fix {
         let replacements = r
             .replacements
             .iter()
-            .map(|x| shellcheck_core::interface::Replacement {
+            .map(|x| shelllint_core::interface::Replacement {
                 start_pos: pos(x.line, x.column),
                 end_pos: pos(x.end_line, x.end_column),
                 string: x.replacement.clone(),
@@ -329,8 +329,8 @@ impl From<FixRepr> for Fix {
 }
 
 #[cfg(feature = "serde")]
-fn pos(line: usize, column: usize) -> shellcheck_core::interface::Position {
-    shellcheck_core::interface::Position { file: String::new(), line: line as i64, column: column as i64 }
+fn pos(line: usize, column: usize) -> shelllint_core::interface::Position {
+    shelllint_core::interface::Position { file: String::new(), line: line as i64, column: column as i64 }
 }
 
 /// Apply every fix in `diagnostics` to `src`, as `shellcheck -f diff` does.
@@ -340,7 +340,7 @@ fn pos(line: usize, column: usize) -> shellcheck_core::interface::Position {
 /// fix are ignored. Pass the diagnostics produced for exactly `src`.
 ///
 /// ```
-/// use shellcheck::{Linter, apply_fixes};
+/// use shelllint::{Linter, apply_fixes};
 ///
 /// let src = "#!/bin/sh\nfor f in $(ls); do echo $f; done\n";
 /// let diags = Linter::new().check_str(src);
@@ -394,7 +394,7 @@ pub struct CheckInfo {
 /// are not listed.
 ///
 /// ```
-/// let checks = shellcheck::list_checks();
+/// let checks = shelllint::list_checks();
 /// assert!(checks.iter().any(|c| c.name == "require-variable-braces"));
 /// ```
 pub fn list_checks() -> &'static [CheckInfo] {
@@ -498,7 +498,7 @@ impl LinterBuilder {
 ///
 /// ```
 /// fn assert_send_sync<T: Send + Sync>() {}
-/// assert_send_sync::<shellcheck::Linter>();
+/// assert_send_sync::<shelllint::Linter>();
 /// ```
 #[derive(Clone, Debug)]
 pub struct Linter {
@@ -528,7 +528,7 @@ impl Linter {
     /// extension cannot select the shell.
     ///
     /// ```
-    /// use shellcheck::Linter;
+    /// use shelllint::Linter;
     ///
     /// let diags = Linter::new().check_str("echo $1\n");
     /// assert!(diags.iter().any(|d| d.code == 2086));

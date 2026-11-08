@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 use std::sync::OnceLock;
 
 use serde_json::Value;
-use shellcheck_core::interface::CheckDescription;
+use shelllint_core::interface::CheckDescription;
 
 const CODES_JSON: &str = include_str!("../data/codes.json");
 
@@ -89,7 +89,7 @@ fn build() -> Vec<Entry> {
             },
         );
     }
-    let optional: Vec<CheckDescription> = shellcheck_checker::optional_checks();
+    let optional: Vec<CheckDescription> = shelllint_checker::optional_checks();
     for d in optional {
         for &code in &d.id {
             let code = u32::try_from(code).expect("SC codes are positive");

@@ -23,8 +23,8 @@ fi
 
 # 2. Rust release binary. Cargo runs under the shared lock and memory cap
 #    (feature-common rules).
-(ulimit -v 8000000; timeout 1200 flock /tmp/shellcheck-rust-cargo.lock nice cargo build --release -p shellcheck-rust -j 4)
-export RS=$CARGO_TARGET_DIR/release/shellcheck-rust
+(ulimit -v 8000000; timeout 1200 flock /tmp/shellcheck-rust-cargo.lock nice cargo build --release -p shelllint -j 4)
+export RS=$CARGO_TARGET_DIR/release/shelllint
 
 # 3. Pinned repos.
 bench/fetch.sh

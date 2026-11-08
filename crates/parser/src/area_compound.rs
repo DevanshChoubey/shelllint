@@ -3,8 +3,8 @@
 // if/while/until/for/select/case, functions, coproc, subshells, brace groups,
 // bats tests, compound commands and lists.
 
-use shellcheck_core::ast::{CaseType, FunctionKeyword, FunctionParentheses, Id, Token};
-use shellcheck_core::interface::Severity::ErrorC;
+use shelllint_core::ast::{CaseType, FunctionKeyword, FunctionParentheses, Id, Token};
+use shelllint_core::interface::Severity::ErrorC;
 
 use crate::engine::{P, PR, is_space};
 use crate::state::IncompleteInterval;

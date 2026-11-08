@@ -27,13 +27,13 @@ body:
     id: command
     attributes:
       label: Command line
-      placeholder: shellcheck-rust -f json1 script.sh
+      placeholder: shelllint -f json1 script.sh
     validations:
       required: true
   - type: textarea
     id: ours
     attributes:
-      label: shellcheck-rust output
+      label: shelllint output
       description: The full output, including any panic message, and the exit code (`echo $?`).
       render: text
     validations:
@@ -47,8 +47,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: shellcheck-rust version
-      description: Output of `shellcheck-rust --version`, or the commit hash.
+      label: shelllint version
+      description: Output of `shelllint --version`, or the commit hash.
     validations:
       required: true
   - type: input

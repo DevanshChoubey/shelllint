@@ -3,12 +3,12 @@
 
 use std::collections::HashMap;
 
-use shellcheck_analyzer::analyzerlib::{
+use shelllint_analyzer::analyzerlib::{
     Comments, Params, Scope, StackData, VariableState, is_true_assignment_source,
 };
-use shellcheck_analyzer::api::{CheckEntry, CheckKind};
-use shellcheck_core::ast::{AssignmentMode, Id, Token};
-use shellcheck_core::interface::TokenComment;
+use shelllint_analyzer::api::{CheckEntry, CheckKind};
+use shelllint_core::ast::{AssignmentMode, Id, Token};
+use shelllint_core::interface::TokenComment;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",

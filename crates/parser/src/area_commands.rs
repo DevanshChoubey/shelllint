@@ -2,9 +2,9 @@
 // Port of ShellCheck src/ShellCheck/Parser.hs (e11f964), lines 2054-2438:
 // separators, simple commands, `source`, pipelines, and/or lists, terms.
 
-use shellcheck_core::ast::{Annotation, Ast, Id, Token};
-use shellcheck_core::astlib::{get_literal_string, get_word_parts, is_string_expansion};
-use shellcheck_core::interface::Severity::{ErrorC, InfoC, WarningC};
+use shelllint_core::ast::{Annotation, Ast, Id, Token};
+use shelllint_core::astlib::{get_literal_string, get_word_parts, is_string_expansion};
+use shelllint_core::interface::Severity::{ErrorC, InfoC, WarningC};
 
 use crate::engine::{P, PR, SourcePos, is_alpha};
 use crate::state::Context;

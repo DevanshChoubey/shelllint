@@ -1,14 +1,14 @@
-# MCP server: `shellcheck-rust-mcp`
+# MCP server: `shelllint-mcp`
 
-`shellcheck-rust-mcp` lets AI coding agents lint shell scripts with the
-shellcheck-rust port. It speaks the Model Context Protocol over stdio, so any
+`shelllint-mcp` lets AI coding agents lint shell scripts with the
+shelllint port. It speaks the Model Context Protocol over stdio, so any
 MCP client can start it as a subprocess.
 
 ## Build
 
 ```sh
-cargo build --release -p shellcheck-mcp
-# binary: target/release/shellcheck-rust-mcp (use an absolute path below)
+cargo build --release -p shelllint-mcp
+# binary: target/release/shelllint-mcp (use an absolute path below)
 ```
 
 ## Tools
@@ -39,14 +39,14 @@ can act on. Only unknown tools and malformed JSON-RPC are protocol errors.
 
 ## Client configuration
 
-Replace `/abs/path/to/shellcheck-rust-mcp` with the built binary's absolute path.
+Replace `/abs/path/to/shelllint-mcp` with the built binary's absolute path.
 
 ### Claude Code
 
 ```sh
-claude mcp add --transport stdio shellcheck -- /abs/path/to/shellcheck-rust-mcp
+claude mcp add --transport stdio shellcheck -- /abs/path/to/shelllint-mcp
 # for every project on this machine:
-claude mcp add --transport stdio --scope user shellcheck -- /abs/path/to/shellcheck-rust-mcp
+claude mcp add --transport stdio --scope user shellcheck -- /abs/path/to/shelllint-mcp
 ```
 
 ### Claude Desktop
@@ -58,7 +58,7 @@ restart Claude Desktop:
 {
   "mcpServers": {
     "shellcheck": {
-      "command": "/abs/path/to/shellcheck-rust-mcp",
+      "command": "/abs/path/to/shelllint-mcp",
       "args": []
     }
   }
@@ -74,7 +74,7 @@ project):
 {
   "mcpServers": {
     "shellcheck": {
-      "command": "/abs/path/to/shellcheck-rust-mcp",
+      "command": "/abs/path/to/shelllint-mcp",
       "args": []
     }
   }
@@ -91,7 +91,7 @@ the command palette:
   "servers": {
     "shellcheck": {
       "type": "stdio",
-      "command": "/abs/path/to/shellcheck-rust-mcp",
+      "command": "/abs/path/to/shelllint-mcp",
       "args": []
     }
   }
@@ -104,7 +104,7 @@ the command palette:
 printf '%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"check_script","arguments":{"script":"rm $1\n"}}}' \
-  | /abs/path/to/shellcheck-rust-mcp
+  | /abs/path/to/shelllint-mcp
 ```
 
 ## Maintenance

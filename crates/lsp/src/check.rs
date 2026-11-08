@@ -2,8 +2,8 @@
 //! Running the checker on a buffer and turning its comments into LSP data.
 
 use lsp_types::{DiagnosticSeverity, Position, Range, TextEdit};
-use shellcheck_checker::check_script;
-use shellcheck_core::interface::{CheckSpec, ParseSpec, PositionedComment, Severity, Shell, empty_check_spec};
+use shelllint_checker::check_script;
+use shelllint_core::interface::{CheckSpec, ParseSpec, PositionedComment, Severity, Shell, empty_check_spec};
 
 use crate::config::Settings;
 use crate::position::{split_lines, to_lsp};
@@ -109,13 +109,13 @@ struct Stmt {
 /// into words, so heredocs, quoted strings and command substitutions are
 /// opaque: a diagnostic inside them belongs to the enclosing statement.
 struct Collector<'a> {
-    ast: &'a shellcheck_core::ast::Ast,
+    ast: &'a shelllint_core::ast::Ast,
     lines: &'a [&'a str],
     out: Vec<Stmt>,
 }
 
 impl Collector<'_> {
-    fn lsp(&self, p: shellcheck_core::ast::Pos) -> Position {
+    fn lsp(&self, p: shelllint_core::ast::Pos) -> Position {
         to_lsp(self.lines, p.line as i64, p.column as i64)
     }
 
@@ -137,7 +137,7 @@ impl Collector<'_> {
     /// A list of statements: each that starts its own line is a candidate. A
     /// directive covers only the statement after it, so `cd d; rm $x` offers
     /// nothing for `rm`.
-    fn list(&mut self, ids: &[shellcheck_core::ast::Id]) {
+    fn list(&mut self, ids: &[shelllint_core::ast::Id]) {
         for &id in ids {
             let (s, e) = self.ast.span(id);
             let start = self.lsp(s);
@@ -151,11 +151,7 @@ impl Collector<'_> {
 
     /// Furthest end of the token or any descendant: a heredoc body lies
     /// beyond the span of the command that owns it.
-    fn subtree_end(
-        &self,
-        id: shellcheck_core::ast::Id,
-        mut end: shellcheck_core::ast::Pos,
-    ) -> shellcheck_core::ast::Pos {
+    fn subtree_end(&self, id: shelllint_core::ast::Id, mut end: shelllint_core::ast::Pos) -> shelllint_core::ast::Pos {
         let mut stack = vec![id];
         while let Some(i) = stack.pop() {
             end = end.max(self.ast.span(i).1);
@@ -166,8 +162,8 @@ impl Collector<'_> {
 
     /// Descend into the statement structure of `id` without treating `id`
     /// itself as a list item.
-    fn structure(&mut self, id: shellcheck_core::ast::Id) {
-        use shellcheck_core::ast::Token::*;
+    fn structure(&mut self, id: shelllint_core::ast::Id) {
+        use shelllint_core::ast::Token::*;
         match self.ast.get(id).clone() {
             T_Script(_, l) | T_BraceGroup(l) | T_Subshell(l) => self.list(&l),
             T_Annotation(_, c)
@@ -235,7 +231,7 @@ pub fn disable_edits(text: &str, filename: &str, dialect: Option<Shell>, pos: Po
         ignore_rc: true,
         shell_type_override: dialect,
     };
-    let Ok(parsed) = std::panic::catch_unwind(|| shellcheck_parser::parse_script(&LspSystem, &spec)) else {
+    let Ok(parsed) = std::panic::catch_unwind(|| shelllint_parser::parse_script(&LspSystem, &spec)) else {
         return vec![];
     };
     let Some(root) = parsed.root else { return vec![] };

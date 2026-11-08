@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Questions and ideas
-    url: https://github.com/DevanshChoubey/shellcheck-rust/discussions
-    about: Ask questions or discuss ideas about shellcheck-rust.
+    url: https://github.com/DevanshChoubey/shelllint/discussions
+    about: Ask questions or discuss ideas about shelllint.
   - name: What a warning means (upstream ShellCheck wiki)
     url: https://www.shellcheck.net/wiki/
     about: The SCxxxx wiki pages belong to the upstream ShellCheck project. They describe ShellCheck, not this port.
@@ -10,5 +10,5 @@ contact_links:
     url: https://github.com/koalaman/shellcheck/issues
     about: This port follows upstream exactly. Propose new checks upstream. Please do not report bugs in this port there.
   - name: Security vulnerability
-    url: https://github.com/DevanshChoubey/shellcheck-rust/security/advisories/new
+    url: https://github.com/DevanshChoubey/shelllint/security/advisories/new
     about: Report security issues privately. See SECURITY.md.
