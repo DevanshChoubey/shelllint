@@ -35,6 +35,8 @@ pub struct Options {
     pub stdin_filename: Option<String>,
     /// `--output=FORMAT:PATH` (extension), repeatable: (format, path).
     pub outputs: Vec<(String, String)>,
+    /// `--cache-dir=PATH` (extension): where to keep reusable results.
+    pub cache_dir: Option<String>,
 }
 
 pub fn default_options() -> Options {
@@ -54,6 +56,7 @@ pub fn default_options() -> Options {
         fail_fast: false,
         stdin_filename: None,
         outputs: vec![],
+        cache_dir: None,
     }
 }
 
@@ -148,6 +151,7 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["stdin-filename"], Req("stdin-filename"), "PATH", "Report standard input ('-') as PATH"),
         o("", &["output"], Req("output"), "FORMAT:PATH", "Also write a FORMAT report to PATH (repeatable)"),
         o("", &["completions"], Req("completions"), "SHELL", "Print a shell completion script (bash, zsh, fish)"),
+        o("", &["cache-dir"], Req("cache-dir"), "PATH", "Reuse results for unchanged files, kept in PATH"),
     ]
 }
 

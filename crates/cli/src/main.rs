@@ -3,6 +3,7 @@
 
 mod dump_ast;
 mod completions;
+mod cache;
 mod fix;
 mod list_checks;
 mod oom;
@@ -382,7 +383,10 @@ fn process_file(
         Some(shell_inference::Decision::Use(sh)) => spec.shell_type_override = Some(sh),
         None => {}
     }
-    let result = check_script_owned(sys, spec);
+    let result = match &options.cache_dir {
+        Some(dir) if filename != "-" => cache::check_cached(sys, dir, options, spec),
+        _ => check_script_owned(sys, spec),
+    };
     format.on_result(&result, sys, out);
     let findings = tally.record(&result);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
@@ -538,6 +542,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
                 return Err(Status::SyntaxFailure);
             }
         },
+        "cache-dir" => options.cache_dir = Some(val.clone()),
         // These flags are handled specially in 'process'
         "format" | "files-from" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),
