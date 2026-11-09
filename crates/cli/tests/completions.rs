@@ -67,7 +67,7 @@ fn bash_has_flags_and_values() {
     }
     assert!(s.contains("-s|--shell)"));
     assert!(s.contains("sh bash dash ksh busybox"));
-    assert!(s.contains("checkstyle diff gcc json json1 quiet tty"));
+    assert!(s.contains("checkstyle diff gcc github json json1 quiet sarif tty"));
     assert!(s.contains("error warning info style"));
     assert!(s.contains("auto always never"));
 }

@@ -646,8 +646,10 @@ fn abbreviations_keep_their_upstream_meaning() {
     assert_eq!(run(&["--in=SC2086", "-"], CLEAN).code, 0);
     // "--c" is ambiguous upstream, between exactly these two.
     let o = run(&["--c", "-"], CLEAN);
-    assert!(o.stderr.contains("--check-sourced") && o.stderr.contains("--color"), "{}", o.stderr);
-    assert!(!o.stderr.contains("--cache-dir"), "{}", o.stderr);
+    // The full usage text follows; only the candidates matter here.
+    let candidates = o.stderr.split("\n\n").next().unwrap();
+    assert!(candidates.contains("--check-sourced") && candidates.contains("--color"), "{}", o.stderr);
+    assert!(!candidates.contains("--cache-dir"), "{}", o.stderr);
     // Abbreviations ShellCheck has no use for still reach extensions.
     assert_eq!(run(&["--verb", "-"], CLEAN).code, 0);
 }
