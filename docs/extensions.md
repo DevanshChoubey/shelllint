@@ -146,7 +146,7 @@ shelllint --enable=prefer-local,unused-function script.sh
 
 ## Containers
 
-From the next release, an Alpine image with a shell is published alongside the
+An Alpine image with a shell is published alongside the
 scratch image, which suits CI systems like GitLab that need a shell:
 
 ```yaml
