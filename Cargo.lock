@@ -431,7 +431,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "libc",
  "shelllint-analyzer",
@@ -442,7 +442,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint-analyzer"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "regex",
  "rpds",
@@ -452,7 +452,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint-checker"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "criterion",
  "shelllint-analyzer",
@@ -463,7 +463,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint-checks"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "regex",
  "shelllint-analyzer",
@@ -472,7 +472,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint-conformance"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -486,14 +486,14 @@ dependencies = [
 
 [[package]]
 name = "shelllint-core"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "regex",
 ]
 
 [[package]]
 name = "shelllint-formatter"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "serde_json",
  "shelllint-core",
@@ -501,7 +501,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint-lib"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -514,7 +514,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint-lsp"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
@@ -528,7 +528,7 @@ dependencies = [
 
 [[package]]
 name = "shelllint-mcp"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "serde_json",
  "shelllint-analyzer",
@@ -539,14 +539,14 @@ dependencies = [
 
 [[package]]
 name = "shelllint-parser"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "shelllint-core",
 ]
 
 [[package]]
 name = "shelllint-wasm"
-version = "0.0.1"
+version = "0.1.0"
 dependencies = [
  "serde",
  "serde_json",

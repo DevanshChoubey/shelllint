@@ -1,6 +1,6 @@
 {
   "name": "@shelllint/win32-x64",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "shelllint prebuilt binary for win32-x64 (used via the shelllint package)",
   "license": "GPL-3.0-or-later",
   "repository": {

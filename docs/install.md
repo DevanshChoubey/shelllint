@@ -19,7 +19,7 @@ that fits your setup; all of them put the same binary on your `PATH`.
 Platform support for the prebuilt binaries: Linux x86_64 and aarch64 (static
 musl, runs on any distro), macOS x86_64 and Apple Silicon, Windows x86_64 (MSVC).
 
-Replace `0.0.1` with the
+Replace `0.1.0` with the
 release you want.
 
 ## Release binary
@@ -27,7 +27,7 @@ release you want.
 Every release attaches one archive per target plus a `SHA256SUMS` file:
 
 ```sh
-V=0.0.1
+V=0.1.0
 T=x86_64-unknown-linux-musl          # or aarch64-unknown-linux-musl,
                                      # x86_64-apple-darwin, aarch64-apple-darwin
 curl -fsSLO "https://github.com/DevanshChoubey/shelllint/releases/download/v$V/shelllint-v$V-$T.tar.gz"
@@ -46,8 +46,8 @@ The image is built `FROM scratch` around a static musl binary (a few MB, no
 shell, no libc). It takes the same arguments as the binary:
 
 ```sh
-docker run --rm -i ghcr.io/devanshchoubey/shelllint:0.0.1 -f gcc - < script.sh
-docker run --rm -v "$PWD:/src" -w /src ghcr.io/devanshchoubey/shelllint:0.0.1 -f tty scripts/*.sh
+docker run --rm -i ghcr.io/devanshchoubey/shelllint:0.1.0 -f gcc - < script.sh
+docker run --rm -v "$PWD:/src" -w /src ghcr.io/devanshchoubey/shelllint:0.1.0 -f tty scripts/*.sh
 ```
 
 To build it locally from a checkout:
@@ -137,7 +137,7 @@ the workspace `Cargo.lock`.
 # .pre-commit-config.yaml
 repos:
   - repo: https://github.com/DevanshChoubey/shelllint
-    rev: v0.0.1
+    rev: v0.1.0
     hooks:
       - id: shelllint          # language: rust, builds with cargo
       # - id: shelllint-docker # language: docker_image, needs Docker
@@ -151,7 +151,7 @@ flags with `args: [--severity=warning]` in your config.
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: DevanshChoubey/shelllint@v0.0.1
+- uses: DevanshChoubey/shelllint@v0.1.0
   with:
     paths: "scripts/**/*.sh install.sh"
     severity: warning

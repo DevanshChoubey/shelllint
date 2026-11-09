@@ -5,7 +5,7 @@
 
 rustPlatform.buildRustPackage {
   pname = "shelllint";
-  version = "0.0.1";
+  version = "0.1.0";
 
   src = lib.cleanSource ../..;
   cargoLock.lockFile = ../../Cargo.lock;
