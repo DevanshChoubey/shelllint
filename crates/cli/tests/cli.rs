@@ -70,6 +70,7 @@ const EXTENSION_HELP: &str = concat!(
     "                      --fix                      Apply all auto-fixes to FILES in place, then report what is left\n",
     "                      --dry-run                  With --fix, print the fixes as a diff (like -f diff) instead\n",
     "                      --verbose                  Print the file and the .shellcheckrc used for it to stderr\n",
+    "                      --list-checks[=text|json]  List the optional checks and what is known about codes\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -161,7 +162,7 @@ fn every_help_flag_is_accepted() {
             let name = tok.split(['=', '[']).next().unwrap().trim_end_matches(',');
             assert!(
                 cases.iter().any(|(f, a)| *f == name || a.iter().any(|x| x.starts_with(name)))
-                    || ["-V", "--version", "--help", "--list-optional"].contains(&name),
+                    || ["-V", "--version", "--help", "--list-optional", "--list-checks"].contains(&name),
                 "flag {} not covered",
                 name
             );

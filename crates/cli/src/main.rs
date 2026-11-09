@@ -2,6 +2,7 @@
 // Port of ShellCheck shellcheck.hs (e11f964)
 
 mod fix;
+mod list_checks;
 mod oom;
 mod options;
 mod sys;
@@ -329,6 +330,10 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         }
         "list-optional" => {
             print_optional();
+            return Err(Status::NoProblems);
+        }
+        "list-checks" => {
+            list_checks::print(val)?;
             return Err(Status::NoProblems);
         }
         "help" => {
