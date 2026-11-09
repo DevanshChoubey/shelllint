@@ -43,8 +43,15 @@ pub struct CheckSpec {
     pub included_warnings: Option<Vec<Code>>,
     pub shell_type_override: Option<Shell>,
     pub min_severity: Severity,
+    // DIVERGENCE: not in upstream. True when `min_severity` was given
+    // explicitly (the `--severity` flag); only then does it win over a
+    // `severity=` key in `.shellcheckrc` or a file-level directive.
+    pub min_severity_explicit: bool,
     pub extended_analysis: Option<bool>,
     pub optional_checks: Vec<String>,
+    // DIVERGENCE: not in upstream. Variable names (a trailing `*` is a prefix
+    // glob) to treat as assigned for SC2154, from `--external-vars`.
+    pub external_vars: Vec<String>,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -67,8 +74,10 @@ pub fn empty_check_spec() -> CheckSpec {
         included_warnings: None,
         shell_type_override: None,
         min_severity: Severity::StyleC,
+        min_severity_explicit: false,
         extended_analysis: None,
         optional_checks: vec![],
+        external_vars: vec![],
     }
 }
 
@@ -116,6 +125,8 @@ pub struct AnalysisSpec {
     pub check_sourced: bool,
     pub optional_checks: Vec<String>,
     pub extended_analysis: Option<bool>,
+    // DIVERGENCE: not in upstream; see `CheckSpec::external_vars`.
+    pub external_vars: Vec<String>,
 }
 
 pub fn new_analysis_spec() -> AnalysisSpec {
@@ -126,6 +137,7 @@ pub fn new_analysis_spec() -> AnalysisSpec {
         check_sourced: false,
         optional_checks: vec![],
         extended_analysis: None,
+        external_vars: vec![],
     }
 }
 

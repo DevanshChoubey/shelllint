@@ -200,6 +200,13 @@ pub fn options() -> Vec<OptDescr> {
             "Report only findings on lines changed since REF (default HEAD)",
         ),
         o("", &["strict-rc"], No("strict-rc"), "", "Make unknown .shellcheckrc keys, bad shell values and an unreadable --rcfile errors"),
+        o(
+            "",
+            &["external-vars"],
+            Req("external-vars"),
+            "VARS",
+            "Treat these variables as assigned for SC2154 (a trailing * is a prefix glob)",
+        ),
     ]
 }
 

@@ -123,6 +123,9 @@ pub struct Params<'a> {
     /// synthetic `builtin X` commands (see `api::check_command`). Cloning
     /// `Params` gives the clone an empty one.
     pub builtin_scratch: BuiltinScratch,
+    /// Not in Haskell: `external-vars` names (a trailing `*` is a prefix
+    /// glob) that SC2154 treats as assigned.
+    pub external_vars: Vec<String>,
 }
 
 /// `variableFlow :: [StackData]`
@@ -328,6 +331,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
         spec.extended_analysis.or_else(|| get_extended_analysis_directive(ast, root)).unwrap_or(true);
     let shell_type = spec.shell_type.unwrap_or_else(|| determine_shell(ast, spec.fallback_shell, root));
     let mut params = Params {
+        external_vars: spec.external_vars.clone(),
         ast,
         root,
         shell_type,
@@ -474,6 +478,13 @@ pub fn determine_shell(ast: &Ast, fallback_shell: Option<Shell>, t: Id) -> Shell
                 .find_map(|a| match a {
                     Annotation::ShellOverride(s) => Some(s.clone()),
                     _ => None,
+                })
+                // DIVERGENCE: the shell of a nix-shell shebang's `-i`.
+                .or_else(|| {
+                    annotations.iter().find_map(|a| match a {
+                        Annotation::ShellFromNix(s) => Some(s.clone()),
+                        _ => None,
+                    })
                 })
                 .unwrap_or_else(|| from_shebang(*s)),
             _ => panic!("determineShell: unexpected root"),

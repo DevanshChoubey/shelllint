@@ -21,6 +21,7 @@ use std::process::exit;
 
 use shelllint_checker::{check_script_owned, optional_checks};
 use shelllint_core::data::{SHELLCHECK_VERSION, shell_for_executable};
+use shelllint_core::extras::{expand_home, is_external_var_pattern};
 use shelllint_core::interface::{CheckSpec, ColorOption, Severity, SystemInterface};
 use shelllint_formatter::{Formatter, by_name, tty::WIKI_LINK};
 
@@ -534,9 +535,12 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
                 ],
             )?;
         }
-        "source-path" => options.source_paths.extend(split_search_path(val)),
+        // DIVERGENCE: a leading `~`, `$HOME` or `${HOME}` is expanded.
+        "source-path" => options.source_paths.extend(split_search_path(val).iter().map(|p| expand_home(p))),
         "sourced" => options.check_spec.check_sourced = true,
         "severity" => {
+            // DIVERGENCE: remembered so that it beats `severity=` in an rc file.
+            options.check_spec.min_severity_explicit = true;
             options.check_spec.min_severity = parse_enum(
                 "severity",
                 val,
@@ -554,6 +558,15 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "enable" => options.check_spec.optional_checks.extend(split(',', val)),
         "extended-analysis" => options.check_spec.extended_analysis = Some(parse_bool(val)?),
         // Extensions beyond ShellCheck.
+        "external-vars" => {
+            for name in split(',', val).into_iter().filter(|s| !s.is_empty()) {
+                if !is_external_var_pattern(&name) {
+                    print_err(&format!("Invalid variable name for --external-vars: {}", name));
+                    return Err(Status::SyntaxFailure);
+                }
+                options.check_spec.external_vars.push(name);
+            }
+        }
         "fix" => options.fix = true,
         "dry-run" => options.dry_run = true,
         "verbose" => options.verbose = true,

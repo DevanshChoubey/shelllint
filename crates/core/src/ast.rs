@@ -184,6 +184,14 @@ pub enum Annotation {
     SourcePath(String),
     ExternalSources(bool),
     ExtendedAnalysis(bool),
+    // DIVERGENCE: the variants below are not in upstream.
+    /// `severity=` (rc file or file-level directive)
+    MinSeverity(crate::interface::Severity),
+    /// One name of `external-vars=` (a trailing `*` is a prefix glob)
+    ExternalVar(String),
+    /// The shell named by `#! nix-shell -i <shell>` after a nix-shell shebang.
+    /// Weaker than `ShellOverride`.
+    ShellFromNix(String),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
