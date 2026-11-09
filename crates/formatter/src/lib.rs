@@ -19,6 +19,7 @@ pub mod github;
 pub mod json;
 pub mod json1;
 pub mod quiet;
+pub mod sarif;
 pub mod tty;
 
 pub trait Formatter {
@@ -45,6 +46,7 @@ pub fn by_name(name: &str, opts: FormatterOptions) -> Option<Box<dyn Formatter>>
         "checkstyle" => Some(Box::new(checkstyle::format())),
         "diff" => Some(Box::new(diff::format(opts))),
         "quiet" => Some(Box::new(quiet::format(opts))),
+        "sarif" => Some(Box::new(sarif::format())),
         _ => None,
     }
 }

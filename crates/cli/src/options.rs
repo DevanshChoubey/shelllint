@@ -31,6 +31,10 @@ pub struct Options {
     pub summary: bool,
     /// `--fail-fast` (extension): stop after the first file with findings.
     pub fail_fast: bool,
+    /// `--stdin-filename=PATH` (extension): the name `-` is reported as.
+    pub stdin_filename: Option<String>,
+    /// `--output=FORMAT:PATH` (extension), repeatable: (format, path).
+    pub outputs: Vec<(String, String)>,
 }
 
 pub fn default_options() -> Options {
@@ -48,13 +52,15 @@ pub fn default_options() -> Options {
         dump_ast: false,
         summary: false,
         fail_fast: false,
+        stdin_filename: None,
+        outputs: vec![],
     }
 }
 
 pub const USAGE_HEADER: &str = "Usage: shellcheck [OPTIONS...] FILES...";
 
 /// The formats shellcheck.hs registers (`Map.keys`, so sorted).
-pub const FORMAT_NAMES: [&str; 7] = ["checkstyle", "diff", "gcc", "json", "json1", "quiet", "tty"];
+pub const FORMAT_NAMES: [&str; 8] = ["checkstyle", "diff", "gcc", "json", "json1", "quiet", "sarif", "tty"];
 
 #[derive(Clone, Copy)]
 pub enum ArgDescr {
@@ -139,11 +145,13 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["dump-ast"], No("dump-ast"), "", "Print each file's parsed AST as JSON instead of the report"),
         o("", &["summary"], No("summary"), "", "Print finding counts and files checked to stderr after the report"),
         o("", &["fail-fast"], No("fail-fast"), "", "Stop after the first file with findings"),
+        o("", &["stdin-filename"], Req("stdin-filename"), "PATH", "Report standard input ('-') as PATH"),
+        o("", &["output"], Req("output"), "FORMAT:PATH", "Also write a FORMAT report to PATH (repeatable)"),
     ]
 }
 
 // "Output format (" ++ formatList ++ ")"
-const FORMAT_DESC: &str = "Output format (checkstyle, diff, gcc, json, json1, quiet, tty)";
+const FORMAT_DESC: &str = "Output format (checkstyle, diff, gcc, json, json1, quiet, sarif, tty)";
 
 /// GetOpt `usageInfo`
 pub fn usage_info(header: &str, opts: &[&OptDescr]) -> String {

@@ -12,6 +12,7 @@ mod sys;
 mod verbose;
 
 use std::io::Write;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::process::exit;
 
 use shelllint_checker::{check_script_owned, optional_checks};
@@ -154,7 +155,7 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
     }
 
     let files_from = get_options(flags, "files-from");
-    let mut all_files = vec![];
+    let mut all_files: Vec<String> = vec![];
     for path in &files_from {
         all_files.extend(read_files_from(path)?);
     }
@@ -165,18 +166,26 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
         verify_files(&all_files)?;
     }
 
-    let format = get_option(flags, "format").unwrap_or("tty");
-    let formatter = match by_name(format, options.formatter_options.clone()) {
-        Some(f) => f,
-        None => {
-            print_err(&format!("Unknown format {}", format));
-            print_err("Supported formats:");
-            for name in options::FORMAT_NAMES {
-                print_err(&format!("  {}", name));
-            }
-            return Err(Status::SupportFailure);
+    if let Some(name) = &options.stdin_filename {
+        if !all_files.iter().any(|f| f == "-") {
+            print_err("--stdin-filename can only be used together with '-' (standard input) as a file.\n");
+            print_err(&get_usage_info());
+            return Err(Status::SyntaxFailure);
         }
-    };
+        if !options.fix {
+            for f in all_files.iter_mut() {
+                if *f == "-" {
+                    *f = name.clone();
+                }
+            }
+        }
+    }
+
+    let format = get_option(flags, "format").unwrap_or("tty");
+    let mut formatter = new_formatter(format, &options)?;
+    if !options.outputs.is_empty() {
+        formatter = tee_outputs(formatter, &options)?;
+    }
 
     if options.dry_run && !options.fix {
         print_err("--dry-run only works together with --fix.");
@@ -190,7 +199,98 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
     }
 
     let sys = io_interface(&options, &all_files);
-    Ok(run_formatter(&sys, formatter, &options, &all_files))
+    let status = run_formatter(&sys, formatter, &options, &all_files);
+    if OUTPUT_FAILED.load(Ordering::SeqCst) {
+        return Ok(Status::RuntimeException);
+    }
+    Ok(status)
+}
+
+/// Set when a `--output` file could not be written.
+static OUTPUT_FAILED: AtomicBool = AtomicBool::new(false);
+
+fn new_formatter(format: &str, options: &Options) -> Result<Box<dyn Formatter>, Status> {
+    match by_name(format, options.formatter_options.clone()) {
+        Some(f) => Ok(f),
+        None => {
+            print_err(&format!("Unknown format {}", format));
+            print_err("Supported formats:");
+            for name in options::FORMAT_NAMES {
+                print_err(&format!("  {}", name));
+            }
+            Err(Status::SupportFailure)
+        }
+    }
+}
+
+/// One `--output=FORMAT:PATH`: its formatter, the file and the report so far.
+struct OutputFile {
+    format: Box<dyn Formatter>,
+    path: String,
+    file: std::fs::File,
+    buf: Vec<u8>,
+}
+
+/// Runs the `-f` formatter and every `--output` formatter off one set of
+/// results, so each script is checked once.
+struct Tee {
+    primary: Box<dyn Formatter>,
+    outputs: Vec<OutputFile>,
+}
+
+/// Opens (creates) every `--output` file before anything is checked, so an
+/// unwritable path fails up front instead of after a report went to stdout.
+fn tee_outputs(primary: Box<dyn Formatter>, options: &Options) -> Result<Box<dyn Formatter>, Status> {
+    let mut outputs = vec![];
+    for (format, path) in &options.outputs {
+        let formatter = new_formatter(format, options)?;
+        match std::fs::File::create(path) {
+            Ok(file) => outputs.push(OutputFile { format: formatter, path: path.clone(), file, buf: vec![] }),
+            Err(e) => {
+                print_err(&format!("Could not write output file: {}: {}", path, sys::show_io_error_in("openFile", path, &e)));
+                return Err(Status::RuntimeException);
+            }
+        }
+    }
+    Ok(Box::new(Tee { primary, outputs }))
+}
+
+impl Formatter for Tee {
+    fn header(&mut self, out: &mut dyn Write) {
+        self.primary.header(out);
+        for o in &mut self.outputs {
+            o.format.header(&mut o.buf);
+        }
+    }
+
+    fn on_result(&mut self, r: &shelllint_core::interface::CheckResult, sys: &dyn SystemInterface, out: &mut dyn Write) {
+        self.primary.on_result(r, sys, out);
+        for o in &mut self.outputs {
+            o.format.on_result(r, sys, &mut o.buf);
+        }
+    }
+
+    fn on_failure(&mut self, file: &str, msg: &str, out: &mut dyn Write) {
+        self.primary.on_failure(file, msg, out);
+        for o in &mut self.outputs {
+            o.format.on_failure(file, msg, &mut o.buf);
+        }
+    }
+
+    fn footer(&mut self, out: &mut dyn Write) {
+        self.primary.footer(out);
+        for o in &mut self.outputs {
+            o.format.footer(&mut o.buf);
+            if let Err(e) = o.file.write_all(&o.buf).and_then(|_| o.file.flush()) {
+                print_err(&format!("Could not write output file: {}: {}", o.path, sys::show_io_error_in("write", &o.path, &e)));
+                OUTPUT_FAILED.store(true, Ordering::SeqCst);
+            }
+        }
+    }
+
+    fn exit_requested(&self) -> bool {
+        self.primary.exit_requested()
+    }
 }
 
 fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
@@ -414,6 +514,16 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "dump-ast" => options.dump_ast = true,
         "summary" => options.summary = true,
         "fail-fast" => options.fail_fast = true,
+        "stdin-filename" => options.stdin_filename = Some(val.clone()),
+        "output" => match val.split_once(':') {
+            Some((format, path)) if !format.is_empty() && !path.is_empty() => {
+                options.outputs.push((format.to_string(), path.to_string()))
+            }
+            _ => {
+                print_err(&format!("Invalid value for --output: {}. Expected FORMAT:PATH.", val));
+                return Err(Status::SyntaxFailure);
+            }
+        },
         // These flags are handled specially in 'process'
         "format" | "files-from" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

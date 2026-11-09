@@ -27,6 +27,8 @@ pub struct IoInterface {
     source_paths: Vec<String>,
     rcfile: Option<String>,
     inputs: Vec<String>,
+    /// `--stdin-filename`: the name standard input is reported (and looked up) as.
+    stdin_name: Option<String>,
     cache: Mutex<HashMap<String, String>>,
     config_cache: Mutex<(String, Option<(String, String)>)>,
 }
@@ -37,6 +39,7 @@ pub fn io_interface(options: &Options, files: &[String]) -> IoInterface {
         source_paths: options.source_paths.clone(),
         rcfile: options.rcfile.clone(),
         inputs: files.iter().map(|f| normalize(f)).collect(),
+        stdin_name: options.stdin_filename.clone(),
         cache: Mutex::new(HashMap::new()),
         config_cache: Mutex::new((String::new(), None)),
     }
@@ -332,6 +335,21 @@ fn simplify_path(p: &str) -> String {
 }
 
 impl IoInterface {
+    /// `normalize`, except that the `--stdin-filename` path need not exist: its
+    /// directory is resolved and the file name kept, as for a real file.
+    fn normalize_input(&self, x: &str) -> String {
+        if self.stdin_name.as_deref() == Some(x) && std::fs::canonicalize(x).is_err() {
+            let p = Path::new(x);
+            if let (Some(parent), Some(name)) = (p.parent(), p.file_name()) {
+                let parent = if parent.as_os_str().is_empty() { Path::new(".") } else { parent };
+                if let Ok(dir) = std::fs::canonicalize(parent) {
+                    return combine(&strip_verbatim(&dir.to_string_lossy()), &name.to_string_lossy());
+                }
+            }
+        }
+        normalize(x)
+    }
+
     fn allowable(&self, rc_suggests_external: Option<bool>, x: &str) -> bool {
         if rc_suggests_external.unwrap_or(self.external_sources) { true } else { self.inputs.contains(&normalize(x)) }
     }
@@ -400,7 +418,7 @@ impl IoInterface {
                 result
             }
             None => {
-                let path = normalize(filename);
+                let path = self.normalize_input(filename);
                 let dir = dir_of(&path);
                 if dir == cache.0 {
                     return cache.1.clone();
@@ -415,7 +433,7 @@ impl IoInterface {
 
 impl EditorConfigFs for IoInterface {
     fn normalize(&self, path: &str) -> String {
-        normalize(path)
+        self.normalize_input(path)
     }
 
     fn read_config(&self, file: &str) -> Option<(String, String)> {
@@ -435,7 +453,9 @@ impl SystemInterface for IoInterface {
             return Ok(x.clone());
         }
         if self.allowable(rc_suggests_external, file) {
-            match input_file(file) {
+            // `--stdin-filename`: the script named PATH is what arrives on stdin.
+            let from = if self.stdin_name.as_deref() == Some(file) { "-" } else { file };
+            match input_file(from) {
                 Ok((contents, should_cache)) => {
                     if should_cache {
                         self.cache.lock().unwrap().insert(file.to_string(), contents.clone());

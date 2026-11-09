@@ -74,12 +74,15 @@ const EXTENSION_HELP: &str = concat!(
     "                      --dump-ast                 Print each file's parsed AST as JSON instead of the report\n",
     "                      --summary                  Print finding counts and files checked to stderr after the report\n",
     "                      --fail-fast                Stop after the first file with findings\n",
+    "                      --stdin-filename=PATH      Report standard input ('-') as PATH\n",
+    "                      --output=FORMAT:PATH       Also write a FORMAT report to PATH (repeatable)\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
 /// with the extensions after upstream's options.
 fn expected_help() -> String {
-    let oracle = include_str!("help.txt");
+    // sarif is an extension format, so the format list differs from upstream's.
+    let oracle = include_str!("help.txt").replace("json1, quiet, tty)", "json1, quiet, sarif, tty)");
     let body = oracle.strip_suffix('\n').unwrap();
     format!("{}{}\n", body, EXTENSION_HELP)
 }
@@ -146,6 +149,8 @@ fn every_help_flag_is_accepted() {
         ("--dump-ast", &["--dump-ast", "--files-from=/dev/null"]),
         ("--summary", &["--summary", "--files-from=/dev/null"]),
         ("--fail-fast", &["--fail-fast", "--files-from=/dev/null"]),
+        ("--stdin-filename", &["--stdin-filename=x.sh", "-"]),
+        ("--output", &["--output=json:/dev/null", "-"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");
@@ -219,7 +224,7 @@ fn bad_option_messages_match_oracle() {
     );
     assert_eq!(
         run(&["-f", "nope", "-"], "").stderr,
-        "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  json\n  json1\n  quiet\n  tty\n"
+        "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  json\n  json1\n  quiet\n  sarif\n  tty\n"
     );
     assert_eq!(run(&["-s", "zsh", "-"], "").stderr, "Unknown shell: zsh\n");
     assert_eq!(run(&["-W", "x", "-"], "").stderr, "Invalid number: x\n");
