@@ -108,6 +108,8 @@ pub struct Params<'a> {
     pub has_pipefail: bool,
     /// Whether this script has 'shopt -s execfail' anywhere.
     pub has_execfail: bool,
+    /// DIVERGENCE: `--modern-dialects` / `modern-dialects=true` (shelllint extension).
+    pub modern_dialects: bool,
     /// A linear (bad) analysis of data flow
     pub variable_flow: VariableFlow,
     /// The shell type, such as Bash or Ksh
@@ -319,6 +321,28 @@ pub fn make_comment_with_fix(severity: Severity, id: Id, code: Code, str: impl I
     }
 }
 
+/// DIVERGENCE: internal name under which `--modern-dialects` and the
+/// `modern-dialects=true` rc key travel in `AnalysisSpec::optional_checks`.
+/// It is not a registered optional check, so `--enable=all` does not select it.
+pub const MODERN_DIALECTS: &str = "modern-dialects";
+
+/// DIVERGENCE: does the script's shebang name ash or busybox? Used by `--modern-dialects`.
+pub fn shebang_names_ash(ast: &Ast, root: Id) -> bool {
+    let script = match ast.get(root) {
+        Token::T_Annotation(_, s) => *s,
+        _ => root,
+    };
+    match ast.get(script) {
+        Token::T_Script(sb, _) => match ast.get(*sb) {
+            Token::T_Literal(s) => {
+                matches!(executable_from_shebang(s).as_str(), "ash" | "busybox" | "busybox sh" | "busybox ash")
+            }
+            _ => false,
+        },
+        _ => false,
+    }
+}
+
 /// `makeParameters spec`. `ast` must have had `compute_parents(root)` called.
 // DIVERGENCE: `variableFlow` refers to `params` lazily in Haskell; here the
 // other fields are computed first and the flow is filled in afterwards.
@@ -363,6 +387,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::Bash => is_option_set(ast, "execfail", root),
             _ => false,
         },
+        modern_dialects: spec.optional_checks.iter().any(|k| k == MODERN_DIALECTS),
         shell_type_specified: spec.shell_type.is_some() || spec.fallback_shell.is_some(),
         variable_flow: VariableFlow::default(),
         cfg_analysis: None,

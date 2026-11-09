@@ -5,7 +5,7 @@ use shelllint_analyzer::analyzerlib::{Comments, Params};
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::get_associative_arrays;
-use shelllint_core::interface::TokenComment;
+use shelllint_core::interface::{Shell, TokenComment};
 
 use crate::support::{run_node_analysis, surround_with};
 
@@ -24,7 +24,9 @@ fn check_array_assignment_indices(params: &Params<'_>, root: Id) -> Vec<TokenCom
         if let Token::T_Assignment(_, name, idx, arr) = p.ast.get(t) {
             if idx.is_empty() {
                 if let Token::T_Array(list) = p.ast.get(*arr) {
-                    let is_assoc = assocs.contains(name);
+                    // DIVERGENCE: bash 5.1 accepts `assoc=(k v k v)` with --modern-dialects.
+                    let is_assoc = assocs.contains(name)
+                        && !(p.modern_dialects && p.shell_type == Shell::Bash && list.len() % 2 == 0);
                     for &e in list {
                         check_element(p, is_assoc, e, c);
                     }

@@ -222,6 +222,7 @@ pub fn options() -> Vec<OptDescr> {
             "Follow calls to these functions (comma separated) like 'source'",
         ),
         o("", &["source-from-path"], No("source-from-path"), "", "Look up a bare sourced filename on $PATH"),
+        o("", &["modern-dialects"], No("modern-dialects"), "", "Accept newer shell features (POSIX.1-2024, ash, bash 5.1)"),
     ]
 }
 

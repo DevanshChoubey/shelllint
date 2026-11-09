@@ -293,6 +293,26 @@ impl<'a> P<'a> {
                     }
                 }
             }
+            // DIVERGENCE: shelllint extension. `modern-dialects=true` is stored as the
+            // internal optional-check name "modern-dialects" (see `MODERN_DIALECTS`).
+            "modern-dialects" => {
+                let pos = self.get_position();
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
+                match value.as_str() {
+                    "true" => vec![Annotation::EnableComment("modern-dialects".to_string())],
+                    "false" => vec![],
+                    _ => {
+                        self.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1146,
+                            "Unknown modern-dialects value. Expected true/false.",
+                        );
+                        vec![]
+                    }
+                }
+            }
             "external-sources" => {
                 let pos = self.get_position();
                 let value =
