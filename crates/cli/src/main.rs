@@ -2,6 +2,7 @@
 // Port of ShellCheck shellcheck.hs (e11f964)
 
 mod dump_ast;
+mod completions;
 mod fix;
 mod list_checks;
 mod oom;
@@ -149,6 +150,19 @@ fn status_to_code(status: Status) -> i32 {
 }
 
 fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
+    if let Some(shell) = get_option(flags, "completions") {
+        return match completions::generate(shell) {
+            Some(script) => {
+                print!("{}", script);
+                Ok(Status::NoProblems)
+            }
+            None => {
+                print_err(&format!("Unknown shell for --completions: {}", shell));
+                print_err(&format!("Supported shells: {}", completions::SHELL_NAMES.join(", ")));
+                Err(Status::SyntaxFailure)
+            }
+        };
+    }
     let mut options = default_options();
     for flag in flags {
         parse_option(flag, &mut options)?;

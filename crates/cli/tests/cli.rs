@@ -76,6 +76,7 @@ const EXTENSION_HELP: &str = concat!(
     "                      --fail-fast                Stop after the first file with findings\n",
     "                      --stdin-filename=PATH      Report standard input ('-') as PATH\n",
     "                      --output=FORMAT:PATH       Also write a FORMAT report to PATH (repeatable)\n",
+    "                      --completions=SHELL        Print a shell completion script (bash, zsh, fish)\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -151,6 +152,7 @@ fn every_help_flag_is_accepted() {
         ("--fail-fast", &["--fail-fast", "--files-from=/dev/null"]),
         ("--stdin-filename", &["--stdin-filename=x.sh", "-"]),
         ("--output", &["--output=json:/dev/null", "-"]),
+        ("--completions", &["--completions=bash"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

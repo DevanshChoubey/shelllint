@@ -147,6 +147,7 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["fail-fast"], No("fail-fast"), "", "Stop after the first file with findings"),
         o("", &["stdin-filename"], Req("stdin-filename"), "PATH", "Report standard input ('-') as PATH"),
         o("", &["output"], Req("output"), "FORMAT:PATH", "Also write a FORMAT report to PATH (repeatable)"),
+        o("", &["completions"], Req("completions"), "SHELL", "Print a shell completion script (bash, zsh, fish)"),
     ]
 }
 
