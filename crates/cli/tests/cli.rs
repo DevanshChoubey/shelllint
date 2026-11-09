@@ -198,9 +198,16 @@ fn every_help_flag_is_accepted() {
     let empty = tmpdir("empty-list").join("list");
     std::fs::write(&empty, "").unwrap();
     let list = format!("--files-from={}", empty.to_str().unwrap());
+    let report = format!("--output=json:{}", empty.with_extension("json").to_str().unwrap());
     for (flag, args) in cases {
-        let args: Vec<&str> =
-            args.iter().map(|a| if *a == "--files-from=/dev/null" { list.as_str() } else { *a }).collect();
+        let args: Vec<&str> = args
+            .iter()
+            .map(|a| match *a {
+                "--files-from=/dev/null" => list.as_str(),
+                "--output=json:/dev/null" => report.as_str(),
+                _ => *a,
+            })
+            .collect();
         let args = &args[..];
         let o = run(args, CLEAN);
         assert_eq!(o.code, 0, "{} -> {:?}: {}", flag, args, o.stderr);

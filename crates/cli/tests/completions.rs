@@ -30,7 +30,8 @@ fn installed(shell: &str) -> bool {
 
 /// Feed `script` to `shell` with a no-execute flag; skip if it is not installed.
 fn syntax_check(shell: &str, flag: &str, script: &str) {
-    if !installed(shell) {
+    // `bash` on a Windows runner may be a stub for an absent WSL distribution.
+    if cfg!(windows) || !installed(shell) {
         eprintln!("skipping {} syntax check: {} is not installed", shell, shell);
         return;
     }

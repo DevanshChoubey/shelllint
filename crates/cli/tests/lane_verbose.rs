@@ -53,7 +53,11 @@ fn stderr_names_file_and_rc() {
     let lines: Vec<&str> = err.lines().collect();
     assert_eq!(lines.len(), 4, "{}", err);
     assert_eq!(lines[0], "shelllint: checking a/x.sh");
-    assert!(lines[1].starts_with("shelllint: using rcfile ") && lines[1].ends_with("a/.shellcheckrc"), "{}", err);
+    assert!(
+        lines[1].starts_with("shelllint: using rcfile ") && lines[1].replace('\\', "/").ends_with("a/.shellcheckrc"),
+        "{}",
+        err
+    );
     assert_eq!(lines[2], "shelllint: checking a/y.sh");
     assert_eq!(lines[1], lines[3]);
 }

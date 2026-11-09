@@ -260,11 +260,14 @@ fn stdin_filename_directory_supplies_shellcheckrc_and_editorconfig() {
     assert!(o.stdout.contains("SC2086"));
 
     write(&d.join("e/.editorconfig"), "root = true\n[*.sh]\nshellcheck.disable = SC2148,SC2086\n");
-    let arg = format!("--stdin-filename={}/e/x.sh", d.display());
+    // Mixing `/` into a canonical Windows `\\?\` path would make it a different file.
+    let root = d.display().to_string();
+    let root = root.strip_prefix(r"\\?\").unwrap_or(&root);
+    let arg = format!("--stdin-filename={}/e/x.sh", root);
     // The .editorconfig next to the (virtual) script applies.
     let o = run(&["-f", "gcc", &arg, "-"], "echo $1\n");
     assert_eq!(o.code, 0, "{}{}", o.stdout, o.stderr);
-    let other = format!("--stdin-filename={}/no-editorconfig/x.sh", d.display());
+    let other = format!("--stdin-filename={}/no-editorconfig/x.sh", root);
     let o = run(&["-f", "gcc", &other, "-"], "echo $1\n");
     assert!(o.stdout.contains("SC2148"), "{}", o.stdout);
 }
@@ -313,6 +316,8 @@ fn output_works_on_a_clean_run_and_keeps_exit_code() {
     assert_eq!(json(&std::fs::read_to_string(&p).unwrap())["version"], "2.1.0");
 }
 
+// Windows filenames can't contain a colon.
+#[cfg(unix)]
 #[test]
 fn output_splits_at_the_first_colon() {
     let d = tmpdir();
