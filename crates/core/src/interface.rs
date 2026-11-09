@@ -59,6 +59,10 @@ pub struct CheckSpec {
     // DIVERGENCE: not in upstream. Variable names (a trailing `*` is a prefix
     // glob) to treat as assigned for SC2154, from `--external-vars`.
     pub external_vars: Vec<String>,
+    /// `--ignore-directives` (extension): in-file `disable=` directives are not honoured.
+    pub ignore_directives: bool,
+    /// `--report-unused-disables` (extension): report `disable=` codes that suppressed nothing (SC9006).
+    pub report_unused_disables: bool,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -85,6 +89,8 @@ pub fn empty_check_spec() -> CheckSpec {
         extended_analysis: None,
         optional_checks: vec![],
         external_vars: vec![],
+        ignore_directives: false,
+        report_unused_disables: false,
     }
 }
 
@@ -95,6 +101,7 @@ pub fn new_parse_spec() -> ParseSpec {
         check_sourced: false,
         ignore_rc: false,
         shell_type_override: None,
+        ignore_directives: false,
     }
 }
 
@@ -116,6 +123,8 @@ pub struct ParseSpec {
     pub check_sourced: bool,
     pub ignore_rc: bool,
     pub shell_type_override: Option<Shell>,
+    /// DIVERGENCE: extension; drop in-file `disable=` directives while parsing.
+    pub ignore_directives: bool,
 }
 
 // DIVERGENCE: `ParseResult` / `newParseResult` are defined by the parser crate,

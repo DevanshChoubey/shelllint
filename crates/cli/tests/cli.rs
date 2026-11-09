@@ -91,6 +91,8 @@ const EXTENSION_HELP: &str = concat!(
     "                      --source-functions=NAMES   Follow calls to these functions (comma separated) like 'source'\n",
     "                      --source-from-path         Look up a bare sourced filename on $PATH\n",
     "                      --modern-dialects          Accept newer shell features (POSIX.1-2024, ash, bash 5.1)\n",
+    "                      --ignore-directives        Don't honour 'disable=' directives in files\n",
+    "                      --report-unused-disables   Report 'disable=' codes that suppress nothing (SC9006)\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -182,6 +184,8 @@ fn every_help_flag_is_accepted() {
         ("--source-functions", &["--source-functions=load,use", "-"]),
         ("--source-from-path", &["--source-from-path", "-"]),
         ("--modern-dialects", &["--modern-dialects", "-"]),
+        ("--ignore-directives", &["--ignore-directives", "-"]),
+        ("--report-unused-disables", &["--report-unused-disables", "-"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

@@ -9,6 +9,7 @@
 
 pub mod ast_dump;
 pub mod directive_ranges;
+pub mod directive_audit;
 pub mod editorconfig;
 pub mod filepath;
 
@@ -170,8 +171,44 @@ fn run_on_check_stack<R>(f: impl FnOnce() -> R) -> R {
 }
 
 /// The `where`-bound `checkScript contents` of `checkScript`.
-fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: String) -> Vec<PositionedComment> {
-    let ranges = directive_ranges::DirectiveRanges::scan(&contents);
+fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, mut contents: String) -> Vec<PositionedComment> {
+    // `--ignore-directives` covers the range directives too.
+    let ranges = if spec.ignore_directives { None } else { directive_ranges::DirectiveRanges::scan(&contents) };
+    // Only the audit needs the script twice; a normal run moves it.
+    let first_pass = if spec.report_unused_disables { contents.clone() } else { std::mem::take(&mut contents) };
+    let (mut all, result) = collect_messages(sys, spec, first_pass, spec.ignore_directives);
+    if spec.report_unused_disables {
+        // DIVERGENCE: extension (`--report-unused-disables`), see `directive_audit`.
+        let (other, other_result) = collect_messages(sys, spec, contents.clone(), !spec.ignore_directives);
+        let (honoured, honoured_result, ignored) =
+            if spec.ignore_directives { (&other, &other_result, &all) } else { (&all, &result, &other) };
+        let reports = directive_audit::unused_disable_reports(spec, &contents, honoured_result, honoured, ignored);
+        all.extend(reports);
+    }
+    // DIVERGENCE: `--severity` beats a file-level `severity=` directive, which
+    // beats one in the rc file (the root's annotations list the file's first).
+    let min_severity = match result.root {
+        Some(root) if !spec.min_severity_explicit => {
+            get_severity_directive(&result.ast, root).unwrap_or(spec.min_severity)
+        }
+        _ => spec.min_severity,
+    };
+    let included: Vec<PositionedComment> =
+        all.into_iter().filter(|pc| should_include(spec, min_severity, pc)).collect();
+    let included = match &ranges {
+        Some(r) => included.into_iter().filter(|pc| !r.suppresses(&spec.filename, pc)).collect(),
+        None => included,
+    };
+    nub_sorted(sort_messages(included))
+}
+
+/// Parse and analyze `contents`: every message, before the `-S`/`-i`/`-e` filters.
+fn collect_messages(
+    sys: &dyn SystemInterface,
+    spec: &CheckSpec,
+    contents: String,
+    ignore_directives: bool,
+) -> (Vec<PositionedComment>, ParseResult) {
     let mut result = parse_script(
         sys,
         &ParseSpec {
@@ -180,6 +217,7 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: 
             check_sourced: spec.check_sourced,
             ignore_rc: spec.ignore_rc,
             shell_type_override: spec.shell_type_override,
+            ignore_directives,
             ..new_parse_spec()
         },
     );
@@ -208,23 +246,9 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: 
             analyze_script(&a_spec, &mut result.ast, root).comments
         }
     };
-    // DIVERGENCE: `--severity` beats a file-level `severity=` directive, which
-    // beats one in the rc file (the root's annotations list the file's first).
-    let min_severity = match result.root {
-        Some(root) if !spec.min_severity_explicit => {
-            get_severity_directive(&result.ast, root).unwrap_or(spec.min_severity)
-        }
-        _ => spec.min_severity,
-    };
     let mut all = parse_messages;
     all.extend(analysis_messages.into_iter().map(|t| token_to_position(&result, t)));
-    let included: Vec<PositionedComment> =
-        all.into_iter().filter(|pc| should_include(spec, min_severity, pc)).collect();
-    let included = match &ranges {
-        Some(r) => included.into_iter().filter(|pc| !r.suppresses(&spec.filename, pc)).collect(),
-        None => included,
-    };
-    nub_sorted(sort_messages(included))
+    (all, result)
 }
 
 fn should_include(spec: &CheckSpec, min_severity: Severity, pc: &PositionedComment) -> bool {

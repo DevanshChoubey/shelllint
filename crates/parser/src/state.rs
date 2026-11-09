@@ -293,6 +293,8 @@ pub struct Environment<'a> {
     pub ignore_rc: bool,
     pub current_filename: String,
     pub shell_type_override: Option<Shell>,
+    /// DIVERGENCE: extension (`--ignore-directives`); in-file `disable=` is dropped.
+    pub ignore_directives: bool,
 }
 
 /// Does this item on the context stack disable warnings for 'code'?

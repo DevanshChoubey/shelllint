@@ -105,7 +105,12 @@ impl<'a> P<'a> {
         self.called("shellcheck directive", |p| {
             p.try_(|p| p.read_annotation_prefix())?;
             p.many1(|p| p.linewhitespace())?;
-            p.read_annotation_without_prefix(true)
+            let mut annotations = p.read_annotation_without_prefix(true)?;
+            // DIVERGENCE: `--ignore-directives` drops in-file `disable=` (rc files are unaffected).
+            if p.env.ignore_directives {
+                annotations.retain(|a| !matches!(a, Annotation::DisableComment(..)));
+            }
+            Ok(annotations)
         })
     }
 
@@ -1190,6 +1195,7 @@ pub(crate) fn parse_script(sys: &dyn SystemInterface, spec: &ParseSpec) -> Parse
         current_filename: spec.filename.clone(),
         ignore_rc: spec.ignore_rc,
         shell_type_override: spec.shell_type_override,
+        ignore_directives: spec.ignore_directives,
     };
     parse_shell(env, &spec.filename, &spec.script)
 }

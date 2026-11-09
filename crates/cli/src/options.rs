@@ -223,6 +223,14 @@ pub fn options() -> Vec<OptDescr> {
         ),
         o("", &["source-from-path"], No("source-from-path"), "", "Look up a bare sourced filename on $PATH"),
         o("", &["modern-dialects"], No("modern-dialects"), "", "Accept newer shell features (POSIX.1-2024, ash, bash 5.1)"),
+        o("", &["ignore-directives"], No("ignore-directives"), "", "Don't honour 'disable=' directives in files"),
+        o(
+            "",
+            &["report-unused-disables"],
+            No("report-unused-disables"),
+            "",
+            "Report 'disable=' codes that suppress nothing (SC9006)",
+        ),
     ]
 }
 

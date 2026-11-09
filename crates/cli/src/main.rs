@@ -607,6 +607,8 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         }
         "source-from-path" => options.source_from_path = true,
         "modern-dialects" => options.check_spec.optional_checks.push("modern-dialects".to_string()),
+        "ignore-directives" => options.check_spec.ignore_directives = true,
+        "report-unused-disables" => options.check_spec.report_unused_disables = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),
