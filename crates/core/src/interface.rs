@@ -26,6 +26,13 @@ pub trait SystemInterface: Sync {
         name.to_string()
     }
 
+    /// DIVERGENCE: `--source-functions=a,b` (not in ShellCheck): names of wrapper
+    /// functions that are followed like `source` when called with a literal
+    /// first argument.
+    fn source_functions(&self) -> Vec<String> {
+        vec![]
+    }
+
     /// Get the configuration file (name, contents) for a filename
     fn get_config(&self, _file: &str) -> Option<(String, String)> {
         None

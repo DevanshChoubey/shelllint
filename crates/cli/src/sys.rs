@@ -25,6 +25,8 @@ use crate::options::Options;
 pub struct IoInterface {
     external_sources: bool,
     source_paths: Vec<String>,
+    source_functions: Vec<String>,
+    source_from_path: bool,
     rcfile: Option<String>,
     inputs: Vec<String>,
     /// `--stdin-filename`: the name standard input is reported (and looked up) as.
@@ -37,6 +39,8 @@ pub fn io_interface(options: &Options, files: &[String]) -> IoInterface {
     IoInterface {
         external_sources: options.external_sources,
         source_paths: options.source_paths.clone(),
+        source_functions: options.source_functions.clone(),
+        source_from_path: options.source_from_path,
         rcfile: options.rcfile.clone(),
         inputs: files.iter().map(|f| normalize(f)).collect(),
         stdin_name: options.stdin_filename.clone(),
@@ -466,6 +470,10 @@ impl EditorConfigFs for IoInterface {
 }
 
 impl SystemInterface for IoInterface {
+    fn source_functions(&self) -> Vec<String> {
+        self.source_functions.clone()
+    }
+
     fn read_file(&self, rc_suggests_external: Option<bool>, file: &str) -> Result<String, ErrorMessage> {
         if let Some(x) = self.cache.lock().unwrap().get(file) {
             return Ok(x.clone());
@@ -522,7 +530,25 @@ impl SystemInterface for IoInterface {
             }
             deflt.to_string()
         };
-        if Path::new(original).is_absolute() { find(drop_drive(original), original) } else { find(original, original) }
+        let found = if Path::new(original).is_absolute() {
+            find(drop_drive(original), original)
+        } else {
+            find(original, original)
+        };
+        // DIVERGENCE: `--source-from-path` (not in ShellCheck): a bare filename the
+        // normal search did not find is looked up on `$PATH`, like bash's `source`.
+        if self.source_from_path && found == original && !does_file_exist(original) && !original.contains(is_path_separator) {
+            if let Some(path) = std::env::var_os("PATH") {
+                for dir in std::env::split_paths(&path) {
+                    let dir = if dir.as_os_str().is_empty() { PathBuf::from(".") } else { dir };
+                    let c = dir.join(original).to_string_lossy().into_owned();
+                    if does_file_exist(&c) {
+                        return c;
+                    }
+                }
+            }
+        }
+        found
     }
 
     fn get_config(&self, filename: &str) -> Option<(String, String)> {

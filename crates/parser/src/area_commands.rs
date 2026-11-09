@@ -175,6 +175,8 @@ impl<'a> P<'a> {
                     let result = p.make_simple_command(id1, id2, &prefix, &[cmd], &suffix);
                     if is_command(&cmd_literal, &["source", "."]) {
                         p.read_source(result)
+                    } else if p.is_source_function(&cmd_literal) {
+                        p.read_source_function(result)
                     } else if is_command(&cmd_literal, &["trap"]) {
                         p.syntax_check_trap(result)?;
                         Ok(result)

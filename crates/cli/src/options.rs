@@ -13,6 +13,10 @@ pub struct Options {
     pub check_spec: CheckSpec,
     pub external_sources: bool,
     pub source_paths: Vec<String>,
+    /// `--source-functions` (extension): wrapper functions followed like `source`.
+    pub source_functions: Vec<String>,
+    /// `--source-from-path` (extension): look a bare filename up on `$PATH`.
+    pub source_from_path: bool,
     pub formatter_options: FormatterOptions,
     #[allow(dead_code)]
     pub min_severity: Severity,
@@ -48,6 +52,8 @@ pub fn default_options() -> Options {
         check_spec: empty_check_spec(),
         external_sources: false,
         source_paths: vec![],
+        source_functions: vec![],
+        source_from_path: false,
         formatter_options: FormatterOptions { color_option: ColorOption::ColorAuto, ..new_formatter_options() },
         min_severity: Severity::StyleC,
         rcfile: None,
@@ -208,6 +214,14 @@ pub fn options() -> Vec<OptDescr> {
             "Treat these variables as assigned for SC2154 (a trailing * is a prefix glob)",
         ),
         o("", &["tab-width"], Req("tab-width"), "N", "Expand tabs to N spaces in the tty source echo"),
+        o(
+            "",
+            &["source-functions"],
+            Req("source-functions"),
+            "NAMES",
+            "Follow calls to these functions (comma separated) like 'source'",
+        ),
+        o("", &["source-from-path"], No("source-from-path"), "", "Look up a bare sourced filename on $PATH"),
     ]
 }
 

@@ -251,6 +251,22 @@ impl<'a> P<'a> {
                 })?;
                 names.into_iter().map(Annotation::ExternalVar).collect()
             }
+            "source-functions" => {
+                // DIVERGENCE: not a ShellCheck directive.
+                let names = self.annotation_plain_or_quoted(&|p| {
+                    p.sep_by(
+                        |p| {
+                            let name: String = p
+                                .many1(|p| p.alt(|p| p.alpha_num(), |p| p.one_of("_-.:")))?
+                                .into_iter()
+                                .collect();
+                            Ok(name)
+                        },
+                        |p| p.char_(','),
+                    )
+                })?;
+                vec![Annotation::SourceFunctions(names)]
+            }
             "shell" => {
                 let pos = self.get_position();
                 let shell = self.annotation_filename()?;

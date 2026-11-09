@@ -602,6 +602,10 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
                 return Err(Status::SyntaxFailure);
             }
         },
+        "source-functions" => {
+            options.source_functions.extend(split(',', val).into_iter().filter(|s| !s.is_empty()))
+        }
+        "source-from-path" => options.source_from_path = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

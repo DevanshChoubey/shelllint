@@ -192,6 +192,9 @@ pub enum Annotation {
     /// The shell named by `#! nix-shell -i <shell>` after a nix-shell shebang.
     /// Weaker than `ShellOverride`.
     ShellFromNix(String),
+    /// DIVERGENCE: `source-functions=a,b` (not in ShellCheck): wrapper functions
+    /// whose literal first argument is followed like `source ARG`.
+    SourceFunctions(Vec<String>),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
