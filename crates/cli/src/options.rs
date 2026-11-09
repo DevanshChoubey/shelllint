@@ -23,6 +23,8 @@ pub struct Options {
     pub dry_run: bool,
     /// `--verbose` (extension): name each file and its .shellcheckrc on stderr.
     pub verbose: bool,
+    /// `--fallback-shell` and friends (extension).
+    pub shell_inference: crate::shell_inference::ShellInference,
 }
 
 pub fn default_options() -> Options {
@@ -36,6 +38,7 @@ pub fn default_options() -> Options {
         fix: false,
         dry_run: false,
         verbose: false,
+        shell_inference: Default::default(),
     }
 }
 

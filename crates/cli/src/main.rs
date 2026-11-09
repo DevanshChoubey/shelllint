@@ -5,6 +5,7 @@ mod fix;
 mod list_checks;
 mod oom;
 mod options;
+mod shell_inference;
 mod sys;
 mod verbose;
 
@@ -50,7 +51,9 @@ fn parse_file_list_lines(contents: &str) -> Vec<String> {
 }
 
 fn parse_arguments(argv: &[String]) -> Result<(Vec<Flag>, Vec<String>), Status> {
-    let (opts, files, errors) = get_opt(&option_table(), argv);
+    let (extra_flags, argv) = shell_inference::extract(argv);
+    let (mut opts, files, errors) = get_opt(&option_table(), &argv);
+    opts.extend(extra_flags);
     if errors.is_empty() {
         Ok((opts, files))
     } else {
@@ -243,7 +246,13 @@ fn process_file(
             return Status::RuntimeException;
         }
     };
-    let spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
+    let mut spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
+    let shell_flag = options.check_spec.shell_type_override.is_some();
+    match shell_inference::decide(&options.shell_inference, shell_flag, spec.ignore_rc, sys, filename, &spec.script) {
+        Some(shell_inference::Decision::Skip) => return Status::NoProblems,
+        Some(shell_inference::Decision::Use(sh)) => spec.shell_type_override = Some(sh),
+        None => {}
+    }
     let result = check_script_owned(sys, spec);
     format.on_result(&result, sys, out);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
@@ -375,6 +384,15 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "fix" => options.fix = true,
         "dry-run" => options.dry_run = true,
         "verbose" => options.verbose = true,
+        "fallback-shell" => match shell_for_executable(val) {
+            Some(shell) => options.shell_inference.fallback = Some(shell),
+            None => {
+                print_err(&format!("Unknown shell: {}", val));
+                return Err(Status::SupportFailure);
+            }
+        },
+        "infer-shell-from-name" => options.shell_inference.infer_from_name = true,
+        "skip-unsupported-shebang" => options.shell_inference.skip_unsupported = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),
