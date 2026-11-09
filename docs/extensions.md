@@ -70,6 +70,8 @@ source <(shelllint --completions=bash)
 only if shelllint, the file's bytes, every option that affects results, the rc
 file in effect and every file followed through `source` are unchanged. Output is
 identical to an uncached run. Standard input and `--fix` bypass the cache.
+`undefined-command` results are tied to the value of `$PATH`, so installing a
+command without changing `$PATH` won't refresh them.
 
 ## Choosing the shell
 

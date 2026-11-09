@@ -166,3 +166,31 @@ fn corrupt_entry_recovers() {
         assert_eq!(std::fs::read(&entry).unwrap(), good, "entry should be rewritten");
     }
 }
+
+// Every option that can change the findings has to be part of the entry's key.
+#[test]
+fn result_affecting_options_miss() {
+    let d = TempDir::new("options");
+    d.write("t.sh", "#!/bin/sh\n# shellcheck disable=SC2086\necho $1\necho \"$EXT\"\n");
+    let cached = |extra: &[&str]| {
+        let mut args = vec!["--norc", "-f", "gcc", "--cache-dir=cache"];
+        args.extend_from_slice(extra);
+        args.push("t.sh");
+        run_in(&d.0, &args)
+    };
+    cached(&[]);
+    let mut seen = d.entries().len();
+    assert_eq!(seen, 1);
+    for extra in [
+        "--ignore-directives",
+        "--report-unused-disables",
+        "--external-vars=EXT",
+        "--source-functions=load",
+        "--source-from-path",
+    ] {
+        let hit_or_miss = cached(&[extra]);
+        assert_eq!(d.entries().len(), seen + 1, "{} shared an entry", extra);
+        seen += 1;
+        assert_eq!(hit_or_miss, run_in(&d.0, &["--norc", "-f", "gcc", extra, "t.sh"]), "{}", extra);
+    }
+}

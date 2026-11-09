@@ -429,6 +429,20 @@ fn key_bytes(options: &Options, spec: &CheckSpec) -> Vec<u8> {
     for c in &spec.optional_checks {
         w.str(c);
     }
+    w.u8(spec.min_severity_explicit as u8);
+    w.u8(spec.ignore_directives as u8);
+    w.u8(spec.report_unused_disables as u8);
+    w.u64(spec.external_vars.len() as u64);
+    for v in &spec.external_vars {
+        w.str(v);
+    }
+    w.u64(options.source_functions.len() as u64);
+    for f in &options.source_functions {
+        w.str(f);
+    }
+    w.u8(options.source_from_path as u8);
+    // `undefined-command` reads the machine's `$PATH`.
+    w.str(&std::env::var("PATH").unwrap_or_default());
     w.u8(options.external_sources as u8);
     w.u64(options.source_paths.len() as u64);
     for p in &options.source_paths {
