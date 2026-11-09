@@ -595,6 +595,13 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "cache-dir" => options.cache_dir = Some(val.clone()),
         "context" => options.formatter_options.context_lines = parse_num(val)?,
         "strict-rc" => options.strict_rc = true,
+        "tab-width" => match parse_num(val)? {
+            n if n >= 1 => options.formatter_options.tab_width = Some(n.min(1024) as usize),
+            _ => {
+                print_err(&format!("Invalid tab width: {}", val));
+                return Err(Status::SyntaxFailure);
+            }
+        },
         // These flags are handled specially in 'process'
         "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

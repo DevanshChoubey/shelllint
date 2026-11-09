@@ -207,6 +207,7 @@ pub fn options() -> Vec<OptDescr> {
             "VARS",
             "Treat these variables as assigned for SC2154 (a trailing * is a prefix glob)",
         ),
+        o("", &["tab-width"], Req("tab-width"), "N", "Expand tabs to N spaces in the tty source echo"),
     ]
 }
 

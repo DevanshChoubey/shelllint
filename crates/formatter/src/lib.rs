@@ -21,6 +21,7 @@ pub mod json;
 pub mod json1;
 pub mod quiet;
 pub mod sarif;
+pub mod tabwidth;
 pub mod tty;
 
 pub trait Formatter {

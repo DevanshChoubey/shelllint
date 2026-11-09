@@ -157,10 +157,12 @@ pub struct FormatterOptions {
     pub wiki_link_count: i64,
     /// Lines of source shown on each side of a finding by `-f context`.
     pub context_lines: i64,
+    /// `--tab-width=N` (extension): expand tabs in the tty source echo.
+    pub tab_width: Option<usize>,
 }
 
 pub fn new_formatter_options() -> FormatterOptions {
-    FormatterOptions { color_option: ColorOption::ColorAuto, wiki_link_count: 3, context_lines: 5 }
+    FormatterOptions { color_option: ColorOption::ColorAuto, wiki_link_count: 3, context_lines: 5, tab_width: None }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]

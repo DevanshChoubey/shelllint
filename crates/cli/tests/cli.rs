@@ -87,6 +87,7 @@ const EXTENSION_HELP: &str = concat!(
     "                      --changed-since[=REF]      Report only findings on lines changed since REF (default HEAD)\n",
     "                      --strict-rc                Make unknown .shellcheckrc keys, bad shell values and an unreadable --rcfile errors\n",
     "                      --external-vars=VARS       Treat these variables as assigned for SC2154 (a trailing * is a prefix glob)\n",
+    "                      --tab-width=N              Expand tabs to N spaces in the tty source echo\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -174,6 +175,7 @@ fn every_help_flag_is_accepted() {
         ("--context", &["--context=2", "--files-from=/dev/null"]),
         ("--strict-rc", &["--strict-rc", "-"]),
         ("--external-vars", &["--external-vars=A,B_*", "-"]),
+        ("--tab-width", &["--tab-width=4", "-"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");
