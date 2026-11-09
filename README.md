@@ -110,6 +110,12 @@ To use it as a drop-in replacement, symlink it as `shellcheck`:
 ln -s "$(command -v shelllint)" ~/.local/bin/shellcheck
 ```
 
+### More options
+
+shelllint also has `-r`, `--exclude-path`, `--changed-since`, `-f sarif`,
+`-f github`, `--cache-dir`, range directives, shell completions and five extra
+optional checks. [docs/extensions.md](docs/extensions.md) covers them all.
+
 ## Compatibility
 
 **Claim:** at upstream commit
