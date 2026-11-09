@@ -11,7 +11,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export CARGO_TARGET_DIR=${CARGO_TARGET_DIR:-/media/devansh/Experiment/playground/shellcheck-rust-targets/site}
+export CARGO_TARGET_DIR=${CARGO_TARGET_DIR:-$PWD/target}
 
 # 1. Haskell reference: static binary out of the docker image.
 if [ ! -x bench/.bin/shellcheck-hs ]; then

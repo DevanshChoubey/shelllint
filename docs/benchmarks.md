@@ -15,10 +15,10 @@ Raw results: [real repositories](../bench/results/real-repos.md) and
 | Memory limit | 6 GB of real memory, no swap (`docker --memory=6g --memory-swap=6g`) |
 | OS | Ubuntu 26.04, Linux 7.0.0 |
 | ShellCheck | v0.11.0-171-ge11f964, static binary from `koalaman/shellcheck:latest` |
-| shelllint | 0.0.1 at commit 1275c7b, release build with LTO, rustc 1.93.1 |
+| shelllint | 0.0.1 at commit 777356a, release build with LTO, rustc 1.93.1 |
 | Timing | Real repositories: median of 3 passes. Synthetic: median of 5 runs |
 
-Commit 1275c7b is the code that was measured. The machine was not idle: desktop
+Commit 777356a is the code that was measured. The machine was not idle: desktop
 applications were running, with a load average of about 1 to 2.5 on 16 logical
 CPUs.
 

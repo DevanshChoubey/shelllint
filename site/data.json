@@ -4292,7 +4292,7 @@
     "version: v0.11.0-171-ge11f964"
    ],
    "rs_version": "shelllint - shell script analysis tool (a Rust port of ShellCheck)\nversion: 0.0.1 (ports ShellCheck v0.11.0-171-ge11f964)\nlicense: GNU General Public License, version 3\nwebsite: https://github.com/DevanshChoubey/shelllint",
-   "hs_binary": "/media/devansh/Experiment/playground/shellcheck-rust/bench/.bin/shellcheck-hs",
+   "hs_binary": "bench/.bin/shellcheck-hs",
    "rs_binary": "/opt/shelllint",
    "rs_binary_bytes": 5617448,
    "loadavg_end": 1.22900390625

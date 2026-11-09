@@ -58,7 +58,7 @@ cargo install --locked shelllint            # from crates.io
 ```
 
 Homebrew, AUR, Nix, npm and PyPI wrappers, a pre-commit hook, a GitHub Action
-and a Docker image are planned. See [docs/launch-plan.md](docs/launch-plan.md).
+and a Docker image are planned.
 
 ## Usage
 
@@ -229,8 +229,7 @@ Other directories:
 - `corpus/`: the extracted tests, the oracle results, the check manifest and
   the parity baseline.
 - `tools/`: scripts that extract and validate the corpus and build the manifest.
-- `docs/`: the [porting guide](docs/porting-a-check.md), design notes and the
-  [launch plan](docs/launch-plan.md).
+- `docs/`: the [porting guide](docs/porting-a-check.md) and design notes.
 
 ## Contributing
 
