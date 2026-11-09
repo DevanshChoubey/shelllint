@@ -63,7 +63,7 @@ pub fn default_options() -> Options {
 pub const USAGE_HEADER: &str = "Usage: shellcheck [OPTIONS...] FILES...";
 
 /// The formats shellcheck.hs registers (`Map.keys`, so sorted).
-pub const FORMAT_NAMES: [&str; 8] = ["checkstyle", "diff", "gcc", "json", "json1", "quiet", "sarif", "tty"];
+pub const FORMAT_NAMES: [&str; 9] = ["checkstyle", "diff", "gcc", "github", "json", "json1", "quiet", "sarif", "tty"];
 
 #[derive(Clone, Copy)]
 pub enum ArgDescr {
@@ -94,6 +94,34 @@ const fn o(
     desc: &'static str,
 ) -> OptDescr {
     OptDescr { shorts, longs, arg, placeholder, desc }
+}
+
+/// ShellCheck's own long options. Abbreviations and the `--help` column width
+/// are decided by these alone, so adding an extension cannot change what an
+/// existing `--ver` means or shift upstream's help text.
+const UPSTREAM_LONGS: [&str; 18] = [
+    "check-sourced",
+    "color",
+    "include",
+    "exclude",
+    "extended-analysis",
+    "format",
+    "list-optional",
+    "norc",
+    "rcfile",
+    "enable",
+    "source-path",
+    "shell",
+    "severity",
+    "version",
+    "wiki-link-count",
+    "external-sources",
+    "help",
+    "files-from",
+];
+
+fn is_upstream(d: &OptDescr) -> bool {
+    d.longs.iter().any(|l| UPSTREAM_LONGS.contains(l))
 }
 
 pub fn options() -> Vec<OptDescr> {
@@ -152,11 +180,14 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["output"], Req("output"), "FORMAT:PATH", "Also write a FORMAT report to PATH (repeatable)"),
         o("", &["completions"], Req("completions"), "SHELL", "Print a shell completion script (bash, zsh, fish)"),
         o("", &["cache-dir"], Req("cache-dir"), "PATH", "Reuse results for unchanged files, kept in PATH"),
+        o("", &["fallback-shell"], Req("fallback-shell"), "SHELL", "Assume SHELL for scripts that do not name a shell"),
+        o("", &["infer-shell-from-name"], No("infer-shell-from-name"), "", "Guess the shell from names like .bashrc"),
+        o("", &["skip-unsupported-shebang"], No("skip-unsupported-shebang"), "", "Skip files with no usable shell, as clean"),
     ]
 }
 
 // "Output format (" ++ formatList ++ ")"
-const FORMAT_DESC: &str = "Output format (checkstyle, diff, gcc, json, json1, quiet, sarif, tty)";
+const FORMAT_DESC: &str = "Output format (checkstyle, diff, gcc, github, json, json1, quiet, sarif, tty)";
 
 /// GetOpt `usageInfo`
 pub fn usage_info(header: &str, opts: &[&OptDescr]) -> String {
@@ -185,7 +216,8 @@ pub fn usage_info(header: &str, opts: &[&OptDescr]) -> String {
         })
         .collect();
     let w1 = rows.iter().map(|r| r.0.chars().count()).max().unwrap_or(0);
-    let w2 = rows.iter().map(|r| r.1.chars().count()).max().unwrap_or(0);
+    // Upstream's rows alone set the width; a longer extension just overflows it.
+    let w2 = rows.iter().zip(opts).filter(|(_, d)| is_upstream(d)).map(|(r, _)| r.1.chars().count()).max().unwrap_or(0);
     let mut s = format!("{}\n", header);
     for (a, b, d) in rows {
         s.push_str(&format!("  {:<w1$}  {:<w2$}  {}\n", a, b, d, w1 = w1, w2 = w2));
@@ -310,10 +342,23 @@ fn long_opt(ls: &str, rs: &[String], optdescr: &[OptDescr]) -> (Opt, usize, Opti
         None => (ls, ""),
     };
     let exact: Vec<&OptDescr> = optdescr.iter().filter(|d| d.longs.contains(&opt)).collect();
-    let options: Vec<&OptDescr> = if exact.is_empty() {
-        optdescr.iter().filter(|d| d.longs.iter().any(|l| l.starts_with(opt))).collect()
-    } else {
+    let prefixed = |upstream_only: bool| -> Vec<&OptDescr> {
+        optdescr
+            .iter()
+            .filter(|d| (!upstream_only || is_upstream(d)) && d.longs.iter().any(|l| l.starts_with(opt)))
+            .collect()
+    };
+    // An abbreviation ShellCheck accepts keeps its meaning; extensions only
+    // get the abbreviations ShellCheck has no use for.
+    let options: Vec<&OptDescr> = if !exact.is_empty() {
         exact
+    } else {
+        let upstream = prefixed(true);
+        if upstream.is_empty() {
+            prefixed(false)
+        } else {
+            upstream
+        }
     };
     let opt_str = format!("--{}", opt);
     let unreq = || (Opt::Unreq(format!("--{}", ls)), 0, None);

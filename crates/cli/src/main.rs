@@ -56,9 +56,7 @@ fn parse_file_list_lines(contents: &str) -> Vec<String> {
 }
 
 fn parse_arguments(argv: &[String]) -> Result<(Vec<Flag>, Vec<String>), Status> {
-    let (extra_flags, argv) = shell_inference::extract(argv);
-    let (mut opts, files, errors) = get_opt(&option_table(), &argv);
-    opts.extend(extra_flags);
+    let (opts, files, errors) = get_opt(&option_table(), argv);
     if errors.is_empty() {
         Ok((opts, files))
     } else {

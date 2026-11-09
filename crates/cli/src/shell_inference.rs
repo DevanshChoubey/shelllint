@@ -2,17 +2,11 @@
 // Extensions beyond ShellCheck: `--fallback-shell`, `--infer-shell-from-name`
 // and `--skip-unsupported-shebang`. Everything here is only reached when one
 // of them is given, so default behaviour is untouched.
-//
-// DIVERGENCE: the three flags are matched by their exact long names (no
-// getopt prefix abbreviations, not listed in `--help`), so that existing
-// abbreviations such as `--in` keep meaning `--include`.
 
 use shelllint_checker::shell_from_filename;
 use shelllint_core::astlib::executable_from_shebang;
 use shelllint_core::data::shell_for_executable;
 use shelllint_core::interface::{Shell, SystemInterface};
-
-use crate::options::Flag;
 
 #[derive(Clone, Debug, Default)]
 pub struct ShellInference {
@@ -28,37 +22,6 @@ impl ShellInference {
     fn active(&self) -> bool {
         self.fallback.is_some() || self.infer_from_name || self.skip_unsupported
     }
-}
-
-/// Pulls the new flags out of `argv` (up to a `--`), returning them as
-/// `Flag`s plus the remaining arguments for getopt.
-pub fn extract(argv: &[String]) -> (Vec<Flag>, Vec<String>) {
-    let mut flags = vec![];
-    let mut rest = vec![];
-    let mut i = 0;
-    while i < argv.len() {
-        let a = &argv[i];
-        i += 1;
-        if a == "--" {
-            rest.push(a.clone());
-            rest.extend(argv[i..].iter().cloned());
-            break;
-        }
-        match a.as_str() {
-            "--infer-shell-from-name" => flags.push(Flag("infer-shell-from-name".into(), "true".into())),
-            "--skip-unsupported-shebang" => flags.push(Flag("skip-unsupported-shebang".into(), "true".into())),
-            "--fallback-shell" => {
-                let v = argv.get(i).cloned().unwrap_or_default();
-                i = (i + 1).min(argv.len());
-                flags.push(Flag("fallback-shell".into(), v));
-            }
-            _ => match a.strip_prefix("--fallback-shell=") {
-                Some(v) => flags.push(Flag("fallback-shell".into(), v.to_string())),
-                None => rest.push(a.clone()),
-            },
-        }
-    }
-    (flags, rest)
 }
 
 pub enum Decision {

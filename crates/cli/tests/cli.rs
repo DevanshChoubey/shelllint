@@ -78,13 +78,16 @@ const EXTENSION_HELP: &str = concat!(
     "                      --output=FORMAT:PATH       Also write a FORMAT report to PATH (repeatable)\n",
     "                      --completions=SHELL        Print a shell completion script (bash, zsh, fish)\n",
     "                      --cache-dir=PATH           Reuse results for unchanged files, kept in PATH\n",
+    "                      --fallback-shell=SHELL     Assume SHELL for scripts that do not name a shell\n",
+    "                      --infer-shell-from-name    Guess the shell from names like .bashrc\n",
+    "                      --skip-unsupported-shebang  Skip files with no usable shell, as clean\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
 /// with the extensions after upstream's options.
 fn expected_help() -> String {
-    // sarif is an extension format, so the format list differs from upstream's.
-    let oracle = include_str!("help.txt").replace("json1, quiet, tty)", "json1, quiet, sarif, tty)");
+    // github and sarif are extension formats, so the format list differs from upstream's.
+    let oracle = include_str!("help.txt").replace("gcc, json, json1, quiet, tty)", "gcc, github, json, json1, quiet, sarif, tty)");
     let body = oracle.strip_suffix('\n').unwrap();
     format!("{}{}\n", body, EXTENSION_HELP)
 }
@@ -148,6 +151,9 @@ fn every_help_flag_is_accepted() {
         ("--fix", &["--fix", "--files-from=/dev/null"]),
         ("--dry-run", &["--fix", "--dry-run", "--files-from=/dev/null"]),
         ("--verbose", &["--verbose", "-"]),
+        ("--fallback-shell", &["--fallback-shell=bash", "-"]),
+        ("--infer-shell-from-name", &["--infer-shell-from-name", "-"]),
+        ("--skip-unsupported-shebang", &["--skip-unsupported-shebang", "-"]),
         ("--dump-ast", &["--dump-ast", "--files-from=/dev/null"]),
         ("--summary", &["--summary", "--files-from=/dev/null"]),
         ("--fail-fast", &["--fail-fast", "--files-from=/dev/null"]),
@@ -228,7 +234,7 @@ fn bad_option_messages_match_oracle() {
     );
     assert_eq!(
         run(&["-f", "nope", "-"], "").stderr,
-        "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  json\n  json1\n  quiet\n  sarif\n  tty\n"
+        "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  github\n  json\n  json1\n  quiet\n  sarif\n  tty\n"
     );
     assert_eq!(run(&["-s", "zsh", "-"], "").stderr, "Unknown shell: zsh\n");
     assert_eq!(run(&["-W", "x", "-"], "").stderr, "Invalid number: x\n");
@@ -623,4 +629,18 @@ fn allocation_failure_exits_251_with_message() {
     let _ = std::fs::remove_dir_all(&d);
     assert_eq!(o.status.code(), Some(251));
     assert_eq!(String::from_utf8_lossy(&o.stderr), "shelllint: out of memory\n");
+}
+
+// Extensions must not steal abbreviations ShellCheck accepts.
+#[test]
+fn abbreviations_keep_their_upstream_meaning() {
+    assert_eq!(run(&["--ver"], "").stdout, run(&["-V"], "").stdout);
+    assert_eq!(run(&["--list"], "").stdout, run(&["--list-optional"], "").stdout);
+    assert_eq!(run(&["--in=SC2086", "-"], CLEAN).code, 0);
+    // "--c" is ambiguous upstream, between exactly these two.
+    let o = run(&["--c", "-"], CLEAN);
+    assert!(o.stderr.contains("--check-sourced") && o.stderr.contains("--color"), "{}", o.stderr);
+    assert!(!o.stderr.contains("--cache-dir"), "{}", o.stderr);
+    // Abbreviations ShellCheck has no use for still reach extensions.
+    assert_eq!(run(&["--verb", "-"], CLEAN).code, 0);
 }
