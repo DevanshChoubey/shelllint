@@ -6,10 +6,7 @@ use shelllint_core::interface::{Code, Shell};
 
 fn codes(script: &str) -> Vec<Code> {
     // Only the codes these tests are about; 1107/1073/... must never show up.
-    check_script_codes(script, Some(Shell::Bash))
-        .into_iter()
-        .filter(|c| !matches!(c, 2154 | 2250 | 2248))
-        .collect()
+    check_script_codes(script, Some(Shell::Bash)).into_iter().filter(|c| !matches!(c, 2154 | 2250 | 2248)).collect()
 }
 
 #[test]
@@ -25,7 +22,8 @@ fn start_end_range() {
 
 #[test]
 fn multiple_codes_and_all() {
-    let s = "#!/bin/bash\n# shellcheck disable-start=SC2086,SC2034\nx=1\necho $b\n# shellcheck disable-end=all\necho $d\n";
+    let s =
+        "#!/bin/bash\n# shellcheck disable-start=SC2086,SC2034\nx=1\necho $b\n# shellcheck disable-end=all\necho $d\n";
     assert_eq!(codes(s), vec![2086]);
     let s = "#!/bin/bash\n# shellcheck disable-start=all\nx=1\necho $b\n# shellcheck disable-end=all\necho $d\n";
     assert_eq!(codes(s), vec![2086]);

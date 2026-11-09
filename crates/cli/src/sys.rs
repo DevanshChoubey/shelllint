@@ -302,7 +302,11 @@ pub fn quiet_rc_text(rcfile: Option<&str>, filename: &str) -> Option<(String, St
     // consume what the real read later needs. (So `color=` in such an rc file
     // is not applied.)
     let is_regular = |p: &String| std::fs::metadata(p).map(|m| m.is_file()).unwrap_or(false);
-    paths.iter().find(|p| does_file_exist(p)).filter(|p| is_regular(p)).and_then(|p| input_file(p).ok().map(|r| (p.clone(), r.0)))
+    paths
+        .iter()
+        .find(|p| does_file_exist(p))
+        .filter(|p| is_regular(p))
+        .and_then(|p| input_file(p).ok().map(|r| (p.clone(), r.0)))
 }
 
 fn dir_of(path: &str) -> String {
@@ -537,7 +541,11 @@ impl SystemInterface for IoInterface {
         };
         // DIVERGENCE: `--source-from-path` (not in ShellCheck): a bare filename the
         // normal search did not find is looked up on `$PATH`, like bash's `source`.
-        if self.source_from_path && found == original && !does_file_exist(original) && !original.contains(is_path_separator) {
+        if self.source_from_path
+            && found == original
+            && !does_file_exist(original)
+            && !original.contains(is_path_separator)
+        {
             if let Some(path) = std::env::var_os("PATH") {
                 for dir in std::env::split_paths(&path) {
                     let dir = if dir.as_os_str().is_empty() { PathBuf::from(".") } else { dir };

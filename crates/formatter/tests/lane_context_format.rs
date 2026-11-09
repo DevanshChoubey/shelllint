@@ -57,21 +57,15 @@ fn default_is_five_lines_and_zero_is_allowed() {
 #[test]
 fn clamps_at_file_start_and_end() {
     let start = run(SCRIPT, vec![finding(1, 1, Severity::ErrorC, 1008, "m")], Some(10));
-    assert_eq!(
-        start,
-        "t.sh:1:1: error: m [SC1008]\n1 | #!/bin/sh\n  | ^\n2 | x=1\n3 | echo $x\n4 | exit 0\n"
-    );
+    assert_eq!(start, "t.sh:1:1: error: m [SC1008]\n1 | #!/bin/sh\n  | ^\n2 | x=1\n3 | echo $x\n4 | exit 0\n");
     let end = run(SCRIPT, vec![finding(4, 8, Severity::StyleC, 9, "m")], Some(2));
     assert_eq!(end, "t.sh:4:8: style: m [SC9]\n2 | x=1\n3 | echo $x\n4 | exit 0\n  |        ^\n");
 }
 
 #[test]
 fn multiple_findings_are_separated_by_a_blank_line() {
-    let got = run(
-        SCRIPT,
-        vec![finding(2, 1, Severity::WarningC, 1, "a"), finding(4, 1, Severity::InfoC, 2, "b")],
-        Some(0),
-    );
+    let got =
+        run(SCRIPT, vec![finding(2, 1, Severity::WarningC, 1, "a"), finding(4, 1, Severity::InfoC, 2, "b")], Some(0));
     let want = "t.sh:2:1: warning: a [SC1]\n2 | x=1\n  | ^\n\nt.sh:4:1: info: b [SC2]\n4 | exit 0\n  | ^\n";
     assert_eq!(got, want);
 }

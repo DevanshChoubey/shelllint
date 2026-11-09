@@ -84,7 +84,9 @@ fn trailing_comment(line: &str) -> Option<usize> {
 impl DirectiveRanges {
     /// `None` when the script mentions no range directive at all.
     pub fn scan(contents: &str) -> Option<DirectiveRanges> {
-        if !contents.contains("disable-start") && !contents.contains("disable-end") && !contents.contains("disable-line")
+        if !contents.contains("disable-start")
+            && !contents.contains("disable-end")
+            && !contents.contains("disable-line")
         {
             return None;
         }

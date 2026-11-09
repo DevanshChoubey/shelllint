@@ -92,9 +92,7 @@ fn match_toks(p: &[Tok], s: &[char]) -> bool {
             }
         }
         Tok::Deep => (0..=s.len()).any(|i| match_toks(rest, &s[i..])),
-        Tok::DeepSlash => {
-            match_toks(rest, s) || (0..s.len()).any(|i| s[i] == '/' && match_toks(rest, &s[i + 1..]))
-        }
+        Tok::DeepSlash => match_toks(rest, s) || (0..s.len()).any(|i| s[i] == '/' && match_toks(rest, &s[i + 1..])),
     }
 }
 
@@ -319,8 +317,7 @@ pub fn changed_lines(rev: &str, files: &[String]) -> Result<ChangedLines, String
             map.insert(file.clone(), vec![(1, i64::MAX)]);
             continue;
         }
-        let (ok, diff, err) =
-            git(&dir, &["diff", "--unified=0", "--no-color", "--no-ext-diff", rev, "--", &base])?;
+        let (ok, diff, err) = git(&dir, &["diff", "--unified=0", "--no-color", "--no-ext-diff", rev, "--", &base])?;
         if !ok {
             return Err(format!("--changed-since: git diff failed for {}: {}", file, err));
         }

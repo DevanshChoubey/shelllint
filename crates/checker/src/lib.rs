@@ -8,8 +8,8 @@
 #![forbid(unsafe_code)]
 
 pub mod ast_dump;
-pub mod directive_ranges;
 pub mod directive_audit;
+pub mod directive_ranges;
 pub mod editorconfig;
 pub mod filepath;
 

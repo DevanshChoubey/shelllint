@@ -81,7 +81,11 @@ fn write_document(filename: &str, result: &ParseResult, out: &mut dyn Write) -> 
 }
 
 fn write_error(out: &mut dyn Write, pc: &PositionedComment) -> io::Result<()> {
-    write!(out, "{{\"line\":{},\"column\":{},\"code\":{},\"message\":", pc.start_pos.line, pc.start_pos.column, pc.comment.code)?;
+    write!(
+        out,
+        "{{\"line\":{},\"column\":{},\"code\":{},\"message\":",
+        pc.start_pos.line, pc.start_pos.column, pc.comment.code
+    )?;
     write_str(out, &pc.comment.message)?;
     out.write_all(b"}")
 }
@@ -189,18 +193,18 @@ fn write_str(out: &mut dyn Write, s: &str) -> io::Result<()> {
             '\r' => "\\r",
             '\t' => "\\t",
             c if (c as u32) < 0x20 => {
-                out.write_all(s[start..i].as_bytes())?;
+                out.write_all(&s.as_bytes()[start..i])?;
                 write!(out, "\\u{:04x}", c as u32)?;
                 start = i + 1;
                 continue;
             }
             _ => continue,
         };
-        out.write_all(s[start..i].as_bytes())?;
+        out.write_all(&s.as_bytes()[start..i])?;
         out.write_all(esc.as_bytes())?;
         start = i + c.len_utf8();
     }
-    out.write_all(s[start..].as_bytes())?;
+    out.write_all(&s.as_bytes()[start..])?;
     out.write_all(b"\"")
 }
 

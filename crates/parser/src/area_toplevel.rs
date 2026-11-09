@@ -241,9 +241,7 @@ impl<'a> P<'a> {
                     p.sep_by(
                         |p| {
                             let mut name: String = p
-                                .many1(|p| {
-                                    p.alt(|p| p.letter(), |p| p.alt(|p| p.digit(), |p| p.char_('_')))
-                                })?
+                                .many1(|p| p.alt(|p| p.letter(), |p| p.alt(|p| p.digit(), |p| p.char_('_'))))?
                                 .into_iter()
                                 .collect();
                             if p.alt(|p| p.char_('*').map(|_| true), |_| Ok(false))? {
@@ -261,10 +259,8 @@ impl<'a> P<'a> {
                 let names = self.annotation_plain_or_quoted(&|p| {
                     p.sep_by(
                         |p| {
-                            let name: String = p
-                                .many1(|p| p.alt(|p| p.alpha_num(), |p| p.one_of("_-.:")))?
-                                .into_iter()
-                                .collect();
+                            let name: String =
+                                p.many1(|p| p.alt(|p| p.alpha_num(), |p| p.one_of("_-.:")))?.into_iter().collect();
                             Ok(name)
                         },
                         |p| p.char_(','),
@@ -799,9 +795,7 @@ impl<'a> P<'a> {
         let contents = self.env.system_interface.get_config(filename);
         match contents {
             None => Ok(vec![]),
-            Some((file, str)) => {
-                read_config(self, &file, &str).map(|a| crate::rcdir::expand_rcdir(&file, a))
-            }
+            Some((file, str)) => read_config(self, &file, &str).map(|a| crate::rcdir::expand_rcdir(&file, a)),
         }
     }
 

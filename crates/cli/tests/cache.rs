@@ -179,8 +179,7 @@ fn result_affecting_options_miss() {
         run_in(&d.0, &args)
     };
     cached(&[]);
-    let mut seen = d.entries().len();
-    assert_eq!(seen, 1);
+    assert_eq!(d.entries().len(), 1);
     for extra in [
         "--ignore-directives",
         "--report-unused-disables",
@@ -190,9 +189,9 @@ fn result_affecting_options_miss() {
         "--source-functions=load",
         "--source-from-path",
     ] {
+        let before = d.entries().len();
         let hit_or_miss = cached(&[extra]);
-        assert_eq!(d.entries().len(), seen + 1, "{} shared an entry", extra);
-        seen += 1;
+        assert_eq!(d.entries().len(), before + 1, "{} shared an entry", extra);
         assert_eq!(hit_or_miss, run_in(&d.0, &["--norc", "-f", "gcc", extra, "t.sh"]), "{}", extra);
     }
 }

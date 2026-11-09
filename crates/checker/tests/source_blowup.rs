@@ -27,12 +27,7 @@ fn mutually_sourcing_scripts_finish_quickly() {
     let files = mutual_scripts(8);
     let main = files[0].1.clone();
     let sys = mocked_system_interface(files);
-    let spec = CheckSpec {
-        filename: "s1.sh".to_string(),
-        script: main,
-        check_sourced: true,
-        ..empty_check_spec()
-    };
+    let spec = CheckSpec { filename: "s1.sh".to_string(), script: main, check_sourced: true, ..empty_check_spec() };
     let start = Instant::now();
     let result = check_script(&sys, &spec);
     let elapsed = start.elapsed();

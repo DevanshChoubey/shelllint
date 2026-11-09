@@ -36,10 +36,7 @@ fn without_the_flags_nothing_changes() {
 fn ignore_directives_shows_suppressed_warnings() {
     let o = run(&["-f", "gcc", "--ignore-directives", "-"], SCRIPT);
     assert_eq!(o.code, 1);
-    assert_eq!(
-        o.stdout,
-        "-:3:6: note: Double quote to prevent globbing and word splitting. [SC2086]\n"
-    );
+    assert_eq!(o.stdout, "-:3:6: note: Double quote to prevent globbing and word splitting. [SC2086]\n");
 }
 
 #[test]

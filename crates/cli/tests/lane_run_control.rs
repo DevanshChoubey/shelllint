@@ -103,12 +103,7 @@ fn summary_goes_to_stderr_and_leaves_stdout_alone() {
         assert_eq!(with.code, plain.code, "exit code differs for {}", fmt);
         assert_eq!(plain.stderr, "", "{}", fmt);
         if fmt != "quiet" {
-            assert_eq!(
-                with.stderr,
-                "4 file(s) checked: 1 error(s), 1 warning(s), 1 info(s), 0 style(s)\n",
-                "{}",
-                fmt
-            );
+            assert_eq!(with.stderr, "4 file(s) checked: 1 error(s), 1 warning(s), 1 info(s), 0 style(s)\n", "{}", fmt);
         }
     }
 }

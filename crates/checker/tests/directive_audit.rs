@@ -160,7 +160,8 @@ fn disabled_optional_checks_do_not_make_a_directive_look_unused() {
     // A range or `all` that contains a disabled optional check is not judged either.
     assert_eq!(codes(auditing("#!/bin/sh\n# shellcheck disable=all\necho hi\n")), vec![]);
     // Enabled by a directive in the file.
-    let by_directive = format!("#!/bin/sh\n# shellcheck enable={}\n# shellcheck disable=SC2248\necho hi\n", optional.name);
+    let by_directive =
+        format!("#!/bin/sh\n# shellcheck enable={}\n# shellcheck disable=SC2248\necho hi\n", optional.name);
     assert_eq!(codes(auditing(&by_directive)), vec![(3, UNUSED)]);
 }
 

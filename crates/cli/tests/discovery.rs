@@ -15,7 +15,11 @@ struct Out {
 
 fn tmp() -> PathBuf {
     static N: AtomicUsize = AtomicUsize::new(0);
-    let d = std::env::temp_dir().join(format!("shelllint-discovery-{}-{}", std::process::id(), N.fetch_add(1, Ordering::SeqCst)));
+    let d = std::env::temp_dir().join(format!(
+        "shelllint-discovery-{}-{}",
+        std::process::id(),
+        N.fetch_add(1, Ordering::SeqCst)
+    ));
     let _ = fs::remove_dir_all(&d);
     fs::create_dir_all(&d).unwrap();
     d

@@ -16,7 +16,10 @@ fn run_in(dir: &std::path::Path, args: &[&str]) -> (i32, String) {
         .stdin(Stdio::null())
         .output()
         .unwrap();
-    (o.status.code().unwrap_or(-1), String::from_utf8_lossy(&o.stdout).into_owned() + &String::from_utf8_lossy(&o.stderr))
+    (
+        o.status.code().unwrap_or(-1),
+        String::from_utf8_lossy(&o.stdout).into_owned() + &String::from_utf8_lossy(&o.stderr),
+    )
 }
 
 /// Layout: root/.shellcheckrc, root/lib/helper.sh (unused var is only seen when

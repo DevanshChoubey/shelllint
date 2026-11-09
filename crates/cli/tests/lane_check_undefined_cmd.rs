@@ -11,6 +11,8 @@ fn path_dir(tag: &str, tools: &[(&str, bool)]) -> std::path::PathBuf {
     for (name, exec) in tools {
         let f = dir.join(name);
         std::fs::write(&f, "#!/bin/sh\n").unwrap();
+        #[cfg(not(unix))]
+        let _ = exec;
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;

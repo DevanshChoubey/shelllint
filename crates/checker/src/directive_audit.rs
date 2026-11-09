@@ -178,7 +178,8 @@ pub fn unused_disable_reports(
         if !anns.iter().any(|a| matches!(a, shelllint_core::ast::Annotation::DisableComment(..))) {
             continue;
         }
-        let (Some((a_start, a_end)), Some((c_start, c_end))) = (parsed.token_positions(id), parsed.token_positions(*child))
+        let (Some((a_start, a_end)), Some((c_start, c_end))) =
+            (parsed.token_positions(id), parsed.token_positions(*child))
         else {
             continue;
         };
@@ -247,7 +248,8 @@ mod tests {
 
     #[test]
     fn scans_elements() {
-        let d = scan_line("  # shellcheck disable=SC2086,2034 source=x.sh disable=\"SC1000-SC1010,all\" # why").unwrap();
+        let d =
+            scan_line("  # shellcheck disable=SC2086,2034 source=x.sh disable=\"SC1000-SC1010,all\" # why").unwrap();
         let labels: Vec<&str> = d.elements.iter().map(|e| e.label.as_str()).collect();
         assert_eq!(labels, ["SC2086", "SC2034", "SC1000-SC1010", "all"]);
         assert_eq!(d.column, 3);

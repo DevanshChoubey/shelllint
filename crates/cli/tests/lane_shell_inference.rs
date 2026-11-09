@@ -88,7 +88,9 @@ fn unknown_fallback_shell_is_rejected() {
 
 #[test]
 fn infer_from_name() {
-    for name in [".bashrc", ".bash_profile", ".bash_login", ".bash_logout", ".bash_aliases", "x.bash", ".kshrc", "x.ksh"] {
+    for name in
+        [".bashrc", ".bash_profile", ".bash_login", ".bash_logout", ".bash_aliases", "x.bash", ".kshrc", "x.ksh"]
+    {
         let f = file(name, BASHISM);
         let plain = run(&["--norc", "-f", "gcc", &f]);
         // .ksh/.bash suffixes are already handled by the checker (no SC2148); the rest report it.
@@ -113,7 +115,9 @@ fn infer_precedes_fallback_but_not_shebang() {
     let f = file(".bashrc", BASHISM);
     assert_clean(&run(&["--norc", "--infer-shell-from-name", "--fallback-shell=sh", &f]));
     let f = file(".profile", BASHISM);
-    assert!(run(&["--norc", "-f", "gcc", "--infer-shell-from-name", "--fallback-shell=bash", &f]).stdout.contains("SC3057"));
+    assert!(
+        run(&["--norc", "-f", "gcc", "--infer-shell-from-name", "--fallback-shell=bash", &f]).stdout.contains("SC3057")
+    );
     // fallback applies where the name tells nothing
     let f = file("plain", BASHISM);
     assert_clean(&run(&["--norc", "--infer-shell-from-name", "--fallback-shell=bash", &f]));

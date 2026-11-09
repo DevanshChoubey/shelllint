@@ -7,6 +7,9 @@
 // `#[ignore = "needs <check>"]`; that includes `null` results that would
 // pass vacuously without the check.
 
+// The EditorConfig mock is keyed by POSIX paths, so its tests are Unix-only.
+#![cfg_attr(not(unix), allow(dead_code, unused_imports))]
+
 use shelllint_checker::editorconfig::{
     EditorConfigFs, editor_config_directives, get_editor_config, invalid_directive_lines, invalid_root_lines,
     is_editor_config_rejection, is_editor_config_root, matches_glob, merge_configs, parse_editor_config,

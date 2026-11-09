@@ -2,9 +2,7 @@
 // Tests for `safe-vars` and `strict-env-vars` (an extension beyond upstream).
 
 use shelllint_checker::check_script;
-use shelllint_core::interface::{
-    CheckSpec, Code, empty_check_spec, mock_rc_file, mocked_system_interface,
-};
+use shelllint_core::interface::{CheckSpec, Code, empty_check_spec, mock_rc_file, mocked_system_interface};
 
 fn codes(rc: Option<&str>, spec: CheckSpec) -> Vec<Code> {
     let sys = match rc {

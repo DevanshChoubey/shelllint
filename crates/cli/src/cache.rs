@@ -217,11 +217,24 @@ fn get_result(r: &mut Reader) -> Option<CheckResult> {
 enum Dep {
     /// `read_file(external, path)`: `Ok(hash of the contents)` or the policy
     /// refusal message.
-    Read { external: Option<bool>, path: String, outcome: Result<u128, String> },
-    FindSource { current: String, external: Option<bool>, source_paths: Vec<String>, name: String, found: String },
+    Read {
+        external: Option<bool>,
+        path: String,
+        outcome: Result<u128, String>,
+    },
+    FindSource {
+        current: String,
+        external: Option<bool>,
+        source_paths: Vec<String>,
+        name: String,
+        found: String,
+    },
     /// `get_config(file)`: `(name, hash of the contents)` of the rc or
     /// editorconfig in effect.
-    Config { file: String, found: Option<(String, u128)> },
+    Config {
+        file: String,
+        found: Option<(String, u128)>,
+    },
 }
 
 fn put_dep(w: &mut Writer, d: &Dep) {
@@ -519,11 +532,7 @@ fn store(path: &Path, bytes: &[u8]) {
     if std::fs::create_dir_all(dir).is_err() {
         return;
     }
-    let tmp = dir.join(format!(
-        ".tmp-{}-{}",
-        std::process::id(),
-        TMP_COUNTER.fetch_add(1, Ordering::Relaxed)
-    ));
+    let tmp = dir.join(format!(".tmp-{}-{}", std::process::id(), TMP_COUNTER.fetch_add(1, Ordering::Relaxed)));
     if std::fs::write(&tmp, bytes).is_err() || std::fs::rename(&tmp, path).is_err() {
         let _ = std::fs::remove_file(&tmp);
     }

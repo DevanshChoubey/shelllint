@@ -19,8 +19,11 @@ struct Dir(PathBuf);
 
 impl Dir {
     fn new() -> Dir {
-        let d = std::env::temp_dir()
-            .join(format!("shelllint-cfg-{}-{}", std::process::id(), N.fetch_add(1, Ordering::SeqCst)));
+        let d = std::env::temp_dir().join(format!(
+            "shelllint-cfg-{}-{}",
+            std::process::id(),
+            N.fetch_add(1, Ordering::SeqCst)
+        ));
         std::fs::create_dir_all(d.join("home")).unwrap();
         std::fs::create_dir_all(d.join("work")).unwrap();
         Dir(d)
@@ -278,7 +281,10 @@ fn external_vars_rc_and_directive_add_up() {
     let o = d.run(&["b.sh"], true);
     assert!(codes_2154(&o).is_empty(), "{}", o.stdout);
     // all three sources together
-    d.write("c.sh", "#!/bin/sh\n# shellcheck external-vars=ci_name,ci_other\necho \"$ci_name $ci_other $plain $zed\"\n");
+    d.write(
+        "c.sh",
+        "#!/bin/sh\n# shellcheck external-vars=ci_name,ci_other\necho \"$ci_name $ci_other $plain $zed\"\n",
+    );
     let o = d.run(&["--external-vars=zed", "c.sh"], true);
     assert!(codes_2154(&o).is_empty(), "{}", o.stdout);
 }
@@ -358,10 +364,7 @@ fn nix_shell_loses_to_shell_flag_and_directive() {
     let o = d.run(&["--shell=dash", "a.sh"], true);
     assert!(has(&o, 3030) || has(&o, 3054), "{}", o.stdout);
     assert!(!has(&o, 1008));
-    d.write(
-        "b.sh",
-        &nix("#!/usr/bin/env nix-shell", "#! nix-shell -i bash\n# shellcheck shell=dash\nx=(1 2)\n"),
-    );
+    d.write("b.sh", &nix("#!/usr/bin/env nix-shell", "#! nix-shell -i bash\n# shellcheck shell=dash\nx=(1 2)\n"));
     let o = d.run(&["b.sh"], true);
     assert!(has(&o, 3030) || has(&o, 3054), "{}", o.stdout);
 }

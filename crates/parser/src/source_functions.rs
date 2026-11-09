@@ -27,17 +27,11 @@ impl<'a> P<'a> {
         let ast = &self.user.ast;
         let literal_first = match ast.get(t) {
             Token::T_Redirecting(_, sc) => match ast.get(*sc) {
-                Token::T_SimpleCommand(_, words) => {
-                    words.get(1).is_some_and(|w| get_literal_string(ast, *w).is_some())
-                }
+                Token::T_SimpleCommand(_, words) => words.get(1).is_some_and(|w| get_literal_string(ast, *w).is_some()),
                 _ => false,
             },
             _ => false,
         };
-        if literal_first || self.get_source_override().is_some() {
-            self.read_source(t)
-        } else {
-            Ok(t)
-        }
+        if literal_first || self.get_source_override().is_some() { self.read_source(t) } else { Ok(t) }
     }
 }

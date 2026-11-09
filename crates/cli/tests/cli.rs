@@ -101,7 +101,10 @@ const EXTENSION_HELP: &str = concat!(
 /// with the extensions after upstream's options.
 fn expected_help() -> String {
     // context, github and sarif are extension formats, so the format list differs from upstream's.
-    let oracle = include_str!("help.txt").replace("(checkstyle, diff, gcc, json, json1, quiet, tty)", "(checkstyle, context, diff, gcc, github, json, json1, quiet, sarif, tty)");
+    let oracle = include_str!("help.txt").replace(
+        "(checkstyle, diff, gcc, json, json1, quiet, tty)",
+        "(checkstyle, context, diff, gcc, github, json, json1, quiet, sarif, tty)",
+    );
     let body = oracle.strip_suffix('\n').unwrap();
     format!("{}{}\n", body, EXTENSION_HELP)
 }
@@ -666,6 +669,8 @@ fn abbreviations_keep_their_upstream_meaning() {
     assert_eq!(run(&["--ver"], "").stdout, run(&["-V"], "").stdout);
     assert_eq!(run(&["--list"], "").stdout, run(&["--list-optional"], "").stdout);
     assert_eq!(run(&["--in=SC2086", "-"], CLEAN).code, 0);
+    // Extensions named --source-* must not make this ambiguous.
+    assert_eq!(run(&["--source=/tmp", "-"], CLEAN).code, 0);
     // "--c" is ambiguous upstream, between exactly these two.
     let o = run(&["--c", "-"], CLEAN);
     // The full usage text follows; only the candidates matter here.

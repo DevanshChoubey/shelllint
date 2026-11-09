@@ -42,7 +42,11 @@ fn run(args: &[&str], stdin: &str) -> Out {
 static N: AtomicUsize = AtomicUsize::new(0);
 
 fn tmpdir() -> PathBuf {
-    let d = std::env::temp_dir().join(format!("shelllint-outfeat-{}-{}", std::process::id(), N.fetch_add(1, Ordering::SeqCst)));
+    let d = std::env::temp_dir().join(format!(
+        "shelllint-outfeat-{}-{}",
+        std::process::id(),
+        N.fetch_add(1, Ordering::SeqCst)
+    ));
     std::fs::create_dir_all(&d).unwrap();
     std::fs::canonicalize(d).unwrap()
 }
@@ -114,14 +118,10 @@ fn sarif_is_valid_sarif_json() {
             reg["endLine"].as_i64().unwrap(),
             reg["endColumn"].as_i64().unwrap(),
         ));
-        let sev = j1["comments"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|c| format!("SC{}", c["code"]) == id)
-            .unwrap()["level"]
-            .as_str()
-            .unwrap();
+        let sev =
+            j1["comments"].as_array().unwrap().iter().find(|c| format!("SC{}", c["code"]) == id).unwrap()["level"]
+                .as_str()
+                .unwrap();
         let want = if sev == "error" || sev == "warning" { sev } else { "note" };
         assert_eq!(r["level"], want);
         let idx = r["ruleIndex"].as_u64().unwrap() as usize;
@@ -206,7 +206,12 @@ fn stdin_filename_names_the_script_in_every_format() {
         let o = run(&["-f", fmt, "--stdin-filename=some/where.sh", "-"], WARN);
         assert_eq!(o.code, 1, "{}: {}", fmt, o.stderr);
         assert!(o.stdout.contains(needle), "{}: {}", fmt, o.stdout);
-        assert!(!o.stdout.contains("'-'") && !o.stdout.contains("\"-\"") && !o.stdout.contains("- line"), "{}: {}", fmt, o.stdout);
+        assert!(
+            !o.stdout.contains("'-'") && !o.stdout.contains("\"-\"") && !o.stdout.contains("- line"),
+            "{}: {}",
+            fmt,
+            o.stdout
+        );
     }
     // The diff format also uses the name.
     let o = run(&["-f", "diff", "--stdin-filename=some/where.sh", "-"], "#!/bin/sh\necho `date`\n");

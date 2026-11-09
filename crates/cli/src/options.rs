@@ -75,7 +75,8 @@ pub fn default_options() -> Options {
 pub const USAGE_HEADER: &str = "Usage: shellcheck [OPTIONS...] FILES...";
 
 /// The formats shellcheck.hs registers (`Map.keys`, so sorted).
-pub const FORMAT_NAMES: [&str; 10] = ["checkstyle", "context", "diff", "gcc", "github", "json", "json1", "quiet", "sarif", "tty"];
+pub const FORMAT_NAMES: [&str; 10] =
+    ["checkstyle", "context", "diff", "gcc", "github", "json", "json1", "quiet", "sarif", "tty"];
 
 #[derive(Clone, Copy)]
 pub enum ArgDescr {
@@ -185,7 +186,13 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["context"], Req("context"), "N", "With -f context, lines of source around each finding (default 5)"),
         o("", &["dry-run"], No("dry-run"), "", "With --fix, print the fixes as a diff (like -f diff) instead"),
         o("", &["verbose"], No("verbose"), "", "Print the file and the .shellcheckrc used for it to stderr"),
-        o("", &["list-checks"], Opt("list-checks", "text"), "text|json", "List the optional checks and what is known about codes"),
+        o(
+            "",
+            &["list-checks"],
+            Opt("list-checks", "text"),
+            "text|json",
+            "List the optional checks and what is known about codes",
+        ),
         o("", &["dump-ast"], No("dump-ast"), "", "Print each file's parsed AST as JSON instead of the report"),
         o("", &["summary"], No("summary"), "", "Print finding counts and files checked to stderr after the report"),
         o("", &["fail-fast"], No("fail-fast"), "", "Stop after the first file with findings"),
@@ -195,7 +202,13 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["cache-dir"], Req("cache-dir"), "PATH", "Reuse results for unchanged files, kept in PATH"),
         o("", &["fallback-shell"], Req("fallback-shell"), "SHELL", "Assume SHELL for scripts that do not name a shell"),
         o("", &["infer-shell-from-name"], No("infer-shell-from-name"), "", "Guess the shell from names like .bashrc"),
-        o("", &["skip-unsupported-shebang"], No("skip-unsupported-shebang"), "", "Skip files with no usable shell, as clean"),
+        o(
+            "",
+            &["skip-unsupported-shebang"],
+            No("skip-unsupported-shebang"),
+            "",
+            "Skip files with no usable shell, as clean",
+        ),
         o("r", &["recursive"], No("recursive"), "", "Check the shell scripts found in directories among FILES"),
         o("", &["exclude-path"], Req("exclude-path"), "GLOB", "Skip paths matching GLOB (repeatable)"),
         o(
@@ -205,7 +218,13 @@ pub fn options() -> Vec<OptDescr> {
             "REF",
             "Report only findings on lines changed since REF (default HEAD)",
         ),
-        o("", &["strict-rc"], No("strict-rc"), "", "Make unknown .shellcheckrc keys, bad shell values and an unreadable --rcfile errors"),
+        o(
+            "",
+            &["strict-rc"],
+            No("strict-rc"),
+            "",
+            "Make unknown .shellcheckrc keys, bad shell values and an unreadable --rcfile errors",
+        ),
         o(
             "",
             &["external-vars"],
@@ -222,7 +241,13 @@ pub fn options() -> Vec<OptDescr> {
             "Follow calls to these functions (comma separated) like 'source'",
         ),
         o("", &["source-from-path"], No("source-from-path"), "", "Look up a bare sourced filename on $PATH"),
-        o("", &["modern-dialects"], No("modern-dialects"), "", "Accept newer shell features (POSIX.1-2024, ash, bash 5.1)"),
+        o(
+            "",
+            &["modern-dialects"],
+            No("modern-dialects"),
+            "",
+            "Accept newer shell features (POSIX.1-2024, ash, bash 5.1)",
+        ),
         o("", &["ignore-directives"], No("ignore-directives"), "", "Don't honour 'disable=' directives in files"),
         o(
             "",
@@ -404,11 +429,7 @@ fn long_opt(ls: &str, rs: &[String], optdescr: &[OptDescr]) -> (Opt, usize, Opti
         exact
     } else {
         let upstream = prefixed(true);
-        if upstream.is_empty() {
-            prefixed(false)
-        } else {
-            upstream
-        }
+        if upstream.is_empty() { prefixed(false) } else { upstream }
     };
     let opt_str = format!("--{}", opt);
     let unreq = || (Opt::Unreq(format!("--{}", ls)), 0, None);

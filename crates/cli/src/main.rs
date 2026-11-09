@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck shellcheck.hs (e11f964)
 
-mod dump_ast;
-mod completions;
 mod cache;
+mod completions;
 mod discover;
+mod dump_ast;
 mod fix;
 mod list_checks;
 mod oom;
 mod options;
-mod shell_inference;
-mod run_control;
 mod rcstrict;
+mod run_control;
+mod shell_inference;
 mod sys;
 mod verbose;
 
 use std::io::Write;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::process::exit;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use shelllint_checker::{check_script_owned, optional_checks};
 use shelllint_core::data::{SHELLCHECK_VERSION, shell_for_executable};
@@ -296,7 +296,11 @@ fn tee_outputs(primary: Box<dyn Formatter>, options: &Options) -> Result<Box<dyn
         match std::fs::File::create(path) {
             Ok(file) => outputs.push(OutputFile { format: formatter, path: path.clone(), file, buf: vec![] }),
             Err(e) => {
-                print_err(&format!("Could not write output file: {}: {}", path, sys::show_io_error_in("openFile", path, &e)));
+                print_err(&format!(
+                    "Could not write output file: {}: {}",
+                    path,
+                    sys::show_io_error_in("openFile", path, &e)
+                ));
                 return Err(Status::RuntimeException);
             }
         }
@@ -312,7 +316,12 @@ impl Formatter for Tee {
         }
     }
 
-    fn on_result(&mut self, r: &shelllint_core::interface::CheckResult, sys: &dyn SystemInterface, out: &mut dyn Write) {
+    fn on_result(
+        &mut self,
+        r: &shelllint_core::interface::CheckResult,
+        sys: &dyn SystemInterface,
+        out: &mut dyn Write,
+    ) {
         self.primary.on_result(r, sys, out);
         for o in &mut self.outputs {
             o.format.on_result(r, sys, &mut o.buf);
@@ -331,7 +340,11 @@ impl Formatter for Tee {
         for o in &mut self.outputs {
             o.format.footer(&mut o.buf);
             if let Err(e) = o.file.write_all(&o.buf).and_then(|_| o.file.flush()) {
-                print_err(&format!("Could not write output file: {}: {}", o.path, sys::show_io_error_in("write", &o.path, &e)));
+                print_err(&format!(
+                    "Could not write output file: {}: {}",
+                    o.path,
+                    sys::show_io_error_in("write", &o.path, &e)
+                ));
                 OUTPUT_FAILED.store(true, Ordering::SeqCst);
             }
         }
@@ -429,14 +442,14 @@ fn process_file(
     let findings = tally.record(&result);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
     // means shellcheck cannot apply the requested configuration.
-    let status = if result.comments.iter().any(|pc| pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig"))
-    {
-        Status::SupportFailure
-    } else if result.comments.is_empty() {
-        Status::NoProblems
-    } else {
-        Status::SomeProblems
-    };
+    let status =
+        if result.comments.iter().any(|pc| pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig")) {
+            Status::SupportFailure
+        } else if result.comments.is_empty() {
+            Status::NoProblems
+        } else {
+            Status::SomeProblems
+        };
     (status, findings)
 }
 
@@ -602,9 +615,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
                 return Err(Status::SyntaxFailure);
             }
         },
-        "source-functions" => {
-            options.source_functions.extend(split(',', val).into_iter().filter(|s| !s.is_empty()))
-        }
+        "source-functions" => options.source_functions.extend(split(',', val).into_iter().filter(|s| !s.is_empty())),
         "source-from-path" => options.source_from_path = true,
         "modern-dialects" => options.check_spec.optional_checks.push("modern-dialects".to_string()),
         "ignore-directives" => options.check_spec.ignore_directives = true,

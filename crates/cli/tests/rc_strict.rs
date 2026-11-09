@@ -99,7 +99,11 @@ fn unknown_key_without_and_with_strict_rc() {
     let o = run_in(&d, &["--strict-rc", "-f", "gcc", "clean.sh"]);
     assert_eq!(o.code, 2, "{}", o.stdout);
     assert_eq!(o.stdout, "");
-    assert!(o.stderr.contains("--strict-rc: ") && o.stderr.contains(".shellcheckrc:1:1: unknown directive"), "{}", o.stderr);
+    assert!(
+        o.stderr.contains("--strict-rc: ") && o.stderr.contains(".shellcheckrc:1:1: unknown directive"),
+        "{}",
+        o.stderr
+    );
     // Not hidden by -S or -e.
     let o = run_in(&d, &["--strict-rc", "-S", "error", "-e", "1107", "clean.sh"]);
     assert_eq!(o.code, 2, "{}", o.stderr);
