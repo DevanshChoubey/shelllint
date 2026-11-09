@@ -8,6 +8,7 @@
 #![forbid(unsafe_code)]
 
 pub mod ast_dump;
+pub mod directive_ranges;
 pub mod editorconfig;
 pub mod filepath;
 
@@ -169,6 +170,7 @@ fn run_on_check_stack<R>(f: impl FnOnce() -> R) -> R {
 
 /// The `where`-bound `checkScript contents` of `checkScript`.
 fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: String) -> Vec<PositionedComment> {
+    let ranges = directive_ranges::DirectiveRanges::scan(&contents);
     let mut result = parse_script(
         sys,
         &ParseSpec {
@@ -204,6 +206,10 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: 
     let mut all = parse_messages;
     all.extend(analysis_messages.into_iter().map(|t| token_to_position(&result, t)));
     let included: Vec<PositionedComment> = all.into_iter().filter(|pc| should_include(spec, pc)).collect();
+    let included = match &ranges {
+        Some(r) => included.into_iter().filter(|pc| !r.suppresses(&spec.filename, pc)).collect(),
+        None => included,
+    };
     nub_sorted(sort_messages(included))
 }
 

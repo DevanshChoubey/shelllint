@@ -179,6 +179,16 @@ impl<'a> P<'a> {
                     |p| p.char_(','),
                 )
             })?,
+            // DIVERGENCE: range directives; the checker applies them by line.
+            "disable-start" | "disable-end" | "disable-line" => {
+                self.annotation_plain_or_quoted(&|p| {
+                    p.sep_by(
+                        |p| p.alt(|p| p.read_annotation_code().map(drop), |p| p.string("all").map(drop)),
+                        |p| p.char_(','),
+                    )
+                })?;
+                vec![]
+            }
             "enable" => self.annotation_plain_or_quoted(&|p| {
                 p.sep_by(
                     |p| {
@@ -277,7 +287,22 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_comment(&mut self) -> PR<String> {
-        self.unexpecting("shellcheck annotation", |p| p.read_annotation_prefix())?;
+        // DIVERGENCE: range directives are plain comments wherever they appear.
+        let range_directive = self
+            .try_(|p| {
+                p.look_ahead(|p| {
+                    p.read_annotation_prefix()?;
+                    p.many1(|p| p.linewhitespace())?;
+                    p.alt(
+                        |p| p.try_(|p| p.string("disable-start=")),
+                        |p| p.alt(|p| p.try_(|p| p.string("disable-end=")), |p| p.string("disable-line=")),
+                    )
+                })
+            })
+            .is_ok();
+        if !range_directive {
+            self.unexpecting("shellcheck annotation", |p| p.read_annotation_prefix())?;
+        }
         self.read_any_comment()
     }
 
