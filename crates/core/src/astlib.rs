@@ -1337,3 +1337,28 @@ pub fn get_extended_analysis_directive(ast: &Ast, root: Id) -> Option<bool> {
         _ => None,
     }
 }
+
+/// Not in upstream: the names from `safe-vars=` directives on the root.
+pub fn get_safe_vars_directive(ast: &Ast, root: Id) -> Vec<String> {
+    match ast.get(root) {
+        Token::T_Annotation(list, _) => list
+            .iter()
+            .filter_map(|a| match a {
+                Annotation::SafeVars(s) => Some(s.clone()),
+                _ => None,
+            })
+            .collect(),
+        _ => vec![],
+    }
+}
+
+/// Not in upstream: `strict-env-vars=` on the root.
+pub fn get_strict_env_vars_directive(ast: &Ast, root: Id) -> Option<bool> {
+    match ast.get(root) {
+        Token::T_Annotation(list, _) => list.iter().find_map(|a| match a {
+            Annotation::StrictEnvVars(s) => Some(*s),
+            _ => None,
+        }),
+        _ => None,
+    }
+}

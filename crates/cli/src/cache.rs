@@ -429,6 +429,11 @@ fn key_bytes(options: &Options, spec: &CheckSpec) -> Vec<u8> {
     for c in &spec.optional_checks {
         w.str(c);
     }
+    w.u64(spec.safe_vars.len() as u64);
+    for v in &spec.safe_vars {
+        w.str(v);
+    }
+    w.opt_bool(spec.strict_env_vars);
     w.u8(spec.min_severity_explicit as u8);
     w.u8(spec.ignore_directives as u8);
     w.u8(spec.report_unused_disables as u8);

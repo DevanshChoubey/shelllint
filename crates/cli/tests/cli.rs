@@ -93,6 +93,8 @@ const EXTENSION_HELP: &str = concat!(
     "                      --modern-dialects          Accept newer shell features (POSIX.1-2024, ash, bash 5.1)\n",
     "                      --ignore-directives        Don't honour 'disable=' directives in files\n",
     "                      --report-unused-disables   Report 'disable=' codes that suppress nothing (SC9006)\n",
+    "                      --safe-vars=VAR1,VAR2..    Treat these variables as free of spaces and globs\n",
+    "                      --strict-env-vars          Warn about unassigned uppercase variables too\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -186,6 +188,8 @@ fn every_help_flag_is_accepted() {
         ("--modern-dialects", &["--modern-dialects", "-"]),
         ("--ignore-directives", &["--ignore-directives", "-"]),
         ("--report-unused-disables", &["--report-unused-disables", "-"]),
+        ("--safe-vars", &["--safe-vars=FOO,BAR", "-"]),
+        ("--strict-env-vars", &["--strict-env-vars", "-"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

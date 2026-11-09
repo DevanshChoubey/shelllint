@@ -318,6 +318,37 @@ impl<'a> P<'a> {
                     }
                 }
             }
+            // DIVERGENCE: `safe-vars` and `strict-env-vars` are not in upstream.
+            "safe-vars" => self.annotation_plain_or_quoted(&|p| {
+                p.sep_by(
+                    |p| {
+                        let name: String = p
+                            .many1(|p| p.alt(|p| p.alt(|p| p.letter(), |p| p.digit()), |p| p.char_('_')))?
+                            .into_iter()
+                            .collect();
+                        Ok(Annotation::SafeVars(name))
+                    },
+                    |p| p.char_(','),
+                )
+            })?,
+            "strict-env-vars" => {
+                let pos = self.get_position();
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
+                match value.as_str() {
+                    "true" => vec![Annotation::StrictEnvVars(true)],
+                    "false" => vec![Annotation::StrictEnvVars(false)],
+                    _ => {
+                        self.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1146,
+                            "Unknown strict-env-vars value. Expected true/false.",
+                        );
+                        vec![]
+                    }
+                }
+            }
             "external-sources" => {
                 let pos = self.get_position();
                 let value =

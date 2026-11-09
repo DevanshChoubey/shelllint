@@ -303,6 +303,12 @@ pub fn analyze_control_flow(params: &CfgParameters, ast: &Ast, root: Id) -> CfgA
     dfa::analyze_control_flow(params, ast, root)
 }
 
+/// Not in upstream: `analyze_control_flow` with extra variables known to
+/// contain no spaces or globs (`safe-vars`).
+pub fn analyze_control_flow_with(params: &CfgParameters, safe_vars: &[String], ast: &Ast, root: Id) -> CfgAnalysis {
+    dfa::analyze_control_flow_with(params, safe_vars, ast, root)
+}
+
 /// Conveniently get the state before a token id
 pub fn get_incoming_state(analysis: &CfgAnalysis, id: Id) -> Option<&ProgramState> {
     let (start, _end) = analysis.token_to_range(id)?;

@@ -226,7 +226,8 @@ fn check_unassigned_references_(include_globals: bool, p: &Params<'_>, _t: Id) -
         if is_exception(var, place) || is_guarded(place) {
             return None;
         }
-        if include_globals || is_local(var) {
+        // DIVERGENCE: `strict-env-vars` turns the uppercase exemption off.
+        if include_globals || p.strict_env_vars || is_local(var) {
             warning_for_locals(var, place)
         } else {
             warning_for_globals(var, place)

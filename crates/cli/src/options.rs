@@ -231,6 +231,8 @@ pub fn options() -> Vec<OptDescr> {
             "",
             "Report 'disable=' codes that suppress nothing (SC9006)",
         ),
+        o("", &["safe-vars"], Req("safe-vars"), "VAR1,VAR2..", "Treat these variables as free of spaces and globs"),
+        o("", &["strict-env-vars"], No("strict-env-vars"), "", "Warn about unassigned uppercase variables too"),
     ]
 }
 

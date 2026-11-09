@@ -26,6 +26,8 @@ ShellCheck issues.
   `wiki-link-count`; `--strict-rc`; `--source-from-path`.
 - `--ignore-directives` and `--report-unused-disables` (#1417, #645).
 - `--modern-dialects` relaxes dialect warnings (#3099, #3062, #2393).
+- `safe-vars` lists variables the quoting checks can trust (#587), and
+  `strict-env-vars` reports unassigned uppercase variables (#930).
 - Optional checks: `require-strict-mode` (#409), `prefer-local` (#468),
   `arith-errexit` (#2777), `undefined-command` (#2574), `unused-function` (#612).
 - An Alpine container image.

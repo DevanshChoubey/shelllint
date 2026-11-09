@@ -185,6 +185,8 @@ fn result_affecting_options_miss() {
         "--ignore-directives",
         "--report-unused-disables",
         "--external-vars=EXT",
+        "--safe-vars=EXT",
+        "--strict-env-vars",
         "--source-functions=load",
         "--source-from-path",
     ] {

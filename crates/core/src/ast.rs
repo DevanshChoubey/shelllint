@@ -195,6 +195,10 @@ pub enum Annotation {
     /// DIVERGENCE: `source-functions=a,b` (not in ShellCheck): wrapper functions
     /// whose literal first argument is followed like `source ARG`.
     SourceFunctions(Vec<String>),
+    /// Not in upstream: a variable name from `safe-vars=`.
+    SafeVars(String),
+    /// Not in upstream: `strict-env-vars=`.
+    StrictEnvVars(bool),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]

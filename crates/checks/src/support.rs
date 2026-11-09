@@ -258,6 +258,9 @@ pub fn check_spacefulness_cfg_prime(dirty_pass: bool, params: &Params<'_>, token
 
     if needs_quoting && (dirty_pass == !is_clean) {
         if !(SPECIAL_VARIABLES_WITHOUT_SPACES.contains(&name.as_str())
+            // DIVERGENCE: `safe-vars` extend the lookup (the dataflow state covers
+            // the extended-analysis case, including later reassignment).
+            || (params.cfg_analysis.is_none() && params.safe_vars.contains(&name))
             || quotes_may_conflict_with_sc2281(params, token))
         {
             if dirty_pass {

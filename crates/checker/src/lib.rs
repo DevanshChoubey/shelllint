@@ -235,6 +235,8 @@ fn collect_messages(
             check_sourced: spec.check_sourced,
             execution_mode: ExecutionMode::Executed,
             extended_analysis: spec.extended_analysis,
+            safe_vars: spec.safe_vars.clone(),
+            strict_env_vars: spec.strict_env_vars,
             optional_checks,
             ..new_analysis_spec()
         }

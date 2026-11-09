@@ -368,7 +368,7 @@ fn patch_state(base: &IState, diff: &IState) -> IState {
 }
 
 /// The default state we assume we get from the environment
-fn create_environment_state() -> IState {
+fn create_environment_state(safe_vars: &[String]) -> IState {
     let mut s = new_internal_state();
     for name in data::INTERNAL_VARIABLES {
         s.insert_global(name, unknown_variable_state());
@@ -382,6 +382,10 @@ fn create_environment_state() -> IState {
         variable_properties: VariableProperties::DEFAULT,
     };
     for name in data::VARIABLES_WITHOUT_SPACES {
+        s.insert_global(name, spaceless.clone());
+    }
+    // DIVERGENCE: user-supplied `safe-vars` extend the lookup.
+    for name in safe_vars {
         s.insert_global(name, spaceless.clone());
     }
     let integer =
@@ -1507,11 +1511,20 @@ impl StatePatcher {
 }
 
 pub(super) fn analyze_control_flow(params: &CfgParameters, ast: &Ast, root: Id) -> CfgAnalysis {
+    analyze_control_flow_with(params, &[], ast, root)
+}
+
+pub(super) fn analyze_control_flow_with(
+    params: &CfgParameters,
+    safe_vars: &[String],
+    ast: &Ast,
+    root: Id,
+) -> CfgAnalysis {
     let cfg = crate::cfg::build_graph(params, ast, root);
     let Some((entry, exit)) = cfg.cf_id_to_range(root) else {
         panic!("{}", please_report("Missing root"));
     };
-    let env = create_environment_state();
+    let env = create_environment_state(safe_vars);
     let (lo, hi) = cfg.cf_graph.node_range();
 
     let node_to_data = {

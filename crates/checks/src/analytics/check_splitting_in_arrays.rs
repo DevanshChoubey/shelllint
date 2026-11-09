@@ -41,6 +41,8 @@ fn check_part(p: &Params<'_>, part: Id, c: &mut Comments) {
                 && !is_quoted_alternative_reference(p.ast, part)
                 && !VARIABLES_WITHOUT_SPACES
                     .contains(&get_braced_reference(&oversimplify(p.ast, s).concat()).as_str())
+                // DIVERGENCE: `safe-vars` extend the lookup.
+                && !p.safe_vars.contains(&get_braced_reference(&oversimplify(p.ast, s).concat()))
             {
                 c.warn(
                     part,

@@ -102,6 +102,8 @@ New `.shellcheckrc` keys:
 | `severity=warning` | Minimum severity for files the rc covers. `# shellcheck severity=warning` before the first command also works. `--severity` wins, then the directive, then the rc file. |
 | `external-vars=A,B,CI_*` | Marks variables as assigned for SC2154. A trailing `*` is a prefix glob. Also `--external-vars=A,B` and a directive. |
 | `source-functions=a,b` | Calls to these wrappers are followed like `source ARG` when the first argument is a literal. Also `--source-functions=a,b` and a directive. |
+| `safe-vars=A,B` | Tells SC2086, SC2206 and related quoting checks that these variables never contain spaces or glob characters. A later assignment in the script still overrides it. Also `--safe-vars=A,B` and a directive. |
+| `strict-env-vars=true` | Stops treating all-uppercase names as environment variables, so unassigned ones get SC2154. Names on the internal list (`HOME`, `PWD` and so on) stay exempt. Also `--strict-env-vars` and a directive. |
 | `source-path=RCDIR/sub` | `RCDIR` means the directory holding the rc file. Only a leading component is expanded. |
 | `color=auto` | Same as `--color`, taken from the rc file for the first input file. |
 | `wiki-link-count=N` | Same as `--wiki-link-count`, taken from the rc file for the first input file. |

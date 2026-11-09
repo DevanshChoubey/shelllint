@@ -63,6 +63,10 @@ pub struct CheckSpec {
     pub ignore_directives: bool,
     /// `--report-unused-disables` (extension): report `disable=` codes that suppressed nothing (SC9006).
     pub report_unused_disables: bool,
+    /// Not in upstream: `--safe-vars`.
+    pub safe_vars: Vec<String>,
+    /// Not in upstream: `--strict-env-vars`.
+    pub strict_env_vars: Option<bool>,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -91,6 +95,8 @@ pub fn empty_check_spec() -> CheckSpec {
         external_vars: vec![],
         ignore_directives: false,
         report_unused_disables: false,
+        safe_vars: vec![],
+        strict_env_vars: None,
     }
 }
 
@@ -143,6 +149,8 @@ pub struct AnalysisSpec {
     pub extended_analysis: Option<bool>,
     // DIVERGENCE: not in upstream; see `CheckSpec::external_vars`.
     pub external_vars: Vec<String>,
+    pub safe_vars: Vec<String>,
+    pub strict_env_vars: Option<bool>,
 }
 
 pub fn new_analysis_spec() -> AnalysisSpec {
@@ -154,6 +162,8 @@ pub fn new_analysis_spec() -> AnalysisSpec {
         optional_checks: vec![],
         extended_analysis: None,
         external_vars: vec![],
+        safe_vars: vec![],
+        strict_env_vars: None,
     }
 }
 
