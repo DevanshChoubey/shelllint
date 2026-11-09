@@ -108,6 +108,8 @@ pub struct Params<'a> {
     pub has_pipefail: bool,
     /// Whether this script has 'shopt -s execfail' anywhere.
     pub has_execfail: bool,
+    /// DIVERGENCE: `--modern-dialects` / `modern-dialects=true` (shelllint extension).
+    pub modern_dialects: bool,
     /// A linear (bad) analysis of data flow
     pub variable_flow: VariableFlow,
     /// The shell type, such as Bash or Ksh
@@ -123,6 +125,13 @@ pub struct Params<'a> {
     /// synthetic `builtin X` commands (see `api::check_command`). Cloning
     /// `Params` gives the clone an empty one.
     pub builtin_scratch: BuiltinScratch,
+    /// Not in Haskell: `external-vars` names (a trailing `*` is a prefix
+    /// glob) that SC2154 treats as assigned.
+    pub external_vars: Vec<String>,
+    /// Not in upstream: variables from `safe-vars` (no spaces or globs).
+    pub safe_vars: std::rc::Rc<Vec<String>>,
+    /// Not in upstream: `strict-env-vars` (uppercase names get SC2154 too).
+    pub strict_env_vars: bool,
 }
 
 /// `variableFlow :: [StackData]`
@@ -316,6 +325,28 @@ pub fn make_comment_with_fix(severity: Severity, id: Id, code: Code, str: impl I
     }
 }
 
+/// DIVERGENCE: internal name under which `--modern-dialects` and the
+/// `modern-dialects=true` rc key travel in `AnalysisSpec::optional_checks`.
+/// It is not a registered optional check, so `--enable=all` does not select it.
+pub const MODERN_DIALECTS: &str = "modern-dialects";
+
+/// DIVERGENCE: does the script's shebang name ash or busybox? Used by `--modern-dialects`.
+pub fn shebang_names_ash(ast: &Ast, root: Id) -> bool {
+    let script = match ast.get(root) {
+        Token::T_Annotation(_, s) => *s,
+        _ => root,
+    };
+    match ast.get(script) {
+        Token::T_Script(sb, _) => match ast.get(*sb) {
+            Token::T_Literal(s) => {
+                matches!(executable_from_shebang(s).as_str(), "ash" | "busybox" | "busybox sh" | "busybox ash")
+            }
+            _ => false,
+        },
+        _ => false,
+    }
+}
+
 /// `makeParameters spec`. `ast` must have had `compute_parents(root)` called.
 // DIVERGENCE: `variableFlow` refers to `params` lazily in Haskell; here the
 // other fields are computed first and the flow is filled in afterwards.
@@ -326,8 +357,11 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
     );
     let extended_analysis =
         spec.extended_analysis.or_else(|| get_extended_analysis_directive(ast, root)).unwrap_or(true);
+    let mut safe_vars = spec.safe_vars.clone();
+    safe_vars.extend(shelllint_core::astlib::get_safe_vars_directive(ast, root));
     let shell_type = spec.shell_type.unwrap_or_else(|| determine_shell(ast, spec.fallback_shell, root));
     let mut params = Params {
+        external_vars: spec.external_vars.clone(),
         ast,
         root,
         shell_type,
@@ -359,16 +393,22 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::Bash => is_option_set(ast, "execfail", root),
             _ => false,
         },
+        modern_dialects: spec.optional_checks.iter().any(|k| k == MODERN_DIALECTS),
         shell_type_specified: spec.shell_type.is_some() || spec.fallback_shell.is_some(),
         variable_flow: VariableFlow::default(),
         cfg_analysis: None,
         builtin_scratch: BuiltinScratch::default(),
+        safe_vars: std::rc::Rc::new(safe_vars),
+        strict_env_vars: spec
+            .strict_env_vars
+            .or_else(|| shelllint_core::astlib::get_strict_env_vars_directive(ast, root))
+            .unwrap_or(false),
     };
     params.variable_flow = get_variable_flow(&params, root).into();
     // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`
     let cf_params = CfgParameters { cf_lastpipe: params.has_lastpipe, cf_pipefail: params.has_pipefail };
     params.cfg_analysis = if extended_analysis {
-        Some(std::rc::Rc::new(crate::cfg_analysis::analyze_control_flow(&cf_params, ast, root)))
+        Some(std::rc::Rc::new(crate::cfg_analysis::analyze_control_flow_with(&cf_params, &params.safe_vars, ast, root)))
     } else {
         None
     };
@@ -474,6 +514,13 @@ pub fn determine_shell(ast: &Ast, fallback_shell: Option<Shell>, t: Id) -> Shell
                 .find_map(|a| match a {
                     Annotation::ShellOverride(s) => Some(s.clone()),
                     _ => None,
+                })
+                // DIVERGENCE: the shell of a nix-shell shebang's `-i`.
+                .or_else(|| {
+                    annotations.iter().find_map(|a| match a {
+                        Annotation::ShellFromNix(s) => Some(s.clone()),
+                        _ => None,
+                    })
                 })
                 .unwrap_or_else(|| from_shebang(*s)),
             _ => panic!("determineShell: unexpected root"),

@@ -230,6 +230,7 @@ pub fn disable_edits(text: &str, filename: &str, dialect: Option<Shell>, pos: Po
         check_sourced: false,
         ignore_rc: true,
         shell_type_override: dialect,
+        ignore_directives: false,
     };
     let Ok(parsed) = std::panic::catch_unwind(|| shelllint_parser::parse_script(&LspSystem, &spec)) else {
         return vec![];

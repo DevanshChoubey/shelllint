@@ -11,7 +11,7 @@ use std::collections::BTreeMap;
 
 use shelllint_core::ast::{Annotation, Id};
 use shelllint_core::astlib::{e4m, executable_from_shebang, get_associative_arrays};
-use shelllint_core::interface::Severity::{ErrorC, InfoC};
+use shelllint_core::interface::Severity::{ErrorC, InfoC, StyleC, WarningC};
 use shelllint_core::interface::{
     Code, Comment, ParseSpec, Position, PositionedComment, SystemInterface, new_positioned_comment,
 };
@@ -28,6 +28,7 @@ use crate::state::{
 use crate::{alt, choice};
 use shelllint_core::ast::{ConditionType, Token};
 use shelllint_core::data::shell_for_executable;
+use shelllint_core::extras::{expand_home, nix_shell_interpreter};
 use shelllint_core::interface::Severity;
 
 // BEGIN annotations
@@ -104,7 +105,12 @@ impl<'a> P<'a> {
         self.called("shellcheck directive", |p| {
             p.try_(|p| p.read_annotation_prefix())?;
             p.many1(|p| p.linewhitespace())?;
-            p.read_annotation_without_prefix(true)
+            let mut annotations = p.read_annotation_without_prefix(true)?;
+            // DIVERGENCE: `--ignore-directives` drops in-file `disable=` (rc files are unaffected).
+            if p.env.ignore_directives {
+                annotations.retain(|a| !matches!(a, Annotation::DisableComment(..)));
+            }
+            Ok(annotations)
         })
     }
 
@@ -179,6 +185,16 @@ impl<'a> P<'a> {
                     |p| p.char_(','),
                 )
             })?,
+            // DIVERGENCE: range directives; the checker applies them by line.
+            "disable-start" | "disable-end" | "disable-line" => {
+                self.annotation_plain_or_quoted(&|p| {
+                    p.sep_by(
+                        |p| p.alt(|p| p.read_annotation_code().map(drop), |p| p.string("all").map(drop)),
+                        |p| p.char_(','),
+                    )
+                })?;
+                vec![]
+            }
             "enable" => self.annotation_plain_or_quoted(&|p| {
                 p.sep_by(
                     |p| {
@@ -190,11 +206,67 @@ impl<'a> P<'a> {
             })?,
             "source" => {
                 let filename = self.annotation_filename()?;
-                vec![Annotation::SourceOverride(filename)]
+                // DIVERGENCE: a leading `~`, `$HOME` or `${HOME}` is expanded.
+                vec![Annotation::SourceOverride(expand_home(&filename))]
             }
             "source-path" => {
                 let dirname = self.annotation_filename()?;
-                vec![Annotation::SourcePath(dirname)]
+                // DIVERGENCE: a leading `~`, `$HOME` or `${HOME}` is expanded.
+                vec![Annotation::SourcePath(expand_home(&dirname))]
+            }
+            // DIVERGENCE: `severity=` is not an upstream key.
+            "severity" => {
+                let pos = self.get_position();
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
+                match value.as_str() {
+                    "error" => vec![Annotation::MinSeverity(ErrorC)],
+                    "warning" => vec![Annotation::MinSeverity(WarningC)],
+                    "info" => vec![Annotation::MinSeverity(InfoC)],
+                    "style" => vec![Annotation::MinSeverity(StyleC)],
+                    _ => {
+                        self.parse_note_at(
+                            pos,
+                            ErrorC,
+                            1147,
+                            "Unknown severity value. Expected error, warning, info or style.",
+                        );
+                        vec![]
+                    }
+                }
+            }
+            // DIVERGENCE: `external-vars=` is not an upstream key.
+            "external-vars" => {
+                let names = self.annotation_plain_or_quoted(&|p| {
+                    p.sep_by(
+                        |p| {
+                            let mut name: String = p
+                                .many1(|p| p.alt(|p| p.letter(), |p| p.alt(|p| p.digit(), |p| p.char_('_'))))?
+                                .into_iter()
+                                .collect();
+                            if p.alt(|p| p.char_('*').map(|_| true), |_| Ok(false))? {
+                                name.push('*');
+                            }
+                            Ok(name)
+                        },
+                        |p| p.char_(','),
+                    )
+                })?;
+                names.into_iter().map(Annotation::ExternalVar).collect()
+            }
+            "source-functions" => {
+                // DIVERGENCE: not a ShellCheck directive.
+                let names = self.annotation_plain_or_quoted(&|p| {
+                    p.sep_by(
+                        |p| {
+                            let name: String =
+                                p.many1(|p| p.alt(|p| p.alpha_num(), |p| p.one_of("_-.:")))?.into_iter().collect();
+                            Ok(name)
+                        },
+                        |p| p.char_(','),
+                    )
+                })?;
+                vec![Annotation::SourceFunctions(names)]
             }
             "shell" => {
                 let pos = self.get_position();
@@ -217,6 +289,57 @@ impl<'a> P<'a> {
                             Severity::ErrorC,
                             1146,
                             "Unknown extended-analysis value. Expected true/false.",
+                        );
+                        vec![]
+                    }
+                }
+            }
+            // DIVERGENCE: shelllint extension. `modern-dialects=true` is stored as the
+            // internal optional-check name "modern-dialects" (see `MODERN_DIALECTS`).
+            "modern-dialects" => {
+                let pos = self.get_position();
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
+                match value.as_str() {
+                    "true" => vec![Annotation::EnableComment("modern-dialects".to_string())],
+                    "false" => vec![],
+                    _ => {
+                        self.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1146,
+                            "Unknown modern-dialects value. Expected true/false.",
+                        );
+                        vec![]
+                    }
+                }
+            }
+            // DIVERGENCE: `safe-vars` and `strict-env-vars` are not in upstream.
+            "safe-vars" => self.annotation_plain_or_quoted(&|p| {
+                p.sep_by(
+                    |p| {
+                        let name: String = p
+                            .many1(|p| p.alt(|p| p.alt(|p| p.letter(), |p| p.digit()), |p| p.char_('_')))?
+                            .into_iter()
+                            .collect();
+                        Ok(Annotation::SafeVars(name))
+                    },
+                    |p| p.char_(','),
+                )
+            })?,
+            "strict-env-vars" => {
+                let pos = self.get_position();
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
+                match value.as_str() {
+                    "true" => vec![Annotation::StrictEnvVars(true)],
+                    "false" => vec![Annotation::StrictEnvVars(false)],
+                    _ => {
+                        self.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1146,
+                            "Unknown strict-env-vars value. Expected true/false.",
                         );
                         vec![]
                     }
@@ -277,7 +400,22 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_comment(&mut self) -> PR<String> {
-        self.unexpecting("shellcheck annotation", |p| p.read_annotation_prefix())?;
+        // DIVERGENCE: range directives are plain comments wherever they appear.
+        let range_directive = self
+            .try_(|p| {
+                p.look_ahead(|p| {
+                    p.read_annotation_prefix()?;
+                    p.many1(|p| p.linewhitespace())?;
+                    p.alt(
+                        |p| p.try_(|p| p.string("disable-start=")),
+                        |p| p.alt(|p| p.try_(|p| p.string("disable-end=")), |p| p.string("disable-line=")),
+                    )
+                })
+            })
+            .is_ok();
+        if !range_directive {
+            self.unexpecting("shellcheck annotation", |p| p.read_annotation_prefix())?;
+        }
         self.read_any_comment()
     }
 
@@ -657,7 +795,7 @@ impl<'a> P<'a> {
         let contents = self.env.system_interface.get_config(filename);
         match contents {
             None => Ok(vec![]),
-            Some((file, str)) => read_config(self, &file, &str),
+            Some((file, str)) => read_config(self, &file, &str).map(|a| crate::rcdir::expand_rcdir(&file, a)),
         }
     }
 
@@ -730,6 +868,15 @@ impl<'a> P<'a> {
                 Token::T_Literal(s) => s.clone(),
                 _ => panic!("{}", please_report("shebang is not a T_Literal")),
             };
+            // DIVERGENCE: a nix-shell shebang names its shell on a later
+            // `#! nix-shell -i <shell>` line; look at the run of `#!` lines
+            // that follows (before `allspacing` skips them as comments).
+            let nix_shell = if executable_from_shebang(&shebang_string) == "nix-shell" {
+                let lines = p.read_shebang_continuation_lines()?;
+                nix_shell_interpreter(&lines)
+            } else {
+                None
+            };
             p.allspacing()?;
             let annotation_start = p.start_span();
             let file_annotations = p.read_annotations()?;
@@ -745,6 +892,9 @@ impl<'a> P<'a> {
                     );
                 }
                 let mut annotations = file_annotations;
+                // DIVERGENCE: the nix-shell shell sits after the file-level
+                // directives but is weaker than a `shell=` directive anywhere.
+                annotations.extend(nix_shell.iter().cloned().map(Annotation::ShellFromNix));
                 annotations.extend(rc_annotations);
                 let annotation_id = p.end_span(annotation_start);
                 let shell_annotation_specified = annotations.iter().any(|x| matches!(x, Annotation::ShellOverride(_)));
@@ -752,7 +902,9 @@ impl<'a> P<'a> {
                 let ignore_shebang = shell_annotation_specified || shell_flag_specified;
 
                 let executable = executable_from_shebang(&shebang_string);
-                if !ignore_shebang {
+                // DIVERGENCE: a nix-shell shebang with a shell (or none, meaning
+                // bash) is not an unrecognized shebang (SC1008).
+                if !ignore_shebang && nix_shell.is_none() {
                     verify_shebang(p, pos, &executable);
                 }
                 if ignore_shebang || is_valid_shell(&executable) != Some(false) {
@@ -770,6 +922,20 @@ impl<'a> P<'a> {
                     let id = p.end_span(start);
                     Ok(p.node(id, Token::T_Script(shebang, vec![])))
                 }
+            })
+        })
+    }
+
+    /// The contents (after `#!`) of the run of `#!` lines at the current
+    /// position, without consuming them.
+    fn read_shebang_continuation_lines(&mut self) -> PR<Vec<String>> {
+        self.look_ahead(|p| {
+            p.many(|p| {
+                p.try_(|p| p.string("#!"))?;
+                let line: String = p.many(|p| p.none_of("\r\n"))?.into_iter().collect();
+                p.optional(|p| p.carriage_return())?;
+                p.optional(|p| p.linefeed())?;
+                Ok(line)
             })
         })
     }
@@ -1054,6 +1220,7 @@ pub(crate) fn parse_script(sys: &dyn SystemInterface, spec: &ParseSpec) -> Parse
         current_filename: spec.filename.clone(),
         ignore_rc: spec.ignore_rc,
         shell_type_override: spec.shell_type_override,
+        ignore_directives: spec.ignore_directives,
     };
     parse_shell(env, &spec.filename, &spec.script)
 }

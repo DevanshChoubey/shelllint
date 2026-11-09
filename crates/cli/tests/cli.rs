@@ -68,13 +68,43 @@ fn tmpfile(name: &str, contents: &str) -> String {
 /// after upstream's.
 const EXTENSION_HELP: &str = concat!(
     "                      --fix                      Apply all auto-fixes to FILES in place, then report what is left\n",
+    "                      --context=N                With -f context, lines of source around each finding (default 5)\n",
     "                      --dry-run                  With --fix, print the fixes as a diff (like -f diff) instead\n",
+    "                      --verbose                  Print the file and the .shellcheckrc used for it to stderr\n",
+    "                      --list-checks[=text|json]  List the optional checks and what is known about codes\n",
+    "                      --dump-ast                 Print each file's parsed AST as JSON instead of the report\n",
+    "                      --summary                  Print finding counts and files checked to stderr after the report\n",
+    "                      --fail-fast                Stop after the first file with findings\n",
+    "                      --stdin-filename=PATH      Report standard input ('-') as PATH\n",
+    "                      --output=FORMAT:PATH       Also write a FORMAT report to PATH (repeatable)\n",
+    "                      --completions=SHELL        Print a shell completion script (bash, zsh, fish)\n",
+    "                      --cache-dir=PATH           Reuse results for unchanged files, kept in PATH\n",
+    "                      --fallback-shell=SHELL     Assume SHELL for scripts that do not name a shell\n",
+    "                      --infer-shell-from-name    Guess the shell from names like .bashrc\n",
+    "                      --skip-unsupported-shebang  Skip files with no usable shell, as clean\n",
+    "  -r                  --recursive                Check the shell scripts found in directories among FILES\n",
+    "                      --exclude-path=GLOB        Skip paths matching GLOB (repeatable)\n",
+    "                      --changed-since[=REF]      Report only findings on lines changed since REF (default HEAD)\n",
+    "                      --strict-rc                Make unknown .shellcheckrc keys, bad shell values and an unreadable --rcfile errors\n",
+    "                      --external-vars=VARS       Treat these variables as assigned for SC2154 (a trailing * is a prefix glob)\n",
+    "                      --tab-width=N              Expand tabs to N spaces in the tty source echo\n",
+    "                      --source-functions=NAMES   Follow calls to these functions (comma separated) like 'source'\n",
+    "                      --source-from-path         Look up a bare sourced filename on $PATH\n",
+    "                      --modern-dialects          Accept newer shell features (POSIX.1-2024, ash, bash 5.1)\n",
+    "                      --ignore-directives        Don't honour 'disable=' directives in files\n",
+    "                      --report-unused-disables   Report 'disable=' codes that suppress nothing (SC9006)\n",
+    "                      --safe-vars=VAR1,VAR2..    Treat these variables as free of spaces and globs\n",
+    "                      --strict-env-vars          Warn about unassigned uppercase variables too\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
 /// with the extensions after upstream's options.
 fn expected_help() -> String {
-    let oracle = include_str!("help.txt");
+    // context, github and sarif are extension formats, so the format list differs from upstream's.
+    let oracle = include_str!("help.txt").replace(
+        "(checkstyle, diff, gcc, json, json1, quiet, tty)",
+        "(checkstyle, context, diff, gcc, github, json, json1, quiet, sarif, tty)",
+    );
     let body = oracle.strip_suffix('\n').unwrap();
     format!("{}{}\n", body, EXTENSION_HELP)
 }
@@ -137,14 +167,47 @@ fn every_help_flag_is_accepted() {
         ("--files-from", &["--files-from=/dev/null"]),
         ("--fix", &["--fix", "--files-from=/dev/null"]),
         ("--dry-run", &["--fix", "--dry-run", "--files-from=/dev/null"]),
+        ("--verbose", &["--verbose", "-"]),
+        ("--fallback-shell", &["--fallback-shell=bash", "-"]),
+        ("--infer-shell-from-name", &["--infer-shell-from-name", "-"]),
+        ("--skip-unsupported-shebang", &["--skip-unsupported-shebang", "-"]),
+        ("--dump-ast", &["--dump-ast", "--files-from=/dev/null"]),
+        ("--summary", &["--summary", "--files-from=/dev/null"]),
+        ("--fail-fast", &["--fail-fast", "--files-from=/dev/null"]),
+        ("--stdin-filename", &["--stdin-filename=x.sh", "-"]),
+        ("--output", &["--output=json:/dev/null", "-"]),
+        ("--completions", &["--completions=bash"]),
+        ("--cache-dir", &["--cache-dir=/tmp/shelllint-cache-unused", "--files-from=/dev/null"]),
+        ("-r", &["-r", "--files-from=/dev/null"]),
+        ("--recursive", &["--recursive", "--files-from=/dev/null"]),
+        ("--exclude-path", &["--exclude-path=x", "-"]),
+        ("--changed-since", &["--changed-since", "--files-from=/dev/null"]),
+        ("--context", &["--context=2", "--files-from=/dev/null"]),
+        ("--strict-rc", &["--strict-rc", "-"]),
+        ("--external-vars", &["--external-vars=A,B_*", "-"]),
+        ("--tab-width", &["--tab-width=4", "-"]),
+        ("--source-functions", &["--source-functions=load,use", "-"]),
+        ("--source-from-path", &["--source-from-path", "-"]),
+        ("--modern-dialects", &["--modern-dialects", "-"]),
+        ("--ignore-directives", &["--ignore-directives", "-"]),
+        ("--report-unused-disables", &["--report-unused-disables", "-"]),
+        ("--safe-vars", &["--safe-vars=FOO,BAR", "-"]),
+        ("--strict-env-vars", &["--strict-env-vars", "-"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");
     std::fs::write(&empty, "").unwrap();
     let list = format!("--files-from={}", empty.to_str().unwrap());
+    let report = format!("--output=json:{}", empty.with_extension("json").to_str().unwrap());
     for (flag, args) in cases {
-        let args: Vec<&str> =
-            args.iter().map(|a| if *a == "--files-from=/dev/null" { list.as_str() } else { *a }).collect();
+        let args: Vec<&str> = args
+            .iter()
+            .map(|a| match *a {
+                "--files-from=/dev/null" => list.as_str(),
+                "--output=json:/dev/null" => report.as_str(),
+                _ => *a,
+            })
+            .collect();
         let args = &args[..];
         let o = run(args, CLEAN);
         assert_eq!(o.code, 0, "{} -> {:?}: {}", flag, args, o.stderr);
@@ -159,7 +222,7 @@ fn every_help_flag_is_accepted() {
             let name = tok.split(['=', '[']).next().unwrap().trim_end_matches(',');
             assert!(
                 cases.iter().any(|(f, a)| *f == name || a.iter().any(|x| x.starts_with(name)))
-                    || ["-V", "--version", "--help", "--list-optional"].contains(&name),
+                    || ["-V", "--version", "--help", "--list-optional", "--list-checks"].contains(&name),
                 "flag {} not covered",
                 name
             );
@@ -210,7 +273,7 @@ fn bad_option_messages_match_oracle() {
     );
     assert_eq!(
         run(&["-f", "nope", "-"], "").stderr,
-        "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  json\n  json1\n  quiet\n  tty\n"
+        "Unknown format nope\nSupported formats:\n  checkstyle\n  context\n  diff\n  gcc\n  github\n  json\n  json1\n  quiet\n  sarif\n  tty\n"
     );
     assert_eq!(run(&["-s", "zsh", "-"], "").stderr, "Unknown shell: zsh\n");
     assert_eq!(run(&["-W", "x", "-"], "").stderr, "Invalid number: x\n");
@@ -605,4 +668,22 @@ fn allocation_failure_exits_251_with_message() {
     let _ = std::fs::remove_dir_all(&d);
     assert_eq!(o.status.code(), Some(251));
     assert_eq!(String::from_utf8_lossy(&o.stderr), "shelllint: out of memory\n");
+}
+
+// Extensions must not steal abbreviations ShellCheck accepts.
+#[test]
+fn abbreviations_keep_their_upstream_meaning() {
+    assert_eq!(run(&["--ver"], "").stdout, run(&["-V"], "").stdout);
+    assert_eq!(run(&["--list"], "").stdout, run(&["--list-optional"], "").stdout);
+    assert_eq!(run(&["--in=SC2086", "-"], CLEAN).code, 0);
+    // Extensions named --source-* must not make this ambiguous.
+    assert_eq!(run(&["--source=/tmp", "-"], CLEAN).code, 0);
+    // "--c" is ambiguous upstream, between exactly these two.
+    let o = run(&["--c", "-"], CLEAN);
+    // The full usage text follows; only the candidates matter here.
+    let candidates = o.stderr.split("\n\n").next().unwrap();
+    assert!(candidates.contains("--check-sourced") && candidates.contains("--color"), "{}", o.stderr);
+    assert!(!candidates.contains("--cache-dir"), "{}", o.stderr);
+    // Abbreviations ShellCheck has no use for still reach extensions.
+    assert_eq!(run(&["--verb", "-"], CLEAN).code, 0);
 }

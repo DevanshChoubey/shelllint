@@ -12,6 +12,7 @@ use shelllint_core::astlib::{
     get_braced_modifier, get_braced_reference, get_path, is_variable_char, is_variable_name, oversimplify,
 };
 use shelllint_core::data::{COMMON_COMMANDS, INTERNAL_VARIABLES};
+use shelllint_core::extras::external_var_matches;
 use shelllint_core::interface::{Severity, TokenComment};
 use shelllint_core::regex::{matches, mk_regex};
 
@@ -132,6 +133,8 @@ fn check_unassigned_references_(include_globals: bool, p: &Params<'_>, _t: Id) -
     let unassigned: Vec<(&String, Id)> = read_map
         .iter()
         .filter(|(k, _)| !write_map.contains_key(*k) && !default_assigned.contains(&k.as_str()))
+        // DIVERGENCE: variables declared with `external-vars` count as assigned.
+        .filter(|(k, _)| !p.external_vars.iter().any(|pat| external_var_matches(pat, k)))
         .map(|(k, v)| (k, *v))
         .collect();
     let written_vars: Vec<Candidate<'_>> =
@@ -223,7 +226,8 @@ fn check_unassigned_references_(include_globals: bool, p: &Params<'_>, _t: Id) -
         if is_exception(var, place) || is_guarded(place) {
             return None;
         }
-        if include_globals || is_local(var) {
+        // DIVERGENCE: `strict-env-vars` turns the uppercase exemption off.
+        if include_globals || p.strict_env_vars || is_local(var) {
             warning_for_locals(var, place)
         } else {
             warning_for_globals(var, place)

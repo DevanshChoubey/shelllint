@@ -96,7 +96,7 @@ impl Formatter for Tty {
         let comments = &result.comments;
         append_comments(&mut self.top_errors, comments, self.options.wiki_link_count);
         for group in group_with(comments, |c| source_file(c).to_string()) {
-            output_for_file(&color, sys, group, out);
+            output_for_file(&color, sys, group, self.options.tab_width, out);
         }
     }
 }
@@ -112,7 +112,13 @@ fn shorten(msg: &str) -> String {
     }
 }
 
-fn output_for_file(color: &ColorFunc, sys: &dyn SystemInterface, comments: &[PositionedComment], out: &mut dyn Write) {
+fn output_for_file(
+    color: &ColorFunc,
+    sys: &dyn SystemInterface,
+    comments: &[PositionedComment],
+    tab_width: Option<usize>,
+    out: &mut dyn Write,
+) {
     let file_name = source_file(&comments[0]);
     let contents = read_or_empty(sys, file_name);
     let file_lines = haskell_lines(&contents);
@@ -122,9 +128,20 @@ fn output_for_file(color: &ColorFunc, sys: &dyn SystemInterface, comments: &[Pos
         let line = if line_num < 1 || line_num > line_count { "" } else { file_lines[(line_num - 1) as usize] };
         let _ = writeln!(out);
         let _ = writeln!(out, "{}", color("message", &format!("In {} line {}:", file_name, line_num)));
-        let _ = writeln!(out, "{}", color("source", line));
-        for c in comments_for_line {
-            let _ = writeln!(out, "{}", color(severity_text(c), &cute_indent(c)));
+        match tab_width {
+            None => {
+                let _ = writeln!(out, "{}", color("source", line));
+                for c in comments_for_line {
+                    let _ = writeln!(out, "{}", color(severity_text(c), &cute_indent(c, col_no(c))));
+                }
+            }
+            Some(width) => {
+                let _ = writeln!(out, "{}", color("source", &tabwidth::expand_tabs(line, width)));
+                for c in comments_for_line {
+                    let col = tabwidth::display_column(line, col_no(c), width);
+                    let _ = writeln!(out, "{}", color(severity_text(c), &cute_indent(c, col)));
+                }
+            }
         }
         let _ = writeln!(out);
         show_fixed_string(color, comments_for_line, &file_lines, out);
@@ -176,14 +193,14 @@ fn show_fixed_string(color: &ColorFunc, comments: &[PositionedComment], file_lin
     let _ = writeln!(out, "{}", s);
 }
 
-fn cute_indent(comment: &PositionedComment) -> String {
+fn cute_indent(comment: &PositionedComment, indent_col: i64) -> String {
     let arrow = |n: i64| format!("^{}^", "-".repeat((n - 2).max(0) as usize));
     let same_line = line_no(comment) == end_line_no(comment);
     let delta = end_col_no(comment) - col_no(comment);
     let make_arrow = if same_line && delta > 2 && delta < 32 { arrow(delta) } else { "^--".to_string() };
     format!(
         "{}{} SC{} ({}): {}",
-        " ".repeat((col_no(comment) - 1).max(0) as usize),
+        " ".repeat((indent_col - 1).max(0) as usize),
         make_arrow,
         code_no(comment),
         severity_text(comment),

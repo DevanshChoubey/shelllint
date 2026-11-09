@@ -10,7 +10,8 @@ name: Release
 # `releases/latest/download/...` works for action.yml `version: latest`.
 # The docker-image job pushes the static image (repo Dockerfile) to
 # ghcr.io/<owner>/shelllint:<version> and :latest for the
-# pre-commit docker hook.
+# pre-commit docker hook, plus an Alpine variant with a shell as
+# :<version>-alpine and :alpine (for GitLab CI and similar runners).
 
 on:
   push:
@@ -122,6 +123,14 @@ jobs:
           done
           sha256sum ./*.tar.gz ./*.zip | sed 's| \./| |' | sort -k2 > SHA256SUMS
           cat SHA256SUMS
+      # TODO(owner): attest the archives too. Add `id-token: write` and
+      # `attestations: write` to this job's permissions, then (pinned by SHA):
+      #   - uses: actions/attest-build-provenance@<SHA> # vX.Y.Z
+      #     with:
+      #       subject-path: |
+      #         dist/*.tar.gz
+      #         dist/*.zip
+      #         dist/SHA256SUMS
       - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           draft: true
@@ -156,8 +165,11 @@ jobs:
             echo "$image:$version"
             echo "$image:latest"
             echo "EOF"
+            echo "alpine_tags<<EOF"
+            echo "$image:$version-alpine"
+            echo "$image:alpine"
+            echo "EOF"
           } >> "$GITHUB_OUTPUT"
-      # TODO: pin these actions by commit SHA like the ones above.
       - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
@@ -171,3 +183,25 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+      # Alpine variant (has a shell). Same build stage, so the layers are
+      # cached from the build above.
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          target: alpine
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.alpine_tags }}
+      # TODO(owner): artifact attestations (SLSA build provenance). Needs a
+      # commit SHA for actions/attest-build-provenance that could not be
+      # verified offline, so nothing is enabled here. To enable: look up the
+      # SHA of the current release tag, pin it with a version comment like the
+      # other actions, add `id-token: write` and `attestations: write` (and
+      # `packages: write`, already set) to this job's permissions, give the
+      # docker build steps `id: push`, and uncomment:
+      #
+      # - uses: actions/attest-build-provenance@<SHA> # vX.Y.Z
+      #   with:
+      #     subject-name: ghcr.io/<lowercase owner>/shelllint
+      #     subject-digest: ${{ steps.push.outputs.digest }}
+      #     push-to-registry: true

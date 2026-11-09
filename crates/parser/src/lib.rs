@@ -23,6 +23,8 @@ mod area_redirect;
 mod area_spacing;
 mod area_toplevel;
 mod area_words;
+mod rcdir;
+mod source_functions;
 
 /// Interface.hs `ParseResult`, holding the arena instead of
 /// `prTokenPositions` (the spans live in `ast`).

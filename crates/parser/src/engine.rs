@@ -219,6 +219,11 @@ pub struct P<'a> {
     pub user: UserState,
     pub sys: SystemState,
     pub env: Environment<'a>,
+    /// Number of `source` expansions so far in this script. Not part of any
+    /// checkpoint: work done in a backtracked alternative still counts.
+    pub(crate) source_expansions: u32,
+    /// Files expanded so far in this script (resolved names); not rolled back.
+    pub(crate) expanded_sources: std::collections::HashSet<String>,
 }
 
 impl<'a> P<'a> {
@@ -236,6 +241,8 @@ impl<'a> P<'a> {
             user: UserState::default(),
             sys: SystemState::default(),
             env,
+            source_expansions: 0,
+            expanded_sources: std::collections::HashSet::new(),
         }
     }
 

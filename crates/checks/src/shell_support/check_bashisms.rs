@@ -117,6 +117,8 @@ struct Ctx<'a, 'b> {
     p: &'a Params<'b>,
     is_busybox_sh: bool,
     is_dash: bool,
+    /// DIVERGENCE: `--modern-dialects` and the shebang names ash/busybox.
+    ash_like: bool,
 }
 
 impl Ctx<'_, '_> {
@@ -322,7 +324,7 @@ impl Ctx<'_, '_> {
                 if shelllint_analyzer::analyzerlib::is_command(ast, t, "echo")
                     && matches(&arg_string, &ECHO_FLAG_RE)
                 {
-                    if self.is_busybox_sh {
+                    if self.is_busybox_sh || self.ash_like {
                         if !matches(&arg_string, &ECHO_BUSYBOX_FLAG_RE) {
                             self.warn_msg(c, arg, 3036, "echo flags besides -n and -e");
                         }
@@ -485,6 +487,16 @@ impl Ctx<'_, '_> {
 
     fn allowed_flags(&self, name: &str) -> Option<Vec<&'static str>> {
         let (is_dash, is_busybox_sh) = (self.is_dash, self.is_busybox_sh);
+        if self.p.modern_dialects && name == "read" {
+            // DIVERGENCE: -d is POSIX.1-2024; ash and busybox sh also have -t.
+            return Some(if self.ash_like || is_busybox_sh {
+                vec!["r", "p", "d", "t"]
+            } else if is_dash {
+                vec!["r", "p"]
+            } else {
+                vec!["r", "d"]
+            });
+        }
         Some(match name {
             "cd" => vec!["L", "P"],
             "exec" => vec![],
@@ -527,6 +539,8 @@ fn get_literal_args(ast: &shelllint_core::ast::Ast, args: &[Id]) -> Vec<(Id, Str
 fn check_bashisms(p: &Params<'_>, t: Id, c: &mut Comments) {
     let is_busybox_sh = p.shell_type == Shell::BusyboxSh;
     let is_dash = p.shell_type == Shell::Dash || is_busybox_sh;
-    let ctx = Ctx { p, is_busybox_sh, is_dash };
+    let ash_like = p.modern_dialects
+        && (is_busybox_sh || shelllint_analyzer::analyzerlib::shebang_names_ash(p.ast, p.root));
+    let ctx = Ctx { p, is_busybox_sh, is_dash, ash_like };
     ctx.bashism(c, t);
 }

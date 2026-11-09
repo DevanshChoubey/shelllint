@@ -1,16 +1,27 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck shellcheck.hs (e11f964)
 
+mod cache;
+mod completions;
+mod discover;
+mod dump_ast;
 mod fix;
+mod list_checks;
 mod oom;
 mod options;
+mod rcstrict;
+mod run_control;
+mod shell_inference;
 mod sys;
+mod verbose;
 
 use std::io::Write;
 use std::process::exit;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use shelllint_checker::{check_script_owned, optional_checks};
 use shelllint_core::data::{SHELLCHECK_VERSION, shell_for_executable};
+use shelllint_core::extras::{expand_home, is_external_var_pattern};
 use shelllint_core::interface::{CheckSpec, ColorOption, Severity, SystemInterface};
 use shelllint_formatter::{Formatter, by_name, tty::WIKI_LINK};
 
@@ -141,46 +152,207 @@ fn status_to_code(status: Status) -> i32 {
 }
 
 fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
+    if let Some(shell) = get_option(flags, "completions") {
+        return match completions::generate(shell) {
+            Some(script) => {
+                print!("{}", script);
+                Ok(Status::NoProblems)
+            }
+            None => {
+                print_err(&format!("Unknown shell for --completions: {}", shell));
+                print_err(&format!("Supported shells: {}", completions::SHELL_NAMES.join(", ")));
+                Err(Status::SyntaxFailure)
+            }
+        };
+    }
     let mut options = default_options();
     for flag in flags {
         parse_option(flag, &mut options)?;
     }
 
     let files_from = get_options(flags, "files-from");
-    let mut all_files = vec![];
+    let mut all_files: Vec<String> = vec![];
     for path in &files_from {
         all_files.extend(read_files_from(path)?);
     }
     all_files.extend(files.iter().cloned());
 
+    // `-r` and `--exclude-path` (extensions): expand directories, drop excluded paths.
+    let recursive = get_option(flags, "recursive").is_some();
+    let excludes = get_options(flags, "exclude-path");
+    let mut walked_to_nothing = false;
+    if recursive || !excludes.is_empty() {
+        let had_inputs = !all_files.is_empty();
+        all_files = discover::expand_files(&all_files, recursive, &excludes);
+        // A walk that finds nothing is not an error.
+        walked_to_nothing = recursive && had_inputs && all_files.is_empty();
+    }
+
     // It shouldn't be an error to do --files-from=/dev/null
-    if files_from.is_empty() {
+    if files_from.is_empty() && !walked_to_nothing {
         verify_files(&all_files)?;
     }
 
-    let format = get_option(flags, "format").unwrap_or("tty");
-    let formatter = match by_name(format, options.formatter_options.clone()) {
-        Some(f) => f,
-        None => {
-            print_err(&format!("Unknown format {}", format));
-            print_err("Supported formats:");
-            for name in options::FORMAT_NAMES {
-                print_err(&format!("  {}", name));
-            }
-            return Err(Status::SupportFailure);
+    if let Some(name) = &options.stdin_filename {
+        if !all_files.iter().any(|f| f == "-") {
+            print_err("--stdin-filename can only be used together with '-' (standard input) as a file.\n");
+            print_err(&get_usage_info());
+            return Err(Status::SyntaxFailure);
         }
-    };
+        if !options.fix {
+            for f in all_files.iter_mut() {
+                if *f == "-" {
+                    *f = name.clone();
+                }
+            }
+        }
+    }
+
+    rcstrict::check_rcfile_readable(&options)?;
+    let first = all_files.first().map(String::as_str);
+    rcstrict::apply_rc_overrides(
+        &mut options,
+        get_option(flags, "color").is_some(),
+        get_option(flags, "wiki-link-count").is_some(),
+        first,
+    );
+
+    let format = get_option(flags, "format").unwrap_or("tty");
+    let mut formatter = new_formatter(format, &options)?;
+    if !options.outputs.is_empty() {
+        formatter = tee_outputs(formatter, &options)?;
+    }
 
     if options.dry_run && !options.fix {
         print_err("--dry-run only works together with --fix.");
         return Err(Status::SyntaxFailure);
+    }
+    if options.dump_ast {
+        return Ok(dump_ast::run(&options, &all_files));
+    }
+    if let Some(rev) = get_option(flags, "changed-since") {
+        if all_files.iter().any(|f| f == "-") {
+            print_err("--changed-since cannot be used with standard input ('-').");
+            return Err(Status::SyntaxFailure);
+        }
+        match discover::changed_lines(rev, &all_files) {
+            Ok(m) => options.changed_lines = Some(m),
+            Err(msg) => {
+                print_err(&format!("{}: {}", prog_name(), msg));
+                return Err(Status::RuntimeException);
+            }
+        }
     }
     if options.fix {
         return Ok(fix::run_fix(&options, formatter, &all_files));
     }
 
     let sys = io_interface(&options, &all_files);
-    Ok(run_formatter(&sys, formatter, &options, &all_files))
+    let status = run_formatter(&sys, formatter, &options, &all_files);
+    if OUTPUT_FAILED.load(Ordering::SeqCst) {
+        return Ok(Status::RuntimeException);
+    }
+    Ok(status)
+}
+
+/// Set when a `--output` file could not be written.
+static OUTPUT_FAILED: AtomicBool = AtomicBool::new(false);
+
+fn new_formatter(format: &str, options: &Options) -> Result<Box<dyn Formatter>, Status> {
+    match by_name(format, options.formatter_options.clone()) {
+        Some(f) => Ok(f),
+        None => {
+            print_err(&format!("Unknown format {}", format));
+            print_err("Supported formats:");
+            for name in options::FORMAT_NAMES {
+                print_err(&format!("  {}", name));
+            }
+            Err(Status::SupportFailure)
+        }
+    }
+}
+
+/// One `--output=FORMAT:PATH`: its formatter, the file and the report so far.
+struct OutputFile {
+    format: Box<dyn Formatter>,
+    path: String,
+    file: std::fs::File,
+    buf: Vec<u8>,
+}
+
+/// Runs the `-f` formatter and every `--output` formatter off one set of
+/// results, so each script is checked once.
+struct Tee {
+    primary: Box<dyn Formatter>,
+    outputs: Vec<OutputFile>,
+}
+
+/// Opens (creates) every `--output` file before anything is checked, so an
+/// unwritable path fails up front instead of after a report went to stdout.
+fn tee_outputs(primary: Box<dyn Formatter>, options: &Options) -> Result<Box<dyn Formatter>, Status> {
+    let mut outputs = vec![];
+    for (format, path) in &options.outputs {
+        let formatter = new_formatter(format, options)?;
+        match std::fs::File::create(path) {
+            Ok(file) => outputs.push(OutputFile { format: formatter, path: path.clone(), file, buf: vec![] }),
+            Err(e) => {
+                print_err(&format!(
+                    "Could not write output file: {}: {}",
+                    path,
+                    sys::show_io_error_in("openFile", path, &e)
+                ));
+                return Err(Status::RuntimeException);
+            }
+        }
+    }
+    Ok(Box::new(Tee { primary, outputs }))
+}
+
+impl Formatter for Tee {
+    fn header(&mut self, out: &mut dyn Write) {
+        self.primary.header(out);
+        for o in &mut self.outputs {
+            o.format.header(&mut o.buf);
+        }
+    }
+
+    fn on_result(
+        &mut self,
+        r: &shelllint_core::interface::CheckResult,
+        sys: &dyn SystemInterface,
+        out: &mut dyn Write,
+    ) {
+        self.primary.on_result(r, sys, out);
+        for o in &mut self.outputs {
+            o.format.on_result(r, sys, &mut o.buf);
+        }
+    }
+
+    fn on_failure(&mut self, file: &str, msg: &str, out: &mut dyn Write) {
+        self.primary.on_failure(file, msg, out);
+        for o in &mut self.outputs {
+            o.format.on_failure(file, msg, &mut o.buf);
+        }
+    }
+
+    fn footer(&mut self, out: &mut dyn Write) {
+        self.primary.footer(out);
+        for o in &mut self.outputs {
+            o.format.footer(&mut o.buf);
+            if let Err(e) = o.file.write_all(&o.buf).and_then(|_| o.file.flush()) {
+                print_err(&format!(
+                    "Could not write output file: {}: {}",
+                    o.path,
+                    sys::show_io_error_in("write", &o.path, &e)
+                ));
+                OUTPUT_FAILED.store(true, Ordering::SeqCst);
+            }
+        }
+    }
+
+    fn exit_requested(&self) -> bool {
+        self.primary.exit_requested()
+    }
 }
 
 fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
@@ -203,7 +375,7 @@ fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
 }
 
 pub(crate) fn run_formatter(
-    sys: &dyn SystemInterface,
+    sys: &sys::IoInterface,
     mut format: Box<dyn Formatter>,
     options: &Options,
     files: &[String],
@@ -212,46 +384,73 @@ pub(crate) fn run_formatter(
     let mut out = std::io::BufWriter::new(stdout.lock());
     format.header(&mut out);
     let mut result = Status::NoProblems;
+    let mut tally = run_control::Tally::default();
     for file in files {
-        let new_status = process_file(sys, format.as_mut(), options, file, &mut out);
+        let (new_status, findings) = process_file(sys, format.as_mut(), options, file, &mut out, &mut tally);
         result = result.max(new_status);
         let _ = out.flush();
         // DIVERGENCE: Haskell's Quiet formatter calls exitFailure itself.
         if format.exit_requested() {
             exit(1);
         }
+        // DIVERGENCE: --fail-fast (extension) stops after the first file with findings.
+        if options.fail_fast && findings > 0 {
+            break;
+        }
     }
     format.footer(&mut out);
     let _ = out.flush();
+    // DIVERGENCE: --summary (extension) reports totals on stderr only.
+    if options.summary {
+        print_err(&tally.summary());
+    }
     result
 }
 
 fn process_file(
-    sys: &dyn SystemInterface,
+    sys: &sys::IoInterface,
     format: &mut dyn Formatter,
     options: &Options,
     filename: &str,
     out: &mut dyn Write,
-) -> Status {
+    tally: &mut run_control::Tally,
+) -> (Status, usize) {
+    verbose::announce(sys, options, filename);
     let contents = match sys.read_file(None, filename) {
         Ok(c) => c,
         Err(msg) => {
             format.on_failure(filename, &msg, out);
-            return Status::RuntimeException;
+            return (Status::RuntimeException, 0);
         }
     };
-    let spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
-    let result = check_script_owned(sys, spec);
+    if options.strict_rc && !options.check_spec.ignore_rc && rcstrict::rc_has_problems(options, filename) {
+        return (Status::RuntimeException, 0);
+    }
+    let mut spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
+    let shell_flag = options.check_spec.shell_type_override.is_some();
+    match shell_inference::decide(&options.shell_inference, shell_flag, spec.ignore_rc, sys, filename, &spec.script) {
+        Some(shell_inference::Decision::Skip) => return (Status::NoProblems, 0),
+        Some(shell_inference::Decision::Use(sh)) => spec.shell_type_override = Some(sh),
+        None => {}
+    }
+    let result = match &options.cache_dir {
+        Some(dir) if filename != "-" => cache::check_cached(sys, dir, options, spec),
+        _ => check_script_owned(sys, spec),
+    };
+    let result = discover::keep_changed(options, result);
     format.on_result(&result, sys, out);
+    let findings = tally.record(&result);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
     // means shellcheck cannot apply the requested configuration.
-    if result.comments.iter().any(|pc| pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig")) {
-        Status::SupportFailure
-    } else if result.comments.is_empty() {
-        Status::NoProblems
-    } else {
-        Status::SomeProblems
-    }
+    let status =
+        if result.comments.iter().any(|pc| pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig")) {
+            Status::SupportFailure
+        } else if result.comments.is_empty() {
+            Status::NoProblems
+        } else {
+            Status::SomeProblems
+        };
+    (status, findings)
 }
 
 fn parse_enum<T: Copy>(name: &str, value: &str, list: &[(&str, T)]) -> Result<T, Status> {
@@ -329,6 +528,10 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
             print_optional();
             return Err(Status::NoProblems);
         }
+        "list-checks" => {
+            list_checks::print(val)?;
+            return Err(Status::NoProblems);
+        }
         "help" => {
             println!("{}", get_usage_info());
             return Err(Status::NoProblems);
@@ -345,9 +548,12 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
                 ],
             )?;
         }
-        "source-path" => options.source_paths.extend(split_search_path(val)),
+        // DIVERGENCE: a leading `~`, `$HOME` or `${HOME}` is expanded.
+        "source-path" => options.source_paths.extend(split_search_path(val).iter().map(|p| expand_home(p))),
         "sourced" => options.check_spec.check_sourced = true,
         "severity" => {
+            // DIVERGENCE: remembered so that it beats `severity=` in an rc file.
+            options.check_spec.min_severity_explicit = true;
             options.check_spec.min_severity = parse_enum(
                 "severity",
                 val,
@@ -365,10 +571,59 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "enable" => options.check_spec.optional_checks.extend(split(',', val)),
         "extended-analysis" => options.check_spec.extended_analysis = Some(parse_bool(val)?),
         // Extensions beyond ShellCheck.
+        "external-vars" => {
+            for name in split(',', val).into_iter().filter(|s| !s.is_empty()) {
+                if !is_external_var_pattern(&name) {
+                    print_err(&format!("Invalid variable name for --external-vars: {}", name));
+                    return Err(Status::SyntaxFailure);
+                }
+                options.check_spec.external_vars.push(name);
+            }
+        }
         "fix" => options.fix = true,
         "dry-run" => options.dry_run = true,
+        "verbose" => options.verbose = true,
+        "fallback-shell" => match shell_for_executable(val) {
+            Some(shell) => options.shell_inference.fallback = Some(shell),
+            None => {
+                print_err(&format!("Unknown shell: {}", val));
+                return Err(Status::SupportFailure);
+            }
+        },
+        "infer-shell-from-name" => options.shell_inference.infer_from_name = true,
+        "skip-unsupported-shebang" => options.shell_inference.skip_unsupported = true,
+        "dump-ast" => options.dump_ast = true,
+        "summary" => options.summary = true,
+        "fail-fast" => options.fail_fast = true,
+        "stdin-filename" => options.stdin_filename = Some(val.clone()),
+        "output" => match val.split_once(':') {
+            Some((format, path)) if !format.is_empty() && !path.is_empty() => {
+                options.outputs.push((format.to_string(), path.to_string()))
+            }
+            _ => {
+                print_err(&format!("Invalid value for --output: {}. Expected FORMAT:PATH.", val));
+                return Err(Status::SyntaxFailure);
+            }
+        },
+        "cache-dir" => options.cache_dir = Some(val.clone()),
+        "context" => options.formatter_options.context_lines = parse_num(val)?,
+        "strict-rc" => options.strict_rc = true,
+        "tab-width" => match parse_num(val)? {
+            n if n >= 1 => options.formatter_options.tab_width = Some(n.min(1024) as usize),
+            _ => {
+                print_err(&format!("Invalid tab width: {}", val));
+                return Err(Status::SyntaxFailure);
+            }
+        },
+        "source-functions" => options.source_functions.extend(split(',', val).into_iter().filter(|s| !s.is_empty())),
+        "source-from-path" => options.source_from_path = true,
+        "modern-dialects" => options.check_spec.optional_checks.push("modern-dialects".to_string()),
+        "ignore-directives" => options.check_spec.ignore_directives = true,
+        "report-unused-disables" => options.check_spec.report_unused_disables = true,
+        "safe-vars" => options.check_spec.safe_vars.extend(split(',', val).into_iter().filter(|s| !s.is_empty())),
+        "strict-env-vars" => options.check_spec.strict_env_vars = Some(true),
         // These flags are handled specially in 'process'
-        "format" | "files-from" => {}
+        "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),
     }
     Ok(())

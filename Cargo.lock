@@ -434,6 +434,7 @@ name = "shelllint"
 version = "0.1.0"
 dependencies = [
  "libc",
+ "serde_json",
  "shelllint-analyzer",
  "shelllint-checker",
  "shelllint-core",

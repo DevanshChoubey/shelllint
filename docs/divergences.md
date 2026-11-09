@@ -23,6 +23,32 @@ would make the port worse without making it more correct.
   starting from 255)`, exit 1. We decode the list leniently, report the
   undecodable name as missing (exit 2) and still check the other files.
 
+## Behaviour that changes without a flag
+
+These differ from ShellCheck even in a run that uses no shelllint option. The
+parity corpus doesn't exercise them.
+
+- **`nix-shell` shebangs.** `#!/usr/bin/env nix-shell` no longer gives SC1008.
+  The shell comes from the `#! nix-shell -i <shell>` lines directly after the
+  shebang, or bash if there is no `-i`. Non-shell interpreters keep SC1008.
+- **Home expansion.** A leading `~`, `$HOME` or `${HOME}` is expanded in
+  `source-path=`, `-P` and `# shellcheck source=`.
+- **`RCDIR`.** A leading `RCDIR` component in `source-path=` in an rc file means
+  the rc file's directory. A real directory named `RCDIR` needs `./RCDIR`.
+- **New directive and rc keys** (`severity`, `external-vars`, `source-functions`,
+  `disable-start`, `disable-end`, `disable-line`, `color`, `wiki-link-count`,
+  `modern-dialects`).
+  ShellCheck reports or ignores these as unknown. An invalid `severity=` in a
+  directive gives SC1147, a code ShellCheck doesn't use.
+- **Repeated `source`.** Mutually sourcing scripts are expanded at most 512
+  times per checked script, then repeats are treated as empty with no
+  diagnostic. This is what stops the runaway memory use. Normal scripts never
+  reach the limit.
+- **`--help` and the format list** also show shelllint's own options and formats.
+  ShellCheck's rows and column layout are unchanged.
+- **Abbreviated long options** resolve against ShellCheck's own options first, so
+  `--ver` is still `--version`. Otherwise they can reach a shelllint option.
+
 ## Related notes
 
 - **Lone surrogates in source text.** Haskell's `decodeString` turns

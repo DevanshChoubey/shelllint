@@ -5,6 +5,7 @@
 pub mod ast;
 pub mod astlib;
 pub mod data;
+pub mod extras;
 pub mod interface;
 pub mod prelude;
 pub mod regex;

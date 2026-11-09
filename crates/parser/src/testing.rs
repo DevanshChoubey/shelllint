@@ -19,6 +19,7 @@ pub fn test_environment() -> Environment<'static> {
         current_filename: "myscript".to_string(),
         ignore_rc: false,
         shell_type_override: None,
+        ignore_directives: false,
     }
 }
 

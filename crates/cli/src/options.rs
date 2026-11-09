@@ -13,6 +13,10 @@ pub struct Options {
     pub check_spec: CheckSpec,
     pub external_sources: bool,
     pub source_paths: Vec<String>,
+    /// `--source-functions` (extension): wrapper functions followed like `source`.
+    pub source_functions: Vec<String>,
+    /// `--source-from-path` (extension): look a bare filename up on `$PATH`.
+    pub source_from_path: bool,
     pub formatter_options: FormatterOptions,
     #[allow(dead_code)]
     pub min_severity: Severity,
@@ -21,6 +25,26 @@ pub struct Options {
     pub fix: bool,
     /// `--dry-run` (extension): with `--fix`, print the diff instead.
     pub dry_run: bool,
+    /// `--verbose` (extension): name each file and its .shellcheckrc on stderr.
+    pub verbose: bool,
+    /// `--fallback-shell` and friends (extension).
+    pub shell_inference: crate::shell_inference::ShellInference,
+    /// `--dump-ast` (extension): print each file's parsed AST as JSON.
+    pub dump_ast: bool,
+    /// `--summary` (extension): print finding counts and files checked on stderr.
+    pub summary: bool,
+    /// `--fail-fast` (extension): stop after the first file with findings.
+    pub fail_fast: bool,
+    /// `--stdin-filename=PATH` (extension): the name `-` is reported as.
+    pub stdin_filename: Option<String>,
+    /// `--output=FORMAT:PATH` (extension), repeatable: (format, path).
+    pub outputs: Vec<(String, String)>,
+    /// `--cache-dir=PATH` (extension): where to keep reusable results.
+    pub cache_dir: Option<String>,
+    /// `--changed-since` (extension): changed line ranges per file.
+    pub changed_lines: Option<crate::discover::ChangedLines>,
+    /// `--strict-rc` (extension): bad .shellcheckrc contents are errors.
+    pub strict_rc: bool,
 }
 
 pub fn default_options() -> Options {
@@ -28,18 +52,31 @@ pub fn default_options() -> Options {
         check_spec: empty_check_spec(),
         external_sources: false,
         source_paths: vec![],
+        source_functions: vec![],
+        source_from_path: false,
         formatter_options: FormatterOptions { color_option: ColorOption::ColorAuto, ..new_formatter_options() },
         min_severity: Severity::StyleC,
         rcfile: None,
         fix: false,
         dry_run: false,
+        verbose: false,
+        shell_inference: Default::default(),
+        dump_ast: false,
+        summary: false,
+        fail_fast: false,
+        stdin_filename: None,
+        outputs: vec![],
+        cache_dir: None,
+        changed_lines: None,
+        strict_rc: false,
     }
 }
 
 pub const USAGE_HEADER: &str = "Usage: shellcheck [OPTIONS...] FILES...";
 
 /// The formats shellcheck.hs registers (`Map.keys`, so sorted).
-pub const FORMAT_NAMES: [&str; 7] = ["checkstyle", "diff", "gcc", "json", "json1", "quiet", "tty"];
+pub const FORMAT_NAMES: [&str; 10] =
+    ["checkstyle", "context", "diff", "gcc", "github", "json", "json1", "quiet", "sarif", "tty"];
 
 #[derive(Clone, Copy)]
 pub enum ArgDescr {
@@ -70,6 +107,34 @@ const fn o(
     desc: &'static str,
 ) -> OptDescr {
     OptDescr { shorts, longs, arg, placeholder, desc }
+}
+
+/// ShellCheck's own long options. Abbreviations and the `--help` column width
+/// are decided by these alone, so adding an extension cannot change what an
+/// existing `--ver` means or shift upstream's help text.
+const UPSTREAM_LONGS: [&str; 18] = [
+    "check-sourced",
+    "color",
+    "include",
+    "exclude",
+    "extended-analysis",
+    "format",
+    "list-optional",
+    "norc",
+    "rcfile",
+    "enable",
+    "source-path",
+    "shell",
+    "severity",
+    "version",
+    "wiki-link-count",
+    "external-sources",
+    "help",
+    "files-from",
+];
+
+fn is_upstream(d: &OptDescr) -> bool {
+    d.longs.iter().any(|l| UPSTREAM_LONGS.contains(l))
 }
 
 pub fn options() -> Vec<OptDescr> {
@@ -118,12 +183,86 @@ pub fn options() -> Vec<OptDescr> {
         ),
         // Extensions beyond ShellCheck (not in upstream's --help).
         o("", &["fix"], No("fix"), "", "Apply all auto-fixes to FILES in place, then report what is left"),
+        o("", &["context"], Req("context"), "N", "With -f context, lines of source around each finding (default 5)"),
         o("", &["dry-run"], No("dry-run"), "", "With --fix, print the fixes as a diff (like -f diff) instead"),
+        o("", &["verbose"], No("verbose"), "", "Print the file and the .shellcheckrc used for it to stderr"),
+        o(
+            "",
+            &["list-checks"],
+            Opt("list-checks", "text"),
+            "text|json",
+            "List the optional checks and what is known about codes",
+        ),
+        o("", &["dump-ast"], No("dump-ast"), "", "Print each file's parsed AST as JSON instead of the report"),
+        o("", &["summary"], No("summary"), "", "Print finding counts and files checked to stderr after the report"),
+        o("", &["fail-fast"], No("fail-fast"), "", "Stop after the first file with findings"),
+        o("", &["stdin-filename"], Req("stdin-filename"), "PATH", "Report standard input ('-') as PATH"),
+        o("", &["output"], Req("output"), "FORMAT:PATH", "Also write a FORMAT report to PATH (repeatable)"),
+        o("", &["completions"], Req("completions"), "SHELL", "Print a shell completion script (bash, zsh, fish)"),
+        o("", &["cache-dir"], Req("cache-dir"), "PATH", "Reuse results for unchanged files, kept in PATH"),
+        o("", &["fallback-shell"], Req("fallback-shell"), "SHELL", "Assume SHELL for scripts that do not name a shell"),
+        o("", &["infer-shell-from-name"], No("infer-shell-from-name"), "", "Guess the shell from names like .bashrc"),
+        o(
+            "",
+            &["skip-unsupported-shebang"],
+            No("skip-unsupported-shebang"),
+            "",
+            "Skip files with no usable shell, as clean",
+        ),
+        o("r", &["recursive"], No("recursive"), "", "Check the shell scripts found in directories among FILES"),
+        o("", &["exclude-path"], Req("exclude-path"), "GLOB", "Skip paths matching GLOB (repeatable)"),
+        o(
+            "",
+            &["changed-since"],
+            Opt("changed-since", "HEAD"),
+            "REF",
+            "Report only findings on lines changed since REF (default HEAD)",
+        ),
+        o(
+            "",
+            &["strict-rc"],
+            No("strict-rc"),
+            "",
+            "Make unknown .shellcheckrc keys, bad shell values and an unreadable --rcfile errors",
+        ),
+        o(
+            "",
+            &["external-vars"],
+            Req("external-vars"),
+            "VARS",
+            "Treat these variables as assigned for SC2154 (a trailing * is a prefix glob)",
+        ),
+        o("", &["tab-width"], Req("tab-width"), "N", "Expand tabs to N spaces in the tty source echo"),
+        o(
+            "",
+            &["source-functions"],
+            Req("source-functions"),
+            "NAMES",
+            "Follow calls to these functions (comma separated) like 'source'",
+        ),
+        o("", &["source-from-path"], No("source-from-path"), "", "Look up a bare sourced filename on $PATH"),
+        o(
+            "",
+            &["modern-dialects"],
+            No("modern-dialects"),
+            "",
+            "Accept newer shell features (POSIX.1-2024, ash, bash 5.1)",
+        ),
+        o("", &["ignore-directives"], No("ignore-directives"), "", "Don't honour 'disable=' directives in files"),
+        o(
+            "",
+            &["report-unused-disables"],
+            No("report-unused-disables"),
+            "",
+            "Report 'disable=' codes that suppress nothing (SC9006)",
+        ),
+        o("", &["safe-vars"], Req("safe-vars"), "VAR1,VAR2..", "Treat these variables as free of spaces and globs"),
+        o("", &["strict-env-vars"], No("strict-env-vars"), "", "Warn about unassigned uppercase variables too"),
     ]
 }
 
 // "Output format (" ++ formatList ++ ")"
-const FORMAT_DESC: &str = "Output format (checkstyle, diff, gcc, json, json1, quiet, tty)";
+const FORMAT_DESC: &str = "Output format (checkstyle, context, diff, gcc, github, json, json1, quiet, sarif, tty)";
 
 /// GetOpt `usageInfo`
 pub fn usage_info(header: &str, opts: &[&OptDescr]) -> String {
@@ -152,7 +291,8 @@ pub fn usage_info(header: &str, opts: &[&OptDescr]) -> String {
         })
         .collect();
     let w1 = rows.iter().map(|r| r.0.chars().count()).max().unwrap_or(0);
-    let w2 = rows.iter().map(|r| r.1.chars().count()).max().unwrap_or(0);
+    // Upstream's rows alone set the width; a longer extension just overflows it.
+    let w2 = rows.iter().zip(opts).filter(|(_, d)| is_upstream(d)).map(|(r, _)| r.1.chars().count()).max().unwrap_or(0);
     let mut s = format!("{}\n", header);
     for (a, b, d) in rows {
         s.push_str(&format!("  {:<w1$}  {:<w2$}  {}\n", a, b, d, w1 = w1, w2 = w2));
@@ -277,10 +417,19 @@ fn long_opt(ls: &str, rs: &[String], optdescr: &[OptDescr]) -> (Opt, usize, Opti
         None => (ls, ""),
     };
     let exact: Vec<&OptDescr> = optdescr.iter().filter(|d| d.longs.contains(&opt)).collect();
-    let options: Vec<&OptDescr> = if exact.is_empty() {
-        optdescr.iter().filter(|d| d.longs.iter().any(|l| l.starts_with(opt))).collect()
-    } else {
+    let prefixed = |upstream_only: bool| -> Vec<&OptDescr> {
+        optdescr
+            .iter()
+            .filter(|d| (!upstream_only || is_upstream(d)) && d.longs.iter().any(|l| l.starts_with(opt)))
+            .collect()
+    };
+    // An abbreviation ShellCheck accepts keeps its meaning; extensions only
+    // get the abbreviations ShellCheck has no use for.
+    let options: Vec<&OptDescr> = if !exact.is_empty() {
         exact
+    } else {
+        let upstream = prefixed(true);
+        if upstream.is_empty() { prefixed(false) } else { upstream }
     };
     let opt_str = format!("--{}", opt);
     let unreq = || (Opt::Unreq(format!("--{}", ls)), 0, None);

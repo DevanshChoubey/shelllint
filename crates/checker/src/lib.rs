@@ -7,6 +7,9 @@
 // `crates/checker/tests/checker.rs`.
 #![forbid(unsafe_code)]
 
+pub mod ast_dump;
+pub mod directive_audit;
+pub mod directive_ranges;
 pub mod editorconfig;
 pub mod filepath;
 
@@ -22,6 +25,7 @@ use shelllint_analyzer::api::{
 };
 use shelllint_core::ast::{Ast, Id};
 use shelllint_core::astlib::get_enable_directives;
+use shelllint_core::extras::{get_external_var_directives, get_severity_directive};
 use shelllint_core::interface::{
     AnalysisResult, AnalysisSpec, CheckDescription, CheckResult, CheckSpec, Code, ExecutionMode, ParseSpec,
     PositionedComment, Severity, Shell, SystemInterface, TokenComment, empty_check_result, empty_check_spec,
@@ -167,7 +171,44 @@ fn run_on_check_stack<R>(f: impl FnOnce() -> R) -> R {
 }
 
 /// The `where`-bound `checkScript contents` of `checkScript`.
-fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: String) -> Vec<PositionedComment> {
+fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, mut contents: String) -> Vec<PositionedComment> {
+    // `--ignore-directives` covers the range directives too.
+    let ranges = if spec.ignore_directives { None } else { directive_ranges::DirectiveRanges::scan(&contents) };
+    // Only the audit needs the script twice; a normal run moves it.
+    let first_pass = if spec.report_unused_disables { contents.clone() } else { std::mem::take(&mut contents) };
+    let (mut all, result) = collect_messages(sys, spec, first_pass, spec.ignore_directives);
+    if spec.report_unused_disables {
+        // DIVERGENCE: extension (`--report-unused-disables`), see `directive_audit`.
+        let (other, other_result) = collect_messages(sys, spec, contents.clone(), !spec.ignore_directives);
+        let (honoured, honoured_result, ignored) =
+            if spec.ignore_directives { (&other, &other_result, &all) } else { (&all, &result, &other) };
+        let reports = directive_audit::unused_disable_reports(spec, &contents, honoured_result, honoured, ignored);
+        all.extend(reports);
+    }
+    // DIVERGENCE: `--severity` beats a file-level `severity=` directive, which
+    // beats one in the rc file (the root's annotations list the file's first).
+    let min_severity = match result.root {
+        Some(root) if !spec.min_severity_explicit => {
+            get_severity_directive(&result.ast, root).unwrap_or(spec.min_severity)
+        }
+        _ => spec.min_severity,
+    };
+    let included: Vec<PositionedComment> =
+        all.into_iter().filter(|pc| should_include(spec, min_severity, pc)).collect();
+    let included = match &ranges {
+        Some(r) => included.into_iter().filter(|pc| !r.suppresses(&spec.filename, pc)).collect(),
+        None => included,
+    };
+    nub_sorted(sort_messages(included))
+}
+
+/// Parse and analyze `contents`: every message, before the `-S`/`-i`/`-e` filters.
+fn collect_messages(
+    sys: &dyn SystemInterface,
+    spec: &CheckSpec,
+    contents: String,
+    ignore_directives: bool,
+) -> (Vec<PositionedComment>, ParseResult) {
     let mut result = parse_script(
         sys,
         &ParseSpec {
@@ -176,6 +217,7 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: 
             check_sourced: spec.check_sourced,
             ignore_rc: spec.ignore_rc,
             shell_type_override: spec.shell_type_override,
+            ignore_directives,
             ..new_parse_spec()
         },
     );
@@ -183,12 +225,18 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: 
     let analysis_spec = |ast: &Ast, root: Id| {
         let mut optional_checks = get_enable_directives(ast, root);
         optional_checks.extend(spec.optional_checks.iter().cloned());
+        // DIVERGENCE: `external-vars` from the flag, plus directives anywhere.
+        let mut external_vars = spec.external_vars.clone();
+        external_vars.extend(get_external_var_directives(ast, root));
         AnalysisSpec {
+            external_vars,
             shell_type: spec.shell_type_override,
             fallback_shell: shell_from_filename(&spec.filename),
             check_sourced: spec.check_sourced,
             execution_mode: ExecutionMode::Executed,
             extended_analysis: spec.extended_analysis,
+            safe_vars: spec.safe_vars.clone(),
+            strict_env_vars: spec.strict_env_vars,
             optional_checks,
             ..new_analysis_spec()
         }
@@ -202,14 +250,13 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, contents: 
     };
     let mut all = parse_messages;
     all.extend(analysis_messages.into_iter().map(|t| token_to_position(&result, t)));
-    let included: Vec<PositionedComment> = all.into_iter().filter(|pc| should_include(spec, pc)).collect();
-    nub_sorted(sort_messages(included))
+    (all, result)
 }
 
-fn should_include(spec: &CheckSpec, pc: &PositionedComment) -> bool {
+fn should_include(spec: &CheckSpec, min_severity: Severity, pc: &PositionedComment) -> bool {
     let code = pc.comment.code;
     let severity = pc.comment.severity;
-    severity <= spec.min_severity
+    severity <= min_severity
         && match &spec.included_warnings {
             None => !spec.excluded_warnings.contains(&code),
             Some(included_warnings) => included_warnings.contains(&code),

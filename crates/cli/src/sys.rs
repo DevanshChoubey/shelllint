@@ -25,8 +25,12 @@ use crate::options::Options;
 pub struct IoInterface {
     external_sources: bool,
     source_paths: Vec<String>,
+    source_functions: Vec<String>,
+    source_from_path: bool,
     rcfile: Option<String>,
     inputs: Vec<String>,
+    /// `--stdin-filename`: the name standard input is reported (and looked up) as.
+    stdin_name: Option<String>,
     cache: Mutex<HashMap<String, String>>,
     config_cache: Mutex<(String, Option<(String, String)>)>,
 }
@@ -35,8 +39,11 @@ pub fn io_interface(options: &Options, files: &[String]) -> IoInterface {
     IoInterface {
         external_sources: options.external_sources,
         source_paths: options.source_paths.clone(),
+        source_functions: options.source_functions.clone(),
+        source_from_path: options.source_from_path,
         rcfile: options.rcfile.clone(),
         inputs: files.iter().map(|f| normalize(f)).collect(),
+        stdin_name: options.stdin_filename.clone(),
         cache: Mutex::new(HashMap::new()),
         config_cache: Mutex::new((String::new(), None)),
     }
@@ -280,6 +287,28 @@ fn does_file_exist(path: &str) -> bool {
     std::fs::metadata(path).map(|m| !m.is_dir()).unwrap_or(false)
 }
 
+pub fn file_exists(path: &str) -> bool {
+    does_file_exist(path)
+}
+
+/// The text of the rc file that applies to `filename` (the `--rcfile` if
+/// given), read without any warning output. Used for the formatter keys.
+pub fn quiet_rc_text(rcfile: Option<&str>, filename: &str) -> Option<(String, String)> {
+    let paths = match rcfile {
+        Some(f) => vec![f.to_string()],
+        None => IoInterface::config_paths(&dir_of(&normalize(filename))),
+    };
+    // Only regular files: reading a fifo or process substitution here would
+    // consume what the real read later needs. (So `color=` in such an rc file
+    // is not applied.)
+    let is_regular = |p: &String| std::fs::metadata(p).map(|m| m.is_file()).unwrap_or(false);
+    paths
+        .iter()
+        .find(|p| does_file_exist(p))
+        .filter(|p| is_regular(p))
+        .and_then(|p| input_file(p).ok().map(|r| (p.clone(), r.0)))
+}
+
 fn dir_of(path: &str) -> String {
     // System.FilePath takeDirectory
     match Path::new(path).parent() {
@@ -332,6 +361,21 @@ fn simplify_path(p: &str) -> String {
 }
 
 impl IoInterface {
+    /// `normalize`, except that the `--stdin-filename` path need not exist: its
+    /// directory is resolved and the file name kept, as for a real file.
+    fn normalize_input(&self, x: &str) -> String {
+        if self.stdin_name.as_deref() == Some(x) && std::fs::canonicalize(x).is_err() {
+            let p = Path::new(x);
+            if let (Some(parent), Some(name)) = (p.parent(), p.file_name()) {
+                let parent = if parent.as_os_str().is_empty() { Path::new(".") } else { parent };
+                if let Ok(dir) = std::fs::canonicalize(parent) {
+                    return combine(&strip_verbatim(&dir.to_string_lossy()), &name.to_string_lossy());
+                }
+            }
+        }
+        normalize(x)
+    }
+
     fn allowable(&self, rc_suggests_external: Option<bool>, x: &str) -> bool {
         if rc_suggests_external.unwrap_or(self.external_sources) { true } else { self.inputs.contains(&normalize(x)) }
     }
@@ -380,6 +424,11 @@ impl IoInterface {
         v
     }
 
+    /// The .shellcheckrc (or --rcfile) that applies to `filename`, if any.
+    pub fn rc_path(&self, filename: &str) -> Option<String> {
+        self.get_rc_config(filename).map(|(path, _)| path)
+    }
+
     fn get_rc_config(&self, filename: &str) -> Option<(String, String)> {
         let mut cache = self.config_cache.lock().unwrap();
         match &self.rcfile {
@@ -395,7 +444,7 @@ impl IoInterface {
                 result
             }
             None => {
-                let path = normalize(filename);
+                let path = self.normalize_input(filename);
                 let dir = dir_of(&path);
                 if dir == cache.0 {
                     return cache.1.clone();
@@ -410,7 +459,7 @@ impl IoInterface {
 
 impl EditorConfigFs for IoInterface {
     fn normalize(&self, path: &str) -> String {
-        normalize(path)
+        self.normalize_input(path)
     }
 
     fn read_config(&self, file: &str) -> Option<(String, String)> {
@@ -425,12 +474,18 @@ impl EditorConfigFs for IoInterface {
 }
 
 impl SystemInterface for IoInterface {
+    fn source_functions(&self) -> Vec<String> {
+        self.source_functions.clone()
+    }
+
     fn read_file(&self, rc_suggests_external: Option<bool>, file: &str) -> Result<String, ErrorMessage> {
         if let Some(x) = self.cache.lock().unwrap().get(file) {
             return Ok(x.clone());
         }
         if self.allowable(rc_suggests_external, file) {
-            match input_file(file) {
+            // `--stdin-filename`: the script named PATH is what arrives on stdin.
+            let from = if self.stdin_name.as_deref() == Some(file) { "-" } else { file };
+            match input_file(from) {
                 Ok((contents, should_cache)) => {
                     if should_cache {
                         self.cache.lock().unwrap().insert(file.to_string(), contents.clone());
@@ -479,11 +534,35 @@ impl SystemInterface for IoInterface {
             }
             deflt.to_string()
         };
-        if Path::new(original).is_absolute() { find(drop_drive(original), original) } else { find(original, original) }
+        let found = if Path::new(original).is_absolute() {
+            find(drop_drive(original), original)
+        } else {
+            find(original, original)
+        };
+        // DIVERGENCE: `--source-from-path` (not in ShellCheck): a bare filename the
+        // normal search did not find is looked up on `$PATH`, like bash's `source`.
+        if self.source_from_path
+            && found == original
+            && !does_file_exist(original)
+            && !original.contains(is_path_separator)
+        {
+            if let Some(path) = std::env::var_os("PATH") {
+                for dir in std::env::split_paths(&path) {
+                    let dir = if dir.as_os_str().is_empty() { PathBuf::from(".") } else { dir };
+                    let c = dir.join(original).to_string_lossy().into_owned();
+                    if does_file_exist(&c) {
+                        return c;
+                    }
+                }
+            }
+        }
+        found
     }
 
     fn get_config(&self, filename: &str) -> Option<(String, String)> {
-        let rc_result = self.get_rc_config(filename);
+        // DIVERGENCE: `color=` and `wiki-link-count=` are applied by the CLI
+        // (see rcstrict.rs), so the parser must not see them.
+        let rc_result = self.get_rc_config(filename).map(|(p, c)| (p, crate::rcstrict::strip_extras(&c).0));
         let ec_result = get_editor_config(self, filename);
         merge_configs(rc_result, ec_result)
     }

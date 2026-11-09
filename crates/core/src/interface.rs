@@ -26,6 +26,13 @@ pub trait SystemInterface: Sync {
         name.to_string()
     }
 
+    /// DIVERGENCE: `--source-functions=a,b` (not in ShellCheck): names of wrapper
+    /// functions that are followed like `source` when called with a literal
+    /// first argument.
+    fn source_functions(&self) -> Vec<String> {
+        vec![]
+    }
+
     /// Get the configuration file (name, contents) for a filename
     fn get_config(&self, _file: &str) -> Option<(String, String)> {
         None
@@ -43,8 +50,23 @@ pub struct CheckSpec {
     pub included_warnings: Option<Vec<Code>>,
     pub shell_type_override: Option<Shell>,
     pub min_severity: Severity,
+    // DIVERGENCE: not in upstream. True when `min_severity` was given
+    // explicitly (the `--severity` flag); only then does it win over a
+    // `severity=` key in `.shellcheckrc` or a file-level directive.
+    pub min_severity_explicit: bool,
     pub extended_analysis: Option<bool>,
     pub optional_checks: Vec<String>,
+    // DIVERGENCE: not in upstream. Variable names (a trailing `*` is a prefix
+    // glob) to treat as assigned for SC2154, from `--external-vars`.
+    pub external_vars: Vec<String>,
+    /// `--ignore-directives` (extension): in-file `disable=` directives are not honoured.
+    pub ignore_directives: bool,
+    /// `--report-unused-disables` (extension): report `disable=` codes that suppressed nothing (SC9006).
+    pub report_unused_disables: bool,
+    /// Not in upstream: `--safe-vars`.
+    pub safe_vars: Vec<String>,
+    /// Not in upstream: `--strict-env-vars`.
+    pub strict_env_vars: Option<bool>,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -67,8 +89,14 @@ pub fn empty_check_spec() -> CheckSpec {
         included_warnings: None,
         shell_type_override: None,
         min_severity: Severity::StyleC,
+        min_severity_explicit: false,
         extended_analysis: None,
         optional_checks: vec![],
+        external_vars: vec![],
+        ignore_directives: false,
+        report_unused_disables: false,
+        safe_vars: vec![],
+        strict_env_vars: None,
     }
 }
 
@@ -79,6 +107,7 @@ pub fn new_parse_spec() -> ParseSpec {
         check_sourced: false,
         ignore_rc: false,
         shell_type_override: None,
+        ignore_directives: false,
     }
 }
 
@@ -100,6 +129,8 @@ pub struct ParseSpec {
     pub check_sourced: bool,
     pub ignore_rc: bool,
     pub shell_type_override: Option<Shell>,
+    /// DIVERGENCE: extension; drop in-file `disable=` directives while parsing.
+    pub ignore_directives: bool,
 }
 
 // DIVERGENCE: `ParseResult` / `newParseResult` are defined by the parser crate,
@@ -116,6 +147,10 @@ pub struct AnalysisSpec {
     pub check_sourced: bool,
     pub optional_checks: Vec<String>,
     pub extended_analysis: Option<bool>,
+    // DIVERGENCE: not in upstream; see `CheckSpec::external_vars`.
+    pub external_vars: Vec<String>,
+    pub safe_vars: Vec<String>,
+    pub strict_env_vars: Option<bool>,
 }
 
 pub fn new_analysis_spec() -> AnalysisSpec {
@@ -126,6 +161,9 @@ pub fn new_analysis_spec() -> AnalysisSpec {
         check_sourced: false,
         optional_checks: vec![],
         extended_analysis: None,
+        external_vars: vec![],
+        safe_vars: vec![],
+        strict_env_vars: None,
     }
 }
 
@@ -143,10 +181,14 @@ pub fn new_analysis_result() -> AnalysisResult {
 pub struct FormatterOptions {
     pub color_option: ColorOption,
     pub wiki_link_count: i64,
+    /// Lines of source shown on each side of a finding by `-f context`.
+    pub context_lines: i64,
+    /// `--tab-width=N` (extension): expand tabs in the tty source echo.
+    pub tab_width: Option<usize>,
 }
 
 pub fn new_formatter_options() -> FormatterOptions {
-    FormatterOptions { color_option: ColorOption::ColorAuto, wiki_link_count: 3 }
+    FormatterOptions { color_option: ColorOption::ColorAuto, wiki_link_count: 3, context_lines: 5, tab_width: None }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]

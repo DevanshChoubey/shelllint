@@ -12,12 +12,16 @@ use std::io::{IsTerminal, Write};
 use shelllint_core::interface::{ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface};
 
 pub mod checkstyle;
+pub mod context;
 pub mod diff;
 pub mod fixer;
 pub mod gcc;
+pub mod github;
 pub mod json;
 pub mod json1;
 pub mod quiet;
+pub mod sarif;
+pub mod tabwidth;
 pub mod tty;
 
 pub trait Formatter {
@@ -38,11 +42,14 @@ pub fn by_name(name: &str, opts: FormatterOptions) -> Option<Box<dyn Formatter>>
     match name {
         "tty" => Some(Box::new(tty::format(opts))),
         "gcc" => Some(Box::new(gcc::format())),
+        "github" => Some(Box::new(github::format())),
         "json" => Some(Box::new(json::format())),
         "json1" => Some(Box::new(json1::format())),
         "checkstyle" => Some(Box::new(checkstyle::format())),
         "diff" => Some(Box::new(diff::format(opts))),
         "quiet" => Some(Box::new(quiet::format(opts))),
+        "sarif" => Some(Box::new(sarif::format())),
+        "context" => Some(Box::new(context::format(opts))),
         _ => None,
     }
 }
