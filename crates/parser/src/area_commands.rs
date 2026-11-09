@@ -13,6 +13,10 @@ use crate::{alt, choice};
 /// The suffix reader `readSimpleCommand` picks for a command name.
 type SuffixReader<'a> = fn(&mut P<'a>) -> PR<Vec<Id>>;
 
+/// Maximum number of `source` expansions per script that behave exactly like
+/// upstream; see the DIVERGENCE in `read_source`.
+const SOURCE_EXPANSION_BUDGET: u32 = 512;
+
 impl<'a> P<'a> {
     pub(crate) fn read_newline_list(&mut self) -> PR<String> {
         let r = self.many1(|p| p.then_skip(|p| p.alt(|p| p.linefeed(), |p| p.carriage_return()), |p| p.spacing()))?;
@@ -336,6 +340,22 @@ impl<'a> P<'a> {
             let resolved = sys.find_source(&current_script, external_sources, &paths, &filename);
             let contents = sys.read_file(external_sources, &resolved);
             (contents, resolved)
+        };
+        // DIVERGENCE: upstream re-parses a sourced file once per path through
+        // the source graph, so N scripts that source each other take O(N!)
+        // time and memory (koalaman/shellcheck#3442, #2954). Count expansions
+        // per checked script; up to SOURCE_EXPANSION_BUDGET behave exactly as
+        // upstream. Beyond it, a file that was already expanded once in this
+        // script is treated as an empty sourced script (no new diagnostic),
+        // while unseen files are still followed (subject to the depth limit),
+        // making the remaining work linear in the number of distinct files.
+        let input = match input {
+            Ok(_) if resolved_file != "/dev/null" => {
+                self.source_expansions = self.source_expansions.saturating_add(1);
+                let seen = !self.expanded_sources.insert(resolved_file.clone());
+                if seen && self.source_expansions > SOURCE_EXPANSION_BUDGET { Ok(String::new()) } else { input }
+            }
+            other => other,
         };
         match input {
             Err(err) => {
