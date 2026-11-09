@@ -81,6 +81,9 @@ const EXTENSION_HELP: &str = concat!(
     "                      --fallback-shell=SHELL     Assume SHELL for scripts that do not name a shell\n",
     "                      --infer-shell-from-name    Guess the shell from names like .bashrc\n",
     "                      --skip-unsupported-shebang  Skip files with no usable shell, as clean\n",
+    "  -r                  --recursive                Check the shell scripts found in directories among FILES\n",
+    "                      --exclude-path=GLOB        Skip paths matching GLOB (repeatable)\n",
+    "                      --changed-since[=REF]      Report only findings on lines changed since REF (default HEAD)\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -161,6 +164,10 @@ fn every_help_flag_is_accepted() {
         ("--output", &["--output=json:/dev/null", "-"]),
         ("--completions", &["--completions=bash"]),
         ("--cache-dir", &["--cache-dir=/tmp/shelllint-cache-unused", "--files-from=/dev/null"]),
+        ("-r", &["-r", "--files-from=/dev/null"]),
+        ("--recursive", &["--recursive", "--files-from=/dev/null"]),
+        ("--exclude-path", &["--exclude-path=x", "-"]),
+        ("--changed-since", &["--changed-since", "--files-from=/dev/null"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

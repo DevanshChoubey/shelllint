@@ -4,6 +4,7 @@
 mod dump_ast;
 mod completions;
 mod cache;
+mod discover;
 mod fix;
 mod list_checks;
 mod oom;
@@ -174,8 +175,19 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
     }
     all_files.extend(files.iter().cloned());
 
+    // `-r` and `--exclude-path` (extensions): expand directories, drop excluded paths.
+    let recursive = get_option(flags, "recursive").is_some();
+    let excludes = get_options(flags, "exclude-path");
+    let mut walked_to_nothing = false;
+    if recursive || !excludes.is_empty() {
+        let had_inputs = !all_files.is_empty();
+        all_files = discover::expand_files(&all_files, recursive, &excludes);
+        // A walk that finds nothing is not an error.
+        walked_to_nothing = recursive && had_inputs && all_files.is_empty();
+    }
+
     // It shouldn't be an error to do --files-from=/dev/null
-    if files_from.is_empty() {
+    if files_from.is_empty() && !walked_to_nothing {
         verify_files(&all_files)?;
     }
 
@@ -206,6 +218,19 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
     }
     if options.dump_ast {
         return Ok(dump_ast::run(&options, &all_files));
+    }
+    if let Some(rev) = get_option(flags, "changed-since") {
+        if all_files.iter().any(|f| f == "-") {
+            print_err("--changed-since cannot be used with standard input ('-').");
+            return Err(Status::SyntaxFailure);
+        }
+        match discover::changed_lines(rev, &all_files) {
+            Ok(m) => options.changed_lines = Some(m),
+            Err(msg) => {
+                print_err(&format!("{}: {}", prog_name(), msg));
+                return Err(Status::RuntimeException);
+            }
+        }
     }
     if options.fix {
         return Ok(fix::run_fix(&options, formatter, &all_files));
@@ -385,6 +410,7 @@ fn process_file(
         Some(dir) if filename != "-" => cache::check_cached(sys, dir, options, spec),
         _ => check_script_owned(sys, spec),
     };
+    let result = discover::keep_changed(options, result);
     format.on_result(&result, sys, out);
     let findings = tally.record(&result);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
@@ -542,7 +568,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         },
         "cache-dir" => options.cache_dir = Some(val.clone()),
         // These flags are handled specially in 'process'
-        "format" | "files-from" => {}
+        "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),
     }
     Ok(())

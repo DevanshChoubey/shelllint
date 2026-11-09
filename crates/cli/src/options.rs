@@ -37,6 +37,8 @@ pub struct Options {
     pub outputs: Vec<(String, String)>,
     /// `--cache-dir=PATH` (extension): where to keep reusable results.
     pub cache_dir: Option<String>,
+    /// `--changed-since` (extension): changed line ranges per file.
+    pub changed_lines: Option<crate::discover::ChangedLines>,
 }
 
 pub fn default_options() -> Options {
@@ -57,6 +59,7 @@ pub fn default_options() -> Options {
         stdin_filename: None,
         outputs: vec![],
         cache_dir: None,
+        changed_lines: None,
     }
 }
 
@@ -183,6 +186,15 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["fallback-shell"], Req("fallback-shell"), "SHELL", "Assume SHELL for scripts that do not name a shell"),
         o("", &["infer-shell-from-name"], No("infer-shell-from-name"), "", "Guess the shell from names like .bashrc"),
         o("", &["skip-unsupported-shebang"], No("skip-unsupported-shebang"), "", "Skip files with no usable shell, as clean"),
+        o("r", &["recursive"], No("recursive"), "", "Check the shell scripts found in directories among FILES"),
+        o("", &["exclude-path"], Req("exclude-path"), "GLOB", "Skip paths matching GLOB (repeatable)"),
+        o(
+            "",
+            &["changed-since"],
+            Opt("changed-since", "HEAD"),
+            "REF",
+            "Report only findings on lines changed since REF (default HEAD)",
+        ),
     ]
 }
 
