@@ -18,8 +18,8 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
         name: "require-strict-mode",
         id: &[9001],
         description: "Notify when a script does not set errexit, nounset and pipefail",
-        positive: "#!/bin/bash\necho hi",
-        negative: "#!/bin/bash\nset -euo pipefail\necho hi",
+        positive: "echo hi",
+        negative: "set -euo pipefail; echo hi",
     }),
     kind: CheckKind::Tree(check_require_strict_mode),
 };

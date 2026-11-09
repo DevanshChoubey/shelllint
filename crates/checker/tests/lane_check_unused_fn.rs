@@ -45,5 +45,6 @@ fn dynamic_command_name_disables_the_check() {
 #[test]
 fn off_by_default() {
     assert_eq!(run("foo() { echo hi; }\n", &[]), Vec::<Code>::new());
-    assert_eq!(run("foo() { echo hi; }\n", &["all"]), vec![9005]);
+    assert_eq!(run("foo() { echo hi; }\n", &["all"]), Vec::<Code>::new());
+    assert_eq!(run("foo() { echo hi; }\n", &["all", "unused-function"]), vec![9005]);
 }

@@ -169,7 +169,14 @@ fn selected_optionals(checks: &[&'static CheckEntry], spec: &AnalysisSpec, regis
     let all = registered(checks, registry);
     let keys = &spec.optional_checks;
     if keys.iter().any(|k| k == "all") {
-        all
+        // DIVERGENCE: shelllint's own checks (SC9000 and up) do not exist in
+        // ShellCheck, so `all` leaves them out and `-o all` keeps matching it.
+        // They run only when named, including alongside `all`.
+        all.into_iter()
+            .filter(|e| {
+                e.optional.is_none_or(|d| !d.id.iter().any(|&c| c >= 9000) || keys.iter().any(|k| k == d.name))
+            })
+            .collect()
     } else {
         keys.iter().filter_map(|k| all.iter().copied().find(|e| e.optional.is_some_and(|d| d.name == k))).collect()
     }
