@@ -39,6 +39,8 @@ pub struct Options {
     pub cache_dir: Option<String>,
     /// `--changed-since` (extension): changed line ranges per file.
     pub changed_lines: Option<crate::discover::ChangedLines>,
+    /// `--strict-rc` (extension): bad .shellcheckrc contents are errors.
+    pub strict_rc: bool,
 }
 
 pub fn default_options() -> Options {
@@ -60,6 +62,7 @@ pub fn default_options() -> Options {
         outputs: vec![],
         cache_dir: None,
         changed_lines: None,
+        strict_rc: false,
     }
 }
 
@@ -196,6 +199,7 @@ pub fn options() -> Vec<OptDescr> {
             "REF",
             "Report only findings on lines changed since REF (default HEAD)",
         ),
+        o("", &["strict-rc"], No("strict-rc"), "", "Make unknown .shellcheckrc keys, bad shell values and an unreadable --rcfile errors"),
     ]
 }
 

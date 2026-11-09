@@ -11,6 +11,7 @@ mod oom;
 mod options;
 mod shell_inference;
 mod run_control;
+mod rcstrict;
 mod sys;
 mod verbose;
 
@@ -206,6 +207,15 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
         }
     }
 
+    rcstrict::check_rcfile_readable(&options)?;
+    let first = all_files.first().map(String::as_str);
+    rcstrict::apply_rc_overrides(
+        &mut options,
+        get_option(flags, "color").is_some(),
+        get_option(flags, "wiki-link-count").is_some(),
+        first,
+    );
+
     let format = get_option(flags, "format").unwrap_or("tty");
     let mut formatter = new_formatter(format, &options)?;
     if !options.outputs.is_empty() {
@@ -399,6 +409,9 @@ fn process_file(
             return (Status::RuntimeException, 0);
         }
     };
+    if options.strict_rc && !options.check_spec.ignore_rc && rcstrict::rc_has_problems(options, filename) {
+        return (Status::RuntimeException, 0);
+    }
     let mut spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
     let shell_flag = options.check_spec.shell_type_override.is_some();
     match shell_inference::decide(&options.shell_inference, shell_flag, spec.ignore_rc, sys, filename, &spec.script) {
@@ -568,6 +581,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         },
         "cache-dir" => options.cache_dir = Some(val.clone()),
         "context" => options.formatter_options.context_lines = parse_num(val)?,
+        "strict-rc" => options.strict_rc = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

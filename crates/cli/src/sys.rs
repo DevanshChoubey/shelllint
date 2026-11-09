@@ -283,6 +283,24 @@ fn does_file_exist(path: &str) -> bool {
     std::fs::metadata(path).map(|m| !m.is_dir()).unwrap_or(false)
 }
 
+pub fn file_exists(path: &str) -> bool {
+    does_file_exist(path)
+}
+
+/// The text of the rc file that applies to `filename` (the `--rcfile` if
+/// given), read without any warning output. Used for the formatter keys.
+pub fn quiet_rc_text(rcfile: Option<&str>, filename: &str) -> Option<(String, String)> {
+    let paths = match rcfile {
+        Some(f) => vec![f.to_string()],
+        None => IoInterface::config_paths(&dir_of(&normalize(filename))),
+    };
+    // Only regular files: reading a fifo or process substitution here would
+    // consume what the real read later needs. (So `color=` in such an rc file
+    // is not applied.)
+    let is_regular = |p: &String| std::fs::metadata(p).map(|m| m.is_file()).unwrap_or(false);
+    paths.iter().find(|p| does_file_exist(p)).filter(|p| is_regular(p)).and_then(|p| input_file(p).ok().map(|r| (p.clone(), r.0)))
+}
+
 fn dir_of(path: &str) -> String {
     // System.FilePath takeDirectory
     match Path::new(path).parent() {
@@ -508,7 +526,9 @@ impl SystemInterface for IoInterface {
     }
 
     fn get_config(&self, filename: &str) -> Option<(String, String)> {
-        let rc_result = self.get_rc_config(filename);
+        // DIVERGENCE: `color=` and `wiki-link-count=` are applied by the CLI
+        // (see rcstrict.rs), so the parser must not see them.
+        let rc_result = self.get_rc_config(filename).map(|(p, c)| (p, crate::rcstrict::strip_extras(&c).0));
         let ec_result = get_editor_config(self, filename);
         merge_configs(rc_result, ec_result)
     }
