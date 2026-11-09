@@ -15,6 +15,7 @@ pub mod checkstyle;
 pub mod diff;
 pub mod fixer;
 pub mod gcc;
+pub mod github;
 pub mod json;
 pub mod json1;
 pub mod quiet;
@@ -38,6 +39,7 @@ pub fn by_name(name: &str, opts: FormatterOptions) -> Option<Box<dyn Formatter>>
     match name {
         "tty" => Some(Box::new(tty::format(opts))),
         "gcc" => Some(Box::new(gcc::format())),
+        "github" => Some(Box::new(github::format())),
         "json" => Some(Box::new(json::format())),
         "json1" => Some(Box::new(json1::format())),
         "checkstyle" => Some(Box::new(checkstyle::format())),

@@ -32,3 +32,14 @@
   types: [shell]
   require_serial: true
   args: [--format=gcc]
+
+# Builds shelllint with cargo on first use (needs a Rust toolchain; slower than
+# the system hook). The binary is installed into the hook's own environment.
+- id: shelllint-rust
+  name: shelllint (cargo)
+  description: Lint shell scripts with shelllint, built from source by pre-commit using cargo.
+  entry: shelllint
+  language: rust
+  types: [shell]
+  require_serial: true
+  args: [--format=gcc]
