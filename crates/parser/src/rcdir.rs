@@ -23,12 +23,14 @@ fn expand_one(rc_file: &str, path: String) -> String {
     if !(rest.is_empty() || rest.starts_with('/')) {
         return path;
     }
-    let dir = match rc_file.rfind('/') {
+    // An rc path found by the upward search is native, so Windows gives `\`.
+    let is_sep = |c: char| c == '/' || (cfg!(windows) && c == '\\');
+    let dir = match rc_file.rfind(is_sep) {
         Some(0) => "/",
         Some(i) => &rc_file[..i],
         None => ".",
     };
-    format!("{}{}", dir.trim_end_matches('/'), rest)
+    format!("{}{}", dir.trim_end_matches(is_sep), rest)
 }
 
 #[cfg(test)]
@@ -43,5 +45,11 @@ mod tests {
         assert_eq!(expand_one(".shellcheckrc", "RCDIR/x".into()), "./x");
         assert_eq!(expand_one("/a/.shellcheckrc", "RCDIRS/x".into()), "RCDIRS/x");
         assert_eq!(expand_one("/a/.shellcheckrc", "x/RCDIR".into()), "x/RCDIR");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn expands_native_windows_paths() {
+        assert_eq!(expand_one(r"C:\a\b\.shellcheckrc", "RCDIR/lib".into()), r"C:\a\b/lib");
     }
 }
