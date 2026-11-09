@@ -109,6 +109,11 @@ shell features: `read -d` in sh (POSIX.1-2024), `read -t`, `read -d` and `echo -
 when the shebang names ash or busybox, and bash 5.1 `assoc=(key value key value)`
 without SC2190. Leave it off for scripts that run on older shells.
 
+**`--ignore-directives`** doesn't honour in-file `disable=` or range directives,
+which is useful for audits. rc files still apply. **`--report-unused-disables`**
+reports each `disable=` code that suppressed nothing as SC9006 (info) on the
+directive's line. Codes of optional checks that aren't enabled are never reported.
+
 **`--strict-rc`** turns an unknown rc key, an invalid `shell=`, `color=` or
 `wiki-link-count=` value, or an unreadable `--rcfile` into an error with exit 2.
 
