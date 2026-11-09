@@ -11,10 +11,13 @@ Per side and repo:
   - diagnostics (run 1 output): compared on sorted (line, column, code)
 
 Each child process runs with RLIMIT_AS = MEM_KB (same as `ulimit -v`) and a
-TIMEOUT-second timeout. Hyperfine is not used: per-process peak RSS needs
+TIMEOUT-second timeout. MEM_KB=0 sets no RLIMIT_AS: the Haskell runtime reserves
+far more address space than it uses, so published numbers come from a cgroup
+limit on real memory instead (docker --memory), described by MEM_CAP_NOTE. Hyperfine is not used: per-process peak RSS needs
 /usr/bin/time, so a plain timing loop does both measurements.
 
-Env: HS, RS (binary paths), REAL_DIR, RESULTS_DIR, RUNS, TIMEOUT, MEM_KB.
+Env: HS, RS (binary paths), REAL_DIR, RESULTS_DIR, RUNS, TIMEOUT, MEM_KB,
+MEM_CAP_NOTE, RUSTC_VERSION (when rustc is not installed where this runs).
 """
 import collections, datetime, json, os, platform, re, resource, shutil, statistics
 import subprocess, sys, time, tomllib
@@ -34,6 +37,8 @@ RSS_RE = re.compile(r"Maximum resident set size \(kbytes\): (\d+)")
 
 
 def cap_memory():
+    if not MEM_KB:
+        return
     lim = MEM_KB * 1024
     resource.setrlimit(resource.RLIMIT_AS, (lim, lim))
 
@@ -67,9 +72,9 @@ def machine_info():
         "kernel": platform.release(),
         "os": sh(["lsb_release", "-ds"]) or platform.platform(),
         "python": platform.python_version(),
-        "rustc": sh(["rustc", "--version"]),
+        "rustc": os.environ.get("RUSTC_VERSION") or sh(["rustc", "--version"]),
         "loadavg_start": os.getloadavg()[0],
-        "memory_cap": f"RLIMIT_AS {MEM_KB} KiB per process, timeout {TIMEOUT}s",
+        "memory_cap": os.environ.get("MEM_CAP_NOTE", f"RLIMIT_AS {MEM_KB} KiB per process") + f", timeout {TIMEOUT}s",
         "method": f"sequential, one process per file, {RUNS} passes, median of pass totals",
     }
 
@@ -271,7 +276,7 @@ def write_markdown(out, path):
     L = []
     L.append("# Real-repo benchmark: Haskell ShellCheck vs shelllint")
     L.append("")
-    L.append(f"Generated {m['date_utc']} by `bench/run_real.sh`. Raw data: `bench/results/real-repos.json`.")
+    L.append(f"Generated {m['date_utc']} by `bench/run_published.sh`. Raw data: `bench/results/real-repos.json`.")
     L.append("")
     L.append("## Machine")
     L.append("")
@@ -281,7 +286,7 @@ def write_markdown(out, path):
     L.append(f"- Rust: `{m['rs_version']}`, release build (LTO, codegen-units=1), {m['rs_binary_bytes']} bytes")
     L.append(f"- {m['rustc']}, Python {m['python']}")
     L.append(f"- Load average (1 min) at start {m['loadavg_start']:.2f}, at end {m['loadavg_end']:.2f}."
-             " Other agents share this machine, so timings carry noise.")
+             " The machine was not idle, so timings carry noise.")
     L.append(f"- Caps: {m['memory_cap']}. {m['method']}.")
     L.append(f"- Flags: `{' '.join(out['config']['args'])}` (json1 on stdout, shell from shebang)")
     L.append("")

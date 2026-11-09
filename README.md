@@ -27,8 +27,8 @@ Haskell source to Rust line by line, without redesigning it. The goals are:
 - **Easy to ship and embed.** A single native binary with no GHC runtime. A
   Rust codebase also makes a WASM build, an embeddable library and an LSP
   server practical.
-- **Speed and memory.** Early measurements are promising but not final. See
-  [Benchmarks](#benchmarks).
+- **Speed and memory.** 6.3x faster and far lower peak memory across 920 real
+  shell files. See [Benchmarks](#benchmarks).
 
 If ShellCheck already works for you, keep using it. This port sits alongside
 the upstream project and does not replace it.
@@ -163,16 +163,21 @@ remaining known differences are listed in
 
 ## Benchmarks
 
-<!-- BENCH: fill from docs/benchmarks.md -->
-
-There are no published numbers yet. Early measurements of speed and peak
-memory against the Haskell binary are promising but **not final**. Published
-benchmarks will state the machine, the inputs, the versions of both binaries
-and the exact commands, so anyone can reproduce them.
+Measured against the Haskell ShellCheck binary on one machine, limited to 6 GB
+of memory. [docs/benchmarks.md](docs/benchmarks.md) has the setup, the full
+tables, the caveats and the command to reproduce them.
 
 | Workload | ShellCheck (Haskell) | shelllint | Ratio |
 |---|---|---|---|
-| <!-- BENCH: workload --> | <!-- BENCH --> | <!-- BENCH --> | <!-- BENCH --> |
+| 7 real repositories, 920 files, total time | 87.3 s (one file killed) | 13.9 s | 6.3x faster |
+| `nvm.sh`, 6,942 lines | killed at 6 GB after 35.3 s | 4.2 s, 613 MB | not comparable |
+| acme.sh, peak memory | 5,383 MB | 258 MB | 20.9x less |
+| neofetch, 11,592 lines, time | 2.12 s | 0.29 s | 7.4x faster |
+| neofetch, peak memory | 518 MB | 40 MB | 13.0x less |
+| 80-line script, time | 26 ms | 7 ms | 3.5x faster |
+| 80-line script, peak memory | 16.8 MB | 8.1 MB | 2.1x less |
+
+The two tools reported identical diagnostics on the 919 files both finished.
 
 ## Differences from ShellCheck
 
