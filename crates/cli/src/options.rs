@@ -21,6 +21,8 @@ pub struct Options {
     pub fix: bool,
     /// `--dry-run` (extension): with `--fix`, print the diff instead.
     pub dry_run: bool,
+    /// `--verbose` (extension): name each file and its .shellcheckrc on stderr.
+    pub verbose: bool,
 }
 
 pub fn default_options() -> Options {
@@ -33,6 +35,7 @@ pub fn default_options() -> Options {
         rcfile: None,
         fix: false,
         dry_run: false,
+        verbose: false,
     }
 }
 
@@ -119,6 +122,7 @@ pub fn options() -> Vec<OptDescr> {
         // Extensions beyond ShellCheck (not in upstream's --help).
         o("", &["fix"], No("fix"), "", "Apply all auto-fixes to FILES in place, then report what is left"),
         o("", &["dry-run"], No("dry-run"), "", "With --fix, print the fixes as a diff (like -f diff) instead"),
+        o("", &["verbose"], No("verbose"), "", "Print the file and the .shellcheckrc used for it to stderr"),
     ]
 }
 

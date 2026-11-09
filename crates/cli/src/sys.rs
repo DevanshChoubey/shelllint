@@ -380,6 +380,11 @@ impl IoInterface {
         v
     }
 
+    /// The .shellcheckrc (or --rcfile) that applies to `filename`, if any.
+    pub fn rc_path(&self, filename: &str) -> Option<String> {
+        self.get_rc_config(filename).map(|(path, _)| path)
+    }
+
     fn get_rc_config(&self, filename: &str) -> Option<(String, String)> {
         let mut cache = self.config_cache.lock().unwrap();
         match &self.rcfile {

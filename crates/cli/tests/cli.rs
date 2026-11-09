@@ -69,6 +69,7 @@ fn tmpfile(name: &str, contents: &str) -> String {
 const EXTENSION_HELP: &str = concat!(
     "                      --fix                      Apply all auto-fixes to FILES in place, then report what is left\n",
     "                      --dry-run                  With --fix, print the fixes as a diff (like -f diff) instead\n",
+    "                      --verbose                  Print the file and the .shellcheckrc used for it to stderr\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -137,6 +138,7 @@ fn every_help_flag_is_accepted() {
         ("--files-from", &["--files-from=/dev/null"]),
         ("--fix", &["--fix", "--files-from=/dev/null"]),
         ("--dry-run", &["--fix", "--dry-run", "--files-from=/dev/null"]),
+        ("--verbose", &["--verbose", "-"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

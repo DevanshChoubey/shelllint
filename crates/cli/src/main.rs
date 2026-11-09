@@ -5,6 +5,7 @@ mod fix;
 mod oom;
 mod options;
 mod sys;
+mod verbose;
 
 use std::io::Write;
 use std::process::exit;
@@ -203,7 +204,7 @@ fn read_files_from(path: &str) -> Result<Vec<String>, Status> {
 }
 
 pub(crate) fn run_formatter(
-    sys: &dyn SystemInterface,
+    sys: &sys::IoInterface,
     mut format: Box<dyn Formatter>,
     options: &Options,
     files: &[String],
@@ -227,12 +228,13 @@ pub(crate) fn run_formatter(
 }
 
 fn process_file(
-    sys: &dyn SystemInterface,
+    sys: &sys::IoInterface,
     format: &mut dyn Formatter,
     options: &Options,
     filename: &str,
     out: &mut dyn Write,
 ) -> Status {
+    verbose::announce(sys, options, filename);
     let contents = match sys.read_file(None, filename) {
         Ok(c) => c,
         Err(msg) => {
@@ -367,6 +369,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         // Extensions beyond ShellCheck.
         "fix" => options.fix = true,
         "dry-run" => options.dry_run = true,
+        "verbose" => options.verbose = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),
