@@ -90,8 +90,8 @@ const EXTENSION_HELP: &str = concat!(
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
 /// with the extensions after upstream's options.
 fn expected_help() -> String {
-    // github and sarif are extension formats, so the format list differs from upstream's.
-    let oracle = include_str!("help.txt").replace("gcc, json, json1, quiet, tty)", "gcc, github, json, json1, quiet, sarif, tty)");
+    // context, github and sarif are extension formats, so the format list differs from upstream's.
+    let oracle = include_str!("help.txt").replace("(checkstyle, diff, gcc, json, json1, quiet, tty)", "(checkstyle, context, diff, gcc, github, json, json1, quiet, sarif, tty)");
     let body = oracle.strip_suffix('\n').unwrap();
     format!("{}{}\n", body, EXTENSION_HELP)
 }
@@ -243,7 +243,7 @@ fn bad_option_messages_match_oracle() {
     );
     assert_eq!(
         run(&["-f", "nope", "-"], "").stderr,
-        "Unknown format nope\nSupported formats:\n  checkstyle\n  diff\n  gcc\n  github\n  json\n  json1\n  quiet\n  sarif\n  tty\n"
+        "Unknown format nope\nSupported formats:\n  checkstyle\n  context\n  diff\n  gcc\n  github\n  json\n  json1\n  quiet\n  sarif\n  tty\n"
     );
     assert_eq!(run(&["-s", "zsh", "-"], "").stderr, "Unknown shell: zsh\n");
     assert_eq!(run(&["-W", "x", "-"], "").stderr, "Invalid number: x\n");

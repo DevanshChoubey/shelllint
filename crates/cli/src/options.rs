@@ -66,7 +66,7 @@ pub fn default_options() -> Options {
 pub const USAGE_HEADER: &str = "Usage: shellcheck [OPTIONS...] FILES...";
 
 /// The formats shellcheck.hs registers (`Map.keys`, so sorted).
-pub const FORMAT_NAMES: [&str; 9] = ["checkstyle", "diff", "gcc", "github", "json", "json1", "quiet", "sarif", "tty"];
+pub const FORMAT_NAMES: [&str; 10] = ["checkstyle", "context", "diff", "gcc", "github", "json", "json1", "quiet", "sarif", "tty"];
 
 #[derive(Clone, Copy)]
 pub enum ArgDescr {
@@ -200,7 +200,7 @@ pub fn options() -> Vec<OptDescr> {
 }
 
 // "Output format (" ++ formatList ++ ")"
-const FORMAT_DESC: &str = "Output format (checkstyle, diff, gcc, github, json, json1, quiet, sarif, tty)";
+const FORMAT_DESC: &str = "Output format (checkstyle, context, diff, gcc, github, json, json1, quiet, sarif, tty)";
 
 /// GetOpt `usageInfo`
 pub fn usage_info(header: &str, opts: &[&OptDescr]) -> String {
