@@ -7,6 +7,7 @@ mod list_checks;
 mod oom;
 mod options;
 mod shell_inference;
+mod run_control;
 mod sys;
 mod verbose;
 
@@ -221,17 +222,26 @@ pub(crate) fn run_formatter(
     let mut out = std::io::BufWriter::new(stdout.lock());
     format.header(&mut out);
     let mut result = Status::NoProblems;
+    let mut tally = run_control::Tally::default();
     for file in files {
-        let new_status = process_file(sys, format.as_mut(), options, file, &mut out);
+        let (new_status, findings) = process_file(sys, format.as_mut(), options, file, &mut out, &mut tally);
         result = result.max(new_status);
         let _ = out.flush();
         // DIVERGENCE: Haskell's Quiet formatter calls exitFailure itself.
         if format.exit_requested() {
             exit(1);
         }
+        // DIVERGENCE: --fail-fast (extension) stops after the first file with findings.
+        if options.fail_fast && findings > 0 {
+            break;
+        }
     }
     format.footer(&mut out);
     let _ = out.flush();
+    // DIVERGENCE: --summary (extension) reports totals on stderr only.
+    if options.summary {
+        print_err(&tally.summary());
+    }
     result
 }
 
@@ -241,33 +251,37 @@ fn process_file(
     options: &Options,
     filename: &str,
     out: &mut dyn Write,
-) -> Status {
+    tally: &mut run_control::Tally,
+) -> (Status, usize) {
     verbose::announce(sys, options, filename);
     let contents = match sys.read_file(None, filename) {
         Ok(c) => c,
         Err(msg) => {
             format.on_failure(filename, &msg, out);
-            return Status::RuntimeException;
+            return (Status::RuntimeException, 0);
         }
     };
     let mut spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
     let shell_flag = options.check_spec.shell_type_override.is_some();
     match shell_inference::decide(&options.shell_inference, shell_flag, spec.ignore_rc, sys, filename, &spec.script) {
-        Some(shell_inference::Decision::Skip) => return Status::NoProblems,
+        Some(shell_inference::Decision::Skip) => return (Status::NoProblems, 0),
         Some(shell_inference::Decision::Use(sh)) => spec.shell_type_override = Some(sh),
         None => {}
     }
     let result = check_script_owned(sys, spec);
     format.on_result(&result, sys, out);
+    let findings = tally.record(&result);
     // A malformed EditorConfig (invalid 'root' or 'shellcheck.*' directive)
     // means shellcheck cannot apply the requested configuration.
-    if result.comments.iter().any(|pc| pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig")) {
+    let status = if result.comments.iter().any(|pc| pc.comment.code == 1134 && pc.start_pos.file.ends_with(".editorconfig"))
+    {
         Status::SupportFailure
     } else if result.comments.is_empty() {
         Status::NoProblems
     } else {
         Status::SomeProblems
-    }
+    };
+    (status, findings)
 }
 
 fn parse_enum<T: Copy>(name: &str, value: &str, list: &[(&str, T)]) -> Result<T, Status> {
@@ -398,6 +412,8 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "infer-shell-from-name" => options.shell_inference.infer_from_name = true,
         "skip-unsupported-shebang" => options.shell_inference.skip_unsupported = true,
         "dump-ast" => options.dump_ast = true,
+        "summary" => options.summary = true,
+        "fail-fast" => options.fail_fast = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

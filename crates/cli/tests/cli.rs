@@ -72,6 +72,8 @@ const EXTENSION_HELP: &str = concat!(
     "                      --verbose                  Print the file and the .shellcheckrc used for it to stderr\n",
     "                      --list-checks[=text|json]  List the optional checks and what is known about codes\n",
     "                      --dump-ast                 Print each file's parsed AST as JSON instead of the report\n",
+    "                      --summary                  Print finding counts and files checked to stderr after the report\n",
+    "                      --fail-fast                Stop after the first file with findings\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -142,6 +144,8 @@ fn every_help_flag_is_accepted() {
         ("--dry-run", &["--fix", "--dry-run", "--files-from=/dev/null"]),
         ("--verbose", &["--verbose", "-"]),
         ("--dump-ast", &["--dump-ast", "--files-from=/dev/null"]),
+        ("--summary", &["--summary", "--files-from=/dev/null"]),
+        ("--fail-fast", &["--fail-fast", "--files-from=/dev/null"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

@@ -27,6 +27,10 @@ pub struct Options {
     pub shell_inference: crate::shell_inference::ShellInference,
     /// `--dump-ast` (extension): print each file's parsed AST as JSON.
     pub dump_ast: bool,
+    /// `--summary` (extension): print finding counts and files checked on stderr.
+    pub summary: bool,
+    /// `--fail-fast` (extension): stop after the first file with findings.
+    pub fail_fast: bool,
 }
 
 pub fn default_options() -> Options {
@@ -42,6 +46,8 @@ pub fn default_options() -> Options {
         verbose: false,
         shell_inference: Default::default(),
         dump_ast: false,
+        summary: false,
+        fail_fast: false,
     }
 }
 
@@ -131,6 +137,8 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["verbose"], No("verbose"), "", "Print the file and the .shellcheckrc used for it to stderr"),
         o("", &["list-checks"], Opt("list-checks", "text"), "text|json", "List the optional checks and what is known about codes"),
         o("", &["dump-ast"], No("dump-ast"), "", "Print each file's parsed AST as JSON instead of the report"),
+        o("", &["summary"], No("summary"), "", "Print finding counts and files checked to stderr after the report"),
+        o("", &["fail-fast"], No("fail-fast"), "", "Stop after the first file with findings"),
     ]
 }
 
