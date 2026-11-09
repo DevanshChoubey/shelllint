@@ -657,7 +657,9 @@ impl<'a> P<'a> {
         let contents = self.env.system_interface.get_config(filename);
         match contents {
             None => Ok(vec![]),
-            Some((file, str)) => read_config(self, &file, &str),
+            Some((file, str)) => {
+                read_config(self, &file, &str).map(|a| crate::rcdir::expand_rcdir(&file, a))
+            }
         }
     }
 
