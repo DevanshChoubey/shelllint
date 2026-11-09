@@ -7,6 +7,7 @@
 // `crates/checker/tests/checker.rs`.
 #![forbid(unsafe_code)]
 
+pub mod ast_dump;
 pub mod editorconfig;
 pub mod filepath;
 

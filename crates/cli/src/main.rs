@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Port of ShellCheck shellcheck.hs (e11f964)
 
+mod dump_ast;
 mod fix;
 mod list_checks;
 mod oom;
@@ -179,6 +180,9 @@ fn process(flags: &[Flag], files: &[String]) -> Result<Status, Status> {
     if options.dry_run && !options.fix {
         print_err("--dry-run only works together with --fix.");
         return Err(Status::SyntaxFailure);
+    }
+    if options.dump_ast {
+        return Ok(dump_ast::run(&options, &all_files));
     }
     if options.fix {
         return Ok(fix::run_fix(&options, formatter, &all_files));
@@ -393,6 +397,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         },
         "infer-shell-from-name" => options.shell_inference.infer_from_name = true,
         "skip-unsupported-shebang" => options.shell_inference.skip_unsupported = true,
+        "dump-ast" => options.dump_ast = true,
         // These flags are handled specially in 'process'
         "format" | "files-from" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

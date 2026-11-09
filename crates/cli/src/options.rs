@@ -25,6 +25,8 @@ pub struct Options {
     pub verbose: bool,
     /// `--fallback-shell` and friends (extension).
     pub shell_inference: crate::shell_inference::ShellInference,
+    /// `--dump-ast` (extension): print each file's parsed AST as JSON.
+    pub dump_ast: bool,
 }
 
 pub fn default_options() -> Options {
@@ -39,6 +41,7 @@ pub fn default_options() -> Options {
         dry_run: false,
         verbose: false,
         shell_inference: Default::default(),
+        dump_ast: false,
     }
 }
 
@@ -127,6 +130,7 @@ pub fn options() -> Vec<OptDescr> {
         o("", &["dry-run"], No("dry-run"), "", "With --fix, print the fixes as a diff (like -f diff) instead"),
         o("", &["verbose"], No("verbose"), "", "Print the file and the .shellcheckrc used for it to stderr"),
         o("", &["list-checks"], Opt("list-checks", "text"), "text|json", "List the optional checks and what is known about codes"),
+        o("", &["dump-ast"], No("dump-ast"), "", "Print each file's parsed AST as JSON instead of the report"),
     ]
 }
 
