@@ -68,6 +68,7 @@ fn tmpfile(name: &str, contents: &str) -> String {
 /// after upstream's.
 const EXTENSION_HELP: &str = concat!(
     "                      --fix                      Apply all auto-fixes to FILES in place, then report what is left\n",
+    "                      --context=N                With -f context, lines of source around each finding (default 5)\n",
     "                      --dry-run                  With --fix, print the fixes as a diff (like -f diff) instead\n",
     "                      --verbose                  Print the file and the .shellcheckrc used for it to stderr\n",
     "                      --list-checks[=text|json]  List the optional checks and what is known about codes\n",
@@ -168,6 +169,7 @@ fn every_help_flag_is_accepted() {
         ("--recursive", &["--recursive", "--files-from=/dev/null"]),
         ("--exclude-path", &["--exclude-path=x", "-"]),
         ("--changed-since", &["--changed-since", "--files-from=/dev/null"]),
+        ("--context", &["--context=2", "--files-from=/dev/null"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

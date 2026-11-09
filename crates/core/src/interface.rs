@@ -143,10 +143,12 @@ pub fn new_analysis_result() -> AnalysisResult {
 pub struct FormatterOptions {
     pub color_option: ColorOption,
     pub wiki_link_count: i64,
+    /// Lines of source shown on each side of a finding by `-f context`.
+    pub context_lines: i64,
 }
 
 pub fn new_formatter_options() -> FormatterOptions {
-    FormatterOptions { color_option: ColorOption::ColorAuto, wiki_link_count: 3 }
+    FormatterOptions { color_option: ColorOption::ColorAuto, wiki_link_count: 3, context_lines: 5 }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]

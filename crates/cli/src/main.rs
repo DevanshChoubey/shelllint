@@ -567,6 +567,7 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
             }
         },
         "cache-dir" => options.cache_dir = Some(val.clone()),
+        "context" => options.formatter_options.context_lines = parse_num(val)?,
         // These flags are handled specially in 'process'
         "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

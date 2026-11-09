@@ -12,6 +12,7 @@ use std::io::{IsTerminal, Write};
 use shelllint_core::interface::{ColorOption, Fix, FormatterOptions, PositionedComment, Severity, SystemInterface};
 
 pub mod checkstyle;
+pub mod context;
 pub mod diff;
 pub mod fixer;
 pub mod gcc;
@@ -47,6 +48,7 @@ pub fn by_name(name: &str, opts: FormatterOptions) -> Option<Box<dyn Formatter>>
         "diff" => Some(Box::new(diff::format(opts))),
         "quiet" => Some(Box::new(quiet::format(opts))),
         "sarif" => Some(Box::new(sarif::format())),
+        "context" => Some(Box::new(context::format(opts))),
         _ => None,
     }
 }

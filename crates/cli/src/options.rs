@@ -173,6 +173,7 @@ pub fn options() -> Vec<OptDescr> {
         ),
         // Extensions beyond ShellCheck (not in upstream's --help).
         o("", &["fix"], No("fix"), "", "Apply all auto-fixes to FILES in place, then report what is left"),
+        o("", &["context"], Req("context"), "N", "With -f context, lines of source around each finding (default 5)"),
         o("", &["dry-run"], No("dry-run"), "", "With --fix, print the fixes as a diff (like -f diff) instead"),
         o("", &["verbose"], No("verbose"), "", "Print the file and the .shellcheckrc used for it to stderr"),
         o("", &["list-checks"], Opt("list-checks", "text"), "text|json", "List the optional checks and what is known about codes"),
