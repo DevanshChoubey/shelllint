@@ -36,7 +36,8 @@ parity corpus doesn't exercise them.
 - **`RCDIR`.** A leading `RCDIR` component in `source-path=` in an rc file means
   the rc file's directory. A real directory named `RCDIR` needs `./RCDIR`.
 - **New directive and rc keys** (`severity`, `external-vars`, `source-functions`,
-  `disable-start`, `disable-end`, `disable-line`, `color`, `wiki-link-count`).
+  `disable-start`, `disable-end`, `disable-line`, `color`, `wiki-link-count`,
+  `modern-dialects`).
   ShellCheck reports or ignores these as unknown. An invalid `severity=` in a
   directive gives SC1147, a code ShellCheck doesn't use.
 - **Repeated `source`.** Mutually sourcing scripts are expanded at most 512

@@ -103,7 +103,7 @@ pub fn strip_extras(text: &str) -> (String, RcExtras) {
 
 /// Keys the parser understands in an rc file. Add new keys here too.
 const KNOWN_KEYS: &[&str] =
-    &["disable", "enable", "source", "source-path", "shell", "extended-analysis", "external-sources", "severity", "external-vars", "source-functions"];
+    &["disable", "enable", "source", "source-path", "shell", "extended-analysis", "external-sources", "severity", "external-vars", "source-functions", "modern-dialects"];
 
 /// Problems `--strict-rc` rejects: (line, column, description).
 fn find_problems(text: &str) -> Vec<(usize, usize, String)> {

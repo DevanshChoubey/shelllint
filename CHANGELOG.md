@@ -24,6 +24,7 @@ ShellCheck issues.
 - Directives and rc files: `disable-start`, `disable-end`, `disable-line`;
   `severity`, `external-vars`, `source-functions`, `RCDIR`, `color`,
   `wiki-link-count`; `--strict-rc`; `--source-from-path`.
+- `--modern-dialects` relaxes dialect warnings (#3099, #3062, #2393).
 - Optional checks: `require-strict-mode` (#409), `prefer-local` (#468),
   `arith-errexit` (#2777), `undefined-command` (#2574), `unused-function` (#612).
 - An Alpine container image.

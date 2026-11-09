@@ -104,6 +104,11 @@ New `.shellcheckrc` keys:
 | `color=auto` | Same as `--color`, taken from the rc file for the first input file. |
 | `wiki-link-count=N` | Same as `--wiki-link-count`, taken from the rc file for the first input file. |
 
+**`--modern-dialects`** (rc or directive: `modern-dialects=true`) accepts newer
+shell features: `read -d` in sh (POSIX.1-2024), `read -t`, `read -d` and `echo -e`
+when the shebang names ash or busybox, and bash 5.1 `assoc=(key value key value)`
+without SC2190. Leave it off for scripts that run on older shells.
+
 **`--strict-rc`** turns an unknown rc key, an invalid `shell=`, `color=` or
 `wiki-link-count=` value, or an unreadable `--rcfile` into an error with exit 2.
 
