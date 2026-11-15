@@ -43,3 +43,15 @@ fn dynamic_target_does_not_mark_others() {
 fn plain_local_unchanged() {
     assert!(has_2034("#!/bin/bash\nf() { local v=1; }\nf\n"));
 }
+
+#[test]
+fn plus_n_is_not_nameref() {
+    assert!(has_2034("#!/bin/bash\ndeclare +n x=1\n"));
+}
+
+#[test]
+fn nameref_flag_variants() {
+    assert!(!has_2034("#!/bin/bash\nf() { declare -nr r=\"$1\"; }\nf x\n"));
+    assert!(!has_2034("#!/bin/bash\nf() { local -an r=\"$1\"; }\nf x\n"));
+    assert!(!has_2034("#!/bin/bash\nf() { typeset -n r=\"$1\"; }\nf x\n"));
+}

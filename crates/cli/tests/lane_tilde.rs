@@ -61,3 +61,19 @@ fn dollar_home_unchanged() {
     let o2 = run(&d.join("s"), &["-x", "a.sh"]);
     assert!(o2.contains("SC1091"), "{o2}");
 }
+
+#[test]
+fn quoted_tilde_unchanged() {
+    for line in ["source \"~/.bashrc\"", "source '~/.bashrc'"] {
+        let (d, h) = setup("quoted", line);
+        let o = run(&d.join("s"), &["-x", "-P", h.to_str().unwrap(), "a.sh"]);
+        assert!(o.contains("SC1090"), "{line}: {o}");
+    }
+}
+
+#[test]
+fn directive_source_tilde_unchanged() {
+    let (d, h) = setup("directive", "# shellcheck source=~/.bashrc\nsource \"$f\"");
+    let o = run(&d.join("s"), &["-x", "-P", h.to_str().unwrap(), "a.sh"]);
+    assert!(!o.contains("SC1090") && !o.contains("SC2154"), "{o}");
+}

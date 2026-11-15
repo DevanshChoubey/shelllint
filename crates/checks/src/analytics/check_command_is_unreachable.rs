@@ -77,7 +77,10 @@ fn trap_action_commands(ast: &Ast, t: Id) -> Vec<String> {
         return vec![];
     }
     let Some(argv) = get_command_argv(ast, t) else { return vec![] };
-    let Some(action) = argv.get(1).and_then(|&a| get_literal_string(ast, a)) else { return vec![] };
+    let skip_dd = argv.get(1).and_then(|&a| get_literal_string(ast, a)).as_deref() == Some("--");
+    let Some(action) = argv.get(1 + usize::from(skip_dd)).and_then(|&a| get_literal_string(ast, a)) else {
+        return vec![];
+    };
     let pr = p_script(&action);
     let Some(proot) = pr.root else { return vec![] };
     reachable_ids(&pr.ast, proot)
