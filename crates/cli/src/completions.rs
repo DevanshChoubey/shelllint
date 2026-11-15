@@ -28,6 +28,7 @@ fn values_for(d: &OptDescr) -> Values {
         "severity" => Values::Words(vec!["error", "warning", "info", "style"]),
         "color" => Values::Words(vec!["auto", "always", "never"]),
         "extended-analysis" => Values::Words(vec!["true", "false"]),
+        "template" => Values::Words(vec!["jinja"]),
         "completions" => Values::Words(SHELL_NAMES.to_vec()),
         "rcfile" | "files-from" => Values::File,
         "source-path" => Values::Dir,

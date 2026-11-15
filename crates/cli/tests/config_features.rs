@@ -217,10 +217,19 @@ fn source_path_flag_expands_home() {
 }
 
 #[test]
-fn unannotated_tilde_source_keeps_sc1090() {
+fn unannotated_tilde_source_searches_source_paths() {
     let d = Dir::new();
     d.write_home(".bashrc", "foo=1\n");
     d.write("a.sh", "#!/bin/bash\nsource ~/.bashrc\n");
+    let o = d.run(&["-x", "a.sh"], true);
+    assert!(!has(&o, 1090), "{}", o.stdout);
+}
+
+#[test]
+fn quoted_tilde_source_keeps_sc1090() {
+    let d = Dir::new();
+    d.write_home(".bashrc", "foo=1\n");
+    d.write("a.sh", "#!/bin/bash\nsource \"~/.bashrc\"\n");
     let o = d.run(&["-x", "a.sh"], true);
     assert!(has(&o, 1090), "{}", o.stdout);
 }

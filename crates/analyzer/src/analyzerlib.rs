@@ -948,6 +948,30 @@ pub fn get_referenced_variable_command(ast: &Ast, base: Id) -> Vec<ReferencedVar
             vec![]
         }
     };
+    // DIVERGENCE: a variable declared with -n is a nameref, so writes to it
+    // go through to its target and it counts as used. A literal target name
+    // (`declare -n ref=array`) counts as used as well; a dynamic one ("$1")
+    // only covers the nameref itself.
+    let for_nameref = || -> Vec<ReferencedVariable> {
+        let mut out = vec![];
+        for &t in rest {
+            if let Token::T_Assignment(_, name, _, value) = ast.get(t) {
+                out.push((t, t, name.clone()));
+                if let Some(target) = get_literal_string(ast, *value)
+                    && is_variable_name(&target)
+                {
+                    out.push((t, t, target));
+                }
+            } else {
+                out.extend(get_reference(t));
+            }
+        }
+        out
+    };
+    let is_nameref = has("n") && !["f", "F"].iter().any(|f| has(f));
+    if is_nameref && matches!(x.as_str(), "declare" | "typeset" | "local") {
+        return for_nameref();
+    }
     match x.as_str() {
         "declare" => for_declare(),
         "typeset" => for_declare(),

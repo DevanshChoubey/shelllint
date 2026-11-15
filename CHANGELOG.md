@@ -8,6 +8,27 @@ Each release also states which upstream ShellCheck commit it ports.
 
 ## [Unreleased]
 
+### Added
+
+- Jinja template mode (#1306): `--template=jinja`, the rc key `template=jinja` or
+  `# shellcheck template=jinja` before the first command, and automatically for
+  `*.j2`, `*.jinja` and `*.jinja2` files. `{{ }}`, `{% %}` and `{# #}` markup is
+  blanked before parsing with every position kept, so templates no longer give
+  SC1083, SC1054 or SC1009 for their markup. Other files are unchanged.
+
+### Fixed
+
+These change default output in the cases described. See
+[docs/divergences.md](docs/divergences.md).
+
+- SC2329 no longer reports a function named in a `trap` action, such as
+  `trap cleanup EXIT` or `trap 'quit; exit' EXIT` (#2542).
+- SC2034 no longer reports namerefs declared with `declare -n`, `local -n` or
+  `typeset -n`, or a literal variable they point to (#817).
+- SC2119 and SC2120 no longer fire for functions defined in a sourced file (#1679).
+- `source ~/file` is looked up like `source "$HOME/file"` instead of giving
+  SC1090, so `-x -P "$HOME"` follows it (#1845).
+
 ## [0.2.1] - 2026-11-13
 
 Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same

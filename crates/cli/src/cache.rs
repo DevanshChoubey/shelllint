@@ -442,6 +442,8 @@ fn key_bytes(options: &Options, spec: &CheckSpec) -> Vec<u8> {
     for c in &spec.optional_checks {
         w.str(c);
     }
+    // Template mode changes what is parsed: by option or rc key; a file name is hashed above.
+    w.u8(spec.optional_checks.iter().any(|c| c == shelllint_checker::TEMPLATE_JINJA) as u8);
     w.u64(spec.safe_vars.len() as u64);
     for v in &spec.safe_vars {
         w.str(v);

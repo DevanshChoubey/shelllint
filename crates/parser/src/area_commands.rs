@@ -300,11 +300,30 @@ impl<'a> P<'a> {
         let file = get_file(ast, &args);
         let override_ = self.get_source_override();
         let ast = &self.user.ast;
+        let overridden = override_.is_some();
         let literal_file = override_
             .or_else(|| file.and_then(|f| get_literal_string(ast, f)))
-            .or_else(|| file.and_then(|f| strip_dynamic_prefix(ast, f)))
-            // Hack to avoid 'source ~/foo' trying to read from literal tilde
-            .filter(|name| !name.starts_with("~/"));
+            .or_else(|| file.and_then(|f| strip_dynamic_prefix(ast, f)));
+        // DIVERGENCE: upstream refuses `source ~/foo` (SC1090) so it never reads
+        // a literal "~" directory. Here `~/foo` is treated exactly like
+        // `$HOME/foo`: the prefix is dropped and `foo` is searched in the
+        // script's directory and the source paths. The real $HOME is not read.
+        // Only an unquoted leading `~/` is a tilde: a quoted one is not expanded by the shell.
+        // A `# shellcheck source=` directive value already has its `~` expanded, so it is left alone.
+        let unquoted_tilde = !overridden
+            && file.is_some_and(|f| match ast.get(f) {
+                Token::T_NormalWord(parts) => {
+                    matches!(parts.first().map(|&p| ast.get(p)), Some(Token::T_Literal(s)) if s.starts_with("~/"))
+                }
+                Token::T_Literal(s) => s.starts_with("~/"),
+                _ => false,
+            });
+        // Any other `~/` path is not followed (SC1090), as upstream does.
+        let literal_file = literal_file.and_then(|name| match name.strip_prefix("~/") {
+            Some(rest) if unquoted_tilde => Some(format!("./{rest}")),
+            Some(_) => None,
+            None => Some(name),
+        });
         let file_id = file.unwrap_or(cmd);
         let Some(filename) = literal_file else {
             self.parse_note_at_id(

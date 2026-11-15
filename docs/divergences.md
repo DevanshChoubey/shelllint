@@ -37,7 +37,7 @@ parity corpus doesn't exercise them.
   the rc file's directory. A real directory named `RCDIR` needs `./RCDIR`.
 - **New directive and rc keys** (`severity`, `external-vars`, `source-functions`,
   `disable-start`, `disable-end`, `disable-line`, `color`, `wiki-link-count`,
-  `modern-dialects`).
+  `modern-dialects`, `template`).
   ShellCheck reports or ignores these as unknown. An invalid `severity=` in a
   directive gives SC1147, a code ShellCheck doesn't use.
 - **Repeated `source`.** Mutually sourcing scripts are expanded at most 512
@@ -48,6 +48,23 @@ parity corpus doesn't exercise them.
   ShellCheck's rows and column layout are unchanged.
 - **Abbreviated long options** resolve against ShellCheck's own options first, so
   `--ver` is still `--version`. Otherwise they can reach a shelllint option.
+- **Trap handlers.** A function whose name appears as a command in a `trap`
+  action, either a bare name (`trap cleanup EXIT`) or a literal string
+  (`trap 'quit; exit' EXIT`), counts as invoked, so it no longer gets SC2329.
+  A later `trap - EXIT` doesn't change that, and non-literal actions aren't read.
+- **Namerefs.** A variable declared with `-n` (`local`, `declare`, `typeset`) counts
+  as used, because writing to it writes to its target. A literal target, as in
+  `declare -n ref=array`, counts as used too. A dynamic target such as `"$1"`
+  only covers the nameref itself. ShellCheck reports SC2034 on both.
+- **SC2119 and SC2120** only pair calls with function definitions in the same
+  file. A function from a sourced file may have callers we can't see, so it's
+  skipped. Functions defined in the checked file behave as before.
+- **`~/` in `source`.** `source ~/.bashrc` is treated like `source "$HOME/.bashrc"`:
+  the prefix is dropped, and the rest is searched in the script's directory and
+  the source paths, so `-x -P "$HOME"` follows it. ShellCheck gives SC1090. The
+  real `$HOME` is never read, and `~user/x` is unchanged.
+- **Jinja templates.** Files named `*.j2`, `*.jinja` or `*.jinja2` are checked in
+  template mode (see [extensions.md](extensions.md#templates)).
 
 ## Related notes
 

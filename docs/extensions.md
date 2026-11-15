@@ -73,6 +73,52 @@ identical to an uncached run. Standard input and `--fix` bypass the cache.
 `undefined-command` results are tied to the value of `$PATH`, so installing a
 command without changing `$PATH` won't refresh them.
 
+## Templates
+
+**`--template=jinja`** (rc key `template=jinja`, or `# shellcheck template=jinja`
+before the first command) checks a Jinja template as shell. It is on
+automatically for files named `*.j2`, `*.jinja` or `*.jinja2`, and off for every
+other file, so ordinary scripts get the same output as before.
+
+```bash
+shelllint --template=jinja deploy.sh
+shelllint deploy.sh.j2
+```
+
+The rc key is read by the command-line tool (including with `--fix`). The
+library, the language server and the MCP server use the option, the directive or
+the file name.
+
+Before parsing, the markup is blanked out and every character is kept, so line
+and column numbers match your file, also after non-ASCII text inside the markup.
+A name like `deploy.bash.j2` is judged by the name without `.j2`, `.jinja` or
+`.jinja2` when the shell is picked from the file name.
+
+- `{{ expr }}` becomes one `_` per character, so `NAME={{ app }}` is an
+  assignment of a plain word.
+- `{% stmt %}` and `{# comment #}` become spaces. Newlines inside them stay.
+- `{% raw %}...{% endraw %}` content is left as written. The tags are blanked.
+- Files followed through `source` are blanked the same way when the checked file
+  is a template, or when their own name ends in `.j2`, `.jinja` or `.jinja2`.
+- A `--fix` that would rewrite text inside the markup is skipped.
+- An unterminated `{{`, `{%` or `{#` is blanked to the end of the file.
+
+The limits:
+
+- Templates aren't rendered. Every branch of an `{% if %}` and every `{% for %}`
+  body is checked as if all of them were present, so you can get a duplicate
+  definition or unreachable code warning where the real branches exclude each
+  other.
+- `{{ }}` is replaced even inside single quotes, because the template renders
+  before the shell runs.
+- shelllint can't see what a placeholder expands to, so it doesn't check the
+  shell that the output becomes.
+- `${#var}` contains `{#`, which Jinja also reads as a comment start, so
+  shelllint blanks from there. Wrap such code in `{% raw %}`.
+- Only Jinja is supported.
+- The directive is read only from the leading comment lines. A `{% %}` line
+  before it stops the scan.
+
 ## Choosing the shell
 
 **`--fallback-shell=SHELL`** assumes SHELL for scripts that name no shell.

@@ -33,6 +33,7 @@ pub enum Decision {
 
 /// The shell a file name implies (`--infer-shell-from-name`).
 pub fn shell_from_name(filename: &str) -> Option<Shell> {
+    let filename = shelllint_checker::strip_template_ext(filename);
     let base = filename.rsplit(['/', '\\']).next().unwrap_or(filename);
     match base {
         ".bashrc" | ".bash_profile" | ".bash_login" | ".bash_logout" | ".bash_aliases" => return Some(Shell::Bash),

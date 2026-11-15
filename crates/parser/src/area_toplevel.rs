@@ -314,6 +314,17 @@ impl<'a> P<'a> {
                     }
                 }
             }
+            // DIVERGENCE: shelllint extension. `template=jinja` is read before parsing
+            // (see `crate::jinja`); here it only has to be accepted.
+            "template" => {
+                let pos = self.get_position();
+                let value =
+                    self.annotation_plain_or_quoted(&|p| Ok(p.many1(|p| p.letter())?.into_iter().collect::<String>()))?;
+                if value != "jinja" {
+                    self.parse_note_at(pos, Severity::ErrorC, 1146, "Unknown template value. Expected jinja.");
+                }
+                vec![]
+            }
             // DIVERGENCE: `safe-vars` and `strict-env-vars` are not in upstream.
             "safe-vars" => self.annotation_plain_or_quoted(&|p| {
                 p.sep_by(

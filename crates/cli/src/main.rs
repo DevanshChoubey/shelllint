@@ -19,7 +19,7 @@ use std::io::Write;
 use std::process::exit;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use shelllint_checker::{check_script_owned, optional_checks, with_check_stack};
+use shelllint_checker::{TEMPLATE_JINJA, check_script_owned, optional_checks, with_check_stack};
 use shelllint_core::data::{SHELLCHECK_VERSION, shell_for_executable};
 use shelllint_core::extras::{expand_home, is_external_var_pattern};
 use shelllint_core::interface::{CheckSpec, ColorOption, Severity, SystemInterface};
@@ -408,6 +408,16 @@ pub(crate) fn run_formatter(
     result
 }
 
+/// DIVERGENCE: `template=jinja` in the rc file that applies to this file.
+pub(crate) fn apply_rc_template(spec: &mut CheckSpec, options: &Options, filename: &str) {
+    if !spec.ignore_rc
+        && !spec.optional_checks.iter().any(|k| k == TEMPLATE_JINJA)
+        && rcstrict::rc_enables_template(options, filename)
+    {
+        spec.optional_checks.push(TEMPLATE_JINJA.to_string());
+    }
+}
+
 fn process_file(
     sys: &sys::IoInterface,
     format: &mut dyn Formatter,
@@ -428,6 +438,7 @@ fn process_file(
         return (Status::RuntimeException, 0);
     }
     let mut spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
+    apply_rc_template(&mut spec, options, filename);
     let shell_flag = options.check_spec.shell_type_override.is_some();
     match shell_inference::decide(&options.shell_inference, shell_flag, spec.ignore_rc, sys, filename, &spec.script) {
         Some(shell_inference::Decision::Skip) => return (Status::NoProblems, 0),
@@ -619,6 +630,13 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "source-functions" => options.source_functions.extend(split(',', val).into_iter().filter(|s| !s.is_empty())),
         "source-from-path" => options.source_from_path = true,
         "modern-dialects" => options.check_spec.optional_checks.push("modern-dialects".to_string()),
+        "template" => {
+            if val != "jinja" {
+                print_err(&format!("Unknown template engine: {}. Valid options are: jinja", val));
+                return Err(Status::SupportFailure);
+            }
+            options.check_spec.optional_checks.push(TEMPLATE_JINJA.to_string());
+        }
         "ignore-directives" => options.check_spec.ignore_directives = true,
         "report-unused-disables" => options.check_spec.report_unused_disables = true,
         "safe-vars" => options.check_spec.safe_vars.extend(split(',', val).into_iter().filter(|s| !s.is_empty())),
