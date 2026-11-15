@@ -73,7 +73,19 @@ fn quoted_tilde_unchanged() {
 
 #[test]
 fn directive_source_tilde_unchanged() {
-    let (d, h) = setup("directive", "# shellcheck source=~/.bashrc\nsource \"$f\"");
-    let o = run(&d.join("s"), &["-x", "-P", h.to_str().unwrap(), "a.sh"]);
-    assert!(!o.contains("SC1090") && !o.contains("SC2154"), "{o}");
+    // The directive keeps 0.2.0's behaviour: `~` expands to the real home
+    // directory. Point it at the test's own directory so the result doesn't
+    // depend on the machine.
+    let (d, h) = setup("directive", "f=unused\n# shellcheck source=~/.bashrc\nsource \"$f\"");
+    let o = Command::new(env!("CARGO_BIN_EXE_shelllint"))
+        .args(["-x", "a.sh"])
+        .current_dir(d.join("s"))
+        .env_remove("SHELLCHECK_OPTS")
+        .env("HOME", &h)
+        .env("USERPROFILE", &h)
+        .stdin(Stdio::null())
+        .output()
+        .unwrap();
+    let o = String::from_utf8_lossy(&o.stdout).into_owned() + &String::from_utf8_lossy(&o.stderr);
+    assert!(!o.contains("SC1090") && !o.contains("SC1091") && !o.contains("SC2154"), "{o}");
 }
