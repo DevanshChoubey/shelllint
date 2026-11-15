@@ -8,6 +8,11 @@ Each release also states which upstream ShellCheck commit it ports.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-15
+
+Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same
+commit as 0.2.1.
+
 ### Added
 
 - Jinja template mode (#1306): `--template=jinja`, the rc key `template=jinja` or
@@ -106,7 +111,8 @@ Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`).
   security policy, issue and pull request templates, and CI and release
   workflows.
 
-[Unreleased]: https://github.com/DevanshChoubey/shelllint/compare/v0.2.1...main
+[Unreleased]: https://github.com/DevanshChoubey/shelllint/compare/v0.3.0...main
+[0.3.0]: https://github.com/DevanshChoubey/shelllint/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/DevanshChoubey/shelllint/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/DevanshChoubey/shelllint/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/DevanshChoubey/shelllint/releases/tag/v0.1.0
