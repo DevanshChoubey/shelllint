@@ -63,6 +63,14 @@ fn check_unpassed_in_functions(params: &Params<'_>, root: Id) -> Vec<TokenCommen
 
 fn find_function(params: &Params<'_>, t: Id) -> Option<(String, Id)> {
     let Token::T_Function(_, _, name, body) = params.ast.get(t) else { return None };
+    // DIVERGENCE: a function defined in a sourced file may have callers we
+    // cannot see, so SC2119/SC2120 only pair calls with same-file definitions.
+    if get_path(params.ast, t)
+        .into_iter()
+        .any(|x| matches!(params.ast.get(x), Token::T_SourceCommand(..)))
+    {
+        return None;
+    }
     let flow = get_variable_flow(params, *body);
     if flow.iter().any(|x| is_positional_reference(params, t, x))
         && !flow.iter().any(is_positional_assignment)
