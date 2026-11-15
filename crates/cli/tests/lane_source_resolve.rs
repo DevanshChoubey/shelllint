@@ -144,3 +144,21 @@ fn source_from_path_only_for_bare_names_and_after_normal_search() {
     assert!(o.stdout.contains("foo is referenced but not assigned"), "{}", o.stdout);
     assert!(!o.stdout.contains("bar is referenced"), "{}", o.stdout);
 }
+
+#[test]
+fn sourced_function_no_sc2119() {
+    let d = TempDir::new("sc2119-sourced");
+    d.write("lib.sh", "f() { echo \"f $*\"; }\n");
+    d.write("test.sh", "#!/bin/sh\n. ./lib.sh\nf\n");
+    let o = run_in(&d.0, &["-x", "test.sh"], None);
+    assert!(!o.stdout.contains("SC2119") && !o.stdout.contains("SC2120"), "{}", o.stdout);
+}
+
+#[test]
+fn same_file_function_keeps_sc2119_sc2120() {
+    let d = TempDir::new("sc2119-same");
+    d.write("test.sh", "#!/bin/sh\nf() { echo \"$1\"; }\nf\n");
+    let o = run_in(&d.0, &["test.sh"], None);
+    assert!(o.stdout.contains("line 3") && o.stdout.contains("SC2119"), "{}", o.stdout);
+    assert!(o.stdout.contains("line 2") && o.stdout.contains("SC2120"), "{}", o.stdout);
+}
