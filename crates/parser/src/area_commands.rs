@@ -302,9 +302,15 @@ impl<'a> P<'a> {
         let ast = &self.user.ast;
         let literal_file = override_
             .or_else(|| file.and_then(|f| get_literal_string(ast, f)))
-            .or_else(|| file.and_then(|f| strip_dynamic_prefix(ast, f)))
-            // Hack to avoid 'source ~/foo' trying to read from literal tilde
-            .filter(|name| !name.starts_with("~/"));
+            .or_else(|| file.and_then(|f| strip_dynamic_prefix(ast, f)));
+        // DIVERGENCE: upstream refuses `source ~/foo` (SC1090) so it never reads
+        // a literal "~" directory. Here `~/foo` is treated exactly like
+        // `$HOME/foo`: the prefix is dropped and `foo` is searched in the
+        // script's directory and the source paths. The real $HOME is not read.
+        let literal_file = literal_file.map(|name| match name.strip_prefix("~/") {
+            Some(rest) => format!("./{rest}"),
+            None => name,
+        });
         let file_id = file.unwrap_or(cmd);
         let Some(filename) = literal_file else {
             self.parse_note_at_id(
