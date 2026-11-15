@@ -186,3 +186,8 @@ fn untrapped_function_still_reported() {
 fn trap_handler_later_reset_is_still_invoked() {
     assert_eq!(sc2329("#!/bin/sh\nh() { :; }\ntrap h EXIT\ntrap - EXIT\nexit 0\n"), vec![]);
 }
+
+#[test]
+fn trap_double_dash_handler_invoked() {
+    assert_eq!(sc2329("#!/bin/sh\ncleanup() { rm -f x; }\ntrap -- cleanup EXIT\nexit 0\n"), vec![]);
+}
