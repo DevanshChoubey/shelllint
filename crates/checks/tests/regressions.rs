@@ -157,3 +157,32 @@ fn unassigned_references_suggest_the_first_closest_name() {
         ]
     );
 }
+
+fn sc2329(script: &str) -> Vec<(i64, u32)> {
+    report("Analytics.hs", "checkCommandIsUnreachable", script)
+        .into_iter()
+        .filter(|r| r.0 == 2329 || r.0 == 2317)
+        .map(|r| (r.0, (r.1).0))
+        .collect()
+}
+
+#[test]
+fn trap_handler_is_invoked() {
+    let s = "#!/bin/sh\nset -e\nquit () { err=$?; bar; }\ntrap 'quit; trap - EXIT; exit $err' EXIT INT\nfoo\nexit 0\n";
+    assert_eq!(sc2329(s), vec![]);
+}
+
+#[test]
+fn trap_bare_name_is_invoked() {
+    assert_eq!(sc2329("#!/bin/sh\ncleanup() { rm -f x; }\ntrap cleanup EXIT\nexit 0\n"), vec![]);
+}
+
+#[test]
+fn untrapped_function_still_reported() {
+    assert_eq!(sc2329("#!/bin/sh\nfoo() { bar; }\nexit 0\n"), vec![(2329, 2)]);
+}
+
+#[test]
+fn trap_handler_later_reset_is_still_invoked() {
+    assert_eq!(sc2329("#!/bin/sh\nh() { :; }\ntrap h EXIT\ntrap - EXIT\nexit 0\n"), vec![]);
+}
