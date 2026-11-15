@@ -532,7 +532,14 @@ mod tests {
         let mk = |f: Fix| PositionedComment { fix: Some(f), ..new_positioned_comment() };
         let markup = [((1, 5), (1, 10))];
         // Before, after and touching the edges: kept. Inside, overlapping, insertion inside: dropped.
-        let mut cs = vec![mk(rep(1, 1, 5)), mk(rep(1, 10, 12)), mk(rep(1, 5, 5)), mk(rep(1, 3, 6)), mk(rep(1, 7, 7)), mk(rep(2, 6, 8))];
+        let mut cs = vec![
+            mk(rep(1, 1, 5)),
+            mk(rep(1, 10, 12)),
+            mk(rep(1, 5, 5)),
+            mk(rep(1, 3, 6)),
+            mk(rep(1, 7, 7)),
+            mk(rep(2, 6, 8)),
+        ];
         drop_fixes_in_markup(&mut cs, &markup);
         let kept: Vec<bool> = cs.iter().map(|c| c.fix.is_some()).collect();
         assert_eq!(kept, vec![true, true, true, false, false, true]);

@@ -410,7 +410,9 @@ pub(crate) fn run_formatter(
 
 /// DIVERGENCE: `template=jinja` in the rc file that applies to this file.
 pub(crate) fn apply_rc_template(spec: &mut CheckSpec, options: &Options, filename: &str) {
-    if !spec.ignore_rc && !spec.optional_checks.iter().any(|k| k == TEMPLATE_JINJA) && rcstrict::rc_enables_template(options, filename)
+    if !spec.ignore_rc
+        && !spec.optional_checks.iter().any(|k| k == TEMPLATE_JINJA)
+        && rcstrict::rc_enables_template(options, filename)
     {
         spec.optional_checks.push(TEMPLATE_JINJA.to_string());
     }
