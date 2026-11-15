@@ -73,6 +73,43 @@ identical to an uncached run. Standard input and `--fix` bypass the cache.
 `undefined-command` results are tied to the value of `$PATH`, so installing a
 command without changing `$PATH` won't refresh them.
 
+## Templates
+
+**`--template=jinja`** (rc key `template=jinja`, or `# shellcheck template=jinja`
+before the first command) checks a Jinja template as shell. It is on
+automatically for files named `*.j2`, `*.jinja` or `*.jinja2`, and off for every
+other file, so ordinary scripts get the same output as before.
+
+```bash
+shelllint --template=jinja deploy.sh
+shelllint deploy.sh.j2
+```
+
+Before parsing, the markup is blanked out and every byte offset is kept, so line
+and column numbers match your file.
+
+- `{{ expr }}` becomes a run of `_` of the same width, so `NAME={{ app }}` is an
+  assignment of a plain word.
+- `{% stmt %}` and `{# comment #}` become spaces. Newlines inside them stay.
+- `{% raw %}...{% endraw %}` content is left as written. The tags are blanked.
+- An unterminated `{{`, `{%` or `{#` is blanked to the end of the file.
+
+The limits:
+
+- Templates aren't rendered. Every branch of an `{% if %}` and every `{% for %}`
+  body is checked as if all of them were present, so you can get a duplicate
+  definition or unreachable code warning where the real branches exclude each
+  other.
+- `{{ }}` is replaced even inside single quotes, because the template renders
+  before the shell runs.
+- shelllint can't see what a placeholder expands to, so it doesn't check the
+  shell that the output becomes.
+- `${#var}` contains `{#`, which Jinja also reads as a comment start, so
+  shelllint blanks from there. Wrap such code in `{% raw %}`.
+- Only Jinja is supported.
+- The directive is read only from the leading comment lines. A `{% %}` line
+  before it stops the scan.
+
 ## Choosing the shell
 
 **`--fallback-shell=SHELL`** assumes SHELL for scripts that name no shell.

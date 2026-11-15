@@ -200,6 +200,11 @@ fn run_on_check_stack<R>(f: impl FnOnce() -> R) -> R {
 
 /// The `where`-bound `checkScript contents` of `checkScript`.
 fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, mut contents: String) -> Vec<PositionedComment> {
+    // DIVERGENCE: Jinja template mode (shelllint extension). Masking keeps every
+    // byte offset, so positions in messages are unchanged.
+    if is_jinja_template(spec, &contents) {
+        contents = shelllint_parser::jinja::mask_jinja(&contents);
+    }
     // `--ignore-directives` covers the range directives too.
     let ranges = if spec.ignore_directives { None } else { directive_ranges::DirectiveRanges::scan(&contents) };
     // Only the audit needs the script twice; a normal run moves it.
@@ -228,6 +233,19 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, mut conten
         None => included,
     };
     nub_sorted(sort_messages(included))
+}
+
+/// Internal optional-check name under which `--template=jinja` and the
+/// `template=jinja` rc key travel in `CheckSpec::optional_checks`.
+pub const TEMPLATE_JINJA: &str = "template-jinja";
+
+/// Template mode is on for `*.j2`, `*.jinja` and `*.jinja2`, with the option or
+/// rc key, or with a `# shellcheck template=jinja` directive before the first command.
+fn is_jinja_template(spec: &CheckSpec, contents: &str) -> bool {
+    use shelllint_parser::jinja;
+    jinja::is_template_name(&spec.filename)
+        || spec.optional_checks.iter().any(|k| k == TEMPLATE_JINJA)
+        || (!spec.ignore_directives && jinja::has_template_directive(contents))
 }
 
 /// Parse and analyze `contents`: every message, before the `-S`/`-i`/`-e` filters.
