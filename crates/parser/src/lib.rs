@@ -10,6 +10,7 @@ use shelllint_core::ast::{Ast, Id};
 use shelllint_core::interface::{ParseSpec, Position, PositionedComment, SystemInterface};
 
 pub mod engine;
+pub mod jinja;
 pub mod state;
 pub mod testing;
 

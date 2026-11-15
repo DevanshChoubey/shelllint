@@ -248,6 +248,7 @@ pub fn options() -> Vec<OptDescr> {
             "",
             "Accept newer shell features (POSIX.1-2024, ash, bash 5.1)",
         ),
+        o("", &["template"], Req("template"), "jinja", "Treat the script as a Jinja template"),
         o("", &["ignore-directives"], No("ignore-directives"), "", "Don't honour 'disable=' directives in files"),
         o(
             "",

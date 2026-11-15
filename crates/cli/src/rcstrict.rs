@@ -114,6 +114,7 @@ const KNOWN_KEYS: &[&str] = &[
     "external-vars",
     "source-functions",
     "modern-dialects",
+    "template",
     "safe-vars",
     "strict-env-vars",
 ];
@@ -147,6 +148,12 @@ fn find_problems(text: &str) -> Vec<(usize, usize, String)> {
 /// The rc file (path, text) that applies to `filename`, without any warning output.
 fn rc_text_for(options: &Options, filename: &str) -> Option<(String, String)> {
     sys::quiet_rc_text(options.rcfile.as_deref(), filename)
+}
+
+/// Does the rc file that applies to `filename` say `template=jinja`?
+pub fn rc_enables_template(options: &Options, filename: &str) -> bool {
+    let Some((_, text)) = rc_text_for(options, filename) else { return false };
+    tokens(&text).iter().any(|(_, _, _, t)| t == "template=jinja" || t == "template=\"jinja\"" || t == "template='jinja'")
 }
 
 /// Apply rc `color=` / `wiki-link-count=` where the command line did not
