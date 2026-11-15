@@ -65,21 +65,78 @@ fn jinja_bad_value() {
 #[test]
 fn jinja_masks_inside_single_quotes_only_in_template_mode() {
     let d = dir("quote");
-    let src = "#!/bin/bash\necho '{{ v }}' $x\n";
+    // `$v` in single quotes is SC2016 as plain shell; masked, it is not there.
+    let src = "#!/bin/bash\necho '{{ $v }}'\n";
     std::fs::write(d.join("a.sh.j2"), src).unwrap();
     std::fs::write(d.join("a.sh"), src).unwrap();
-    // Masked: the quoted text is plain underscores either way, the finding is on $x.
-    let (_, j2) = run(&["--norc", "-f", "gcc", "a.sh.j2"], &d);
-    assert!(j2.contains("SC2086"), "{j2}");
+    let (_, plain) = run(&["--norc", "-f", "gcc", "a.sh"], &d);
+    assert!(plain.contains("SC2016"), "{plain}");
+    assert_eq!(run(&["--norc", "-f", "gcc", "a.sh.j2"], &d), (0, String::new()));
     // A masked `{{ v }}` outside quotes becomes one word, not a syntax error.
     std::fs::write(d.join("b.sh.j2"), "#!/bin/bash\necho {{ v }}\n").unwrap();
     assert_eq!(run(&["--norc", "-f", "gcc", "b.sh.j2"], &d), (0, String::new()));
-    // Not a template: output is what it was before.
-    std::fs::write(d.join("b.sh"), "#!/bin/bash\necho {{ v }}\n").unwrap();
-    let (code, out) = run(&["--norc", "-f", "gcc", "b.sh"], &d);
+}
+
+#[test]
+fn plain_sh_with_braces_matches_oracle() {
+    let oracle = "/media/devansh/Experiment/playground/shellcheck-rust/bench/.bin/shellcheck-hs";
+    if !std::path::Path::new(oracle).exists() {
+        return;
+    }
+    let d = dir("oracle");
+    for (i, src) in [
+        T1306,
+        "#!/bin/bash\necho {{ v }} $x\n",
+        "#!/bin/bash\necho '{{ $v }}' {% if %}\n",
+        "#!/bin/sh\n{# c #}\nx={{ a }}\n",
+        "#!/bin/bash\nf() { echo \"${#1}\"; }\n{{ unterminated\n",
+    ]
+    .iter()
+    .enumerate()
+    {
+        let name = format!("p{i}.sh");
+        std::fs::write(d.join(&name), src).unwrap();
+        let (_, ours) = run(&["--norc", "-f", "json1", &name], &d);
+        let theirs = Command::new(oracle).args(["-f", "json1", "--norc", &name]).current_dir(&d).output().unwrap();
+        assert_eq!(ours, String::from_utf8_lossy(&theirs.stdout), "{src:?}");
+    }
+}
+
+#[test]
+fn jinja_raw_block() {
+    let d = dir("raw");
+    // Raw content is shell as written: `$y` inside is still checked.
+    std::fs::write(d.join("x.sh.j2"), "#!/bin/bash\n{% raw %}\necho $y\n{% endraw %}\necho {{ a }}\n").unwrap();
+    let (code, out) = run(&["--norc", "-f", "gcc", "x.sh.j2"], &d);
     assert_eq!(code, 1, "{out}");
-    let (_, plain) = run(&["--norc", "-f", "gcc", "a.sh"], &d);
-    assert!(plain.contains("SC2086"), "{plain}");
+    assert!(out.contains("x.sh.j2:3:6") && out.contains("SC2086"), "{out}");
+    assert!(!out.contains("SC1"), "{out}");
+}
+
+#[test]
+fn jinja_unterminated_markup() {
+    let d = dir("unterm");
+    std::fs::write(d.join("x.sh.j2"), "#!/bin/bash\necho ok\necho {{ never closed\n$y\n").unwrap();
+    // Blanked to the end of the file: nothing after it is checked, and no syntax error.
+    assert_eq!(run(&["--norc", "-f", "gcc", "x.sh.j2"], &d), (0, String::new()));
+}
+
+#[test]
+fn jinja_stdin_filename() {
+    use std::io::Write;
+    use std::process::Stdio;
+    let d = dir("stdin");
+    let mut child = Command::new(env!("CARGO_BIN_EXE_shelllint"))
+        .args(["--norc", "-f", "gcc", "--stdin-filename", "x.sh.j2", "-"])
+        .current_dir(&d)
+        .env_remove("SHELLCHECK_OPTS")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child.stdin.take().unwrap().write_all(T1306.as_bytes()).unwrap();
+    let o = child.wait_with_output().unwrap();
+    assert_eq!((o.status.code(), String::from_utf8_lossy(&o.stdout).into_owned()), (Some(0), String::new()));
 }
 
 #[test]
@@ -93,6 +150,100 @@ fn jinja_columns_unchanged() {
     };
     assert_eq!(col("x.sh.j2"), col("x.sh"));
     assert!(!col("x.sh.j2").is_empty());
+}
+
+#[test]
+fn jinja_columns_after_multibyte() {
+    let d = dir("mb");
+    let src = "#!/bin/bash\necho {{ caf\u{e9} }} $y\n";
+    std::fs::write(d.join("x.sh.j2"), src).unwrap();
+    let (_, out) = run(&["--norc", "-f", "gcc", "x.sh.j2"], &d);
+    let col: usize = out.lines().find(|l| l.contains("SC2086")).unwrap().split(':').nth(2).unwrap().parse().unwrap();
+    let want = src.lines().nth(1).unwrap().chars().position(|c| c == '$').unwrap() + 1;
+    assert_eq!(col, want, "{out}");
+}
+
+#[test]
+fn fix_respects_rc_template() {
+    let d = dir("fix");
+    let src = "#!/bin/bash\na={{ v }}\necho $b\n";
+    std::fs::write(d.join("x.sh"), src).unwrap();
+    std::fs::write(d.join(".shellcheckrc"), "template=jinja\n").unwrap();
+    run(&["--fix", "x.sh"], &d);
+    assert_eq!(std::fs::read_to_string(d.join("x.sh")).unwrap(), "#!/bin/bash\na={{ v }}\necho \"$b\"\n");
+}
+
+#[test]
+fn fix_never_rewrites_markup() {
+    let d = dir("fixmk");
+    // The fix quotes the word around the markup; the markup itself stays as written.
+    std::fs::write(d.join("x.sh.j2"), "#!/bin/bash\necho $x{{ v }}\n").unwrap();
+    run(&["--fix", "x.sh.j2"], &d);
+    let out = std::fs::read_to_string(d.join("x.sh.j2")).unwrap();
+    assert_eq!(out, "#!/bin/bash\necho \"$x{{ v }}\"\n");
+    assert!(!out.contains("__"));
+}
+
+#[test]
+fn jinja_sourced_template_is_masked() {
+    let d = dir("src");
+    std::fs::write(d.join("lib.sh.j2"), "x={{ a }}\n{% if b %}\ny=1\n{% endif %}\n").unwrap();
+    std::fs::write(d.join("main.sh"), "#!/bin/bash\n# shellcheck source=lib.sh.j2\nsource lib.sh.j2\n").unwrap();
+    let (_, out) = run(&["--norc", "-f", "gcc", "-x", "main.sh"], &d);
+    assert!(!out.contains("lib.sh.j2"), "{out}");
+    assert!(!out.contains("SC1"), "{out}");
+}
+
+#[test]
+fn jinja_directive_quoted() {
+    let d = dir("dirq");
+    for (i, q) in ["\"jinja\"", "'jinja'"].iter().enumerate() {
+        let name = format!("q{i}.sh");
+        std::fs::write(d.join(&name), format!("#!/bin/bash\n# shellcheck template={q}\necho {{{{ v }}}}\n")).unwrap();
+        assert_eq!(run(&["--norc", "-f", "gcc", &name], &d), (0, String::new()), "{q}");
+    }
+}
+
+#[test]
+fn strict_rc_rejects_bad_template() {
+    let d = dir("strict");
+    std::fs::write(d.join("x.sh"), "#!/bin/sh\ntrue\n").unwrap();
+    std::fs::write(d.join(".shellcheckrc"), "template=mako\n").unwrap();
+    assert_eq!(run(&["--strict-rc", "x.sh"], &d).0, 2);
+    std::fs::write(d.join(".shellcheckrc"), "template=\"jinja\"\n").unwrap();
+    assert_eq!(run(&["--strict-rc", "x.sh"], &d).0, 0);
+}
+
+#[test]
+fn enable_cannot_turn_on_template_mode() {
+    let d = dir("enable");
+    std::fs::write(d.join("x.sh"), "#!/bin/bash\necho {{ v }}\n").unwrap();
+    for name in ["template-jinja", "template=jinja", "\0template-jinja"] {
+        if name.contains('\0') {
+            continue; // not passable in an argument
+        }
+        let (code, _) = run(&["--norc", &format!("--enable={name}"), "-f", "gcc", "x.sh"], &d);
+        assert_eq!(code, 1, "{name}");
+    }
+    std::fs::write(d.join(".shellcheckrc"), "enable=template-jinja\n").unwrap();
+    assert_eq!(run(&["-f", "gcc", "x.sh"], &d).0, 1);
+}
+
+#[test]
+fn template_name_infers_shell_from_inner_name() {
+    let d = dir("infer");
+    let body = "echo hi\n";
+    for n in ["x.sh", "x.sh.j2", "x.bash", "x.bash.j2"] {
+        std::fs::write(d.join(n), body).unwrap();
+    }
+    let codes = |n: &str| {
+        let (_, out) = run(&["--norc", "-f", "gcc", n], &d);
+        out.lines().filter_map(|l| l.split("SC").nth(1).map(|c| c[..4].to_string())).collect::<Vec<_>>()
+    };
+    assert_eq!(codes("x.sh.j2"), codes("x.sh"));
+    assert_eq!(codes("x.sh"), vec!["2148"]);
+    assert_eq!(codes("x.bash.j2"), codes("x.bash"));
+    assert!(codes("x.bash").is_empty());
 }
 
 #[test]

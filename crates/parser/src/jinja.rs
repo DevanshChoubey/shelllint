@@ -2,8 +2,8 @@
 //
 // A Jinja template is shell text with `{{ expr }}`, `{% stmt %}` and
 // `{# comment #}` markup. This pass replaces the markup with shell-neutral
-// text before parsing and keeps every byte offset and every newline, so line
-// and column numbers stay exact.
+// text before parsing and keeps every character and every newline in place,
+// so line and column numbers stay exact.
 
 /// Does this file name mean a Jinja template (`*.j2`, `*.jinja`, `*.jinja2`)?
 pub fn is_template_name(filename: &str) -> bool {
@@ -28,7 +28,7 @@ pub fn has_template_directive(src: &str) -> bool {
             if tok.starts_with('#') {
                 break;
             }
-            if tok == "template=jinja" {
+            if matches!(tok, "template=jinja" | "template=\"jinja\"" | "template='jinja'") {
                 return true;
             }
         }
@@ -36,35 +36,43 @@ pub fn has_template_directive(src: &str) -> bool {
     false
 }
 
-/// Blank out the markup of a Jinja template. The result has the same byte
-/// length as `src`, and every `\n` stays where it was.
+/// Blank out the markup of a Jinja template. Every character inside markup
+/// becomes exactly one ASCII fill character (`_` for `{{ }}`, a space for
+/// `{% %}` and `{# #}`), so the result has the same number of characters as
+/// `src` (columns count characters), and every `\n` stays where it was.
 pub fn mask_jinja(src: &str) -> String {
-    let b = src.as_bytes();
-    let mut out = b.to_vec();
+    mask_with_ranges(src).0
+}
+
+/// `mask_jinja`, plus the blanked runs as half-open character index ranges.
+fn mask_with_ranges(src: &str) -> (String, Vec<(usize, usize)>) {
+    let b: Vec<char> = src.chars().collect();
+    let mut out = b.clone();
+    let mut runs = vec![];
     let mut i = 0;
     while i + 1 < b.len() {
-        let (close, fill): (&[u8], u8) = match (b[i], b[i + 1]) {
-            (b'{', b'{') => (b"}}", b'_'),
-            (b'{', b'%') => (b"%}", b' '),
-            (b'{', b'#') => (b"#}", b' '),
+        let (close, fill): ([char; 2], char) = match (b[i], b[i + 1]) {
+            ('{', '{') => (['}', '}'], '_'),
+            ('{', '%') => (['%', '}'], ' '),
+            ('{', '#') => (['#', '}'], ' '),
             _ => {
                 i += 1;
                 continue;
             }
         };
-        let end = find(b, close, i + 2).map_or(b.len(), |p| p + 2);
-        blank(&mut out, i, end, fill);
-        if b[i + 1] == b'%' && end <= b.len() && is_tag(&b[i + 2..end.saturating_sub(2).max(i + 2)], b"raw") {
+        let end = find(&b, &close, i + 2).map_or(b.len(), |p| p + 2);
+        blank(&mut out, &mut runs, i, end, fill);
+        if b[i + 1] == '%' && end <= b.len() && is_tag(&b[i + 2..end.saturating_sub(2).max(i + 2)], "raw") {
             // Raw content stays as written, up to the matching endraw tag.
             let mut j = end;
             loop {
-                let Some(s) = find(b, b"{%", j) else {
+                let Some(s) = find(&b, &['{', '%'], j) else {
                     i = b.len();
                     break;
                 };
-                let e = find(b, b"%}", s + 2).map_or(b.len(), |p| p + 2);
-                if is_tag(&b[s + 2..e.saturating_sub(2).max(s + 2)], b"endraw") {
-                    blank(&mut out, s, e, b' ');
+                let e = find(&b, &['%', '}'], s + 2).map_or(b.len(), |p| p + 2);
+                if is_tag(&b[s + 2..e.saturating_sub(2).max(s + 2)], "endraw") {
+                    blank(&mut out, &mut runs, s, e, ' ');
                     i = e;
                     break;
                 }
@@ -74,29 +82,62 @@ pub fn mask_jinja(src: &str) -> String {
         }
         i = end;
     }
-    // Only ASCII bytes were written, over whole markup runs, so this is valid.
-    String::from_utf8(out).unwrap_or_else(|_| src.to_string())
+    (out.into_iter().collect(), runs)
 }
 
-fn find(hay: &[u8], needle: &[u8], from: usize) -> Option<usize> {
+/// The masked markup of `src`, as half-open `((line, col), (line, col))`
+/// ranges. Lines and columns are 1 based and tabs advance to the next
+/// multiple of 8, like the positions in messages and fixes.
+pub fn markup_ranges(src: &str) -> Vec<((i64, i64), (i64, i64))> {
+    let runs = mask_with_ranges(src).1;
+    let mut pos = Vec::with_capacity(src.len() + 1);
+    let (mut line, mut col) = (1i64, 1i64);
+    for c in src.chars() {
+        pos.push((line, col));
+        match c {
+            '\n' => {
+                line += 1;
+                col = 1;
+            }
+            '\t' => col = (col - 1) / 8 * 8 + 9,
+            _ => col += 1,
+        }
+    }
+    pos.push((line, col));
+    runs.into_iter().map(|(s, e)| (pos[s], pos[e])).collect()
+}
+
+/// `x.sh.j2` -> `x.sh`: drop one trailing template extension.
+pub fn strip_template_ext(filename: &str) -> &str {
+    for ext in [".jinja2", ".jinja", ".j2"] {
+        let n = filename.len().wrapping_sub(ext.len());
+        if filename.len() > ext.len() && filename.is_char_boundary(n) && filename[n..].eq_ignore_ascii_case(ext) {
+            return &filename[..n];
+        }
+    }
+    filename
+}
+
+fn find(hay: &[char], needle: &[char], from: usize) -> Option<usize> {
     if from >= hay.len() {
         return None;
     }
     hay[from..].windows(needle.len()).position(|w| w == needle).map(|p| p + from)
 }
 
-fn blank(out: &mut [u8], start: usize, end: usize, fill: u8) {
-    for byte in &mut out[start..end] {
-        if *byte != b'\n' {
-            *byte = fill;
+fn blank(out: &mut [char], runs: &mut Vec<(usize, usize)>, start: usize, end: usize, fill: char) {
+    runs.push((start, end));
+    for c in &mut out[start..end] {
+        if *c != '\n' {
+            *c = fill;
         }
     }
 }
 
 /// Is the inside of a `{% … %}` tag just `name`, allowing `-` or `+` whitespace control?
-fn is_tag(inner: &[u8], name: &[u8]) -> bool {
-    let s = String::from_utf8_lossy(inner);
-    s.trim_matches(|c: char| c.is_whitespace() || c == '-' || c == '+').as_bytes() == name
+fn is_tag(inner: &[char], name: &str) -> bool {
+    let s: String = inner.iter().collect();
+    s.trim_matches(|c: char| c.is_whitespace() || c == '-' || c == '+') == name
 }
 
 #[cfg(test)]
@@ -132,12 +173,12 @@ mod tests {
     }
 
     #[test]
-    fn utf8_length_preserved() {
+    fn utf8_char_count_preserved() {
         let s = "x={{ caf\u{e9} \u{1F600} }} y\u{e9}";
         let m = mask_jinja(s);
-        assert_eq!(m.len(), s.len());
-        assert!(m.ends_with(" y\u{e9}"));
-        assert!(m.starts_with("x=_"));
+        assert_eq!(m.chars().count(), s.chars().count());
+        assert_eq!(m, "x=____________ y\u{e9}");
+        assert!(!m.is_ascii() && m[..15].is_ascii());
     }
 
     #[test]
@@ -150,10 +191,20 @@ mod tests {
             "echo {{ \u{e9}\n}} {% for i in x %}\u{1F600}",
         ] {
             let m = mask_jinja(s);
-            assert_eq!(m.len(), s.len(), "{s:?}");
-            let nl = |t: &str| t.bytes().enumerate().filter(|(_, c)| *c == b'\n').map(|(i, _)| i).collect::<Vec<_>>();
+            assert_eq!(m.chars().count(), s.chars().count(), "{s:?}");
+            let nl = |t: &str| t.chars().enumerate().filter(|(_, c)| *c == '\n').map(|(i, _)| i).collect::<Vec<_>>();
             assert_eq!(nl(&m), nl(s), "{s:?}");
         }
+    }
+
+    #[test]
+    fn markup_ranges_and_ext() {
+        let s = "a\t{{ x }}\nb {# c\nd #}";
+        assert_eq!(markup_ranges(s), vec![((1, 9), (1, 16)), ((2, 3), (3, 5))]);
+        assert_eq!(strip_template_ext("x.sh.j2"), "x.sh");
+        assert_eq!(strip_template_ext("x.SH.Jinja2"), "x.SH");
+        assert_eq!(strip_template_ext("x.sh"), "x.sh");
+        assert_eq!(strip_template_ext(".j2"), ".j2");
     }
 
     #[test]
@@ -164,5 +215,7 @@ mod tests {
         assert!(has_template_directive("# shellcheck disable=SC2086 template=jinja\n"));
         assert!(!has_template_directive("echo\n# shellcheck template=jinja\n"));
         assert!(!has_template_directive("# template=jinja\n"));
+        assert!(has_template_directive("# shellcheck template=\"jinja\"\n"));
+        assert!(has_template_directive("# shellcheck template='jinja'\n"));
     }
 }

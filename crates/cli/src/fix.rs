@@ -97,7 +97,8 @@ impl Fixer {
         for file in targets {
             // Unreadable files are reported by the final lint.
             let Ok(contents) = sys.read_file(None, file) else { continue };
-            let spec = CheckSpec { filename: file.clone(), script: contents, ..options.check_spec.clone() };
+            let mut spec = CheckSpec { filename: file.clone(), script: contents, ..options.check_spec.clone() };
+            crate::apply_rc_template(&mut spec, options, file);
             let result = check_script_owned(sys, spec);
             for (name, fix) in diff::fixes_by_file(&result) {
                 if self.reported.contains(&name) {
