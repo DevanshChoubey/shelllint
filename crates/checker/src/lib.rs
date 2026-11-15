@@ -111,7 +111,14 @@ pub fn token_to_position(pr: &ParseResult, t: TokenComment) -> PositionedComment
     PositionedComment { start_pos: start, end_pos: end, comment: t.comment, fix, ..new_positioned_comment() }
 }
 
+/// `x.sh.j2` -> `x.sh`: the file name without one trailing template extension.
+pub fn strip_template_ext(filename: &str) -> &str {
+    shelllint_parser::jinja::strip_template_ext(filename)
+}
+
 pub fn shell_from_filename(filename: &str) -> Option<Shell> {
+    // DIVERGENCE: a template name (`x.bash.j2`) is judged by the name under its extension.
+    let filename = shelllint_parser::jinja::strip_template_ext(filename);
     let shell_extensions = [
         (".ksh", Shell::Ksh),
         (".bash", Shell::Bash),
@@ -202,17 +209,25 @@ fn run_on_check_stack<R>(f: impl FnOnce() -> R) -> R {
 fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, mut contents: String) -> Vec<PositionedComment> {
     // DIVERGENCE: Jinja template mode (shelllint extension). Masking keeps every
     // byte offset, so positions in messages are unchanged.
-    if is_jinja_template(spec, &contents) {
-        contents = shelllint_parser::jinja::mask_jinja(&contents);
+    let template = is_jinja_template(spec, &contents);
+    let original = if template { Some(std::mem::take(&mut contents)) } else { None };
+    if let Some(orig) = &original {
+        contents = shelllint_parser::jinja::mask_jinja(orig);
     }
+    // Sourced files are masked too, in template mode or when they have a template name.
+    let masking = MaskingSystem { inner: sys, all: template };
+    let sys: &dyn SystemInterface = &masking;
+    let markup = original.as_deref().map(shelllint_parser::jinja::markup_ranges).unwrap_or_default();
     // `--ignore-directives` covers the range directives too.
     let ranges = if spec.ignore_directives { None } else { directive_ranges::DirectiveRanges::scan(&contents) };
     // Only the audit needs the script twice; a normal run moves it.
     let first_pass = if spec.report_unused_disables { contents.clone() } else { std::mem::take(&mut contents) };
     let (mut all, result) = collect_messages(sys, spec, first_pass, spec.ignore_directives);
+    drop_fixes_in_markup(&mut all, &markup);
     if spec.report_unused_disables {
         // DIVERGENCE: extension (`--report-unused-disables`), see `directive_audit`.
-        let (other, other_result) = collect_messages(sys, spec, contents.clone(), !spec.ignore_directives);
+        let (mut other, other_result) = collect_messages(sys, spec, contents.clone(), !spec.ignore_directives);
+        drop_fixes_in_markup(&mut other, &markup);
         let (honoured, honoured_result, ignored) =
             if spec.ignore_directives { (&other, &other_result, &all) } else { (&all, &result, &other) };
         let reports = directive_audit::unused_disable_reports(spec, &contents, honoured_result, honoured, ignored);
@@ -237,7 +252,54 @@ fn check_script_contents(sys: &dyn SystemInterface, spec: &CheckSpec, mut conten
 
 /// Internal optional-check name under which `--template=jinja` and the
 /// `template=jinja` rc key travel in `CheckSpec::optional_checks`.
-pub const TEMPLATE_JINJA: &str = "template-jinja";
+// The leading NUL keeps the name out of reach of `enable=` and `--enable`.
+pub const TEMPLATE_JINJA: &str = "\0template-jinja";
+
+/// Reads sourced files through `inner`, masking template markup in them when
+/// `all` is set or the file has a template name.
+struct MaskingSystem<'a> {
+    inner: &'a dyn SystemInterface,
+    all: bool,
+}
+
+impl SystemInterface for MaskingSystem<'_> {
+    fn read_file(&self, external: Option<bool>, path: &str) -> Result<String, shelllint_core::interface::ErrorMessage> {
+        let text = self.inner.read_file(external, path)?;
+        if self.all || shelllint_parser::jinja::is_template_name(path) {
+            Ok(shelllint_parser::jinja::mask_jinja(&text))
+        } else {
+            Ok(text)
+        }
+    }
+    fn find_source(&self, current: &str, external: Option<bool>, source_paths: &[String], name: &str) -> String {
+        self.inner.find_source(current, external, source_paths, name)
+    }
+    fn source_functions(&self) -> Vec<String> {
+        self.inner.source_functions()
+    }
+    fn get_config(&self, file: &str) -> Option<(String, String)> {
+        self.inner.get_config(file)
+    }
+}
+
+/// A fix that would rewrite masked markup would write placeholder text into
+/// the user's file, so such fixes are dropped (the message stays).
+fn drop_fixes_in_markup(comments: &mut [PositionedComment], markup: &[((i64, i64), (i64, i64))]) {
+    if markup.is_empty() {
+        return;
+    }
+    for pc in comments {
+        let hits = pc.fix.as_ref().is_some_and(|f| {
+            f.replacements.iter().any(|r| {
+                let (s, e) = ((r.start_pos.line, r.start_pos.column), (r.end_pos.line, r.end_pos.column));
+                markup.iter().any(|&(ms, me)| if s == e { ms < s && s < me } else { s < me && ms < e })
+            })
+        });
+        if hits {
+            pc.fix = None;
+        }
+    }
+}
 
 /// Template mode is on for `*.j2`, `*.jinja` and `*.jinja2`, with the option or
 /// rc key, or with a `# shellcheck template=jinja` directive before the first command.
@@ -422,7 +484,7 @@ fn construct(mut x: u32, n: usize, rest: &[u8]) -> Option<(u32, usize)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use shelllint_core::interface::{Comment, Position};
+    use shelllint_core::interface::{Comment, Fix, InsertionPoint, Position, Replacement};
 
     fn pc(line: i64, code: Code, end: i64) -> PositionedComment {
         let pos = |column| Position { file: "f".into(), line, column };
@@ -451,6 +513,29 @@ mod tests {
         };
         let got = nub_token_comments(vec![tc(1, 2, "a"), tc(1, 2, "b"), tc(1, 2, "a"), tc(2, 2, "a"), tc(2, 2, "a")]);
         assert_eq!(got, vec![tc(1, 2, "a"), tc(1, 2, "b"), tc(2, 2, "a")]);
+    }
+
+    #[test]
+    fn fixes_touching_markup_are_dropped() {
+        let rep = |l: i64, s: i64, e: i64| {
+            let pos = |c| Position { file: "f".into(), line: l, column: c };
+            Fix {
+                replacements: vec![Replacement {
+                    start_pos: pos(s),
+                    end_pos: pos(e),
+                    string: "x".into(),
+                    precedence: 1,
+                    insertion_point: InsertionPoint::InsertBefore,
+                }],
+            }
+        };
+        let mk = |f: Fix| PositionedComment { fix: Some(f), ..new_positioned_comment() };
+        let markup = [((1, 5), (1, 10))];
+        // Before, after and touching the edges: kept. Inside, overlapping, insertion inside: dropped.
+        let mut cs = vec![mk(rep(1, 1, 5)), mk(rep(1, 10, 12)), mk(rep(1, 5, 5)), mk(rep(1, 3, 6)), mk(rep(1, 7, 7)), mk(rep(2, 6, 8))];
+        drop_fixes_in_markup(&mut cs, &markup);
+        let kept: Vec<bool> = cs.iter().map(|c| c.fix.is_some()).collect();
+        assert_eq!(kept, vec![true, true, true, false, false, true]);
     }
 
     #[test]

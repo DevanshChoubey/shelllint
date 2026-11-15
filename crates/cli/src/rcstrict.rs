@@ -131,6 +131,12 @@ fn find_problems(text: &str) -> Vec<(usize, usize, String)> {
             format!("invalid value for '{}'", key)
         } else if !KNOWN_KEYS.contains(&key) || !token.contains('=') {
             format!("unknown directive '{}'", key)
+        } else if key == "template" {
+            let v = value.trim_matches(|c| c == '"' || c == '\'');
+            if v == "jinja" {
+                continue;
+            }
+            format!("invalid template value '{}'", v)
         } else if key == "shell" {
             let v = value.trim_matches(|c| c == '"' || c == '\'');
             if shell_for_executable(v).is_some() {

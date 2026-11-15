@@ -85,13 +85,22 @@ shelllint --template=jinja deploy.sh
 shelllint deploy.sh.j2
 ```
 
-Before parsing, the markup is blanked out and every byte offset is kept, so line
-and column numbers match your file.
+The rc key is read by the command-line tool (including with `--fix`). The
+library, the language server and the MCP server use the option, the directive or
+the file name.
 
-- `{{ expr }}` becomes a run of `_` of the same width, so `NAME={{ app }}` is an
+Before parsing, the markup is blanked out and every character is kept, so line
+and column numbers match your file, also after non-ASCII text inside the markup.
+A name like `deploy.bash.j2` is judged by the name without `.j2`, `.jinja` or
+`.jinja2` when the shell is picked from the file name.
+
+- `{{ expr }}` becomes one `_` per character, so `NAME={{ app }}` is an
   assignment of a plain word.
 - `{% stmt %}` and `{# comment #}` become spaces. Newlines inside them stay.
 - `{% raw %}...{% endraw %}` content is left as written. The tags are blanked.
+- Files followed through `source` are blanked the same way when the checked file
+  is a template, or when their own name ends in `.j2`, `.jinja` or `.jinja2`.
+- A `--fix` that would rewrite text inside the markup is skipped.
 - An unterminated `{{`, `{%` or `{#` is blanked to the end of the file.
 
 The limits:

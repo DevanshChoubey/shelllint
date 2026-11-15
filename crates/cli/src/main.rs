@@ -408,6 +408,14 @@ pub(crate) fn run_formatter(
     result
 }
 
+/// DIVERGENCE: `template=jinja` in the rc file that applies to this file.
+pub(crate) fn apply_rc_template(spec: &mut CheckSpec, options: &Options, filename: &str) {
+    if !spec.ignore_rc && !spec.optional_checks.iter().any(|k| k == TEMPLATE_JINJA) && rcstrict::rc_enables_template(options, filename)
+    {
+        spec.optional_checks.push(TEMPLATE_JINJA.to_string());
+    }
+}
+
 fn process_file(
     sys: &sys::IoInterface,
     format: &mut dyn Formatter,
@@ -428,11 +436,7 @@ fn process_file(
         return (Status::RuntimeException, 0);
     }
     let mut spec = CheckSpec { filename: filename.to_string(), script: contents, ..options.check_spec.clone() };
-    // DIVERGENCE: `template=jinja` in the rc file that applies to this file.
-    if !spec.ignore_rc && !spec.optional_checks.iter().any(|k| k == TEMPLATE_JINJA) && rcstrict::rc_enables_template(options, filename)
-    {
-        spec.optional_checks.push(TEMPLATE_JINJA.to_string());
-    }
+    apply_rc_template(&mut spec, options, filename);
     let shell_flag = options.check_spec.shell_type_override.is_some();
     match shell_inference::decide(&options.shell_inference, shell_flag, spec.ignore_rc, sys, filename, &spec.script) {
         Some(shell_inference::Decision::Skip) => return (Status::NoProblems, 0),
