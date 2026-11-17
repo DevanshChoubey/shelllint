@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// Needs a real zsh, which Windows runners don't have.
+#![cfg(unix)]
 // DIVERGENCE: shelllint-only tests for zsh message text and gating (SC2206, SC2207, SC2302).
 //
 // Every zsh claim is checked against real zsh 5.9 in the same test.

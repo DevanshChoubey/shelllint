@@ -1,14 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // DIVERGENCE: shelllint-only test helpers for the zsh message lane (no ShellCheck counterpart).
 //
-// Runs the built `shelllint` binary and real `/usr/bin/zsh`, so a test can state
-// a zsh claim and check it against zsh in the same place.
+// Runs the built `shelllint` binary and a real zsh, so a test can state a zsh
+// claim and check it against zsh in the same place. The tests that use it need
+// zsh installed (`/usr/bin/zsh` or `/bin/zsh`); CI installs it on Linux.
 #![allow(dead_code)]
 
 use std::io::Write;
 use std::process::{Command, Stdio};
 
-pub const ZSH: &str = "/usr/bin/zsh";
+/// The zsh binary to check claims against.
+pub fn zsh_bin() -> &'static str {
+    ["/usr/bin/zsh", "/bin/zsh"]
+        .into_iter()
+        .find(|p| std::path::Path::new(p).exists())
+        .expect("these tests check their zsh claims against a real zsh: install zsh")
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Finding {
@@ -72,13 +79,13 @@ pub fn message_of(f: &[Finding], code: u32) -> String {
 
 /// `zsh -n` accepts `script` (parse only).
 pub fn zsh_parses(script: &str) {
-    let o = Command::new(ZSH).args(["-fn", "-c", script]).output().unwrap();
+    let o = Command::new(zsh_bin()).args(["-fn", "-c", script]).output().unwrap();
     assert!(o.status.success(), "zsh -n rejected {script:?}: {}", String::from_utf8_lossy(&o.stderr));
 }
 
 /// stdout of `zsh -fc script` (stderr folded in), trimmed.
 pub fn zsh_run(script: &str) -> String {
-    let o = Command::new(ZSH).args(["-fc", script]).output().unwrap();
+    let o = Command::new(zsh_bin()).args(["-fc", script]).output().unwrap();
     let mut s = String::from_utf8_lossy(&o.stdout).into_owned();
     s.push_str(&String::from_utf8_lossy(&o.stderr));
     s.trim().to_string()
