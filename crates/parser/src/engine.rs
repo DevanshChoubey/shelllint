@@ -262,6 +262,13 @@ pub struct P<'a> {
     /// combinator that could retry an alternative returns from then on, so the
     /// rest of the parse fails at once instead of trying each alternative.
     pub(crate) too_deep: Option<ParseError>,
+    /// DIVERGENCE: zsh extension. Positions of the `()` pairs and newlines in
+    /// the buffer last asked about, so the `()` test on a line is a binary
+    /// search (`zsh_line_has_paren_pair`). The buffer is kept alive so its
+    /// pointer key stays unique.
+    pub(crate) zsh_line_index: Option<(Rc<[char]>, crate::area_zsh_functions::LineIndex)>,
+    /// zsh only: the last word scan of `zsh_closes_group` (see `WordScan`).
+    pub(crate) zsh_word_scan: Option<crate::area_zsh_functions::WordScan>,
 }
 
 /// DIVERGENCE: the most nested reader frames (`called` contexts, arithmetic
@@ -295,7 +302,15 @@ impl<'a> P<'a> {
             zsh_copy_budget: ZSH_COPY_BUDGET,
             nesting: 0,
             too_deep: None,
+            zsh_line_index: None,
+            zsh_word_scan: None,
         }
+    }
+
+    /// DIVERGENCE: zsh extension. The buffer under the cursor and the cursor's
+    /// offset into it (the buffer is shared, not copied).
+    pub(crate) fn buffer_and_offset(&self) -> (Rc<[char]>, usize) {
+        (self.input.buf.clone(), self.input.at)
     }
 
     /// DIVERGENCE: zsh extension. The cursor's memo key and a copy of its input
@@ -375,11 +390,6 @@ impl<'a> P<'a> {
     pub fn set_position(&mut self, pos: SourcePos) {
         self.pos = pos;
         self.touch();
-    }
-
-    /// DIVERGENCE: zsh extension. The characters already consumed, for look-behind.
-    pub(crate) fn consumed_chars(&self) -> &[char] {
-        &self.input.buf[..self.input.at]
     }
 
     /// `getInput`

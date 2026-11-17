@@ -23,10 +23,34 @@
 //   again for each name (the checker drops the duplicate comments).
 // - an empty body is an empty list.
 
+use std::rc::Rc;
+
 use shelllint_core::ast::{FunctionKeyword, FunctionParentheses, Id, Token};
 use shelllint_core::interface::Severity::ErrorC;
 
 use crate::engine::{P, PR, SourcePos};
+
+/// DIVERGENCE: zsh extension. Where the `()` pairs and the newlines sit in one
+/// buffer, ascending (see `zsh_line_has_paren_pair`).
+pub(crate) struct LineIndex {
+    pairs: Vec<usize>,
+    newlines: Vec<usize>,
+}
+
+/// Buffers shorter than this are scanned directly; the index is for long ones.
+const LINE_INDEX_MIN: usize = 4096;
+
+/// DIVERGENCE: zsh extension. The last word scan of `zsh_closes_group`: over
+/// `buf[..end]`, the word starts at `start` and holds `open` `{` and `close`
+/// `}` in `buf[start..end]`.
+#[derive(Clone)]
+pub(crate) struct WordScan {
+    buf: Rc<[char]>,
+    end: usize,
+    start: usize,
+    open: i32,
+    close: i32,
+}
 
 /// The name given to an anonymous function (zsh shows it as `(anon)` in `$funcstack`; that spelling would trip SC2288 as a command name).
 pub(crate) const ANON_FUNCTION_NAME: &str = "zsh-anonymous-function";
@@ -151,13 +175,24 @@ impl<'a> P<'a> {
     /// `}` is the last character of the word (followed by a space, newline,
     /// `;`, `&`, `|`, a paren, a redirect or the end of input) and the word
     /// did not open a `{` of its own (`{a}`, `%{x%}`).
-    fn zsh_closes_group(&self, rest: &[char]) -> bool {
-        let before = self.consumed_chars();
-        let mut i = before.len();
+    fn zsh_closes_group(&mut self, rest: &[char]) -> bool {
+        // DIVERGENCE: the word's braces are counted from the previous scan of
+        // this buffer when that scan's prefix is still before the cursor, so a
+        // run of `}` in one word costs the length of the run, not its square.
+        let (buf, at) = self.buffer_and_offset();
+        let before = &buf[..at];
+        let cached = match &self.zsh_word_scan {
+            Some(s) if Rc::ptr_eq(&s.buf, &buf) && s.end <= at => Some(s.clone()),
+            _ => None,
+        };
+        let floor = cached.as_ref().map_or(0, |s| s.end);
+        let mut i = at;
         let (mut open, mut close) = (0i32, 0i32);
-        while i > 0 {
-            let c = before[i - 1];
+        let mut hit_boundary = false;
+        while i > floor {
+            let c = buf[i - 1];
             if c.is_whitespace() || WORD_ENDS.contains(c) {
+                hit_boundary = true;
                 break;
             }
             match c {
@@ -167,6 +202,14 @@ impl<'a> P<'a> {
             }
             i -= 1;
         }
+        if !hit_boundary && let Some(s) = &cached {
+            // The scan reached the old prefix unbroken: the rest of the word is
+            // what that scan counted.
+            open += s.open;
+            close += s.close;
+            i = s.start;
+        }
+        self.zsh_word_scan = Some(WordScan { buf: buf.clone(), end: at, start: i, open, close });
         if open > close {
             return false;
         }
@@ -505,14 +548,42 @@ impl<'a> P<'a> {
     pub(crate) fn zsh_function_definition(&mut self) -> PR<Option<Id>> {
         let input = self.get_input();
         let rest = input.as_slice();
-        let line: &[char] = &rest[..rest.iter().position(|c| *c == '\n').unwrap_or(rest.len())];
         let keyword_form = rest.starts_with(&['f', 'u', 'n', 'c', 't', 'i', 'o', 'n'])
             && rest.get(8).is_some_and(|c| *c == ' ' || *c == '\t');
-        let has_parens = line.windows(2).any(|w| w == ['(', ')']);
-        if !keyword_form && !has_parens {
+        // The keyword form needs no `()` test, so the line is not searched for one.
+        if !keyword_form && !self.zsh_line_has_paren_pair() {
             return Ok(None);
         }
         self.option_maybe(|p| p.try_(|p| p.zsh_read_function_definition(keyword_form)))
+    }
+
+    /// Does the rest of the current line hold a `()` pair? The answer is the
+    /// same as scanning the line, but on a long buffer it is a binary search
+    /// in an index built once per buffer, so the many compound attempts on one
+    /// long line do not each rescan it.
+    fn zsh_line_has_paren_pair(&mut self) -> bool {
+        let (buf, at) = self.buffer_and_offset();
+        if buf.len() < LINE_INDEX_MIN {
+            let end = buf[at..].iter().position(|c| *c == '\n').map_or(buf.len(), |p| at + p);
+            return buf[at..end].windows(2).any(|w| w == ['(', ')']);
+        }
+        if !matches!(&self.zsh_line_index, Some((b, _)) if Rc::ptr_eq(b, &buf)) {
+            let mut index = LineIndex { pairs: Vec::new(), newlines: Vec::new() };
+            for (j, &c) in buf.iter().enumerate() {
+                if c == '\n' {
+                    index.newlines.push(j);
+                } else if c == '(' && buf.get(j + 1) == Some(&')') {
+                    index.pairs.push(j);
+                }
+            }
+            self.zsh_line_index = Some((buf.clone(), index));
+        }
+        let Some((_, index)) = &self.zsh_line_index else { return false };
+        // The first pair at or after the cursor; it is on this line when it
+        // starts before the line's newline (a pair never spans a newline).
+        let Some(&pair) = index.pairs.get(index.pairs.partition_point(|&j| j < at)) else { return false };
+        let end = index.newlines.get(index.newlines.partition_point(|&n| n < at)).copied().unwrap_or(buf.len());
+        pair < end
     }
 
     fn zsh_read_function_definition(&mut self, keyword_form: bool) -> PR<Id> {
