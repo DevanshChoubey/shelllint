@@ -957,16 +957,7 @@ impl<'a> P<'a> {
                 if !ignore_shebang && nix_shell.is_none() {
                     verify_shebang(p, pos, &executable);
                 }
-                // TEMPORARY (zsh foundation): until the zsh parser rules and the
-                // zsh-aware checks land, a body that is zsh only because of its
-                // shebang is consumed unanalysed, exactly as it was while zsh was
-                // an unsupported shebang (minus SC1071). `prop_readScript7`
-                // (`for f (a b); echo $f`) needs this to stay empty. Selecting zsh
-                // by `--shell`, a directive, the rc file or the file name lints
-                // the body. Delete this flag when the zsh lanes are integrated.
-                let zsh_shebang_body_pending =
-                    !ignore_shebang && nix_shell.is_none() && shell_for_executable(&executable) == Some(Shell::Zsh);
-                if !zsh_shebang_body_pending && (ignore_shebang || is_valid_shell(&executable) != Some(false)) {
+                if ignore_shebang || is_valid_shell(&executable) != Some(false) {
                     let commands = p.read_compound_list_or_empty()?;
                     let id = p.end_span(start);
                     p.read_pending_here_docs()?;

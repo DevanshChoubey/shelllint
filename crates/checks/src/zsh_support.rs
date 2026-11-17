@@ -9,10 +9,10 @@
 
 use std::collections::HashSet;
 
-use shelllint_analyzer::analyzerlib::{Params, ZshOpt};
+use shelllint_analyzer::analyzerlib::{Params, ZshOpt, make_comment};
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::{arguments, get_command_name, get_literal_string, oversimplify};
-use shelllint_core::interface::Shell;
+use shelllint_core::interface::{Severity, Shell, TokenComment};
 use shelllint_core::zsh_data::{is_zsh_hook_array, is_zsh_implicit_function};
 
 /// The leading `=` or `~` of `${=x}` / `${~x}` (zsh's explicit split and glob
@@ -215,4 +215,43 @@ pub fn zsh_flagged_reference(p: &Params<'_>, t: Id) -> Option<String> {
     }
     let name = shelllint_core::astlib::get_braced_reference(rest);
     if name.is_empty() { None } else { Some(name) }
+}
+
+/// SC1087 under zsh. The parser cannot see options, so it never reports
+/// "Use braces when expanding arrays" for zsh; this reports it, with the same
+/// message at the same position (the `$`), for each unbraced `$name[...]`
+/// that appears where `KSH_ARRAYS` is on (there `$a[1]` is `${a}[1]`, not a
+/// subscript). Other shells report it from the parser, so this is a no-op.
+pub fn zsh_ksharrays_unbraced_subscripts(p: &Params<'_>) -> Vec<TokenComment> {
+    if p.shell_type != Shell::Zsh {
+        return Vec::new();
+    }
+    let mut found = Vec::new();
+    p.ast.analyze(
+        p.root,
+        &mut |id| {
+            // zsh reads `$a[1]` as `T_DollarBraced(true, a[1])` whose word
+            // starts right after the `$`; `${a[1]}` has a `{` in between.
+            if let Token::T_DollarBraced(true, word) = p.ast.get(id) {
+                let (start, _) = p.ast.span(id);
+                let (wstart, _) = p.ast.span(*word);
+                if wstart.line == start.line && wstart.column == start.column + 1 {
+                    found.push(id);
+                }
+            }
+        },
+        &mut |_| {},
+    );
+    found
+        .into_iter()
+        .filter(|id| p.zsh_option(*id, ZshOpt::KshArrays))
+        .map(|id| {
+            make_comment(
+                Severity::ErrorC,
+                id,
+                1087,
+                "Use braces when expanding arrays, e.g. ${array[idx]} (or ${var}[.. to quiet).",
+            )
+        })
+        .collect()
 }

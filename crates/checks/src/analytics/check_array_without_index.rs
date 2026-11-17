@@ -11,6 +11,7 @@ use shelllint_core::data::ARRAY_VARIABLES;
 use shelllint_core::interface::{Severity, Shell, TokenComment};
 
 use crate::support::do_variable_flow_analysis;
+use crate::zsh_support::zsh_ksharrays_unbraced_subscripts;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -22,6 +23,12 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_array_without_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> {
+    let mut out = zsh_ksharrays_unbraced_subscripts(p);
+    out.extend(check_array_without_index_flow(p));
+    out
+}
+
+fn check_array_without_index_flow(p: &Params<'_>) -> Vec<TokenComment> {
     let default_set: HashSet<String> = if p.shell_type == Shell::Bash {
         ARRAY_VARIABLES.iter().map(|s| s.to_string()).collect()
     } else {
