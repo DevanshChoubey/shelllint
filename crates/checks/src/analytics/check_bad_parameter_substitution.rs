@@ -4,6 +4,7 @@
 use shelllint_analyzer::analyzerlib::{Comments, Params};
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Ast, Id, Token};
+use shelllint_core::interface::Shell;
 use shelllint_core::astlib::{
     e4m, is_command_substitution, is_special_variable_char, is_unmodified_parameter_expansion,
     is_variable_char, is_variable_name, is_variable_start_char,
@@ -23,6 +24,19 @@ fn check_bad_parameter_substitution(p: &Params<'_>, t: Id, c: &mut Comments) {
     let Token::T_DollarBraced(_, word) = ast.get(t) else { return };
     let Token::T_NormalWord(contents) = ast.get(*word) else { return };
     let Some(&first) = contents.first() else { return };
+    if p.shell_type == Shell::Zsh {
+        // DIVERGENCE: zsh has flags (`${(f)x}`), nested expansions (`${${x}}`,
+        // `${$(cmd)}`) and `${=x}`/`${~x}`, so SC2082 and SC2296/2298/2299/2300/2301
+        // have no zsh-true form and are off. A double-quoted name right after
+        // the brace (`${"x"}`) is still a "bad substitution" in zsh, so
+        // SC2297 stays.
+        if matches!(ast.get(first), Token::T_DoubleQuoted(l)
+            if l.len() == 1 && matches!(ast.get(l[0]), Token::T_Literal(s) if is_variable(s)))
+        {
+            c.err(first, 2297, "Double quotes must be outside ${}: ${\"invalid\"} vs \"${valid}\".");
+        }
+        return;
+    }
     if is_indirection(ast, contents) {
         c.err(t, 2082, "To expand via indirection, use arrays, ${!name} or (for sh only) eval.");
     } else {
