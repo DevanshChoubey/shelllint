@@ -206,12 +206,24 @@ impl<'a> P<'a> {
         self.char_('[')?;
         text.push('[');
         let mut depth = 1usize;
+        // zsh reads a subscript with its parentheses balanced (`$a[(I)x]`,
+        // `$a[x(y)]`); `$a[(I]` and `$a[x)]` are errors.
+        let mut parens = 0usize;
         loop {
             let seg_start = self.start_span();
             let chunk: String = self.many(|p| p.none_of(SUBSCRIPT_STOP))?.into_iter().collect();
+            for c in chunk.chars() {
+                match c {
+                    '(' => parens += 1,
+                    ')' if parens == 0 => return self.fail("Unbalanced ) in subscript"),
+                    ')' => parens -= 1,
+                    _ => {}
+                }
+            }
             text.push_str(&chunk);
             let ahead = self.zsh_peek(1);
             match ahead.first().copied() {
+                Some(']') if parens > 0 => return self.fail("Unbalanced ( in subscript"),
                 Some(']') => {
                     self.char_(']')?;
                     text.push(']');
