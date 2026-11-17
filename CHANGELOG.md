@@ -8,6 +8,17 @@ Each release also states which upstream ShellCheck commit it ports.
 
 ## [Unreleased]
 
+### Fixed
+
+- zsh: a long line of commands no longer rescans the rest of the line for `()` at every
+  command, and a word with many `}` is no longer rescanned per brace. Output is
+  unchanged (567 of 567 oh-my-zsh files give the same report). On 40k commands on one
+  line the parse time drops from about 5.4 s to 2.4 s (release build).
+- A long `&&` or `||` chain no longer runs out of memory during analysis. The set of
+  commands that could have set `$?` is now shared between states instead of copied at
+  every join. `true && ` repeated 25k times used more than 1.4 GB and now uses about
+  175 MB. Output is unchanged.
+
 ## [0.5.0] - 2026-11-17
 
 Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same
@@ -25,10 +36,6 @@ commit as 0.4.0.
 
 ### Fixed
 
-- zsh: a long line of commands no longer rescans the rest of the line for `()` at every
-  command, and a word with many `}` is no longer rescanned per brace. Output is
-  unchanged (567 of 567 oh-my-zsh files give the same report). On 40k commands on one
-  line the parse time drops from about 5.4 s to 2.4 s (release build).
 - Input nested more than 1000 levels deep (for example 100k nested `{` groups, `$(`
   or `${`) aborted with a stack overflow, or ran for minutes. It now reports SC1072
   and exits 1. See [docs/divergences.md](docs/divergences.md#where-the-oracle-crashes-and-we-do-not).
