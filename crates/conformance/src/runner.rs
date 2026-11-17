@@ -147,20 +147,25 @@ pub fn run_all<'a>(
     (counts, results)
 }
 
-/// Full pipeline for parity: codes reported by the checker for a script.
-#[allow(unused_variables)]
 /// DIVERGENCE: the corpus oracle is upstream ShellCheck, which cannot lint zsh and
 /// skips a script whose shebang names it (SC1071). shelllint lints such a body, so
-/// the comparison reproduces the oracle's skip for a script with no forced shell.
-#[allow(dead_code)]
-fn oracle_skips_zsh(script: &str, no_forced_shell: bool) -> bool {
+/// the comparison reproduces the oracle's skip for a record the oracle ran without
+/// a forced shell (`oracle_shell` is None), and only for a zsh shebang.
+fn oracle_skips_zsh(script: &str, oracle_shell: Option<&str>) -> bool {
     let Some(line) = script.lines().next().and_then(|l| l.strip_prefix("#!")) else { return false };
     let mut words = line.split_whitespace().filter(|w| !w.starts_with('-'));
     let first = words.next().unwrap_or("");
     let exe = if first.rsplit('/').next() == Some("env") { words.next().unwrap_or("") } else { first };
-    no_forced_shell && exe.rsplit('/').next() == Some("zsh")
+    oracle_shell.is_none() && exe.rsplit('/').next() == Some("zsh")
 }
 
+/// Whether the parity comparison skips this record as an oracle zsh skip.
+fn is_zsh_oracle_skip(rec: &Record) -> bool {
+    rec.script.as_deref().is_some_and(|script| oracle_skips_zsh(script, rec.oracle_shell.as_deref()))
+}
+
+/// Full pipeline for parity: codes reported by the checker for a script.
+#[allow(unused_variables)]
 fn pipeline_codes(rec: &Record) -> Option<Vec<i64>> {
     #[cfg(feature = "checker")]
     {
@@ -171,7 +176,7 @@ fn pipeline_codes(rec: &Record) -> Option<Vec<i64>> {
             Some("bash") => Some(Shell::Bash),
             _ => None,
         };
-        if oracle_skips_zsh(script, shell.is_none()) {
+        if is_zsh_oracle_skip(rec) {
             return Some(Vec::new());
         }
         return classify_codes(|| shelllint_checker::check_script_codes(script, shell));
@@ -190,6 +195,8 @@ pub struct ParityResult {
     pub total: usize,
     pub matched: usize,
     pub available: bool,
+    /// Records skipped because the oracle cannot lint their zsh shebang.
+    pub zsh_skipped: usize,
     /// Keys of tests whose code set equals the oracle's.
     pub matches: BTreeMap<String, bool>,
     /// (key, ours, oracle) for every script whose code set differs.
@@ -208,6 +215,9 @@ pub fn run_parity(recs: &[Record]) -> ParityResult {
             continue;
         }
         res.total += 1;
+        if is_zsh_oracle_skip(r) {
+            res.zsh_skipped += 1;
+        }
         if let Some(got) = pipeline_codes(r) {
             res.available = true;
             if code_set(&got) == code_set(oracle) {
@@ -412,7 +422,7 @@ pub fn pipeline_json1(rec: &Record) -> Option<Vec<Value>> {
             Some("bash") => Some(Shell::Bash),
             _ => None,
         };
-        if oracle_skips_zsh(script, shell.is_none()) {
+        if is_zsh_oracle_skip(rec) {
             return Some(Vec::new());
         }
         let run = || {
@@ -452,6 +462,8 @@ pub struct FullParityResult {
     pub total: usize,
     pub matched: usize,
     pub available: bool,
+    /// Records skipped because the oracle cannot lint their zsh shebang.
+    pub zsh_skipped: usize,
     /// Scripts the oracle file has no usable entry for.
     pub missing_oracle: Vec<String>,
     /// Scripts our pipeline panicked on.
@@ -471,6 +483,9 @@ pub fn run_parity_full(recs: &[Record], oracle: &BTreeMap<String, crate::OracleF
             continue;
         }
         res.total += 1;
+        if is_zsh_oracle_skip(r) {
+            res.zsh_skipped += 1;
+        }
         let key = r.key();
         let Some(want) = oracle.get(&key).and_then(|o| o.comments.as_ref()) else {
             res.missing_oracle.push(key);
@@ -592,5 +607,26 @@ mod tests {
     fn filter_accepts_module_without_suffix() {
         let f = Filter { module: Some("Analytics".into()), ..Default::default() };
         assert!(f.matches(&rec("node")));
+    }
+
+    /// The zsh-shebang skip applies only to a record the oracle ran without a
+    /// forced shell; a forced dash or ksh record still lints its body.
+    #[test]
+    fn zsh_oracle_skip_needs_a_zsh_shebang_and_no_forced_shell() {
+        let zsh = "#!/bin/zsh
+echo hi
+";
+        assert!(oracle_skips_zsh(zsh, None));
+        assert!(oracle_skips_zsh("#!/usr/bin/env zsh
+echo hi
+", None));
+        assert!(!oracle_skips_zsh(zsh, Some("dash")));
+        assert!(!oracle_skips_zsh(zsh, Some("ksh")));
+        assert!(!oracle_skips_zsh(zsh, Some("bash")));
+        assert!(!oracle_skips_zsh("#!/bin/bash
+echo hi
+", None));
+        assert!(!oracle_skips_zsh("echo hi
+", None));
     }
 }
