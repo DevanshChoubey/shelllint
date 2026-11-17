@@ -32,6 +32,10 @@ use super::{
 };
 use crate::cfg::{CFEdge, CFEffect, CFNode, CFStringPart, CFValue, CfGraph, IdTagged, Node, PropSet, Scope};
 
+/// `$?` provenance: the commands that could have set the exit code. Persistent,
+/// so that joins share structure instead of copying the whole set.
+pub(crate) type ExitSet = rpds::RedBlackTreeSet<Id>;
+
 /// The number of iterations for DFA to stabilize
 const ITERATION_COUNT: u32 = 1_000_000;
 /// There have been multiple bugs where bad caching caused oscillations.
@@ -282,7 +286,7 @@ struct IState {
     locals: VMap<VariableState>,
     prefix: VMap<VariableState>,
     funcs: VMap<FunctionValue>,
-    exit_codes: Option<Rc<BTreeSet<Id>>>,
+    exit_codes: Option<Rc<ExitSet>>,
     is_reachable: Option<bool>,
 }
 
@@ -325,7 +329,7 @@ impl IState {
         self.modified();
         self.funcs.insert(name, value);
     }
-    fn set_exit_codes(&mut self, set: Rc<BTreeSet<Id>>) {
+    fn set_exit_codes(&mut self, set: Rc<ExitSet>) {
         self.modified();
         self.exit_codes = Some(set);
     }
@@ -413,7 +417,7 @@ enum StateDependency {
     /// function on the stack?)
     DepIsRecursive(Node, bool),
     /// The set of commands that could have provided the exit code $?
-    DepExitCodes(Rc<BTreeSet<Id>>),
+    DepExitCodes(Rc<ExitSet>),
 }
 use StateDependency::*;
 
@@ -467,7 +471,7 @@ fn deps_to_state(set: &DepSet) -> IState {
 /// `deps_to_state(set)`; its `sIsReachable` is always `Nothing`.
 struct BaseLayers {
     scopes: [Layer; 3],
-    exit_codes: Option<Rc<BTreeSet<Id>>>,
+    exit_codes: Option<Rc<ExitSet>>,
 }
 
 fn deps_to_layers(set: &DepSet) -> BaseLayers {
@@ -724,8 +728,8 @@ impl<'g> Ctx<'g> {
         )
     }
 
-    fn read_exit_codes(&mut self) -> Rc<BTreeSet<Id>> {
-        self.lookup_stack(false, |s| s.exit_codes.clone(), |v| DepExitCodes(v.clone()), Rc::new(BTreeSet::new()))
+    fn read_exit_codes(&mut self) -> Rc<ExitSet> {
+        self.lookup_stack(false, |s| s.exit_codes.clone(), |v| DepExitCodes(v.clone()), Rc::new(ExitSet::new()))
     }
 
     /// Set a variable. This includes properties. Applies it to the appropriate scope.
@@ -1000,7 +1004,7 @@ impl<'g> Ctx<'g> {
                     self.transfer_effect(f);
                 }
             }
-            CFNode::CFSetExitCode(id) => self.output.set_exit_codes(Rc::new(BTreeSet::from([*id]))),
+            CFNode::CFSetExitCode(id) => self.output.set_exit_codes(Rc::new(ExitSet::new().insert(*id))),
             CFNode::CFUnresolvedExit | CFNode::CFUnreachable => self.patch_output(&unreachable_state()),
             // TODO
             CFNode::CFSetBackgroundPid(_) => {}
@@ -1151,7 +1155,7 @@ impl<'g> Ctx<'g> {
             // on the stack, it won't be found by the normal check.
             DepIsRecursive(node, _) if *node == entry => true,
             DepIsRecursive(node, val) => *val == self.stack.iter().any(|f| f.entry_point == *node),
-            DepExitCodes(val) => self.peek_stack(|s| s.exit_codes.clone(), Rc::new(BTreeSet::new())) == *val,
+            DepExitCodes(val) => self.peek_stack(|s| s.exit_codes.clone(), Rc::new(ExitSet::new())) == *val,
         }
     }
 
@@ -1350,14 +1354,22 @@ fn union_functions(a: &FunctionValue, b: &FunctionValue) -> FunctionValue {
     Rc::new(a.union(b).cloned().collect())
 }
 
-fn union_ids(a: &Rc<BTreeSet<Id>>, b: &Rc<BTreeSet<Id>>) -> Rc<BTreeSet<Id>> {
-    if Rc::ptr_eq(a, b) || b.is_subset(a) {
+fn union_ids(a: &Rc<ExitSet>, b: &Rc<ExitSet>) -> Rc<ExitSet> {
+    if Rc::ptr_eq(a, b) {
         return a.clone();
     }
-    if a.is_subset(b) {
-        return b.clone();
+    // The larger set is shared, and the smaller one's elements are added to a
+    // copy of it. A persistent set copies only the path to each new element,
+    // so a join that adds one command costs O(log n), not O(n).
+    let (big, small) = if a.size() >= b.size() { (a, b) } else { (b, a) };
+    if small.iter().all(|x| big.contains(x)) {
+        return big.clone();
     }
-    Rc::new(a.union(b).copied().collect())
+    let mut out = (**big).clone();
+    for x in small.iter() {
+        out.insert_mut(*x);
+    }
+    Rc::new(out)
 }
 
 /// Get the all the functions defined in an InternalState
@@ -1376,13 +1388,13 @@ fn get_function_targets(state: &IState) -> BTreeMap<Node, FunctionDefinition> {
 /// `ProgramState` accessors.
 struct Externalizer {
     empty_map: Rc<PMap<VariableState>>,
-    empty_codes: Rc<BTreeSet<Id>>,
+    empty_codes: Rc<ExitSet>,
     /// Identical states (same shared parts) are stored once.
     dedup: HashMap<([usize; 7], bool), ProgramState>,
 }
 
 impl Externalizer {
-    fn make(&mut self, scopes: [Layer; 6], exit_codes: Rc<BTreeSet<Id>>, state_is_reachable: bool) -> ProgramState {
+    fn make(&mut self, scopes: [Layer; 6], exit_codes: Rc<ExitSet>, state_is_reachable: bool) -> ProgramState {
         let key = (
             [
                 scopes[0].addr(),
@@ -1399,7 +1411,14 @@ impl Externalizer {
         // address can't be reused for different contents.
         self.dedup
             .entry(key)
-            .or_insert_with(|| ProgramState(Rc::new(StateData { scopes, exit_codes, state_is_reachable })))
+            .or_insert_with(|| {
+                ProgramState(Rc::new(StateData {
+                    scopes,
+                    exit_codes,
+                    exit_codes_sorted: std::cell::OnceCell::new(),
+                    state_is_reachable,
+                }))
+            })
             .clone()
     }
 
@@ -1583,7 +1602,7 @@ pub(super) fn analyze_control_flow_with(
         // flattenByNode: merge all the pre/post states for each node.
         let mut ext = Externalizer {
             empty_map: Rc::new(PMap::new()),
-            empty_codes: Rc::new(BTreeSet::new()),
+            empty_codes: Rc::new(ExitSet::new()),
             dedup: HashMap::new(),
         };
         let mut out: Vec<Option<(ProgramState, ProgramState)>> = (0..size).map(|_| None).collect();
