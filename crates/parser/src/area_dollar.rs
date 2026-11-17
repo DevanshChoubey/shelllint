@@ -229,12 +229,16 @@ impl<'a> P<'a> {
                 |_| Ok(value),
                 |p| {
                     p.look_ahead(|p| p.char_('['))?;
-                    p.parse_note_at(
-                        pos,
-                        Severity::ErrorC,
-                        1087,
-                        "Use braces when expanding arrays, e.g. ${array[idx]} (or ${var}[.. to quiet).",
-                    );
+                    // DIVERGENCE: zsh reads `$a[i]` as a subscript unless KSH_ARRAYS is on,
+                    // which the parser cannot see, so the zsh dialect never reports it here.
+                    if !p.env.is_zsh() {
+                        p.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1087,
+                            "Use braces when expanding arrays, e.g. ${array[idx]} (or ${var}[.. to quiet).",
+                        );
+                    }
                     Ok(())
                 },
             )
