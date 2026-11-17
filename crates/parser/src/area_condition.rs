@@ -186,11 +186,16 @@ impl<'a> P<'a> {
                 p.string("]")
             })
         })?;
-        let x = self.read_normal_word()?;
+        let x = if self.env.is_zsh() {
+            self.zsh_normalish_word("", &["do", "done", "then", "fi", "esac"], true)?
+        } else {
+            self.read_normal_word()?
+        };
         let pos = self.get_position();
         if cond_not_array_index(&self.user.ast, x)
             && cond_ended_with(&self.user.ast, "]", x)
             && !only_literal_string(&self.user.ast, x).contains('[')
+            && !self.zsh_escaped_bracket_word(x)
         {
             self.parse_problem_at(
                 pos,

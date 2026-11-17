@@ -28,10 +28,16 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_pattern_word(&mut self) -> PR<Id> {
+        if self.env.is_zsh() {
+            return self.zsh_normalish_word("", &["esac"], true);
+        }
         self.read_normalish_word("", &["esac"])
     }
 
     pub(crate) fn read_normalish_word(&mut self, end: &str, terms: &[&str]) -> PR<Id> {
+        if self.env.is_zsh() {
+            return self.zsh_normalish_word(end, terms, false);
+        }
         let start = self.start_span();
         let pos = self.get_position();
         let x = self.many1(|p| p.read_normal_word_part(end))?;
@@ -147,10 +153,13 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_dollar_braced_literal(&mut self) -> PR<Id> {
+        if self.env.is_zsh() && self.look_ahead(|p| p.char_('{')).is_ok() {
+            return self.zsh_braced_nested();
+        }
         let start = self.start_span();
         let vars = self.reluctantly_till1(
             |p| p.alt(|p| p.read_brace_escaped(), |p| p.any_char().map(String::from)),
-            |p| p.braced_quotable(),
+            |p| if p.env.is_zsh() { p.one_of("}\"$`'{") } else { p.braced_quotable() },
         )?;
         let id = self.end_span(start);
         Ok(self.node(id, Token::T_Literal(vars.concat())))
