@@ -18,6 +18,12 @@ Each release also states which upstream ShellCheck commit it ports.
   `.zsh` and `.zsh-theme` files and zsh shebangs. See
   [docs/extensions.md](docs/extensions.md#zsh).
 
+### Fixed
+
+- `. ~/x.sh` and `source ~/.bashrc` that cannot be followed (no `-x`, or the file
+  is not found) now give SC1090, a warning, like ShellCheck, instead of an SC1091
+  note about `./x.sh`. Following with `-x -P` is unchanged.
+
 ## [0.4.0] - 2026-11-17
 
 Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same
