@@ -23,6 +23,13 @@ Each release also states which upstream ShellCheck commit it ports.
 - Input nested more than 1000 levels deep (for example 100k nested `{` groups, `$(`
   or `${`) aborted with a stack overflow, or ran for minutes. It now reports SC1072
   and exits 1. See [docs/divergences.md](docs/divergences.md#where-the-oracle-crashes-and-we-do-not).
+- `--bash-version` no longer reports features that a version test in the script
+  guards. `if ((BASH_VERSINFO[0] >= 4)); then declare -A m; fi` is silent at 3.2, and
+  so are the early-exit and `&&` / `||` forms. A feature newer than the guard still
+  warns. See [Bash version targeting](docs/extensions.md#bash-version-targeting).
+- `. ~/x.sh` and `source ~/.bashrc` that cannot be followed (no `-x`, or the file
+  is not found) now give SC1090, a warning, like ShellCheck, instead of an SC1091
+  note about `./x.sh`. Following with `-x -P` is unchanged.
 
 ## [0.4.0] - 2026-11-17
 

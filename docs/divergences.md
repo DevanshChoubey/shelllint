@@ -80,8 +80,9 @@ parity corpus doesn't exercise them.
   skipped. Functions defined in the checked file behave as before.
 - **`~/` in `source`.** `source ~/.bashrc` is treated like `source "$HOME/.bashrc"`:
   the prefix is dropped, and the rest is searched in the script's directory and
-  the source paths, so `-x -P "$HOME"` follows it. ShellCheck gives SC1090. The
-  real `$HOME` is never read, and `~user/x` is unchanged.
+  the source paths, so `-x -P "$HOME"` follows it. ShellCheck gives SC1090. When
+  the file is not followed (no `-x`, or not found) we give SC1090 too, the same
+  warning as ShellCheck. The real `$HOME` is never read, and `~user/x` is unchanged.
 - **Jinja templates.** Files named `*.j2`, `*.jinja` or `*.jinja2` are checked in
   template mode (see [extensions.md](extensions.md#templates)).
 

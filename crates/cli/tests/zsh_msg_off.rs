@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// Needs a real zsh, which Windows runners don't have.
+#![cfg(unix)]
 // DIVERGENCE: shelllint-only tests for the codes this lane turns off or rewrites under zsh
 // (SC2277, SC2270, SC2275, SC2051, SC2180, SC2082, SC2296-2301, SC2338, SC2118).
 //

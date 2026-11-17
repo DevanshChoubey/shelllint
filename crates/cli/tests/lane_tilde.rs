@@ -38,10 +38,10 @@ fn tilde_source_found_via_source_path() {
 }
 
 #[test]
-fn tilde_source_without_path_is_1091() {
+fn tilde_source_without_path_is_1090() {
     let (d, _) = setup("nopath", "source ~/.bashrc");
     let o = run(&d.join("s"), &["-x", "a.sh"]);
-    assert!(o.contains("SC1091") && !o.contains("SC1090"), "{o}");
+    assert!(o.contains("SC1090") && !o.contains("SC1091"), "{o}");
 }
 
 #[test]
@@ -88,4 +88,94 @@ fn directive_source_tilde_unchanged() {
         .unwrap();
     let o = String::from_utf8_lossy(&o.stdout).into_owned() + &String::from_utf8_lossy(&o.stderr);
     assert!(!o.contains("SC1090") && !o.contains("SC1091") && !o.contains("SC2154"), "{o}");
+}
+
+/// Output of `shelllint -f gcc` on `script` written to `a.sh` next to a real `x.sh`
+/// and `dir/f.sh`, for the given shell and extra flags.
+fn gcc(name: &str, shell: &str, script: &str, extra: &[&str]) -> String {
+    let d = tmpdir(name);
+    std::fs::write(d.join("x.sh"), "echo hi\n").unwrap();
+    std::fs::create_dir_all(d.join("dir")).unwrap();
+    std::fs::write(d.join("dir/f.sh"), "echo hi\n").unwrap();
+    std::fs::write(d.join("a.sh"), format!("{script}\n")).unwrap();
+    let mut args = vec!["-f", "gcc", "-s", shell];
+    args.extend_from_slice(extra);
+    args.push("a.sh");
+    run(&d, &args).replace("a.sh:", "-:")
+}
+
+const SC1090: &str = "ShellCheck can't follow non-constant source. Use a directive to specify location. [SC1090]";
+
+#[test]
+fn unquoted_tilde_source_is_sc1090_warning_like_the_oracle() {
+    // Column checked against the oracle: `. ~/x.sh` is col 3, `source ~/...` col 8.
+    for (i, sh) in ["sh", "bash"].into_iter().enumerate() {
+        for (j, (script, col)) in
+            [(". ~/x.sh", 3), ("source ~/.bashrc", 8), ("source ~/dir/f.sh", 8)].into_iter().enumerate()
+        {
+            // With -x a file that exists next to the script is followed (the 0.3.0 feature), so
+            // the -x run names a file that does not exist: the oracle never follows `~/`.
+            for (k, extra) in [vec![], vec!["-x"]].into_iter().enumerate() {
+                let script = if k == 1 {
+                    script.replace("x.sh", "gone.sh").replace("f.sh", "gone.sh")
+                } else {
+                    script.to_string()
+                };
+                let o = gcc(&format!("u{i}{j}{k}"), sh, &script, &extra);
+                let want = format!("-:1:{col}: warning: {SC1090}");
+                assert!(o.lines().any(|l| l == want), "{sh} {extra:?} {script}: {o}");
+                assert!(!o.contains("SC1091"), "{sh} {extra:?} {script}: {o}");
+            }
+        }
+    }
+}
+
+#[test]
+fn tilde_source_sc1090_exit_status_under_severity_warning() {
+    let d = tmpdir("exit");
+    std::fs::write(d.join("a.sh"), "#!/bin/sh\n. ~/x.sh\n").unwrap();
+    let st = Command::new(env!("CARGO_BIN_EXE_shelllint"))
+        .args(["-S", "warning", "a.sh"])
+        .current_dir(&d)
+        .env_remove("SHELLCHECK_OPTS")
+        .stdout(Stdio::null())
+        .status()
+        .unwrap();
+    assert_eq!(st.code(), Some(1));
+}
+
+#[test]
+fn tilde_source_with_x_and_p_still_follows_in_bash_and_sh() {
+    for sh in ["sh", "bash"] {
+        let d = tmpdir(&format!("follow-{sh}"));
+        std::fs::create_dir_all(d.join("H/dir")).unwrap();
+        std::fs::write(d.join("H/x.sh"), "y=1\n").unwrap();
+        std::fs::write(d.join("H/dir/f.sh"), "y=1\n").unwrap();
+        for line in [". ~/x.sh", ". ~/dir/f.sh"] {
+            std::fs::write(d.join("a.sh"), format!("{line}\necho \"$y\"\n")).unwrap();
+            let o = run(&d, &["-x", "-P", d.join("H").to_str().unwrap(), "-s", sh, "a.sh"]);
+            assert!(!o.contains("SC1090") && !o.contains("SC1091") && !o.contains("SC2154"), "{sh} {line}: {o}");
+            // Without -x the same script is not followed.
+            let o = run(&d, &["-P", d.join("H").to_str().unwrap(), "-s", sh, "a.sh"]);
+            assert!(o.contains("SC1090"), "{sh} {line}: {o}");
+        }
+    }
+}
+
+#[test]
+fn bare_tilde_and_other_user_tilde_are_sc1091_like_the_oracle() {
+    // Oracle: `. ~` and `source ~user/x` give SC1091 note naming the literal path.
+    let o = gcc("bare", "bash", ". ~", &[]);
+    assert!(o.contains("-:1:3: note: Not following: ~ was not specified as input"), "{o}");
+    let o = gcc("user", "bash", "source ~user/x", &[]);
+    assert!(o.contains("-:1:8: note: Not following: ~user/x was not specified as input"), "{o}");
+    let o = gcc("root", "sh", "source ~root/z", &[]);
+    assert!(o.contains("-:1:8: note: Not following: ~root/z was not specified as input"), "{o}");
+}
+
+#[test]
+fn quoted_tilde_source_is_sc1090_with_sc2088() {
+    let o = gcc("quoted-gcc", "bash", "source \"~/x\"", &[]);
+    assert!(o.contains(&format!("-:1:8: warning: {SC1090}")), "{o}");
+    assert!(o.contains("-:1:9: warning: Tilde does not expand in quotes. Use $HOME. [SC2088]"), "{o}");
 }
