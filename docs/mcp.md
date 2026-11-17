@@ -22,7 +22,7 @@ cargo build --release -p shelllint-mcp
 | `fix_script` | Applies all auto-fixes. Returns the fixed script, a unified diff, and what remains. |
 
 `check_script`, `check_file` and `fix_script` take `shell` (sh, bash, dash,
-ksh, busybox), `enable` (optional check names, or `all`), `exclude` (codes such
+ksh, busybox, zsh), `enable` (optional check names, or `all`), `exclude` (codes such
 as `SC2086`), and `severity` (error, warning, info, style).
 
 Bad input comes back as a tool error (`isError: true`) with a message the model

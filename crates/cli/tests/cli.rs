@@ -107,6 +107,11 @@ fn expected_help() -> String {
         "(checkstyle, diff, gcc, json, json1, quiet, tty)",
         "(checkstyle, context, diff, gcc, github, json, json1, quiet, sarif, tty)",
     );
+    // zsh is an extension dialect, so the dialect list differs from upstream's.
+    let oracle = oracle.replace(
+        "Specify dialect (sh, bash, dash, ksh, busybox)",
+        "Specify dialect (sh, bash, dash, ksh, busybox, zsh)",
+    );
     let body = oracle.strip_suffix('\n').unwrap();
     format!("{}{}\n", body, EXTENSION_HELP)
 }
@@ -248,7 +253,7 @@ fn exit_codes() {
     assert_eq!(run(&["-e", "SCx", "-"], CLEAN).code, 3);
     assert_eq!(run(&["-S", "bad", "-"], CLEAN).code, 4);
     assert_eq!(run(&["--color=bad", "-"], CLEAN).code, 4);
-    assert_eq!(run(&["-s", "zsh", "-"], CLEAN).code, 4);
+    assert_eq!(run(&["-s", "tcsh", "-"], CLEAN).code, 4);
     assert_eq!(run(&["-f", "nope", "-"], CLEAN).code, 4);
 }
 
@@ -279,7 +284,7 @@ fn bad_option_messages_match_oracle() {
         run(&["-f", "nope", "-"], "").stderr,
         "Unknown format nope\nSupported formats:\n  checkstyle\n  context\n  diff\n  gcc\n  github\n  json\n  json1\n  quiet\n  sarif\n  tty\n"
     );
-    assert_eq!(run(&["-s", "zsh", "-"], "").stderr, "Unknown shell: zsh\n");
+    assert_eq!(run(&["-s", "tcsh", "-"], "").stderr, "Unknown shell: tcsh\n");
     assert_eq!(run(&["-W", "x", "-"], "").stderr, "Invalid number: x\n");
     assert_eq!(run(&["--extended-analysis=maybe", "-"], "").stderr, "Invalid boolean, expected true/false: maybe\n");
 }

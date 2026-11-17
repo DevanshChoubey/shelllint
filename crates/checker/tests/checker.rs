@@ -152,7 +152,7 @@ fn prop_editor_config_applies_disable() {
 fn prop_editor_config_unknown_shell_is_reported() {
     // An unknown shell can't be applied silently; it surfaces as a
     // config parse error (SC1134) rather than being dropped.
-    assert_eq!(check_with_editor_config("[foo]\nshellcheck.shell=zsh\n", "foo", "#!/bin/sh\necho \"hi\""), vec![1134]);
+    assert_eq!(check_with_editor_config("[foo]\nshellcheck.shell=tcsh\n", "foo", "#!/bin/sh\necho \"hi\""), vec![1134]);
 }
 
 #[test]
@@ -832,14 +832,14 @@ fn prop_file_cannot_enable_external_sources2() {
 
 #[test]
 fn prop_rc_can_suppress_early_problems1() {
-    assert_eq!(check_with_rc("disable=1071", spec("#!/bin/zsh\necho $1")), none());
+    assert_eq!(check_with_rc("disable=1071", spec("#!/bin/tcsh\necho $1")), none());
 }
 
 #[test]
 fn prop_rc_can_suppress_early_problems1_parse_part() {
     // Without the rc, the parser half reports 1071.
-    assert_eq!(check_with_rc("", spec("#!/bin/zsh\necho $1")), vec![1071]);
-    assert!(!check_with_rc("disable=1071", spec("#!/bin/zsh\necho $1")).contains(&1071));
+    assert_eq!(check_with_rc("", spec("#!/bin/tcsh\necho $1")), vec![1071]);
+    assert!(!check_with_rc("disable=1071", spec("#!/bin/tcsh\necho $1")).contains(&1071));
 }
 
 #[test]
@@ -1269,7 +1269,7 @@ fn prop_parse_editor_config6() {
 }
 #[test]
 fn prop_parse_editor_config_unknown_shell() {
-    assert_eq!(parse_editor_config("[*]\nshellcheck.shell=zsh\n", "foo"), "");
+    assert_eq!(parse_editor_config("[*]\nshellcheck.shell=tcsh\n", "foo"), "");
 }
 #[test]
 fn prop_parse_editor_config_empty_shell() {
@@ -1334,7 +1334,7 @@ fn prop_invalid_root_lines_in_section() {
 }
 #[test]
 fn prop_invalid_directive_lines_unknown_shell() {
-    assert_eq!(invalid_directive_lines("[*]\nshellcheck.shell=zsh\n", "foo"), vec![2]);
+    assert_eq!(invalid_directive_lines("[*]\nshellcheck.shell=tcsh\n", "foo"), vec![2]);
 }
 #[test]
 fn prop_invalid_directive_lines_empty_shell() {
@@ -1370,12 +1370,12 @@ fn prop_invalid_directive_lines_plain_value() {
 }
 #[test]
 fn prop_invalid_directive_lines_no_match() {
-    assert_eq!(invalid_directive_lines("[*.txt]\nshellcheck.shell=zsh\n", "foo"), Vec::<usize>::new());
+    assert_eq!(invalid_directive_lines("[*.txt]\nshellcheck.shell=tcsh\n", "foo"), Vec::<usize>::new());
 }
 #[test]
 fn prop_invalid_directive_lines_matching_section() {
     assert_eq!(
-        invalid_directive_lines("[*.txt]\nshellcheck.shell=zsh\n[foo]\nshellcheck.shell=bash\n", "foo"),
+        invalid_directive_lines("[*.txt]\nshellcheck.shell=tcsh\n[foo]\nshellcheck.shell=bash\n", "foo"),
         Vec::<usize>::new()
     );
 }
@@ -1385,7 +1385,7 @@ fn editor_config_directives_cases() {
     assert_eq!(editor_config_directives("[foo]\nshellcheck.shell=bash\n", "foo"), Some("\nshell=bash\n".into()));
     assert_eq!(editor_config_directives("[bar]\nshellcheck.shell=bash\n", "foo"), None);
     assert_eq!(
-        editor_config_directives("[foo]\nshellcheck.shell=zsh\nshellcheck.disable=#x\n", "foo"),
+        editor_config_directives("[foo]\nshellcheck.shell=tcsh\nshellcheck.disable=#x\n", "foo"),
         Some("\ninvalid editorconfig value\n\n\ninvalid editorconfig value\n".into())
     );
 }
@@ -1628,4 +1628,59 @@ fn negated_regex_classes_do_not_match_newline() {
         oracle_positions("#!/bin/dash\necho \"${x:\n}\" \"${x:1}\"\nset \"-\n\" -e\n"),
         vec![(2154, 2, 7, 3, 2), (3057, 3, 5, 3, 11)]
     );
+}
+
+// ---- zsh is a supported shell (a shelllint extension) ----------------------
+
+const ZSH_CLEAN: &str = "echo \"hi\"\n";
+
+#[test]
+fn zsh_editor_config_shell_is_accepted() {
+    assert_eq!(check_with_editor_config("[foo]\nshellcheck.shell=zsh\n", "foo", "#!/bin/sh\necho \"hi\""), none());
+    assert_eq!(parse_editor_config("[*]\nshellcheck.shell=zsh\n", "foo"), "\nshell=zsh\n");
+    assert_eq!(invalid_directive_lines("[*]\nshellcheck.shell=zsh\n", "foo"), Vec::<usize>::new());
+    assert_eq!(editor_config_directives("[foo]\nshellcheck.shell=zsh\n", "foo"), Some("\nshell=zsh\n".into()));
+}
+
+#[test]
+fn zsh_rc_shell_is_accepted() {
+    assert_eq!(check_with_rc("shell=zsh", spec(&format!("#!/bin/sh\n{ZSH_CLEAN}"))), none());
+    assert_eq!(check_with_rc("shell=zsh", spec(ZSH_CLEAN)), none());
+}
+
+#[test]
+fn zsh_directive_is_accepted() {
+    assert_eq!(check_with_rc("", spec(&format!("# shellcheck shell=zsh\n{ZSH_CLEAN}"))), none());
+    assert_eq!(check_with_rc("", spec(&format!("#!/bin/sh\n# shellcheck shell=zsh\n{ZSH_CLEAN}"))), none());
+}
+
+// NOTE: while the parser's `zsh_shebang_body_pending` flag is set, a body that
+// is zsh only by its shebang is not analysed, so the `none()` results here show
+// that the shebang is accepted (no SC1071, no SC1008), not that the body lints.
+#[test]
+fn zsh_shebangs_are_accepted() {
+    // No SC1071 (unsupported shebang) and no SC1008 (unrecognised shebang).
+    for sb in ["#!/bin/zsh", "#!/usr/bin/env zsh", "#!/usr/bin/zsh -f", "#! /bin/zsh"] {
+        assert_eq!(check_with_rc("", spec(&format!("{sb}\n{ZSH_CLEAN}"))), none(), "{sb}");
+    }
+    // Other unsupported shells still are.
+    assert_eq!(check_with_rc("", spec(&format!("#!/bin/fish\n{ZSH_CLEAN}"))), vec![1071]);
+    assert_eq!(check_with_rc("", spec(&format!("#!/bin/tcsh\n{ZSH_CLEAN}"))), vec![1071]);
+}
+
+#[test]
+fn zsh_file_names_infer_zsh() {
+    // A zsh file name is a shell (no SC2148), as `.ksh` and `.bash` are.
+    for name in ["a.zsh", "a.zsh-theme", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "dir/a.zsh"] {
+        let s = CheckSpec { filename: name.into(), script: ZSH_CLEAN.into(), ..empty_check_spec() };
+        assert_eq!(check_with_rc("", s), none(), "{name}");
+    }
+    let s = CheckSpec { filename: "a.fish".into(), script: ZSH_CLEAN.into(), ..empty_check_spec() };
+    assert_eq!(check_with_rc("", s), vec![2148]);
+}
+
+#[test]
+fn zsh_shell_override_is_accepted() {
+    let s = CheckSpec { shell_type_override: Some(shelllint_core::interface::Shell::Zsh), ..spec(ZSH_CLEAN) };
+    assert_eq!(check_with_rc("", s), none());
 }
