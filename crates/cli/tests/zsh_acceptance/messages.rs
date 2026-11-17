@@ -18,31 +18,31 @@ fn bash_only_advice(msg: &str) -> Option<&'static str> {
     ["mapfile", "readarray", "read -a", "BASH_ARGV0"].into_iter().find(|w| msg.contains(w))
 }
 
-case!(pend, sc2207_zsh_advice_names_zsh_forms, {
+case!(now, sc2207_zsh_advice_names_zsh_forms, {
     let got = zsh("a=($(date))\necho \"${a[@]}\"\n");
     let m = messages(&got, 2207);
     assert_eq!(m.len(), 1, "SC2207 once, got {:?}", pairs(&got));
     assert!(zsh_forms(&m[0]), "SC2207 text under zsh names no zsh form: {}", m[0]);
 });
-case!(pend, sc2207_zsh_advice_does_not_mention_mapfile_or_read_a, {
+case!(now, sc2207_zsh_advice_does_not_mention_mapfile_or_read_a, {
     let got = zsh("a=($(date))\necho \"${a[@]}\"\n");
     for m in messages(&got, 2207) {
         assert_eq!(bash_only_advice(&m), None, "bash-only advice in SC2207 under zsh: {m}");
     }
 });
-case!(pend, sc2206_zsh_advice_names_zsh_forms, {
+case!(now, sc2206_zsh_advice_names_zsh_forms, {
     let got = zsh("setopt shwordsplit\na=($1)\necho \"${a[@]}\"\n");
     let m = messages(&got, 2206);
     assert_eq!(m.len(), 1, "SC2206 once, got {:?}", pairs(&got));
     assert!(zsh_forms(&m[0]), "SC2206 text under zsh names no zsh form: {}", m[0]);
 });
-case!(pend, sc2206_zsh_advice_does_not_mention_mapfile_or_read_a, {
+case!(now, sc2206_zsh_advice_does_not_mention_mapfile_or_read_a, {
     let got = zsh("setopt shwordsplit\na=($1)\necho \"${a[@]}\"\n");
     for m in messages(&got, 2206) {
         assert_eq!(bash_only_advice(&m), None, "bash-only advice in SC2206 under zsh: {m}");
     }
 });
-case!(pend, sc2206_on_explicit_equals_flag_uses_the_zsh_text_too, {
+case!(now, sc2206_on_explicit_equals_flag_uses_the_zsh_text_too, {
     let got = zsh("a=(${=1})\necho \"${a[@]}\"\n");
     let m = messages(&got, 2206);
     assert_eq!(m.len(), 1, "{:?}", pairs(&got));
@@ -67,7 +67,7 @@ case!(now, sc2207_and_sc2206_text_is_unchanged_for_bash_sh_dash_ksh, {
     }
 });
 
-case!(pend, sc2207_and_sc2206_zsh_text_differs_from_every_other_shell, {
+case!(now, sc2207_and_sc2206_zsh_text_differs_from_every_other_shell, {
     let z207 = messages(&zsh("a=($(date))\n"), 2207);
     let z206 = messages(&zsh("setopt shwordsplit\na=($1)\n"), 2206);
     assert_eq!(z207.len(), 1);
@@ -80,7 +80,7 @@ case!(pend, sc2207_and_sc2206_zsh_text_differs_from_every_other_shell, {
     }
 });
 
-case!(pend, no_zsh_output_gives_bash_only_advice, {
+case!(now, no_zsh_output_gives_bash_only_advice, {
     let scripts = [
         "a=($(date))\necho \"${a[@]}\"\n",
         "setopt shwordsplit\na=($1)\necho \"${a[@]}\"\n",

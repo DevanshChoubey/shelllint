@@ -19,7 +19,6 @@ fn sc2016_zsh_prompt_without_promptsubst_fires_but_bash_ps1_does_not() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2016_zsh_prompt_is_fine_with_promptsubst_on() {
     assert_eq!(zsh_run("x=hi; setopt promptsubst; PS1='$x> '; print -P $PS1"), "hi>");
     for var in ["PS1", "PS2", "PS3", "PS4", "PROMPT", "PROMPT2", "RPROMPT", "RPS1", "SPROMPT"] {
@@ -30,7 +29,6 @@ fn sc2016_zsh_prompt_is_fine_with_promptsubst_on() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2016_zsh_prompt_fires_again_after_nopromptsubst() {
     assert_eq!(lane(&zsh("setopt promptsubst\nunsetopt promptsubst\nPS1='$x'\n")), vec![2016]);
     assert_eq!(lane(&zsh("setopt promptsubst nopromptsubst\nPS1='$x'\n")), vec![2016]);

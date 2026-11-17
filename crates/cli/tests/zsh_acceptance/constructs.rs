@@ -872,7 +872,12 @@ fn near_miss_reported(construct: &str) {
         let got = zsh(m.code);
         let parse_codes: Vec<u32> = codes(&got)
             .into_iter()
-            .filter(|c| (1000..2000).contains(c) && ![1083, 1087, 1089, 1090, 1091].contains(c))
+            .filter(|c| {
+                // C28's near-miss is a stray `fi`, which zsh -n reports as a parse error and
+                // shelllint reports as SC1089 ("Parsing stopped here").
+                let ignored: &[u32] = if construct == "C28" { &[1083, 1087, 1090, 1091] } else { &[1083, 1087, 1089, 1090, 1091] };
+                (1000..2000).contains(c) && !ignored.contains(c)
+            })
             .collect();
         assert!(
             !parse_codes.is_empty(),
@@ -915,194 +920,194 @@ fn every_construct_c01_to_c29_has_three_snippets_and_a_near_miss() {
     }
 }
 
-case!(pend, c01_anonymous_function__minimal_parses_under_zsh, { parses("C01", "minimal") });
-case!(pend, c01_anonymous_function__in_function_with_args_parses_under_zsh, { parses("C01", "in_function_with_args") });
-case!(pend, c01_anonymous_function__function_keyword_parses_under_zsh, { parses("C01", "function_keyword") });
-case!(pend, c01_anonymous_function__piped_with_args_parses_under_zsh, { parses("C01", "piped_with_args") });
+case!(now, c01_anonymous_function__minimal_parses_under_zsh, { parses("C01", "minimal") });
+case!(now, c01_anonymous_function__in_function_with_args_parses_under_zsh, { parses("C01", "in_function_with_args") });
+case!(now, c01_anonymous_function__function_keyword_parses_under_zsh, { parses("C01", "function_keyword") });
+case!(now, c01_anonymous_function__piped_with_args_parses_under_zsh, { parses("C01", "piped_with_args") });
 case!(now, c01_anonymous_function__bash_sh_ksh_output_unchanged, { bash_unchanged("C01") });
 case!(now, c01_anonymous_function__near_miss_is_still_reported, { near_miss_reported("C01") });
 
-case!(pend, c02_disown_amp_pipe_bang__amp_pipe_parses_under_zsh, { parses("C02", "amp_pipe") });
-case!(pend, c02_disown_amp_pipe_bang__amp_bang_parses_under_zsh, { parses("C02", "amp_bang") });
-case!(pend, c02_disown_amp_pipe_bang__group_in_function_parses_under_zsh, { parses("C02", "group_in_function") });
-case!(pend, c02_disown_amp_pipe_bang__subshell_parses_under_zsh, { parses("C02", "subshell") });
+case!(now, c02_disown_amp_pipe_bang__amp_pipe_parses_under_zsh, { parses("C02", "amp_pipe") });
+case!(now, c02_disown_amp_pipe_bang__amp_bang_parses_under_zsh, { parses("C02", "amp_bang") });
+case!(now, c02_disown_amp_pipe_bang__group_in_function_parses_under_zsh, { parses("C02", "group_in_function") });
+case!(now, c02_disown_amp_pipe_bang__subshell_parses_under_zsh, { parses("C02", "subshell") });
 case!(now, c02_disown_amp_pipe_bang__bash_sh_ksh_output_unchanged, { bash_unchanged("C02") });
 case!(now, c02_disown_amp_pipe_bang__near_miss_is_still_reported, { near_miss_reported("C02") });
 
-case!(pend, c03_temp_file_subst__diff_two_parses_under_zsh, { parses("C03", "diff_two") });
-case!(pend, c03_temp_file_subst__in_function_parses_under_zsh, { parses("C03", "in_function") });
-case!(pend, c03_temp_file_subst__mixed_with_process_subst_parses_under_zsh, {
+case!(now, c03_temp_file_subst__diff_two_parses_under_zsh, { parses("C03", "diff_two") });
+case!(now, c03_temp_file_subst__in_function_parses_under_zsh, { parses("C03", "in_function") });
+case!(now, c03_temp_file_subst__mixed_with_process_subst_parses_under_zsh, {
     parses("C03", "mixed_with_process_subst")
 });
-case!(pend, c03_temp_file_subst__as_redirect_source_parses_under_zsh, { parses("C03", "as_redirect_source") });
+case!(now, c03_temp_file_subst__as_redirect_source_parses_under_zsh, { parses("C03", "as_redirect_source") });
 case!(now, c03_temp_file_subst__bash_sh_ksh_output_unchanged, { bash_unchanged("C03") });
 case!(now, c03_temp_file_subst__near_miss_is_still_reported, { near_miss_reported("C03") });
 
-case!(pend, c04_paren_pattern_groups__alternation_parses_under_zsh, { parses("C04", "alternation") });
-case!(pend, c04_paren_pattern_groups__backref_flag_group_parses_under_zsh, { parses("C04", "backref_flag_group") });
-case!(pend, c04_paren_pattern_groups__repeat_hash_hash_parses_under_zsh, { parses("C04", "repeat_hash_hash") });
+case!(now, c04_paren_pattern_groups__alternation_parses_under_zsh, { parses("C04", "alternation") });
+case!(now, c04_paren_pattern_groups__backref_flag_group_parses_under_zsh, { parses("C04", "backref_flag_group") });
+case!(now, c04_paren_pattern_groups__repeat_hash_hash_parses_under_zsh, { parses("C04", "repeat_hash_hash") });
 case!(now, c04_paren_pattern_groups__tilde_param_in_pattern_parses_under_zsh, {
     parses("C04", "tilde_param_in_pattern")
 });
 case!(now, c04_paren_pattern_groups__bash_sh_ksh_output_unchanged, { bash_unchanged("C04") });
 case!(now, c04_paren_pattern_groups__near_miss_is_still_reported, { near_miss_reported("C04") });
 
-case!(pend, c05_numeric_ranges__any_number_parses_under_zsh, { parses("C05", "any_number") });
-case!(pend, c05_numeric_ranges__bounded_parses_under_zsh, { parses("C05", "bounded") });
-case!(pend, c05_numeric_ranges__case_label_parses_under_zsh, { parses("C05", "case_label") });
-case!(pend, c05_numeric_ranges__in_function_with_and_parses_under_zsh, { parses("C05", "in_function_with_and") });
+case!(now, c05_numeric_ranges__any_number_parses_under_zsh, { parses("C05", "any_number") });
+case!(now, c05_numeric_ranges__bounded_parses_under_zsh, { parses("C05", "bounded") });
+case!(now, c05_numeric_ranges__case_label_parses_under_zsh, { parses("C05", "case_label") });
+case!(now, c05_numeric_ranges__in_function_with_and_parses_under_zsh, { parses("C05", "in_function_with_and") });
 case!(now, c05_numeric_ranges__bash_sh_ksh_output_unchanged, { bash_unchanged("C05") });
 case!(now, c05_numeric_ranges__near_miss_is_still_reported, { near_miss_reported("C05") });
 
-case!(pend, c06_glob_qualifiers__nullglob_qualifier_parses_under_zsh, { parses("C06", "nullglob_qualifier") });
+case!(now, c06_glob_qualifiers__nullglob_qualifier_parses_under_zsh, { parses("C06", "nullglob_qualifier") });
 case!(now, c06_glob_qualifiers__recursive_dot_tail_parses_under_zsh, { parses("C06", "recursive_dot_tail") });
 case!(now, c06_glob_qualifiers__loop_mtime_parses_under_zsh, { parses("C06", "loop_mtime") });
 case!(now, c06_glob_qualifiers__array_assign_head_parses_under_zsh, { parses("C06", "array_assign_head") });
 case!(now, c06_glob_qualifiers__bash_sh_ksh_output_unchanged, { bash_unchanged("C06") });
 case!(now, c06_glob_qualifiers__near_miss_is_still_reported, { near_miss_reported("C06") });
 
-case!(pend, c07_case_pattern_groups__group_label_parses_under_zsh, { parses("C07", "group_label") });
-case!(pend, c07_case_pattern_groups__number_and_group_parses_under_zsh, { parses("C07", "number_and_group") });
-case!(pend, c07_case_pattern_groups__multiline_in_function_parses_under_zsh, {
+case!(now, c07_case_pattern_groups__group_label_parses_under_zsh, { parses("C07", "group_label") });
+case!(now, c07_case_pattern_groups__number_and_group_parses_under_zsh, { parses("C07", "number_and_group") });
+case!(now, c07_case_pattern_groups__multiline_in_function_parses_under_zsh, {
     parses("C07", "multiline_in_function")
 });
 case!(now, c07_case_pattern_groups__bash_sh_ksh_output_unchanged, { bash_unchanged("C07") });
 case!(now, c07_case_pattern_groups__near_miss_is_still_reported, { near_miss_reported("C07") });
 
-case!(pend, c08_for_short_form__paren_list_parses_under_zsh, { parses("C08", "paren_list") });
-case!(pend, c08_for_short_form__brace_body_parses_under_zsh, { parses("C08", "brace_body") });
-case!(pend, c08_for_short_form__body_on_next_line_parses_under_zsh, { parses("C08", "body_on_next_line") });
-case!(pend, c08_for_short_form__in_with_semicolon_cmd_parses_under_zsh, { parses("C08", "in_with_semicolon_cmd") });
+case!(now, c08_for_short_form__paren_list_parses_under_zsh, { parses("C08", "paren_list") });
+case!(now, c08_for_short_form__brace_body_parses_under_zsh, { parses("C08", "brace_body") });
+case!(now, c08_for_short_form__body_on_next_line_parses_under_zsh, { parses("C08", "body_on_next_line") });
+case!(now, c08_for_short_form__in_with_semicolon_cmd_parses_under_zsh, { parses("C08", "in_with_semicolon_cmd") });
 case!(now, c08_for_short_form__bash_sh_ksh_output_unchanged, { bash_unchanged("C08") });
 case!(now, c08_for_short_form__near_miss_is_still_reported, { near_miss_reported("C08") });
 
-case!(pend, c09_multi_var_for__minimal_parses_under_zsh, { parses("C09", "minimal") });
-case!(pend, c09_multi_var_for__in_function_parses_under_zsh, { parses("C09", "in_function") });
-case!(pend, c09_multi_var_for__assoc_kv_parses_under_zsh, { parses("C09", "assoc_kv") });
+case!(now, c09_multi_var_for__minimal_parses_under_zsh, { parses("C09", "minimal") });
+case!(now, c09_multi_var_for__in_function_parses_under_zsh, { parses("C09", "in_function") });
+case!(now, c09_multi_var_for__assoc_kv_parses_under_zsh, { parses("C09", "assoc_kv") });
 case!(now, c09_multi_var_for__bash_sh_ksh_output_unchanged, { bash_unchanged("C09") });
 case!(now, c09_multi_var_for__near_miss_is_still_reported, { near_miss_reported("C09") });
 
-case!(pend, c10_always_block__minimal_parses_under_zsh, { parses("C10", "minimal") });
-case!(pend, c10_always_block__cleanup_no_semicolon_parses_under_zsh, { parses("C10", "cleanup_no_semicolon") });
-case!(pend, c10_always_block__in_function_parses_under_zsh, { parses("C10", "in_function") });
+case!(now, c10_always_block__minimal_parses_under_zsh, { parses("C10", "minimal") });
+case!(now, c10_always_block__cleanup_no_semicolon_parses_under_zsh, { parses("C10", "cleanup_no_semicolon") });
+case!(now, c10_always_block__in_function_parses_under_zsh, { parses("C10", "in_function") });
 case!(now, c10_always_block__bash_sh_ksh_output_unchanged, { bash_unchanged("C10") });
 case!(now, c10_always_block__near_miss_is_still_reported, { near_miss_reported("C10") });
 
-case!(pend, c11_close_brace_without_separator__function_body_parses_under_zsh, { parses("C11", "function_body") });
-case!(pend, c11_close_brace_without_separator__plain_group_parses_under_zsh, { parses("C11", "plain_group") });
-case!(pend, c11_close_brace_without_separator__two_commands_parses_under_zsh, { parses("C11", "two_commands") });
-case!(pend, c11_close_brace_without_separator__redirect_last_parses_under_zsh, { parses("C11", "redirect_last") });
+case!(now, c11_close_brace_without_separator__function_body_parses_under_zsh, { parses("C11", "function_body") });
+case!(now, c11_close_brace_without_separator__plain_group_parses_under_zsh, { parses("C11", "plain_group") });
+case!(now, c11_close_brace_without_separator__two_commands_parses_under_zsh, { parses("C11", "two_commands") });
+case!(now, c11_close_brace_without_separator__redirect_last_parses_under_zsh, { parses("C11", "redirect_last") });
 case!(now, c11_close_brace_without_separator__bash_sh_ksh_output_unchanged, { bash_unchanged("C11") });
 case!(now, c11_close_brace_without_separator__near_miss_is_still_reported, { near_miss_reported("C11") });
 
-case!(pend, c12_empty_bodies__function_spaced_parses_under_zsh, { parses("C12", "function_spaced") });
-case!(pend, c12_empty_bodies__function_tight_parses_under_zsh, { parses("C12", "function_tight") });
-case!(pend, c12_empty_bodies__anonymous_parses_under_zsh, { parses("C12", "anonymous") });
-case!(pend, c12_empty_bodies__function_keyword_parses_under_zsh, { parses("C12", "function_keyword") });
+case!(now, c12_empty_bodies__function_spaced_parses_under_zsh, { parses("C12", "function_spaced") });
+case!(now, c12_empty_bodies__function_tight_parses_under_zsh, { parses("C12", "function_tight") });
+case!(now, c12_empty_bodies__anonymous_parses_under_zsh, { parses("C12", "anonymous") });
+case!(now, c12_empty_bodies__function_keyword_parses_under_zsh, { parses("C12", "function_keyword") });
 case!(now, c12_empty_bodies__bash_sh_ksh_output_unchanged, { bash_unchanged("C12") });
 case!(now, c12_empty_bodies__near_miss_is_still_reported, { near_miss_reported("C12") });
 
-case!(pend, c13_multi_name_function__two_names_parses_under_zsh, { parses("C13", "two_names") });
-case!(pend, c13_multi_name_function__three_names_no_semi_parses_under_zsh, { parses("C13", "three_names_no_semi") });
-case!(pend, c13_multi_name_function__then_called_parses_under_zsh, { parses("C13", "then_called") });
+case!(now, c13_multi_name_function__two_names_parses_under_zsh, { parses("C13", "two_names") });
+case!(now, c13_multi_name_function__three_names_no_semi_parses_under_zsh, { parses("C13", "three_names_no_semi") });
+case!(now, c13_multi_name_function__then_called_parses_under_zsh, { parses("C13", "then_called") });
 case!(now, c13_multi_name_function__bash_sh_ksh_output_unchanged, { bash_unchanged("C13") });
 case!(now, c13_multi_name_function__near_miss_is_still_reported, { near_miss_reported("C13") });
 
-case!(pend, c14_odd_function_names__expansion_name_parses_under_zsh, { parses("C14", "expansion_name") });
-case!(pend, c14_odd_function_names__quoted_param_suffix_parses_under_zsh, { parses("C14", "quoted_param_suffix") });
-case!(pend, c14_odd_function_names__brace_expansion_name_parses_under_zsh, { parses("C14", "brace_expansion_name") });
-case!(pend, c14_odd_function_names__tilde_name_parses_under_zsh, { parses("C14", "tilde_name") });
+case!(now, c14_odd_function_names__expansion_name_parses_under_zsh, { parses("C14", "expansion_name") });
+case!(now, c14_odd_function_names__quoted_param_suffix_parses_under_zsh, { parses("C14", "quoted_param_suffix") });
+case!(now, c14_odd_function_names__brace_expansion_name_parses_under_zsh, { parses("C14", "brace_expansion_name") });
+case!(now, c14_odd_function_names__tilde_name_parses_under_zsh, { parses("C14", "tilde_name") });
 case!(now, c14_odd_function_names__bash_sh_ksh_output_unchanged, { bash_unchanged("C14") });
 case!(now, c14_odd_function_names__near_miss_is_still_reported, { near_miss_reported("C14") });
 
-case!(pend, c15_empty_then_else_comment_only__then_comment_parses_under_zsh, { parses("C15", "then_comment") });
-case!(pend, c15_empty_then_else_comment_only__else_comment_parses_under_zsh, { parses("C15", "else_comment") });
-case!(pend, c15_empty_then_else_comment_only__elif_comment_body_parses_under_zsh, {
+case!(now, c15_empty_then_else_comment_only__then_comment_parses_under_zsh, { parses("C15", "then_comment") });
+case!(now, c15_empty_then_else_comment_only__else_comment_parses_under_zsh, { parses("C15", "else_comment") });
+case!(now, c15_empty_then_else_comment_only__elif_comment_body_parses_under_zsh, {
     parses("C15", "elif_comment_body")
 });
 case!(now, c15_empty_then_else_comment_only__bash_sh_ksh_output_unchanged, { bash_unchanged("C15") });
 case!(now, c15_empty_then_else_comment_only__near_miss_is_still_reported, { near_miss_reported("C15") });
 
-case!(pend, c16_brace_form_control_flow__if_arith_brace_parses_under_zsh, { parses("C16", "if_arith_brace") });
-case!(pend, c16_brace_form_control_flow__for_in_brace_parses_under_zsh, { parses("C16", "for_in_brace") });
-case!(pend, c16_brace_form_control_flow__if_elif_else_brace_parses_under_zsh, { parses("C16", "if_elif_else_brace") });
+case!(now, c16_brace_form_control_flow__if_arith_brace_parses_under_zsh, { parses("C16", "if_arith_brace") });
+case!(now, c16_brace_form_control_flow__for_in_brace_parses_under_zsh, { parses("C16", "for_in_brace") });
+case!(now, c16_brace_form_control_flow__if_elif_else_brace_parses_under_zsh, { parses("C16", "if_elif_else_brace") });
 case!(now, c16_brace_form_control_flow__bash_sh_ksh_output_unchanged, { bash_unchanged("C16") });
 case!(now, c16_brace_form_control_flow__near_miss_is_still_reported, { near_miss_reported("C16") });
 
-case!(pend, c17_subscript_flags__I_flag_parses_under_zsh, { parses("C17", "I_flag") });
+case!(now, c17_subscript_flags__I_flag_parses_under_zsh, { parses("C17", "I_flag") });
 case!(now, c17_subscript_flags__Ie_flag_braced_parses_under_zsh, { parses("C17", "Ie_flag_braced") });
 case!(now, c17_subscript_flags__split_flag_parses_under_zsh, { parses("C17", "split_flag") });
 case!(now, c17_subscript_flags__in_condition_parses_under_zsh, { parses("C17", "in_condition") });
 case!(now, c17_subscript_flags__bash_sh_ksh_output_unchanged, { bash_unchanged("C17") });
 case!(now, c17_subscript_flags__near_miss_is_still_reported, { near_miss_reported("C17") });
 
-case!(pend, c18_arith_base_prefix__hex_parses_under_zsh, { parses("C18", "hex") });
-case!(pend, c18_arith_base_prefix__single_hash_parses_under_zsh, { parses("C18", "single_hash") });
-case!(pend, c18_arith_base_prefix__base36_parses_under_zsh, { parses("C18", "base36") });
+case!(now, c18_arith_base_prefix__hex_parses_under_zsh, { parses("C18", "hex") });
+case!(now, c18_arith_base_prefix__single_hash_parses_under_zsh, { parses("C18", "single_hash") });
+case!(now, c18_arith_base_prefix__base36_parses_under_zsh, { parses("C18", "base36") });
 case!(now, c18_arith_base_prefix__bash_sh_ksh_output_unchanged, { bash_unchanged("C18") });
 case!(now, c18_arith_base_prefix__near_miss_is_still_reported, { near_miss_reported("C18") });
 
-case!(pend, c19_clobber_append__minimal_parses_under_zsh, { parses("C19", "minimal") });
-case!(pend, c19_clobber_append__group_redirect_parses_under_zsh, { parses("C19", "group_redirect") });
-case!(pend, c19_clobber_append__in_function_parses_under_zsh, { parses("C19", "in_function") });
+case!(now, c19_clobber_append__minimal_parses_under_zsh, { parses("C19", "minimal") });
+case!(now, c19_clobber_append__group_redirect_parses_under_zsh, { parses("C19", "group_redirect") });
+case!(now, c19_clobber_append__in_function_parses_under_zsh, { parses("C19", "in_function") });
 case!(now, c19_clobber_append__bash_sh_ksh_output_unchanged, { bash_unchanged("C19") });
 case!(now, c19_clobber_append__near_miss_is_still_reported, { near_miss_reported("C19") });
 
-case!(pend, c20_numeric_fd_redirect__close_1_parses_under_zsh, { parses("C20", "close_1") });
-case!(pend, c20_numeric_fd_redirect__in_function_close_2_parses_under_zsh, { parses("C20", "in_function_close_2") });
+case!(now, c20_numeric_fd_redirect__close_1_parses_under_zsh, { parses("C20", "close_1") });
+case!(now, c20_numeric_fd_redirect__in_function_close_2_parses_under_zsh, { parses("C20", "in_function_close_2") });
 case!(now, c20_numeric_fd_redirect__named_fd_still_fine_parses_under_zsh, { parses("C20", "named_fd_still_fine") });
 case!(now, c20_numeric_fd_redirect__bash_sh_ksh_output_unchanged, { bash_unchanged("C20") });
 case!(now, c20_numeric_fd_redirect__near_miss_is_still_reported, { near_miss_reported("C20") });
 
-case!(pend, c21_nested_param_expansion__match_replace_parses_under_zsh, { parses("C21", "match_replace") });
+case!(now, c21_nested_param_expansion__match_replace_parses_under_zsh, { parses("C21", "match_replace") });
 case!(now, c21_nested_param_expansion__simple_nested_parses_under_zsh, { parses("C21", "simple_nested") });
 case!(now, c21_nested_param_expansion__quoted_nested_flag_parses_under_zsh, { parses("C21", "quoted_nested_flag") });
 case!(now, c21_nested_param_expansion__bash_sh_ksh_output_unchanged, { bash_unchanged("C21") });
 case!(now, c21_nested_param_expansion__near_miss_is_still_reported, { near_miss_reported("C21") });
 
-case!(pend, c22_anon_fn_in_process_subst__cat_parses_under_zsh, { parses("C22", "cat") });
-case!(pend, c22_anon_fn_in_process_subst__diff_with_body_parses_under_zsh, { parses("C22", "diff_with_body") });
+case!(now, c22_anon_fn_in_process_subst__cat_parses_under_zsh, { parses("C22", "cat") });
+case!(now, c22_anon_fn_in_process_subst__diff_with_body_parses_under_zsh, { parses("C22", "diff_with_body") });
 case!(now, c22_anon_fn_in_process_subst__bash_sh_ksh_output_unchanged, { bash_unchanged("C22") });
 case!(now, c22_anon_fn_in_process_subst__near_miss_is_still_reported, { near_miss_reported("C22") });
 
-case!(pend, c23_math_function_call__compare_parses_under_zsh, { parses("C23", "compare") });
-case!(pend, c23_math_function_call__in_if_condition_parses_under_zsh, { parses("C23", "in_if_condition") });
-case!(pend, c23_math_function_call__with_args_parses_under_zsh, { parses("C23", "with_args") });
+case!(now, c23_math_function_call__compare_parses_under_zsh, { parses("C23", "compare") });
+case!(now, c23_math_function_call__in_if_condition_parses_under_zsh, { parses("C23", "in_if_condition") });
+case!(now, c23_math_function_call__with_args_parses_under_zsh, { parses("C23", "with_args") });
 case!(now, c23_math_function_call__bash_sh_ksh_output_unchanged, { bash_unchanged("C23") });
 case!(now, c23_math_function_call__near_miss_is_still_reported, { near_miss_reported("C23") });
 
-case!(pend, c24_prompt_braces_no_sc1083__percent_braces_parses_under_zsh, { parses("C24", "percent_braces") });
-case!(pend, c24_prompt_braces_no_sc1083__color_only_parses_under_zsh, { parses("C24", "color_only") });
-case!(pend, c24_prompt_braces_no_sc1083__at_brace_upstream_parses_under_zsh, { parses("C24", "at_brace_upstream") });
+case!(now, c24_prompt_braces_no_sc1083__percent_braces_parses_under_zsh, { parses("C24", "percent_braces") });
+case!(now, c24_prompt_braces_no_sc1083__color_only_parses_under_zsh, { parses("C24", "color_only") });
+case!(now, c24_prompt_braces_no_sc1083__at_brace_upstream_parses_under_zsh, { parses("C24", "at_brace_upstream") });
 case!(now, c24_prompt_braces_no_sc1083__rprompt_single_quoted_style_parses_under_zsh, {
     parses("C24", "rprompt_single_quoted_style")
 });
 case!(now, c24_prompt_braces_no_sc1083__bash_sh_ksh_output_unchanged, { bash_unchanged("C24") });
 
-case!(pend, c25_anon_fn_args_disown__args_amp_pipe_parses_under_zsh, { parses("C25", "args_amp_pipe") });
-case!(pend, c25_anon_fn_args_disown__args_amp_bang_parses_under_zsh, { parses("C25", "args_amp_bang") });
-case!(pend, c25_anon_fn_args_disown__in_function_parses_under_zsh, { parses("C25", "in_function") });
+case!(now, c25_anon_fn_args_disown__args_amp_pipe_parses_under_zsh, { parses("C25", "args_amp_pipe") });
+case!(now, c25_anon_fn_args_disown__args_amp_bang_parses_under_zsh, { parses("C25", "args_amp_bang") });
+case!(now, c25_anon_fn_args_disown__in_function_parses_under_zsh, { parses("C25", "in_function") });
 case!(now, c25_anon_fn_args_disown__bash_sh_ksh_output_unchanged, { bash_unchanged("C25") });
 case!(now, c25_anon_fn_args_disown__near_miss_is_still_reported, { near_miss_reported("C25") });
 
-case!(pend, c26_glob_flags__case_insens_parses_under_zsh, { parses("C26", "case_insens") });
-case!(pend, c26_glob_flags__match_flag_parses_under_zsh, { parses("C26", "match_flag") });
-case!(pend, c26_glob_flags__backref_then_match_parses_under_zsh, { parses("C26", "backref_then_match") });
-case!(pend, c26_glob_flags__qualifier_flag_parses_under_zsh, { parses("C26", "qualifier_flag") });
+case!(now, c26_glob_flags__case_insens_parses_under_zsh, { parses("C26", "case_insens") });
+case!(now, c26_glob_flags__match_flag_parses_under_zsh, { parses("C26", "match_flag") });
+case!(now, c26_glob_flags__backref_then_match_parses_under_zsh, { parses("C26", "backref_then_match") });
+case!(now, c26_glob_flags__qualifier_flag_parses_under_zsh, { parses("C26", "qualifier_flag") });
 case!(now, c26_glob_flags__bash_sh_ksh_output_unchanged, { bash_unchanged("C26") });
 case!(now, c26_glob_flags__near_miss_is_still_reported, { near_miss_reported("C26") });
 
-case!(pend, c27_subscript_in_double_bracket__I_in_test_parses_under_zsh, { parses("C27", "I_in_test") });
-case!(pend, c27_subscript_in_double_bracket__r_in_n_test_parses_under_zsh, { parses("C27", "r_in_n_test") });
+case!(now, c27_subscript_in_double_bracket__I_in_test_parses_under_zsh, { parses("C27", "I_in_test") });
+case!(now, c27_subscript_in_double_bracket__r_in_n_test_parses_under_zsh, { parses("C27", "r_in_n_test") });
 case!(now, c27_subscript_in_double_bracket__braced_Ie_parses_under_zsh, { parses("C27", "braced_Ie") });
 case!(now, c27_subscript_in_double_bracket__bash_sh_ksh_output_unchanged, { bash_unchanged("C27") });
 case!(now, c27_subscript_in_double_bracket__near_miss_is_still_reported, { near_miss_reported("C27") });
 
-case!(pend, c28_short_if__one_line_parses_under_zsh, { parses("C28", "one_line") });
-case!(pend, c28_short_if__then_more_commands_parses_under_zsh, { parses("C28", "then_more_commands") });
+case!(now, c28_short_if__one_line_parses_under_zsh, { parses("C28", "one_line") });
+case!(now, c28_short_if__then_more_commands_parses_under_zsh, { parses("C28", "then_more_commands") });
 case!(now, c28_short_if__bash_sh_ksh_output_unchanged, { bash_unchanged("C28") });
 case!(now, c28_short_if__near_miss_is_still_reported, { near_miss_reported("C28") });
 
-case!(pend, c29_nested_flags_base_slice__lowercase_slice_parses_under_zsh, { parses("C29", "lowercase_slice") });
+case!(now, c29_nested_flags_base_slice__lowercase_slice_parses_under_zsh, { parses("C29", "lowercase_slice") });
 case!(now, c29_nested_flags_base_slice__bash_sh_ksh_output_unchanged, { bash_unchanged("C29") });
 case!(now, c29_nested_flags_base_slice__near_miss_is_still_reported, { near_miss_reported("C29") });

@@ -105,11 +105,6 @@ fn editorconfig() {
     assert!(run(&["-f", "gcc", "x"], &d).1.contains("SC1134"));
 }
 
-// NOTE: while `zsh_shebang_body_pending` is set in the parser (see
-// area_toplevel.rs), a body that is zsh only by its shebang is not analysed, so
-// the clean results below show only that the shebang is accepted (no SC1071,
-// no SC1008), not that the body lints. `zsh_shebang_body_is_linted` is the
-// end-state guard; integration enables it with the parser rules.
 #[test]
 fn shebangs() {
     let d = dir("shebang");
@@ -145,7 +140,6 @@ fn file_names_infer_zsh() {
 }
 
 #[test]
-#[ignore = "zsh: pending integration"]
 fn zsh_shebang_body_is_linted() {
     // Under `--shell=zsh` the same body is linted today.
     let d = dir("lintbody");

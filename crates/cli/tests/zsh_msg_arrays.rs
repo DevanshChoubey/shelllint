@@ -61,7 +61,6 @@ fn sc2207_zsh_suggested_form_is_not_reported_again() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2207_zsh_suggested_form_stays_silent_under_shwordsplit() {
     // evidence: with shwordsplit on, ${(f)x} still gives 2 elements (no re-splitting)
     assert_eq!(zsh_run("setopt shwordsplit; x=$(printf 'a b\\nc'); a=(${(f)x}); print ${#a}"), "2");
@@ -123,7 +122,6 @@ fn sc2206_zsh_suggested_split_forms_parse_and_split() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2206_zsh_fires_with_shwordsplit_on() {
     assert_eq!(zsh_run("setopt shwordsplit; x='a b'; a=($x); print ${#a}"), "2");
     let f = zsh("setopt shwordsplit\nx='a b'\na=($x)\n");
@@ -132,7 +130,6 @@ fn sc2206_zsh_fires_with_shwordsplit_on() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2206_zsh_silent_after_unsetopt_shwordsplit_and_inside_scoped_function() {
     assert!(lane(&zsh("setopt shwordsplit\nunsetopt shwordsplit\nx='a b'\na=($x)\n")).is_empty());
     assert!(lane(&zsh("f() {\n  setopt localoptions shwordsplit\n}\nx='a b'\na=($x)\n")).is_empty());

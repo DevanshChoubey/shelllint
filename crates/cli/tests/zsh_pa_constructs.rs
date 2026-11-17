@@ -9,8 +9,7 @@
 //     the tree gave before zsh support;
 //   - near-misses: snippets `zsh -n` rejects, which `--shell=zsh` must also
 //     report as a parse error.
-// Scripts select zsh with `--shell=zsh`, never with a shebang alone (see
-// `zsh_shebang_body_pending`).
+// Scripts select zsh with `--shell=zsh`.
 
 #[path = "zsh_common.rs"]
 mod zsh_common;

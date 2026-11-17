@@ -4,10 +4,9 @@
 // Selecting zsh at every entry point, the one conformance record that touches zsh
 // (`prop_readScript7`), and the guarantee that other shells are unaffected.
 //
-// Note on shebangs: while the temporary shebang shim is in place, a body that is zsh only
-// because of its `#!/bin/zsh` line is consumed unanalysed. Tests use `--shell=zsh`, `-s zsh`,
-// a `# shellcheck shell=zsh` directive or a `.zsh` file name, except the one ignored test
-// (`shebang_alone_selects_zsh_and_lints_the_body`) that checks the shebang alone works.
+// Note on shebangs: most tests pick zsh with `--shell=zsh`, `-s zsh`, a
+// `# shellcheck shell=zsh` directive or a `.zsh` file name; the one shebang test
+// (`shebang_alone_selects_zsh_and_lints_the_body`) checks the shebang alone works.
 use crate::support::*;
 
 /// zsh-only syntax (C11): accepted by `zsh -n`, a parse error for every other shell.
@@ -23,18 +22,18 @@ case!(now, zsh_only_snippet_is_valid_zsh, {
     }
 });
 
-case!(pend, entry_point_shell_flag, { no_parse_errors(&lint(&["--shell=zsh"], ZSH_ONLY), "--shell=zsh") });
-case!(pend, entry_point_short_s_flag, { no_parse_errors(&lint(&["-s", "zsh"], ZSH_ONLY), "-s zsh") });
-case!(pend, entry_point_directive, {
+case!(now, entry_point_shell_flag, { no_parse_errors(&lint(&["--shell=zsh"], ZSH_ONLY), "--shell=zsh") });
+case!(now, entry_point_short_s_flag, { no_parse_errors(&lint(&["-s", "zsh"], ZSH_ONLY), "-s zsh") });
+case!(now, entry_point_directive, {
     no_parse_errors(&lint(&[], &format!("# shellcheck shell=zsh\n{ZSH_ONLY}")), "shell=zsh directive")
 });
-case!(pend, entry_point_directive_beats_a_bash_shebang, {
+case!(now, entry_point_directive_beats_a_bash_shebang, {
     no_parse_errors(&lint(&[], &format!("#!/bin/bash\n# shellcheck shell=zsh\n{ZSH_ONLY}")), "directive over shebang")
 });
-case!(pend, entry_point_fallback_shell, {
+case!(now, entry_point_fallback_shell, {
     no_parse_errors(&lint(&["--fallback-shell=zsh"], ZSH_ONLY), "--fallback-shell=zsh")
 });
-case!(pend, entry_point_file_names, {
+case!(now, entry_point_file_names, {
     for name in ["plugin.zsh", "pure.zsh-theme", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout"] {
         no_parse_errors(&lint_named(name, &[], ZSH_ONLY), name);
     }
@@ -49,23 +48,22 @@ case!(now, entry_point_flag_beats_a_zsh_file_name_when_it_names_another_shell, {
 // parses, and nothing is reported: in zsh `$f` is not split, so there is no SC2086.
 const READ_SCRIPT7: &str = "#!/bin/zsh\n# shellcheck disable=SC1071\nfor f (a b); echo $f\n";
 
-case!(pend, prop_read_script7_reports_nothing_under_shell_zsh, {
+case!(now, prop_read_script7_reports_nothing_under_shell_zsh, {
     let got = lint(&["--shell=zsh"], READ_SCRIPT7);
     assert!(got.is_empty(), "{:?}", pairs(&got));
 });
-case!(pend, prop_read_script7_reports_nothing_with_the_directive, {
+case!(now, prop_read_script7_reports_nothing_with_the_directive, {
     let got = lint(&[], "# shellcheck shell=zsh\nfor f (a b); echo $f\n");
     assert!(got.is_empty(), "{:?}", pairs(&got));
 });
-case!(pend, prop_read_script7_keeps_reporting_nothing_with_shwordsplit_off_spelled_out, {
+case!(now, prop_read_script7_keeps_reporting_nothing_with_shwordsplit_off_spelled_out, {
     let got = lint(&["--shell=zsh"], "setopt noshwordsplit\nfor f (a b); echo $f\n");
     assert!(got.is_empty(), "{:?}", pairs(&got));
 });
 
-// The one test that uses a shebang alone (no flag, directive or file name). Ignored until
-// the temporary shim that consumes shebang-only zsh bodies is removed at integration.
+// The one test that uses a shebang alone (no flag, directive or file name).
 // Checks: the body is linted, zsh syntax parses, no SC1071, and `prop_readScript7` stays empty.
-case!(pend, shebang_alone_selects_zsh_and_lints_the_body, {
+case!(now, shebang_alone_selects_zsh_and_lints_the_body, {
     for shebang in ["#!/bin/zsh", "#!/usr/bin/zsh", "#!/usr/bin/env zsh"] {
         let got = lint(&[], &format!("{shebang}\necho \"$undefined_thing\"\n"));
         assert_eq!(lines(&got, 2154), [2], "{shebang}: {:?}", pairs(&got));

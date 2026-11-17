@@ -133,26 +133,26 @@ macro_rules! plugin_case {
         });
     };
 }
-plugin_case!(pend, prompt_theme_reports_exactly_the_expected_findings, 0);
-plugin_case!(pend, completion_function_reports_exactly_the_expected_findings, 1);
-plugin_case!(pend, hook_plugin_reports_exactly_the_expected_findings, 2);
-plugin_case!(pend, emulate_library_reports_exactly_the_expected_findings, 3);
-plugin_case!(pend, shwordsplit_legacy_reports_exactly_the_expected_findings, 4);
+plugin_case!(now, prompt_theme_reports_exactly_the_expected_findings, 0);
+plugin_case!(now, completion_function_reports_exactly_the_expected_findings, 1);
+plugin_case!(now, hook_plugin_reports_exactly_the_expected_findings, 2);
+plugin_case!(now, emulate_library_reports_exactly_the_expected_findings, 3);
+plugin_case!(now, shwordsplit_legacy_reports_exactly_the_expected_findings, 4);
 
-case!(pend, scripts_give_the_same_findings_when_zsh_is_inferred_from_the_file_name, {
+case!(now, scripts_give_the_same_findings_when_zsh_is_inferred_from_the_file_name, {
     for s in SCRIPTS {
         let got = lint_named(s.file_name, &[], s.text);
         assert_eq!(sorted(&got), expect_sorted(s), "(line, code) for {} linted by file name only", s.file_name);
     }
 });
 
-case!(pend, no_script_reports_a_parse_error_or_other_sc1xxx, {
+case!(now, no_script_reports_a_parse_error_or_other_sc1xxx, {
     for s in SCRIPTS {
         assert!(parse_level(&zsh(s.text)).is_empty(), "{}: {:?}", s.name, parse_level(&zsh(s.text)));
     }
 });
 
-case!(pend, scripts_never_report_class_d_codes, {
+case!(now, scripts_never_report_class_d_codes, {
     const D: [u32; 13] = [2296, 2298, 2299, 2300, 2301, 2082, 2190, 2051, 2277, 2270, 2168, 2180, 2338];
     for s in SCRIPTS {
         let bad: Vec<u32> = codes(&zsh_with(&["--enable=all"], s.text)).into_iter().filter(|c| D.contains(c)).collect();

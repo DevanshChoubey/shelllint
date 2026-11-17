@@ -1654,9 +1654,6 @@ fn zsh_directive_is_accepted() {
     assert_eq!(check_with_rc("", spec(&format!("#!/bin/sh\n# shellcheck shell=zsh\n{ZSH_CLEAN}"))), none());
 }
 
-// NOTE: while the parser's `zsh_shebang_body_pending` flag is set, a body that
-// is zsh only by its shebang is not analysed, so the `none()` results here show
-// that the shebang is accepted (no SC1071, no SC1008), not that the body lints.
 #[test]
 fn zsh_shebangs_are_accepted() {
     // No SC1071 (unsupported shebang) and no SC1008 (unrecognised shebang).

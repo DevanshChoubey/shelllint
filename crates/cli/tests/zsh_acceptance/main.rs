@@ -3,9 +3,8 @@
 //
 // Test layer 5: independent acceptance tests for zsh support, written from the design
 // (spec, plan, research) and from experiments with the real zsh 5.9, never from the
-// implementation. Tests that cannot pass until the zsh lanes are integrated carry
-// `#[ignore = "zsh: pending integration"]`; integration removes the marks and any
-// failure then is a bug in a lane, unless zsh itself disagrees with the test.
+// implementation. Every test runs; a failure is a bug in the implementation unless
+// zsh itself disagrees with the test.
 //
 #![allow(non_snake_case)] // test names keep zsh spellings such as `emulate_L_zsh`
 
@@ -18,16 +17,10 @@
 //   dialect      entry points, prop_readScript7, other shells unaffected
 //   plugins      realistic plugin-shaped scripts with exact expected (code, line) lists
 
-// `case!(now, name, { body })` is a plain test. `case!(pend, name, { body })` is the
-// same test, ignored until integration.
+// `case!(now, name, { body })` is a plain test.
 macro_rules! case {
     (now, $n:ident, $b:block) => {
         #[test]
-        fn $n() $b
-    };
-    (pend, $n:ident, $b:block) => {
-        #[test]
-        #[ignore = "zsh: pending integration"]
         fn $n() $b
     };
 }
@@ -35,13 +28,6 @@ macro_rules! case {
 macro_rules! code_case {
     (now, $n:ident, $c:expr, $s:expr, $e:expr) => {
         #[test]
-        fn $n() {
-            $crate::support::code_lint($c, $s, &$e)
-        }
-    };
-    (pend, $n:ident, $c:expr, $s:expr, $e:expr) => {
-        #[test]
-        #[ignore = "zsh: pending integration"]
         fn $n() {
             $crate::support::code_lint($c, $s, &$e)
         }

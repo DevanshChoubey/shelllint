@@ -196,7 +196,6 @@ fn sc2221_ordinary_overlap_still_reported_under_zsh() {
 }
 
 #[test]
-#[ignore = "zsh: pending P-B (extended-glob pattern syntax)"]
 fn sc2195_zsh_pattern_forms_are_not_flagged() {
     assert_eq!(zsh_codes("setopt extendedglob\ncase $1 in (a|b)#) :;; esac\n"), Vec::<u32>::new());
 }

@@ -77,26 +77,22 @@ fn sc2086_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2086_shwordsplit_on_fires() {
     assert!(has(&zsh_codes_opts("x=\"a b\"\necho $x\n", &["shwordsplit"]), 2086));
     assert!(has(&zsh_codes_opts("x=\"a b\"\necho $x\n", &["SH_WORD_SPLIT"]), 2086));
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2086_globsubst_on_fires() {
     assert!(has(&zsh_codes_opts("x=\"a*\"\necho $x\n", &["globsubst"]), 2086));
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2086_option_off_again_is_silent() {
     assert!(!has(&zsh_codes_opts("x=\"a b\"\necho $x\n", &["shwordsplit", "noshwordsplit"]), 2086));
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2086_option_on_other_conditions_stay_silent() {
     for script in [
         "x=\"a b\"\necho \"$x\"\n",
@@ -128,7 +124,6 @@ fn sc2223_other_condition_quoted_default_stays_silent_in_bash_and_zsh() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2223_option_on_fires() {
     assert!(has(&zsh_codes_opts(": ${x:=default}\n", &["shwordsplit"]), 2223));
     assert!(has(&zsh_codes_opts(": ${x:=default}\n", &["globsubst"]), 2223));
@@ -159,13 +154,11 @@ fn sc2048_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2048_shwordsplit_on_fires() {
     assert!(has(&zsh_codes_opts("rm $*\n", &["shwordsplit"]), 2048));
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2048_option_on_quoted_stays_silent() {
     assert!(!has(&zsh_codes_opts("rm \"$*\"\n", &["shwordsplit"]), 2048));
 }
@@ -195,7 +188,6 @@ fn sc2068_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2068_shwordsplit_on_fires() {
     assert!(has(&zsh_codes_opts("rm $@\n", &["shwordsplit"]), 2068));
     assert!(has(&zsh_codes_opts("a=(1 2)\nrm ${a[@]}\n", &["shwordsplit"]), 2068));
@@ -227,13 +219,11 @@ fn sc2053_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2053_globsubst_on_fires() {
     assert!(has(&zsh_codes_opts("a=x\nb=y\n[[ $a == $b ]]\n", &["globsubst"]), 2053));
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2053_shwordsplit_alone_does_not_make_it_true() {
     assert!(!has(&zsh_codes_opts("a=x\nb=y\n[[ $a == $b ]]\n", &["shwordsplit"]), 2053));
 }
@@ -262,7 +252,6 @@ fn sc2295_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2295_globsubst_on_fires() {
     assert!(has(&zsh_codes_opts("p='a*'\nx=abcd\necho \"${x#$p}\"\n", &["globsubst"]), 2295));
     assert!(has(&zsh_codes_opts("x=abcd\necho \"${x%$(date)}\"\n", &["globsubst"]), 2295));
@@ -292,7 +281,6 @@ fn sc2254_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2254_globsubst_on_fires() {
     assert!(has(&zsh_codes_opts("p='a*'\ncase $1 in $p) echo hit;; esac\n", &["globsubst"]), 2254));
 }
@@ -317,14 +305,12 @@ fn sc2128_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2128_ksharrays_on_fires() {
     assert!(has(&zsh_codes_opts("a=(1 2)\necho \"$a\"\n", &["ksharrays"]), 2128));
     assert!(has(&zsh_codes_opts("a=(1 2)\necho \"$a\"\n", &["KSH_ARRAYS"]), 2128));
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2128_ksharrays_on_indexed_stays_silent() {
     assert!(!has(&zsh_codes_opts("a=(1 2)\necho \"${a[0]}\" \"${a[@]}\"\n", &["ksharrays"]), 2128));
 }
@@ -348,7 +334,6 @@ fn sc2178_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2178_ksharrays_on_fires() {
     assert!(has(&zsh_codes_opts("a=(1 2)\na=str\necho \"${a}\"\n", &["ksharrays"]), 2178));
 }
@@ -373,14 +358,12 @@ fn sc2028_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2028_bsdecho_on_fires() {
     assert!(has(&zsh_codes_opts("echo \"a\\nb\"\n", &["bsdecho"]), 2028));
     assert!(has(&zsh_codes_opts("echo \"a\\nb\"\n", &["BSD_ECHO"]), 2028));
 }
 
 #[test]
-#[ignore = "zsh: pending OT"]
 fn sc2028_bsdecho_on_echo_e_stays_silent() {
     assert!(!has(&zsh_codes_opts("echo -e \"a\\nb\"\n", &["bsdecho"]), 2028));
 }
@@ -406,7 +389,6 @@ fn sc1087_bash_unchanged() {
 }
 
 #[test]
-#[ignore = "zsh: pending OT (SC1087 is reported by the parser, so with KSH_ARRAYS on it needs an analysis-side report)"]
 fn sc1087_ksharrays_on_fires() {
     assert!(has(&zsh_codes_opts("a=(1 2)\necho \"$a[1]\"\n", &["ksharrays"]), 1087));
 }

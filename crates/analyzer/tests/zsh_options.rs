@@ -735,7 +735,6 @@ fn tracker_matches_the_table() {
 
 /// Every anonymous-function row, once lane P-A lets them parse.
 #[test]
-#[ignore = "zsh: pending P-A"]
 fn tracker_matches_the_table_anonymous_functions() {
     let mut failures = Vec::new();
     for r in rows().iter().filter(|r| r.anonymous) {

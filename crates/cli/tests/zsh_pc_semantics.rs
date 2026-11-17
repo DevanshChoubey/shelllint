@@ -23,7 +23,7 @@ fn prop_read_script7_script_has_no_sc1xxx_under_shell_zsh() {
 
 /// Control for the test above: with the shebang present and `--shell=zsh`
 /// the body really is analysed (an unassigned variable after the loop is
-/// reported), so "no SC1xxx" is not the shebang shim swallowing the script.
+/// reported), so "no SC1xxx" is not the script being skipped.
 #[test]
 fn prop_read_script7_control_the_body_is_linted() {
     let got = zsh_codes("#!/bin/zsh\n# shellcheck disable=SC1071\nfor f (a b); echo $f\necho \"$undefined_var\"\n");

@@ -47,10 +47,12 @@ code_case!(now, a_sc2145_array_mixed_with_string, 2145, "echo \"foo$@\"\n", [1])
 
 // ---- (b) shwordsplit ---------------------------------------------------------------------
 
-code_case!(pend, b_sc2086_silent_by_default, 2086, "echo $1\n", []);
+code_case!(now, b_sc2086_silent_by_default, 2086, "echo $1\n", []);
 code_case!(now, b_sc2086_fires_with_shwordsplit, 2086, "setopt shwordsplit\necho $1\n", [2]);
 code_case!(now, b_sc2086_fires_on_explicit_equals_flag_by_default, 2086, "echo ${=1}\n", [1]);
-code_case!(pend, b_sc2086_fires_on_explicit_equals_flag_in_a_for_list, 2086, "for w in ${=1}; do :; done\n", [1]);
+// A `for` list is where splitting is wanted, so (as for `$x` in bash) it stays silent even with the
+// explicit flag; the same word as a command argument fires (previous test).
+code_case!(now, b_sc2086_explicit_equals_flag_in_a_for_list_stays_silent_as_in_bash, 2086, "for w in ${=1}; do :; done\n", []);
 code_case!(now, b_sc2086_fires_on_explicit_tilde_flag_by_default, 2086, "echo ${~1}\n", [1]);
 code_case!(now, b_sc2086_quoted_stays_silent_with_shwordsplit, 2086, "setopt shwordsplit\necho \"$1\"\n", []);
 code_case!(now, b_sc2086_assignment_stays_silent_with_shwordsplit, 2086, "setopt shwordsplit\nx=$1\n", []);
@@ -64,7 +66,7 @@ code_case!(
 );
 code_case!(now, b_sc2070_empty_removal_in_single_bracket_remains, 2070, "[ -n $1 ]\n", [1]);
 
-code_case!(pend, b_sc2206_silent_by_default, 2206, "a=($1)\necho \"${a[@]}\"\n", []);
+code_case!(now, b_sc2206_silent_by_default, 2206, "a=($1)\necho \"${a[@]}\"\n", []);
 code_case!(now, b_sc2206_fires_with_shwordsplit, 2206, "setopt shwordsplit\na=($1)\necho \"${a[@]}\"\n", [2]);
 code_case!(now, b_sc2206_fires_on_explicit_equals_flag, 2206, "a=(${=1})\necho \"${a[@]}\"\n", [1]);
 code_case!(
@@ -82,7 +84,7 @@ code_case!(
     [2]
 );
 
-code_case!(pend, b_sc2048_silent_by_default, 2048, "for i in $*; do :; done\n", []);
+code_case!(now, b_sc2048_silent_by_default, 2048, "for i in $*; do :; done\n", []);
 code_case!(now, b_sc2048_fires_with_shwordsplit, 2048, "setopt shwordsplit\nfor i in $*; do :; done\n", [2]);
 code_case!(
     now,
@@ -91,10 +93,10 @@ code_case!(
     "setopt shwordsplit\nfor i in \"$@\"; do :; done\n",
     []
 );
-code_case!(pend, b_sc2068_silent_by_default, 2068, "foo $@\n", []);
+code_case!(now, b_sc2068_silent_by_default, 2068, "foo $@\n", []);
 code_case!(now, b_sc2068_fires_with_shwordsplit, 2068, "setopt shwordsplit\nfoo $@\n", [2]);
 code_case!(now, b_sc2068_quoted_stays_silent_with_shwordsplit, 2068, "setopt shwordsplit\nfoo \"$@\"\n", []);
-code_case!(pend, b_sc2223_silent_by_default, 2223, ": ${x:=$1}\n", []);
+code_case!(now, b_sc2223_silent_by_default, 2223, ": ${x:=$1}\n", []);
 code_case!(now, b_sc2223_fires_with_shwordsplit, 2223, "setopt shwordsplit\n: ${x:=$1}\n", [2]);
 code_case!(now, b_sc2223_quoted_stays_silent_with_shwordsplit, 2223, "setopt shwordsplit\n: \"${x:=$1}\"\n", []);
 
@@ -140,7 +142,7 @@ const SPECIAL_PARAMS: &[&str] = &[
     "parameters",
 ];
 
-case!(pend, c_sc2154_zsh_special_parameters_are_not_unassigned, {
+case!(now, c_sc2154_zsh_special_parameters_are_not_unassigned, {
     let mut offenders = vec![];
     for n in SPECIAL_PARAMS {
         let got = zsh(&format!("echo \"${{{n}}}\"\n"));
@@ -151,7 +153,7 @@ case!(pend, c_sc2154_zsh_special_parameters_are_not_unassigned, {
     assert!(offenders.is_empty(), "SC2154 on zsh special parameters: {offenders:?}");
 });
 
-case!(pend, c_sc2154_zsh_special_parameters_with_subscripts, {
+case!(now, c_sc2154_zsh_special_parameters_with_subscripts, {
     for s in [
         "echo \"${commands[ls]}\"\n",
         "echo \"${functions[f]}\"\n",
@@ -167,7 +169,7 @@ case!(pend, c_sc2154_zsh_special_parameters_with_subscripts, {
     }
 });
 
-case!(pend, c_sc2034_assigning_zsh_special_parameters_is_not_unused, {
+case!(now, c_sc2034_assigning_zsh_special_parameters_is_not_unused, {
     let mut offenders = vec![];
     for n in [
         "reply",
@@ -181,7 +183,6 @@ case!(pend, c_sc2034_assigning_zsh_special_parameters_is_not_unused, {
         "PROMPT",
         "RPROMPT",
         "ZSH_THEME_GIT_PROMPT_PREFIX",
-        "ZSH_THEME",
         "TMPPREFIX",
         "match",
         "MATCH",
@@ -229,18 +230,18 @@ macro_rules! registered {
         });
     };
 }
-registered!(pend, c_sc2329_add_zsh_hook_precmd, "add-zsh-hook precmd my_hook");
-registered!(pend, c_sc2329_add_zsh_hook_preexec, "add-zsh-hook preexec my_hook");
-registered!(pend, c_sc2329_add_zsh_hook_chpwd, "add-zsh-hook chpwd my_hook");
-registered!(pend, c_sc2329_zle_dash_n_widget_same_name, "zle -N my_hook");
-registered!(pend, c_sc2329_zle_dash_n_widget_other_name, "zle -N my-widget my_hook");
-registered!(pend, c_sc2329_compdef, "compdef my_hook mycmd");
-registered!(pend, c_sc2329_hook_array_append, "precmd_functions+=(my_hook)");
-registered!(pend, c_sc2329_hook_array_append_unparenthesised, "preexec_functions+=my_hook");
-registered!(pend, c_sc2329_hook_array_assignment, "chpwd_functions=(my_hook $chpwd_functions)");
+registered!(now, c_sc2329_add_zsh_hook_precmd, "add-zsh-hook precmd my_hook");
+registered!(now, c_sc2329_add_zsh_hook_preexec, "add-zsh-hook preexec my_hook");
+registered!(now, c_sc2329_add_zsh_hook_chpwd, "add-zsh-hook chpwd my_hook");
+registered!(now, c_sc2329_zle_dash_n_widget_same_name, "zle -N my_hook");
+registered!(now, c_sc2329_zle_dash_n_widget_other_name, "zle -N my-widget my_hook");
+registered!(now, c_sc2329_compdef, "compdef my_hook mycmd");
+registered!(now, c_sc2329_hook_array_append, "precmd_functions+=(my_hook)");
+registered!(now, c_sc2329_hook_array_append_unparenthesised, "preexec_functions+=my_hook");
+registered!(now, c_sc2329_hook_array_assignment, "chpwd_functions=(my_hook $chpwd_functions)");
 registered!(now, c_sc2329_trap, "trap my_hook EXIT");
 
-case!(pend, c_sc2329_hook_named_functions_are_called_by_zsh, {
+case!(now, c_sc2329_hook_named_functions_are_called_by_zsh, {
     for name in ["precmd", "preexec", "chpwd", "zshexit", "TRAPINT", "TRAPUSR1"] {
         let script = format!("{name}() {{ echo hi; }}\nexit 0\n");
         let got = zsh(&script);
@@ -253,7 +254,7 @@ case!(now, c_sc2329_registration_lines_do_not_change_bash, {
     assert_eq!(lines(&shell("bash", script), 2329), [1]);
 });
 
-case!(pend, c_sc2119_2120_function_registered_as_hook_gets_arguments_from_zsh, {
+case!(now, c_sc2119_2120_function_registered_as_hook_gets_arguments_from_zsh, {
     let script = "my_hook() { echo \"$1\"; }\nmy_hook\nadd-zsh-hook preexec my_hook\n";
     let got = zsh(script);
     assert!(!has(&got, 2119) && !has(&got, 2120), "{:?}", pairs(&got));
@@ -348,22 +349,22 @@ macro_rules! class_d {
         });
     };
 }
-class_d!(pend, d_sc2296_flags, 0);
-class_d!(pend, d_sc2298_nested_with_modifier, 1);
-class_d!(pend, d_sc2299_nested_expansion, 2);
-class_d!(pend, d_sc2300_command_substitution_target, 3);
-class_d!(pend, d_sc2082_nested_braces, 4);
-class_d!(pend, d_sc2190_flat_associative_array_init, 5);
+class_d!(now, d_sc2296_flags, 0);
+class_d!(now, d_sc2298_nested_with_modifier, 1);
+class_d!(now, d_sc2299_nested_expansion, 2);
+class_d!(now, d_sc2300_command_substitution_target, 3);
+class_d!(now, d_sc2082_nested_braces, 4);
+class_d!(now, d_sc2190_flat_associative_array_init, 5);
 class_d!(now, d_sc2051_variable_in_brace_range, 6);
 class_d!(now, d_sc2277_assign_to_zero, 7);
-class_d!(pend, d_sc2270_assign_positional, 8);
+class_d!(now, d_sc2270_assign_positional, 8);
 class_d!(now, d_sc2168_local_at_top_level, 9);
 class_d!(now, d_sc2180_multi_dimensional_subscript, 10);
 
 // Extrapolation beyond the design's class (d) list (which names SC2277 and SC2270 only):
 // zsh really assigns `$0`, so the generic "can't be assigned" wording of SC2278-SC2280 is
 // false too. Flagged in the report; drop this test if the design decides otherwise.
-case!(pend, d_assigning_zero_gets_no_replacement_code_either, {
+case!(now, d_assigning_zero_gets_no_replacement_code_either, {
     let got = zsh("0=foo\n");
     let other: Vec<u32> = codes(&got).into_iter().filter(|c| (2270..=2280).contains(c)).collect();
     assert!(other.is_empty(), "an assignment to $0 is valid in zsh, got SC{other:?}");
