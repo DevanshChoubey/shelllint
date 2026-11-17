@@ -39,12 +39,16 @@ pub fn shell_from_name(filename: &str) -> Option<Shell> {
         ".bashrc" | ".bash_profile" | ".bash_login" | ".bash_logout" | ".bash_aliases" => return Some(Shell::Bash),
         ".kshrc" => return Some(Shell::Ksh),
         ".profile" | ".shrc" => return Some(Shell::Sh),
+        // DIVERGENCE: zsh names are a shelllint extension.
+        ".zshrc" | ".zshenv" | ".zprofile" | ".zlogin" | ".zlogout" => return Some(Shell::Zsh),
         _ => {}
     }
     if base.ends_with(".bash") {
         Some(Shell::Bash)
     } else if base.ends_with(".ksh") {
         Some(Shell::Ksh)
+    } else if base.ends_with(".zsh") || base.ends_with(".zsh-theme") {
+        Some(Shell::Zsh)
     } else {
         None
     }
@@ -88,7 +92,7 @@ fn classify_shebang(script: &str) -> Shebang {
     let line = rest.lines().next().unwrap_or("");
     let exe = executable_from_shebang(line);
     // Mirrors the parser's `isValidShell`: empty and known prefixes are fine.
-    let good = ["sh", "ash", "dash", "busybox sh", "bash", "bats", "ksh", "oksh"];
+    let good = ["sh", "ash", "dash", "busybox sh", "bash", "bats", "ksh", "oksh", "zsh"];
     if exe.is_empty() && line.trim().is_empty() {
         Shebang::None
     } else if exe.is_empty() || good.iter().any(|g| exe.starts_with(g)) || shell_for_executable(&exe).is_some() {
