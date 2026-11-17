@@ -10,6 +10,8 @@
 // - `check_bash_version/commands.rs`: builtins and their flags
 // - `check_bash_version/expansions.rs`: `${..}` and brace expansions
 // - `check_bash_version/variables.rs`: variables, `+=`, `[[ -v ]]` and array indexes
+// - `check_bash_version/guards.rs`: version guards (`BASH_VERSINFO[0] >= 4`) that raise the
+//   effective target inside the region they protect
 //
 // Every sub-check is `pub fn check(p: &Params<'_>, t: Id, c: &mut Comments)`, run once
 // per node. A sub-check reports through `too_new` / `too_new_as` only.
@@ -23,6 +25,8 @@ use shelllint_core::interface::{BashVersion, Code, Shell};
 mod commands;
 #[path = "check_bash_version/expansions.rs"]
 mod expansions;
+#[path = "check_bash_version/guards.rs"]
+mod guards;
 #[path = "check_bash_version/syntax.rs"]
 mod syntax;
 #[path = "check_bash_version/variables.rs"]
@@ -102,9 +106,9 @@ pub fn target(p: &Params<'_>) -> Option<BashVersion> {
 }
 
 /// Warn that the feature of `code` is newer than the target, at node `t`.
-/// Says nothing when there is no target, the shell is not bash, or the target is
-/// the feature's release or later. The message is
-/// `<feature> requires bash <V> (target is <T>).`
+/// Says nothing when there is no target, the shell is not bash, the target is
+/// the feature's release or later, or a version guard around `t` proves that
+/// release (`guards.rs`). The message is `<feature> requires bash <V> (target is <T>).`
 pub fn too_new(p: &Params<'_>, c: &mut Comments, t: Id, code: Code) {
     too_new_as(p, c, t, code, None);
 }
@@ -117,7 +121,7 @@ pub fn too_new_as(p: &Params<'_>, c: &mut Comments, t: Id, code: Code, what: Opt
         debug_assert!(false, "SC{code} is not in the bash version table");
         return;
     };
-    if target < f.version {
+    if target < f.version && !guards::covers(p.ast, t, (f.version.major(), f.version.minor())) {
         c.warn(t, code, format!("{} requires bash {} (target is {}).", what.unwrap_or(f.name), f.version, target));
     }
 }
