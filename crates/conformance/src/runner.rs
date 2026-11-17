@@ -149,6 +149,18 @@ pub fn run_all<'a>(
 
 /// Full pipeline for parity: codes reported by the checker for a script.
 #[allow(unused_variables)]
+/// DIVERGENCE: the corpus oracle is upstream ShellCheck, which cannot lint zsh and
+/// skips a script whose shebang names it (SC1071). shelllint lints such a body, so
+/// the comparison reproduces the oracle's skip for a script with no forced shell.
+#[allow(dead_code)]
+fn oracle_skips_zsh(script: &str, no_forced_shell: bool) -> bool {
+    let Some(line) = script.lines().next().and_then(|l| l.strip_prefix("#!")) else { return false };
+    let mut words = line.split_whitespace().filter(|w| !w.starts_with('-'));
+    let first = words.next().unwrap_or("");
+    let exe = if first.rsplit('/').next() == Some("env") { words.next().unwrap_or("") } else { first };
+    no_forced_shell && exe.rsplit('/').next() == Some("zsh")
+}
+
 fn pipeline_codes(rec: &Record) -> Option<Vec<i64>> {
     #[cfg(feature = "checker")]
     {
@@ -159,6 +171,9 @@ fn pipeline_codes(rec: &Record) -> Option<Vec<i64>> {
             Some("bash") => Some(Shell::Bash),
             _ => None,
         };
+        if oracle_skips_zsh(script, shell.is_none()) {
+            return Some(Vec::new());
+        }
         return classify_codes(|| shelllint_checker::check_script_codes(script, shell));
     }
     #[allow(unreachable_code)]
@@ -397,6 +412,9 @@ pub fn pipeline_json1(rec: &Record) -> Option<Vec<Value>> {
             Some("bash") => Some(Shell::Bash),
             _ => None,
         };
+        if oracle_skips_zsh(script, shell.is_none()) {
+            return Some(Vec::new());
+        }
         let run = || {
             let spec = CheckSpec {
                 filename: "script.sh".to_string(),
