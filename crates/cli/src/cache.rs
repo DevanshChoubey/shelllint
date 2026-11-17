@@ -395,6 +395,7 @@ fn shell_byte(s: Option<Shell>) -> u8 {
         Some(Shell::Bash) => 3,
         Some(Shell::Dash) => 4,
         Some(Shell::BusyboxSh) => 5,
+        Some(Shell::Zsh) => 6,
     }
 }
 

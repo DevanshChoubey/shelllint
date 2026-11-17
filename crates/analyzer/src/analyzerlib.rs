@@ -86,6 +86,43 @@ impl Checker {
 /// `CF.CFGAnalysis`; see `crate::cfg_analysis` for the query API.
 pub use crate::cfg_analysis::CfgAnalysis;
 
+/// DIVERGENCE: zsh options the checks may ask about through
+/// [`Params::zsh_option`]. A shelllint extension, with no ShellCheck counterpart.
+///
+/// The spellings are zsh's, case and underscores ignored (`ShWordSplit` is
+/// `SH_WORD_SPLIT`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ZshOpt {
+    /// `SH_WORD_SPLIT`: unquoted `$x` is split on `$IFS`.
+    ShWordSplit,
+    /// `KSH_ARRAYS`: arrays are 0-based and `$a` is `${a[0]}`.
+    KshArrays,
+    /// `GLOB_SUBST`: the result of an unquoted expansion is used as a glob pattern.
+    GlobSubst,
+    /// `RC_EXPAND_PARAM`: `x${a[@]}y` distributes over the elements, `x$a` too.
+    RcExpandParam,
+    /// `BSD_ECHO`: `echo` does not interpret backslash escapes.
+    BsdEcho,
+    /// `PROMPT_SUBST`: parameter expansion in prompt strings.
+    PromptSubst,
+    /// `EXTENDED_GLOB`: `#`, `^` and `~` are pattern operators.
+    ExtendedGlob,
+    /// `KSH_GLOB`: `@(a|b)`, `*(a)` and friends are patterns.
+    KshGlob,
+    /// `SH_GLOB`: `(`, `|` and `)` are not special in patterns.
+    ShGlob,
+    /// `NULL_GLOB`: a pattern with no match expands to nothing.
+    NullGlob,
+    /// `NOMATCH`: a pattern with no match is an error.
+    NoMatch,
+    /// `LOCAL_OPTIONS`: option changes in a function are undone on return.
+    LocalOptions,
+    /// `ERR_RETURN`: a failing command returns from the function.
+    ErrReturn,
+    /// `PIPE_FAIL`: a pipeline fails if any element fails.
+    PipeFail,
+}
+
 /// `data Parameters`
 #[derive(Clone, Debug)]
 pub struct Params<'a> {
@@ -349,6 +386,71 @@ pub fn shebang_names_ash(ast: &Ast, root: Id) -> bool {
     }
 }
 
+impl Params<'_> {
+    /// DIVERGENCE: is zsh option `opt` on at `node`?
+    ///
+    /// `node` is the token the question is about. It is unused for now: the
+    /// option tracker will answer per node, from `setopt`, `unsetopt`,
+    /// `emulate` and friends.
+    ///
+    /// For a shell other than zsh the answer is what the check would have
+    /// assumed before zsh support, so that those shells behave exactly as
+    /// they did (word splitting on, globbing on, 0-based arrays, `echo` not
+    /// interpreting escapes in the warning's sense):
+    ///
+    /// | option | non-zsh | reason |
+    /// |---|---|---|
+    /// | `ShWordSplit` | on | sh-family shells split unquoted expansions |
+    /// | `KshArrays` | on | sh-family arrays are 0-based, `$a` is `${a[0]}` |
+    /// | `GlobSubst` | on | unquoted expansion results are globbed |
+    /// | `RcExpandParam` | off | `x$a` does not distribute over an array |
+    /// | `BsdEcho` | on | the echo-escape warning (SC2028) fires for every non-zsh shell |
+    /// | `PromptSubst` | off | no prompt-string substitution rule exists for them |
+    /// | `ExtendedGlob` | off | `#`, `^` and `~` are not zsh pattern operators there |
+    /// | `KshGlob` | on for ksh and bash, else off | both read `@(...)` patterns (bash's `extglob` shopt is not modelled) |
+    /// | `ShGlob` | on | no zsh `(a|b)` pattern groups |
+    /// | `NullGlob` | off | an unmatched glob stays literal |
+    /// | `NoMatch` | off | an unmatched glob is not an error |
+    /// | `LocalOptions` | off | not applicable |
+    /// | `ErrReturn` | off | not applicable |
+    /// | `PipeFail` | `has_pipefail` | `set -o pipefail` as already tracked |
+    ///
+    /// For zsh it returns the zsh 5.9 defaults until the tracker replaces it.
+    /// Evidence, from `/usr/bin/zsh -fc '[[ -o <opt> ]] && echo on || echo off'`
+    /// (zsh 5.9 x86_64-ubuntu-linux-gnu), for every option:
+    ///
+    /// ```text
+    /// shwordsplit off   ksharrays off     globsubst off     rcexpandparam off
+    /// bsdecho off       promptsubst off   extendedglob off  kshglob off
+    /// shglob off        nullglob off      nomatch ON        localoptions off
+    /// errreturn off     pipefail off
+    /// ```
+    ///
+    /// and, for the non-zsh column, `zsh -fc 'emulate sh; [[ -o <opt> ]]'` gives
+    /// shwordsplit on, ksharrays on, globsubst on, rcexpandparam off, bsdecho on,
+    /// promptsubst off, extendedglob off, kshglob off, shglob on, nullglob off,
+    /// nomatch off; and `emulate ksh` turns kshglob on. The bash entry for
+    /// `KshGlob` follows what the parser reads under bash, not `emulate`.
+    pub fn zsh_option(&self, node: Id, opt: ZshOpt) -> bool {
+        let _ = node;
+        if self.shell_type == Shell::Zsh {
+            return matches!(opt, ZshOpt::NoMatch);
+        }
+        match opt {
+            ZshOpt::ShWordSplit | ZshOpt::KshArrays | ZshOpt::GlobSubst | ZshOpt::BsdEcho | ZshOpt::ShGlob => true,
+            ZshOpt::KshGlob => matches!(self.shell_type, Shell::Ksh | Shell::Bash),
+            ZshOpt::PipeFail => self.has_pipefail,
+            ZshOpt::RcExpandParam
+            | ZshOpt::PromptSubst
+            | ZshOpt::ExtendedGlob
+            | ZshOpt::NullGlob
+            | ZshOpt::NoMatch
+            | ZshOpt::LocalOptions
+            | ZshOpt::ErrReturn => false,
+        }
+    }
+}
+
 /// `makeParameters spec`. `ast` must have had `compute_parents(root)` called.
 // DIVERGENCE: `variableFlow` refers to `params` lazily in Haskell; here the
 // other fields are computed first and the flow is filled in afterwards.
@@ -376,6 +478,9 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::BusyboxSh => false,
             Shell::Sh => false,
             Shell::Ksh => true,
+            // DIVERGENCE: zsh runs the last pipeline element in the current shell
+            // (`echo hi | read x; echo $x` prints hi under `zsh -fc`).
+            Shell::Zsh => true,
         },
         has_inherit_errexit: match shell_type {
             Shell::Bash => is_option_set(ast, "inherit_errexit", root),
@@ -383,6 +488,9 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::BusyboxSh => true,
             Shell::Sh => true,
             Shell::Ksh => false,
+            // DIVERGENCE: zsh subshells inherit `set -e` (`set -e; x=$(false; echo hi)`
+            // exits at the `false` under `zsh -fc`).
+            Shell::Zsh => true,
         },
         has_pipefail: match shell_type {
             Shell::Bash => is_option_set(ast, "pipefail", root),
@@ -390,6 +498,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::BusyboxSh => is_option_set(ast, "pipefail", root),
             Shell::Sh => is_option_set(ast, "pipefail", root),
             Shell::Ksh => is_option_set(ast, "pipefail", root),
+            Shell::Zsh => is_option_set(ast, "pipefail", root),
         },
         has_execfail: match shell_type {
             Shell::Bash => is_option_set(ast, "execfail", root),

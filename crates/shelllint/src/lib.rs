@@ -88,6 +88,8 @@ pub enum Shell {
     Ksh,
     /// BusyBox `sh`.
     BusyboxSh,
+    /// Zsh.
+    Zsh,
 }
 
 impl From<Shell> for CoreShell {
@@ -98,6 +100,7 @@ impl From<Shell> for CoreShell {
             Shell::Dash => CoreShell::Dash,
             Shell::Ksh => CoreShell::Ksh,
             Shell::BusyboxSh => CoreShell::BusyboxSh,
+            Shell::Zsh => CoreShell::Zsh,
         }
     }
 }

@@ -188,6 +188,11 @@ mod tests {
     }
 
     #[test]
+    fn zsh_is_a_known_shell() {
+        assert!(check("echo \"hi\"\n", r#"{"shell":"zsh"}"#).is_ok());
+    }
+
+    #[test]
     fn bad_options_are_errors() {
         assert!(check("", r#"{"nope":1}"#).is_err());
         assert!(check("", r#"{"shell":"tcsh"}"#).is_err());

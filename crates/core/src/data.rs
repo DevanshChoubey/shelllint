@@ -431,6 +431,8 @@ pub fn shell_for_executable(name: &str) -> Option<Shell> {
         "ksh88" => Some(Shell::Ksh),
         "ksh93" => Some(Shell::Ksh),
         "oksh" => Some(Shell::Ksh),
+        // DIVERGENCE: zsh is a shelllint extension.
+        "zsh" => Some(Shell::Zsh),
         _ => None,
     }
 }
@@ -478,6 +480,8 @@ mod tests {
         assert_eq!(shell_for_executable("bats"), Some(Shell::Bash));
         assert_eq!(shell_for_executable("busybox ash"), Some(Shell::BusyboxSh));
         assert_eq!(shell_for_executable("ash"), Some(Shell::Dash));
-        assert_eq!(shell_for_executable("zsh"), None);
+        assert_eq!(shell_for_executable("zsh"), Some(Shell::Zsh));
+        assert_eq!(shell_for_executable("fish"), None);
+        assert_eq!(shell_for_executable("tcsh"), None);
     }
 }
