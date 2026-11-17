@@ -8,7 +8,10 @@ use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::{get_literal_string, is_variable_char, is_variable_name};
 use shelllint_core::data::INTERNAL_VARIABLES;
-use shelllint_core::interface::TokenComment;
+use shelllint_core::interface::{Shell, TokenComment};
+use shelllint_core::zsh_data::is_zsh_special_variable;
+
+use crate::zsh_support::zsh_flagged_reference;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -33,6 +36,18 @@ fn check_unused_assignments(params: &Params<'_>, _t: Id) -> Vec<TokenComment> {
     }
     for v in INTERNAL_VARIABLES {
         references.insert((*v).to_string());
+    }
+    // DIVERGENCE: `${(f)x}`, `${=x}`, `${+x}` and the like read `x` in zsh.
+    if params.shell_type == Shell::Zsh {
+        ast.analyze(
+            params.root,
+            &mut |t| {
+                if let Some(name) = zsh_flagged_reference(params, t) {
+                    references.insert(strip_suffix(&name));
+                }
+            },
+            &mut |_| {},
+        );
     }
 
     // Variables set by bats' run (or pretended to be set by @test)
@@ -63,6 +78,10 @@ fn check_unused_assignments(params: &Params<'_>, _t: Id) -> Vec<TokenComment> {
             continue;
         }
         if name.starts_with('_') || params.has_allexport {
+            continue;
+        }
+        // DIVERGENCE: zsh reads its special parameters and hook arrays itself.
+        if params.shell_type == Shell::Zsh && is_zsh_special_variable(name) {
             continue;
         }
         comments.warn(

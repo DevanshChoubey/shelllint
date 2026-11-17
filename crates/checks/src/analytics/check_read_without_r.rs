@@ -8,6 +8,7 @@ use shelllint_core::astlib::{
     arguments, get_all_flags, get_command_token_or_this, get_gnu_opts, get_literal_string,
 };
 use shelllint_core::data::FLAGS_FOR_READ;
+use shelllint_core::interface::Shell;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -29,7 +30,16 @@ fn check_read_without_r(p: &Params<'_>, t: Id, c: &mut Comments) {
     if flags.iter().any(|(_, s)| s == "r") {
         return;
     }
+    // DIVERGENCE: zsh's `read -k` and `read -q` take raw characters with no
+    // backslash handling, and its `read -t 0` still reads (and mangles) a line.
+    let zsh = p.shell_type == Shell::Zsh;
+    if zsh && flags.iter().any(|(_, s)| s == "k" || s == "q") {
+        return;
+    }
     let has_t0 = || -> bool {
+        if zsh {
+            return false;
+        }
         let Some(parsed) = get_gnu_opts(p.ast, FLAGS_FOR_READ, &arguments(p.ast, t)) else {
             return false;
         };

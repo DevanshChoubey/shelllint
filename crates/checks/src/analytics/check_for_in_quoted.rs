@@ -10,6 +10,7 @@ use shelllint_core::astlib::{
 };
 
 use crate::support::{fix_with, replace_end};
+use crate::zsh_support::{quoted_expansion_yields_words, quoted_word_yields_words};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -34,7 +35,10 @@ fn check_for_in_quoted(params: &Params<'_>, t: Id, c: &mut Comments) {
             if let [word] = &parts[..] {
                 let word = *word;
                 if let Token::T_DoubleQuoted(list) = ast.get(word) {
-                    if list.iter().any(|&x| will_split(ast, x)) && !may_become_multiple_args(ast, word)
+                    if list.iter().any(|&x| will_split(ast, x))
+                        && !may_become_multiple_args(ast, word)
+                        // DIVERGENCE: zsh keeps `"${(@)a}"`, `"${(f)x}"` and `"${=x}"` as several words.
+                        && !list.iter().any(|&x| quoted_expansion_yields_words(params, x))
                         || get_literal_string(ast, word).is_some_and(|s| would_have_been_glob(&s))
                     {
                         c.err(
@@ -61,7 +65,11 @@ fn check_for_in_quoted(params: &Params<'_>, t: Id, c: &mut Comments) {
         if get_unquoted_literal(ast, single).is_some_and(|s| s.contains(',')) {
             c.warn(single, 2042, "Use spaces, not commas, to separate loop elements.");
             return;
-        } else if !(will_split(ast, single) || may_become_multiple_args(ast, single)) {
+        } else if !(will_split(ast, single)
+            || may_become_multiple_args(ast, single)
+            // DIVERGENCE: zsh keeps `"${(@)a}"`, `"${(f)x}"` and `"${=x}"` as several words.
+            || quoted_word_yields_words(params, single))
+        {
             c.warn(
                 single,
                 2043,

@@ -11,6 +11,8 @@ use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::{e4m, get_braced_modifier, get_literal_string, get_path, oversimplify};
 use shelllint_core::interface::TokenComment;
 
+use crate::zsh_support::zsh_registered_functions;
+
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnpassedInFunctions",
@@ -54,8 +56,13 @@ fn check_unpassed_in_functions(params: &Params<'_>, root: Id) -> Vec<TokenCommen
         groups.entry(x.0.clone()).or_default().push(x);
     }
 
+    // DIVERGENCE: zsh passes arguments to hook, widget and completion functions itself.
+    let registered = zsh_registered_functions(params);
     let mut c = Comments::default();
     for group in groups.values() {
+        if registered.contains(&group[0].0) {
+            continue;
+        }
         warn_for_group(params, &function_map, group, &mut c);
     }
     c.into_vec()

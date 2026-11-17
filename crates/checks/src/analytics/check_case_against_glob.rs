@@ -27,7 +27,7 @@ fn check_case_against_glob(p: &Params<'_>, t: Id, c: &mut Comments) {
 fn check_(p: &Params<'_>, expr: Id, c: &mut Comments) {
     if let Token::T_NormalWord(list) = p.ast.get(expr) {
         // If it's already a glob, assume that's what the user wanted
-        if !is_glob(p.ast, expr) && list.iter().any(|&x| is_quoteable_expansion(p.ast, x)) {
+        if !is_glob(p.ast, expr) && list.iter().any(|&x| is_quoteable_expansion(p.ast, x) && crate::zsh_support::globs(p, x)) {
             c.warn(
                 expr,
                 2254,

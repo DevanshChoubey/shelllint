@@ -12,8 +12,11 @@ use shelllint_core::astlib::{
     get_braced_modifier, get_braced_reference, get_path, is_variable_char, is_variable_name, oversimplify,
 };
 use shelllint_core::data::{COMMON_COMMANDS, INTERNAL_VARIABLES};
+use shelllint_core::zsh_data::is_zsh_special_variable;
+
+use crate::zsh_support::is_zsh_assoc_key;
 use shelllint_core::extras::external_var_matches;
-use shelllint_core::interface::{Severity, TokenComment};
+use shelllint_core::interface::{Severity, Shell, TokenComment};
 use shelllint_core::regex::{matches, mk_regex};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
@@ -121,6 +124,8 @@ fn check_unassigned_references_(include_globals: bool, p: &Params<'_>, _t: Id) -
             StackData::Assignment(_, _, name, _) => {
                 write_map.insert(name.clone(), ());
             }
+            // DIVERGENCE: a bare word in the subscript of a zsh special associative array is a key.
+            StackData::Reference(_, place, _) if is_zsh_assoc_key(p, *place) => {}
             StackData::Reference(_, place, name) => {
                 // insertWith (const id): keep the existing value
                 read_map.entry(name.clone()).or_insert(*place);
@@ -133,6 +138,8 @@ fn check_unassigned_references_(include_globals: bool, p: &Params<'_>, _t: Id) -
     let unassigned: Vec<(&String, Id)> = read_map
         .iter()
         .filter(|(k, _)| !write_map.contains_key(*k) && !default_assigned.contains(&k.as_str()))
+        // DIVERGENCE: zsh sets its own special parameters (`commands`, `reply`, `fg`, ...).
+        .filter(|(k, _)| !(p.shell_type == Shell::Zsh && is_zsh_special_variable(k)))
         // DIVERGENCE: variables declared with `external-vars` count as assigned.
         .filter(|(k, _)| !p.external_vars.iter().any(|pat| external_var_matches(pat, k)))
         .map(|(k, v)| (k, *v))
