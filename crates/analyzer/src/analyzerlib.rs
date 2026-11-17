@@ -842,7 +842,7 @@ pub fn get_variable_flow(params: &Params<'_>, t: Id) -> Vec<StackData> {
         state.borrow_mut().extend(read.into_iter().map(|(a, b, c)| StackData::Reference(a, b, c)));
     };
     let set_written = |t: Id| {
-        let written = get_modified_variables(ast, t);
+        let written = get_modified_variables_in(ast, t, params.shell_type == Shell::Zsh);
         state.borrow_mut().extend(written.into_iter().map(|(a, b, c, d)| StackData::Assignment(a, b, c, d)));
     };
     let start_scope = |t: Id| {
@@ -908,6 +908,12 @@ pub type ModifiedVariable = (Id, Id, String, DataType);
 pub type ReferencedVariable = (Id, Id, String);
 
 pub fn get_modified_variables(ast: &Ast, t: Id) -> Vec<ModifiedVariable> {
+    get_modified_variables_in(ast, t, false)
+}
+
+/// `get_modified_variables`, told whether the script is zsh. DIVERGENCE: only
+/// zsh gives `read name?prompt` a meaning; every other shell is unchanged.
+pub fn get_modified_variables_in(ast: &Ast, t: Id, zsh: bool) -> Vec<ModifiedVariable> {
     use DataSource::*;
     use DataType::*;
     // markAsChecked place token = mapMaybe (f place) $ getWordParts token
@@ -934,7 +940,7 @@ pub fn get_modified_variables(ast: &Ast, t: Id) -> Vec<ModifiedVariable> {
                 _ => None,
             })
             .collect(),
-        Token::T_SimpleCommand(..) => get_modified_variable_command(ast, t),
+        Token::T_SimpleCommand(_, words) => modified_variable_command_words(ast, t, words, zsh),
 
         Token::TA_Unary(op, v) if op.contains("--") || op.contains("++") => match ast.get(*v) {
             Token::TA_Variable(name, _) => vec![(t, *v, name.clone(), DataString(SourceInteger))],
@@ -1135,13 +1141,13 @@ pub fn get_referenced_variable_command(ast: &Ast, base: Id) -> Vec<ReferencedVar
 /// )
 pub fn get_modified_variable_command(ast: &Ast, base: Id) -> Vec<ModifiedVariable> {
     match ast.get(base) {
-        Token::T_SimpleCommand(_, words) => modified_variable_command_words(ast, base, words),
+        Token::T_SimpleCommand(_, words) => modified_variable_command_words(ast, base, words, false),
         _ => vec![],
     }
 }
 
 /// `getModifiedVariableCommand` on `T_SimpleCommand base _ words`.
-fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<ModifiedVariable> {
+fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id], zsh: bool) -> Vec<ModifiedVariable> {
     use DataSource::*;
     use DataType::*;
     let Some((x, rest)) = literal_command(ast, words) else { return vec![] };
@@ -1271,7 +1277,7 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
     };
 
     let result: Vec<ModifiedVariable> = match x.as_str() {
-        "builtin" => modified_variable_command_words(ast, base, rest),
+        "builtin" => modified_variable_command_words(ast, base, rest, zsh),
         "read" => {
             // catMaybes $ takeWhile isJust (reverse $ map getLiteral rest)
             let fallback = || -> Vec<ModifiedVariable> { rest.iter().rev().map_while(|&t| get_literal(t)).collect() };
@@ -1284,7 +1290,22 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
                     ),
                 }
             };
-            parsed().unwrap_or_else(fallback)
+            let mut vars = parsed().unwrap_or_else(fallback);
+            if zsh {
+                // DIVERGENCE: zsh `read name?prompt` and `read -q name?prompt` read into
+                // `name`; the `?prompt` is not part of the variable name.
+                vars.retain(|(_, _, n, _)| !n.contains('?'));
+                for &w in rest {
+                    if let Some(lit) = get_literal_string(ast, w) {
+                        if let Some((name, _)) = lit.split_once('?') {
+                            if !lit.starts_with('-') && is_variable_name(name) {
+                                vars.push((base, w, name.to_string(), DataString(SourceExternal)));
+                            }
+                        }
+                    }
+                }
+            }
+            vars
         }
 
         "getopts" => match rest {

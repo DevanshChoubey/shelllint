@@ -70,6 +70,11 @@ fn check_unpassed_in_functions(params: &Params<'_>, root: Id) -> Vec<TokenCommen
 
 fn find_function(params: &Params<'_>, t: Id) -> Option<(String, Id)> {
     let Token::T_Function(_, _, name, body) = params.ast.get(t) else { return None };
+    // DIVERGENCE: a zsh anonymous function is called where it is written, with
+    // the arguments following its body, so it has no callers to pair up.
+    if name == "zsh-anonymous-function" {
+        return None;
+    }
     // DIVERGENCE: a function defined in a sourced file may have callers we
     // cannot see, so SC2119/SC2120 only pair calls with same-file definitions.
     if get_path(params.ast, t)
