@@ -13,7 +13,9 @@ use crate::{alt, choice};
 impl<'a> P<'a> {
     pub(crate) fn read_if_clause(&mut self) -> PR<Id> {
         self.called("if expression", |p| {
-            if p.env.is_zsh() && let Ok(id) = p.zsh_if_without_then() {
+            if p.env.is_zsh()
+                && let Ok(id) = p.zsh_if_without_then()
+            {
                 return Ok(id);
             }
             let start = p.start_span();
@@ -367,7 +369,8 @@ impl<'a> P<'a> {
                     p.read_sequential_sep()?;
                     p.spacing()
                 })?;
-                let group = if p.env.is_zsh() { p.zsh_loop_body(id)? } else { p.alt(read_braced, |p| p.read_do_group(id))? };
+                let group =
+                    if p.env.is_zsh() { p.zsh_loop_body(id)? } else { p.alt(read_braced, |p| p.read_do_group(id))? };
                 Ok(p.node(id, Token::T_ForArithmetic(x, y, z, group)))
             })
         }

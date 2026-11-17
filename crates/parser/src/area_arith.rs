@@ -148,13 +148,8 @@ impl<'a> P<'a> {
 
     fn arith_read_arith_term(&mut self) -> PR<Id> {
         if self.env.is_zsh() {
-            return alt!(
-                self,
-                |p| p.arith_read_group(),
-                |p| p.zsh_arith_call(),
-                |p| p.arith_read_variable(),
-                |p| p.arith_read_expansion()
-            );
+            return alt!(self, |p| p.arith_read_group(), |p| p.zsh_arith_call(), |p| p.arith_read_variable(), |p| p
+                .arith_read_expansion());
         }
         alt!(self, |p| p.arith_read_group(), |p| p.arith_read_variable(), |p| p.arith_read_expansion())
     }
@@ -244,7 +239,8 @@ impl<'a> P<'a> {
 
     pub(crate) fn arith_read_any_negated(&mut self) -> PR<Id> {
         if self.env.is_zsh() {
-            return alt!(self, |p| p.zsh_arith_base_prefix(), |p| p.arith_read_negated(), |p| p.arith_read_any_signed());
+            return alt!(self, |p| p.zsh_arith_base_prefix(), |p| p.arith_read_negated(), |p| p
+                .arith_read_any_signed());
         }
         alt!(self, |p| p.arith_read_negated(), |p| p.arith_read_any_signed())
     }

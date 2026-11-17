@@ -50,24 +50,51 @@ fn assert_hard_error(name: &str, script: &str) {
 }
 
 const C24_PROMPT_BRACES_POSITIVES: &[(&str, &str)] = &[
-    (r#"prompt_escape_pair"#, r#"PS1=%{x%}
-"#),
-    (r#"color_escape"#, r#"PS1=%F{blue}x%f
-"#),
-    (r#"nested_prompt_escapes"#, r#"PROMPT=%{%F{blue}%}x
-"#),
-    (r#"revision_suffix"#, r#"git log @{u}..
-"#),
-    (r#"revision_suffix_negative_index"#, r#"git rev-parse HEAD@{-1}
-"#),
-    (r#"revision_in_command_subst"#, r#"x=$(git rev-parse @{upstream})
-"#),
-    (r#"background_color_escape"#, r#"PS1=%K{red}x%k
-"#),
-    (r#"strftime_escape"#, r#"PS1=%D{"%H:%M"}
-"#),
-    (r#"escape_with_expansion"#, r#"RPROMPT=%{$fg[red]%}x%{$reset_color%}
-"#),
+    (
+        r#"prompt_escape_pair"#,
+        r#"PS1=%{x%}
+"#,
+    ),
+    (
+        r#"color_escape"#,
+        r#"PS1=%F{blue}x%f
+"#,
+    ),
+    (
+        r#"nested_prompt_escapes"#,
+        r#"PROMPT=%{%F{blue}%}x
+"#,
+    ),
+    (
+        r#"revision_suffix"#,
+        r#"git log @{u}..
+"#,
+    ),
+    (
+        r#"revision_suffix_negative_index"#,
+        r#"git rev-parse HEAD@{-1}
+"#,
+    ),
+    (
+        r#"revision_in_command_subst"#,
+        r#"x=$(git rev-parse @{upstream})
+"#,
+    ),
+    (
+        r#"background_color_escape"#,
+        r#"PS1=%K{red}x%k
+"#,
+    ),
+    (
+        r#"strftime_escape"#,
+        r#"PS1=%D{"%H:%M"}
+"#,
+    ),
+    (
+        r#"escape_with_expansion"#,
+        r#"RPROMPT=%{$fg[red]%}x%{$reset_color%}
+"#,
+    ),
 ];
 
 #[test]
@@ -127,36 +154,54 @@ fn c24_prompt_braces_literal_open_brace_still_warns() {
 }
 
 const C28_IF_WITHOUT_THEN_POSITIVES: &[(&str, &str)] = &[
-    (r#"in_else_branch"#, r#"if true; then echo a
+    (
+        r#"in_else_branch"#,
+        r#"if true; then echo a
 else
   if ! [[ -z $x ]] && printf '%s' "$x"
   local s=1
   printf '%s' "$s"
 fi
-"#),
-    (r#"in_brace_group"#, r#"{
+"#,
+    ),
+    (
+        r#"in_brace_group"#,
+        r#"{
 if true
 local s=1
 }
-"#),
-    (r#"in_function"#, r#"g() {
+"#,
+    ),
+    (
+        r#"in_function"#,
+        r#"g() {
   if [[ -n $1 ]] && print x
   local s=1
 }
-"#),
-    (r#"in_subshell"#, r#"(
+"#,
+    ),
+    (
+        r#"in_subshell"#,
+        r#"(
   if true
   print a
 )
-"#),
-    (r#"closed_by_fi_of_outer_if"#, r#"if true; then echo a
+"#,
+    ),
+    (
+        r#"closed_by_fi_of_outer_if"#,
+        r#"if true; then echo a
 else
 if true
 local s=1
 fi
-"#),
-    (r#"condition_only"#, r#"{ if true; }
-"#),
+"#,
+    ),
+    (
+        r#"condition_only"#,
+        r#"{ if true; }
+"#,
+    ),
 ];
 
 #[test]
@@ -195,18 +240,27 @@ fn c28_if_without_then_bash_output_is_unchanged() {
 }
 
 const C28_IF_WITHOUT_THEN_NEAR_MISSES: &[(&str, &str)] = &[
-    (r#"top_level_without_then"#, r#"if true
+    (
+        r#"top_level_without_then"#,
+        r#"if true
 local s=1
-"#),
-    (r#"top_level_if_fi"#, r#"if true
+"#,
+    ),
+    (
+        r#"top_level_if_fi"#,
+        r#"if true
 fi
-"#),
-    (r#"extra_fi_after_short_if"#, r#"if true; then
+"#,
+    ),
+    (
+        r#"extra_fi_after_short_if"#,
+        r#"if true; then
 else if [[ -z $x ]]
   printf hi
   fi
 fi
-"#),
+"#,
+    ),
 ];
 
 #[test]
@@ -215,4 +269,3 @@ fn c28_if_without_then_near_misses_zsh_rejects_are_not_accepted() {
         assert_hard_error(name, script);
     }
 }
-

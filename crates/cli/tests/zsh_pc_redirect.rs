@@ -50,20 +50,41 @@ fn assert_hard_error(name: &str, script: &str) {
 }
 
 const C19_CLOBBER_APPEND_POSITIVES: &[(&str, &str)] = &[
-    (r#"force_append"#, r#"echo a >>| f
-"#),
-    (r#"force_append_bang"#, r#"echo a >>! f
-"#),
-    (r#"force_truncate_bang"#, r#"echo a >! f
-"#),
-    (r#"fd_prefixed"#, r#"cmd 2>>| log
-"#),
-    (r#"quoted_target_in_subshell"#, r#"( umask 077; : >>| "$datafile" ) 2> /dev/null
-"#),
-    (r#"on_brace_group"#, r#"{ echo a; } >>| f
-"#),
-    (r#"in_and_or_list"#, r#"echo a >>| f && echo b >>! f || echo c
-"#),
+    (
+        r#"force_append"#,
+        r#"echo a >>| f
+"#,
+    ),
+    (
+        r#"force_append_bang"#,
+        r#"echo a >>! f
+"#,
+    ),
+    (
+        r#"force_truncate_bang"#,
+        r#"echo a >! f
+"#,
+    ),
+    (
+        r#"fd_prefixed"#,
+        r#"cmd 2>>| log
+"#,
+    ),
+    (
+        r#"quoted_target_in_subshell"#,
+        r#"( umask 077; : >>| "$datafile" ) 2> /dev/null
+"#,
+    ),
+    (
+        r#"on_brace_group"#,
+        r#"{ echo a; } >>| f
+"#,
+    ),
+    (
+        r#"in_and_or_list"#,
+        r#"echo a >>| f && echo b >>! f || echo c
+"#,
+    ),
 ];
 
 #[test]
@@ -102,10 +123,11 @@ fn c19_clobber_append_bash_output_is_unchanged() {
     }
 }
 
-const C19_CLOBBER_APPEND_NEAR_MISSES: &[(&str, &str)] = &[
-    (r#"missing_target"#, r#"echo a >>|
-"#),
-];
+const C19_CLOBBER_APPEND_NEAR_MISSES: &[(&str, &str)] = &[(
+    r#"missing_target"#,
+    r#"echo a >>|
+"#,
+)];
 
 #[test]
 fn c19_clobber_append_near_misses_zsh_rejects_are_not_accepted() {
@@ -115,22 +137,43 @@ fn c19_clobber_append_near_misses_zsh_rejects_are_not_accepted() {
 }
 
 const C20_FD_DIGIT_VAR_POSITIVES: &[(&str, &str)] = &[
-    (r#"close_numeric_fd"#, r#"exec {1}<&-
-"#),
-    (r#"builtin_exec_in_function"#, r#"g() {
+    (
+        r#"close_numeric_fd"#,
+        r#"exec {1}<&-
+"#,
+    ),
+    (
+        r#"builtin_exec_in_function"#,
+        r#"g() {
   builtin exec {1}<&-
 }
-"#),
-    (r#"open_numeric_fd"#, r#"exec {10}>file
-"#),
-    (r#"close_output_fd"#, r#"exec {1}>&-
-"#),
-    (r#"after_command"#, r#"echo hi {1}>file
-"#),
-    (r#"named_fd_still_works"#, r#"exec {fd}<&-
-"#),
-    (r#"in_condition_branch"#, r#"if true; then exec {1}<&-; fi
-"#),
+"#,
+    ),
+    (
+        r#"open_numeric_fd"#,
+        r#"exec {10}>file
+"#,
+    ),
+    (
+        r#"close_output_fd"#,
+        r#"exec {1}>&-
+"#,
+    ),
+    (
+        r#"after_command"#,
+        r#"echo hi {1}>file
+"#,
+    ),
+    (
+        r#"named_fd_still_works"#,
+        r#"exec {fd}<&-
+"#,
+    ),
+    (
+        r#"in_condition_branch"#,
+        r#"if true; then exec {1}<&-; fi
+"#,
+    ),
 ];
 
 #[test]
@@ -169,10 +212,11 @@ fn c20_fd_digit_var_bash_output_is_unchanged() {
     }
 }
 
-const C20_FD_DIGIT_VAR_NEAR_MISSES: &[(&str, &str)] = &[
-    (r#"missing_dup_target"#, r#"exec {1}<&
-"#),
-];
+const C20_FD_DIGIT_VAR_NEAR_MISSES: &[(&str, &str)] = &[(
+    r#"missing_dup_target"#,
+    r#"exec {1}<&
+"#,
+)];
 
 #[test]
 fn c20_fd_digit_var_near_misses_zsh_rejects_are_not_accepted() {
@@ -180,4 +224,3 @@ fn c20_fd_digit_var_near_misses_zsh_rejects_are_not_accepted() {
         assert_hard_error(name, script);
     }
 }
-

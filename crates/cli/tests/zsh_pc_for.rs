@@ -50,52 +50,112 @@ fn assert_hard_error(name: &str, script: &str) {
 }
 
 const C08_FOR_SHORT_POSITIVES: &[(&str, &str)] = &[
-    (r#"short_body_same_line"#, r#"for f (a b) echo $f
-"#),
-    (r#"short_body_after_semicolon"#, r#"for f (a b); echo $f
-"#),
-    (r#"multi_line_word_list"#, r#"for f (a
+    (
+        r#"short_body_same_line"#,
+        r#"for f (a b) echo $f
+"#,
+    ),
+    (
+        r#"short_body_after_semicolon"#,
+        r#"for f (a b); echo $f
+"#,
+    ),
+    (
+        r#"multi_line_word_list"#,
+        r#"for f (a
 b) echo $f
-"#),
-    (r#"body_on_next_line"#, r#"for f (a b)
+"#,
+    ),
+    (
+        r#"body_on_next_line"#,
+        r#"for f (a b)
   echo $f
-"#),
-    (r#"brace_body"#, r#"for f (a b) { echo $f; }
-"#),
-    (r#"brace_body_after_semicolon"#, r#"for f (a b); { echo $f; }
-"#),
-    (r#"brace_body_on_next_line"#, r#"for f (a b)
+"#,
+    ),
+    (
+        r#"brace_body"#,
+        r#"for f (a b) { echo $f; }
+"#,
+    ),
+    (
+        r#"brace_body_after_semicolon"#,
+        r#"for f (a b); { echo $f; }
+"#,
+    ),
+    (
+        r#"brace_body_on_next_line"#,
+        r#"for f (a b)
 { echo $f; }
-"#),
-    (r#"for_in_brace_body"#, r#"for f in a b; { echo $f; }
-"#),
-    (r#"for_in_short_body_after_semicolon"#, r#"for f in a b; echo $f
-"#),
-    (r#"for_in_short_body_next_line"#, r#"for f in a b
+"#,
+    ),
+    (
+        r#"for_in_brace_body"#,
+        r#"for f in a b; { echo $f; }
+"#,
+    ),
+    (
+        r#"for_in_short_body_after_semicolon"#,
+        r#"for f in a b; echo $f
+"#,
+    ),
+    (
+        r#"for_in_short_body_next_line"#,
+        r#"for f in a b
 echo $f
-"#),
-    (r#"do_done_after_paren_list"#, r#"for f (a b); do echo $f; done
-"#),
-    (r#"do_done_on_next_line"#, r#"for f (a b)
+"#,
+    ),
+    (
+        r#"do_done_after_paren_list"#,
+        r#"for f (a b); do echo $f; done
+"#,
+    ),
+    (
+        r#"do_done_on_next_line"#,
+        r#"for f (a b)
 do echo $f; done
-"#),
-    (r#"in_function_with_pipeline"#, r#"g() { for x ($@) echo $x | sort; }
-"#),
-    (r#"nested_short_loops"#, r#"for f (a b) for g (c d) echo $f$g
-"#),
-    (r#"short_body_with_and_list"#, r#"for f (a b) echo $f && echo next
-"#),
-    (r#"arithmetic_for_short_body"#, r#"for ((i=0;i<3;i++)) echo $i
-"#),
-    (r#"arithmetic_for_short_body_semicolon"#, r#"for ((i=0;i<3;i++)); echo $i
-"#),
-    (r#"followed_by_command"#, r#"for f (a b) echo $f
+"#,
+    ),
+    (
+        r#"in_function_with_pipeline"#,
+        r#"g() { for x ($@) echo $x | sort; }
+"#,
+    ),
+    (
+        r#"nested_short_loops"#,
+        r#"for f (a b) for g (c d) echo $f$g
+"#,
+    ),
+    (
+        r#"short_body_with_and_list"#,
+        r#"for f (a b) echo $f && echo next
+"#,
+    ),
+    (
+        r#"arithmetic_for_short_body"#,
+        r#"for ((i=0;i<3;i++)) echo $i
+"#,
+    ),
+    (
+        r#"arithmetic_for_short_body_semicolon"#,
+        r#"for ((i=0;i<3;i++)); echo $i
+"#,
+    ),
+    (
+        r#"followed_by_command"#,
+        r#"for f (a b) echo $f
 echo done
-"#),
-    (r#"inside_if"#, r#"if true; then for f (a b) echo $f; fi
-"#),
-    (r#"quoted_and_expanded_words"#, r#"for f ("a b" $x ${y:-z}) echo $f
-"#),
+"#,
+    ),
+    (
+        r#"inside_if"#,
+        r#"if true; then for f (a b) echo $f; fi
+"#,
+    ),
+    (
+        r#"quoted_and_expanded_words"#,
+        r#"for f ("a b" $x ${y:-z}) echo $f
+"#,
+    ),
 ];
 
 #[test]
@@ -148,12 +208,21 @@ fn c08_for_short_bash_output_is_unchanged() {
 }
 
 const C08_FOR_SHORT_NEAR_MISSES: &[(&str, &str)] = &[
-    (r#"unterminated_word_list"#, r#"for f (a b
-"#),
-    (r#"stray_done_after_short_body"#, r#"for f (a b) echo $f; done
-"#),
-    (r#"do_without_done"#, r#"for f (a b) do echo $f
-"#),
+    (
+        r#"unterminated_word_list"#,
+        r#"for f (a b
+"#,
+    ),
+    (
+        r#"stray_done_after_short_body"#,
+        r#"for f (a b) echo $f; done
+"#,
+    ),
+    (
+        r#"do_without_done"#,
+        r#"for f (a b) do echo $f
+"#,
+    ),
 ];
 
 #[test]
@@ -164,29 +233,56 @@ fn c08_for_short_near_misses_zsh_rejects_are_not_accepted() {
 }
 
 const C09_FOR_MULTI_VAR_POSITIVES: &[(&str, &str)] = &[
-    (r#"two_names_in_list"#, r#"for k v in a 1 b 2; do echo "$k $v"; done
-"#),
-    (r#"three_names"#, r#"for k v w in a 1 2 b 3 4; do echo "$k$v$w"; done
-"#),
-    (r#"names_with_paren_list"#, r#"for k v (a 1 b 2) echo "$k=$v"
-"#),
-    (r#"names_with_brace_body"#, r#"for k v in a 1 b 2; { echo "$k=$v"; }
-"#),
-    (r#"over_assoc_array"#, r#"g() { local -A m; m=(a 1); for k v in ${(kv)m}; do print -r -- "$k $v"; done; }
-"#),
-    (r#"positional_params"#, r#"for k v; do echo "$k$v"; done
-"#),
-    (r#"multi_line_loop"#, r#"for k v in a 1 b 2
+    (
+        r#"two_names_in_list"#,
+        r#"for k v in a 1 b 2; do echo "$k $v"; done
+"#,
+    ),
+    (
+        r#"three_names"#,
+        r#"for k v w in a 1 2 b 3 4; do echo "$k$v$w"; done
+"#,
+    ),
+    (
+        r#"names_with_paren_list"#,
+        r#"for k v (a 1 b 2) echo "$k=$v"
+"#,
+    ),
+    (
+        r#"names_with_brace_body"#,
+        r#"for k v in a 1 b 2; { echo "$k=$v"; }
+"#,
+    ),
+    (
+        r#"over_assoc_array"#,
+        r#"g() { local -A m; m=(a 1); for k v in ${(kv)m}; do print -r -- "$k $v"; done; }
+"#,
+    ),
+    (
+        r#"positional_params"#,
+        r#"for k v; do echo "$k$v"; done
+"#,
+    ),
+    (
+        r#"multi_line_loop"#,
+        r#"for k v in a 1 b 2
 do
   echo "$k"
   echo "$v"
 done
-"#),
-    (r#"digit_names_loop_over_positionals"#, r#"set -- a b c d e f
+"#,
+    ),
+    (
+        r#"digit_names_loop_over_positionals"#,
+        r#"set -- a b c d e f
 for 1 2 3; do print "$1$2$3"; done
-"#),
-    (r#"digit_name_with_in_list"#, r#"for 1 in a b; do print "$1"; done
-"#),
+"#,
+    ),
+    (
+        r#"digit_name_with_in_list"#,
+        r#"for 1 in a b; do print "$1"; done
+"#,
+    ),
 ];
 
 #[test]
@@ -228,12 +324,21 @@ fn c09_for_multi_var_bash_output_is_unchanged() {
 }
 
 const C09_FOR_MULTI_VAR_NEAR_MISSES: &[(&str, &str)] = &[
-    (r#"missing_done"#, r#"for k v in a 1 b 2; do echo hi
-"#),
-    (r#"missing_closing_paren"#, r#"for k v (a 1 b 2
-"#),
-    (r#"digit_then_letter_is_not_a_name"#, r#"for 1x in a; do :; done
-"#),
+    (
+        r#"missing_done"#,
+        r#"for k v in a 1 b 2; do echo hi
+"#,
+    ),
+    (
+        r#"missing_closing_paren"#,
+        r#"for k v (a 1 b 2
+"#,
+    ),
+    (
+        r#"digit_then_letter_is_not_a_name"#,
+        r#"for 1x in a; do :; done
+"#,
+    ),
 ];
 
 #[test]
@@ -242,4 +347,3 @@ fn c09_for_multi_var_near_misses_zsh_rejects_are_not_accepted() {
         assert_hard_error(name, script);
     }
 }
-

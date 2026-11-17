@@ -36,15 +36,11 @@ impl<'a> P<'a> {
         )?;
         let name = self.then_skip(|p| p.zsh_for_name(), |p| p.allspacing())?;
         let extra = self.zsh_for_extra_names()?;
-        let values = choice!(
-            self,
-            |p: &mut Self| p.read_in_clause(),
-            |p: &mut Self| p.zsh_for_paren_list(),
-            |p: &mut Self| {
+        let values =
+            choice!(self, |p: &mut Self| p.read_in_clause(), |p: &mut Self| p.zsh_for_paren_list(), |p: &mut Self| {
                 p.optional(|p| p.read_sequential_sep())?;
                 Ok(vec![])
-            },
-        )?;
+            },)?;
         let mut group = self.zsh_loop_body(id)?;
         // DIVERGENCE: `T_ForIn` holds one name. Each further name is modelled
         // as a nested `for name in; ...` with no words, which assigns it for
@@ -75,9 +71,7 @@ impl<'a> P<'a> {
     /// `k v` of `for k v in ...` / `for k v (...)` / `for k v; do`: more names,
     /// which must be followed by `in`, `do`, `(`, `{`, `;` or a newline.
     #[allow(clippy::type_complexity)]
-    fn zsh_for_extra_names(
-        &mut self,
-    ) -> PR<Vec<(crate::engine::SourcePos, crate::engine::SourcePos, String)>> {
+    fn zsh_for_extra_names(&mut self) -> PR<Vec<(crate::engine::SourcePos, crate::engine::SourcePos, String)>> {
         self.alt(
             |p| {
                 p.try_(|p| {
@@ -231,10 +225,7 @@ impl<'a> P<'a> {
     /// The name inside `{...}` before a redirection: an identifier, or digits
     /// (zsh reads `{1}>&-` as "the descriptor held in parameter 1").
     pub(crate) fn zsh_io_variable_name(&mut self) -> PR<String> {
-        self.alt(
-            |p| p.read_variable_name(),
-            |p| p.many1(|p| p.digit()).map(|ds| ds.into_iter().collect()),
-        )
+        self.alt(|p| p.read_variable_name(), |p| p.many1(|p| p.digit()).map(|ds| ds.into_iter().collect()))
     }
 
     // ---- SC1083 -----------------------------------------------------------

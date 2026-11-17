@@ -49,7 +49,9 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_io_file_op(&mut self) -> PR<Id> {
-        if self.env.is_zsh() && let Ok(op) = self.zsh_forced_redirect_op() {
+        if self.env.is_zsh()
+            && let Ok(op) = self.zsh_forced_redirect_op()
+        {
             return Ok(op);
         }
         choice!(

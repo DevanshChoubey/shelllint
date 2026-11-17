@@ -40,7 +40,11 @@ fn sourcing_inside_an_if_condition_is_the_same_under_zsh_and_bash() {
     let dir = std::env::temp_dir().join(format!("zsh_pc_source_{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     std::fs::write(dir.join("lib.sh"), "x=1\nunused_in_lib=2\n").unwrap();
-    std::fs::write(dir.join("main.sh"), "if . ./lib.sh; then echo \"$x\"; fi\nif source ./lib.sh\nthen echo \"$x\"; fi\n").unwrap();
+    std::fs::write(
+        dir.join("main.sh"),
+        "if . ./lib.sh; then echo \"$x\"; fi\nif source ./lib.sh\nthen echo \"$x\"; fi\n",
+    )
+    .unwrap();
     let run = |shell: &str| {
         let o = Command::new(env!("CARGO_BIN_EXE_shelllint"))
             .args(["--norc", "-x", "-f", "json1", &format!("--shell={shell}"), "main.sh"])
@@ -50,7 +54,14 @@ fn sourcing_inside_an_if_condition_is_the_same_under_zsh_and_bash() {
             .unwrap();
         assert!(matches!(o.status.code(), Some(0) | Some(1)), "{}", String::from_utf8_lossy(&o.stderr));
         let v: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
-        v["comments"].as_array().unwrap().iter().map(|c| (c["code"].as_u64().unwrap(), c["file"].as_str().unwrap().to_string(), c["line"].as_u64().unwrap())).collect::<Vec<_>>()
+        v["comments"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|c| {
+                (c["code"].as_u64().unwrap(), c["file"].as_str().unwrap().to_string(), c["line"].as_u64().unwrap())
+            })
+            .collect::<Vec<_>>()
     };
     let (zsh, bash) = (run("zsh"), run("bash"));
     std::fs::remove_dir_all(&dir).ok();
@@ -157,7 +168,8 @@ fn prompt_escapes_do_not_report_sc1083_under_zsh() {
 #[test]
 fn if_without_then_gives_the_same_nodes_checks_expect() {
     // The gallois shape: the condition list runs up to the closing `fi`.
-    let script = "if true; then echo a\nelse\n  if ! [[ -z $x ]] && printf '%s' \"$x\"\n  local s=1\n  printf '%s' \"$s\"\nfi\n";
+    let script =
+        "if true; then echo a\nelse\n  if ! [[ -z $x ]] && printf '%s' \"$x\"\n  local s=1\n  printf '%s' \"$s\"\nfi\n";
     no_sc1xxx(script);
     // a regular if is untouched
     assert_eq!(zsh_codes("if true; then echo a; fi\n"), bash_codes("if true; then echo a; fi\n"));

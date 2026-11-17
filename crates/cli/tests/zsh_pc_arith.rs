@@ -50,24 +50,51 @@ fn assert_hard_error(name: &str, script: &str) {
 }
 
 const C18_ARITH_BASE_POSITIVES: &[(&str, &str)] = &[
-    (r#"double_hash_base_16"#, r#"echo $(( [##16] 255 ))
-"#),
-    (r#"single_hash_base_16"#, r#"echo $(( [#16] 255 ))
-"#),
-    (r#"base_in_arith_command_assignment"#, r#"(( x = [#16] 255 ))
-"#),
-    (r#"base_36_with_expression"#, r#"x=$(( [##36] 99999 + 1 ))
-"#),
-    (r#"base_after_operator"#, r#"echo $(( 2 * [#16] 5 ))
-"#),
-    (r#"base_with_char_code_operand"#, r#"ord=$(( [##16] #byte ))
-"#),
-    (r#"base_without_space"#, r#"echo $(( [##16]255+1 ))
-"#),
-    (r#"in_function_in_pipeline"#, r#"g() { echo $(( [##2] $1 )) | tr 0 o; }
-"#),
-    (r#"base_from_parameter"#, r#"echo $(( [#$b] 5 ))
-"#),
+    (
+        r#"double_hash_base_16"#,
+        r#"echo $(( [##16] 255 ))
+"#,
+    ),
+    (
+        r#"single_hash_base_16"#,
+        r#"echo $(( [#16] 255 ))
+"#,
+    ),
+    (
+        r#"base_in_arith_command_assignment"#,
+        r#"(( x = [#16] 255 ))
+"#,
+    ),
+    (
+        r#"base_36_with_expression"#,
+        r#"x=$(( [##36] 99999 + 1 ))
+"#,
+    ),
+    (
+        r#"base_after_operator"#,
+        r#"echo $(( 2 * [#16] 5 ))
+"#,
+    ),
+    (
+        r#"base_with_char_code_operand"#,
+        r#"ord=$(( [##16] #byte ))
+"#,
+    ),
+    (
+        r#"base_without_space"#,
+        r#"echo $(( [##16]255+1 ))
+"#,
+    ),
+    (
+        r#"in_function_in_pipeline"#,
+        r#"g() { echo $(( [##2] $1 )) | tr 0 o; }
+"#,
+    ),
+    (
+        r#"base_from_parameter"#,
+        r#"echo $(( [#$b] 5 ))
+"#,
+    ),
 ];
 
 #[test]
@@ -108,10 +135,11 @@ fn c18_arith_base_bash_output_is_unchanged() {
     }
 }
 
-const C18_ARITH_BASE_NEAR_MISSES: &[(&str, &str)] = &[
-    (r#"unterminated_arith"#, r#"echo $(( [##16] 255 )
-"#),
-];
+const C18_ARITH_BASE_NEAR_MISSES: &[(&str, &str)] = &[(
+    r#"unterminated_arith"#,
+    r#"echo $(( [##16] 255 )
+"#,
+)];
 
 #[test]
 fn c18_arith_base_near_misses_zsh_rejects_are_not_accepted() {
@@ -121,22 +149,46 @@ fn c18_arith_base_near_misses_zsh_rejects_are_not_accepted() {
 }
 
 const C23_MATH_FUNCTION_POSITIVES: &[(&str, &str)] = &[
-    (r#"empty_argument_list"#, r#"(( f() == 1 ))
-"#),
-    (r#"mathfunc_no_args"#, r#"(( rand48() < 2 ))
-"#),
-    (r#"with_arguments"#, r#"(( f(1, 2) > 0 )) && echo y
-"#),
-    (r#"in_expansion_assignment"#, r#"x=$(( abs(-3) + 1 ))
-"#),
-    (r#"in_if_condition"#, r#"if (( sqrt(16) == 4 )); then echo y; fi
-"#),
-    (r#"nested_calls"#, r#"echo $(( f(g(1)) ))
-"#),
-    (r#"with_space_before_paren_in_group"#, r#"(( (f()) + 1 ))
-"#),
-    (r#"combined_with_base_prefix"#, r#"echo $(( [##16] abs(-255) ))
-"#),
+    (
+        r#"empty_argument_list"#,
+        r#"(( f() == 1 ))
+"#,
+    ),
+    (
+        r#"mathfunc_no_args"#,
+        r#"(( rand48() < 2 ))
+"#,
+    ),
+    (
+        r#"with_arguments"#,
+        r#"(( f(1, 2) > 0 )) && echo y
+"#,
+    ),
+    (
+        r#"in_expansion_assignment"#,
+        r#"x=$(( abs(-3) + 1 ))
+"#,
+    ),
+    (
+        r#"in_if_condition"#,
+        r#"if (( sqrt(16) == 4 )); then echo y; fi
+"#,
+    ),
+    (
+        r#"nested_calls"#,
+        r#"echo $(( f(g(1)) ))
+"#,
+    ),
+    (
+        r#"with_space_before_paren_in_group"#,
+        r#"(( (f()) + 1 ))
+"#,
+    ),
+    (
+        r#"combined_with_base_prefix"#,
+        r#"echo $(( [##16] abs(-255) ))
+"#,
+    ),
 ];
 
 #[test]
@@ -176,10 +228,11 @@ fn c23_math_function_bash_output_is_unchanged() {
     }
 }
 
-const C23_MATH_FUNCTION_NEAR_MISSES: &[(&str, &str)] = &[
-    (r#"unbalanced_call"#, r#"(( f(1 ))
-"#),
-];
+const C23_MATH_FUNCTION_NEAR_MISSES: &[(&str, &str)] = &[(
+    r#"unbalanced_call"#,
+    r#"(( f(1 ))
+"#,
+)];
 
 #[test]
 fn c23_math_function_near_misses_zsh_rejects_are_not_accepted() {
@@ -187,4 +240,3 @@ fn c23_math_function_near_misses_zsh_rejects_are_not_accepted() {
         assert_hard_error(name, script);
     }
 }
-
