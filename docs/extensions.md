@@ -150,6 +150,7 @@ New `.shellcheckrc` keys:
 | `source-functions=a,b` | Calls to these wrappers are followed like `source ARG` when the first argument is a literal. Also `--source-functions=a,b` and a directive. |
 | `safe-vars=A,B` | Tells SC2086, SC2206 and related quoting checks that these variables never contain spaces or glob characters. A later assignment in the script still overrides it. Also `--safe-vars=A,B` and a directive. |
 | `strict-env-vars=true` | Stops treating all-uppercase names as environment variables, so unassigned ones get SC2154. Names on the internal list (`HOME`, `PWD` and so on) stay exempt. Also `--strict-env-vars` and a directive. |
+| `bash-version=3.2` | Warns about bash features newer than this release (SC9100 to SC9137). Also `--bash-version=3.2` and a directive. See [Bash version targeting](#bash-version-targeting). |
 | `source-path=RCDIR/sub` | `RCDIR` means the directory holding the rc file. Only a leading component is expanded. |
 | `color=auto` | Same as `--color`, taken from the rc file for the first input file. |
 | `wiki-link-count=N` | Same as `--wiki-link-count`, taken from the rc file for the first input file. |
@@ -189,6 +190,79 @@ that it keeps matching ShellCheck, so name them even alongside `all`.
 ```bash
 shelllint --enable=prefer-local,unused-function script.sh
 ```
+
+## Bash version targeting
+
+Scripts often have to run on an old bash, such as the 3.2 that macOS ships as
+`/bin/bash`, but get written and tested on bash 5. Name the oldest bash the script
+must run on, and shelllint warns about every feature newer than that:
+
+```bash
+shelllint --bash-version=3.2 script.sh
+```
+
+The setting is `--bash-version=X.Y`, `bash-version=X.Y` in `.shellcheckrc`, or
+`# shellcheck bash-version=X.Y` in a file. The flag wins, then the directive,
+then the rc file. A directive covers the whole file.
+
+- Values are real bash releases: 3.0 3.1 3.2 4.0 4.1 4.2 4.3 4.4 5.0 5.1 5.2 5.3.
+  A bare `4` means 4.0.
+- It's off until a target is set, and then output for other scripts doesn't change.
+- It applies only when the shell is bash (a bash shebang, `.bats`, or the bash
+  default). It's ignored for sh, dash, ksh and busybox, where the SC3xxx checks
+  already cover portability.
+- A bad `--bash-version` value exits with status 3. A bad rc value is an error under
+  `--strict-rc` and ignored otherwise. A bad directive value gives SC1146.
+- Each finding is a warning, `declare -A requires bash 4.0 (target is 3.2).`, reported
+  at every use. They're not optional checks: `-o all` and `--list-checks` are unchanged.
+  Each code has its own number so a project can turn off just the feature it polyfills,
+  with `--exclude=SC9102` or `disable=SC9102`.
+
+Not covered: behaviour changes that aren't syntax, such as the 3.2 quoted right-hand
+side of `=~`, and `**` without a visible `shopt -s globstar`.
+
+SC9100 to SC9199 are shelllint's own.
+
+| Code | Needs bash | Feature |
+| --- | --- | --- |
+| SC9100 | 3.1 | `printf -v var` |
+| SC9101 | 3.1 | `+=` append to a variable or array |
+| SC9102 | 4.0 | `declare -A`, `local -A`, `typeset -A` (associative arrays) |
+| SC9103 | 4.0 | `mapfile`, `readarray` |
+| SC9104 | 4.0 | `\|&` (pipe stderr too) |
+| SC9105 | 4.0 | `;&` and `;;&` case terminators |
+| SC9106 | 4.0 | `coproc` |
+| SC9107 | 4.0 | `${v,}` `${v,,}` `${v^}` `${v^^}` case modification |
+| SC9108 | 4.0 | Zero-padded or stepped brace expansion, `{01..10}` `{1..9..2}` |
+| SC9109 | 4.0 | `&>>` |
+| SC9110 | 4.0 | `$BASHPID` |
+| SC9111 | 4.0 | `shopt -s globstar` |
+| SC9112 | 4.0 | `read -t` with a fractional timeout |
+| SC9113 | 4.1 | `{fd}>` fd allocation |
+| SC9114 | 4.1 | `read -N` |
+| SC9115 | 4.1 | `printf -v 'a[i]'` (an array element) |
+| SC9116 | 4.2 | `declare -g` |
+| SC9117 | 4.2 | Negative index or length in `${a[-1]}` and `${v:0:-1}` |
+| SC9118 | 4.2 | `[[ -v var ]]`, `test -v var` |
+| SC9119 | 4.2 | `shopt -s lastpipe` |
+| SC9120 | 4.2 | `printf '%(fmt)T'` |
+| SC9121 | 4.3 | Negative index assignment or unset, `a[-1]=x` |
+| SC9122 | 4.3 | `declare -n`, `local -n` (namerefs) |
+| SC9123 | 4.3 | `[[ -R var ]]` |
+| SC9124 | 4.3 | `wait -n` |
+| SC9125 | 4.4 | `${v@Q}` `@E` `@P` `@A` `@a` |
+| SC9126 | 4.4 | `local -` |
+| SC9127 | 4.4 | `mapfile -d` |
+| SC9128 | 4.4 | `shopt -s inherit_errexit` |
+| SC9129 | 5.0 | `$EPOCHSECONDS`, `$EPOCHREALTIME`, `$BASH_ARGV0` |
+| SC9130 | 5.0 | `wait -f` |
+| SC9131 | 5.0 | `shopt -s localvar_inherit`, `localvar_unset` |
+| SC9132 | 5.1 | `$SRANDOM` |
+| SC9133 | 5.1 | `wait -p` |
+| SC9134 | 5.1 | `${v@U}` `@u` `@L` `@K` |
+| SC9135 | 5.2 | `${v@k}` |
+| SC9136 | 5.2 | `shopt -s patsub_replacement` |
+| SC9137 | 5.3 | `${ cmd; }` and `${\| cmd; }` |
 
 ## Containers
 
