@@ -67,6 +67,7 @@ use shelllint_core::interface::{
     CheckSpec, Fix as CoreFix, InsertionPoint as CoreInsertionPoint, NewSystemInterface, PositionedComment,
     Severity as CoreSeverity, Shell as CoreShell, empty_check_spec,
 };
+pub use shelllint_core::interface::{BashVersion, ParseBashVersionError};
 use shelllint_formatter::fixer::{apply_fix, merge_fixes};
 use shelllint_formatter::{haskell_lines, make_non_virtual};
 
@@ -476,6 +477,13 @@ impl LinterBuilder {
         if !codes.is_empty() {
             self.spec.included_warnings.get_or_insert_with(Vec::new).extend(codes);
         }
+        self
+    }
+
+    /// Warns about bash features newer than `version` (SC9100 to SC9137), such
+    /// as `declare -A` for 3.2. Only applies when the shell is bash. Off by default.
+    pub fn bash_version(mut self, version: BashVersion) -> Self {
+        self.spec.bash_version = Some(version);
         self
     }
 
