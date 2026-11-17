@@ -71,6 +71,7 @@ impl<'a> P<'a> {
 
     pub(crate) fn read_normal_word_part(&mut self, end: &str) -> PR<Id> {
         self.not_followed_by2(|p| p.one_of(end))?;
+        if self.env.is_zsh() && let Some(id) = self.zsh_word_part()? { return Ok(id); }
         // checkForParenthesis
         self.attempting(
             |_| Ok(()),

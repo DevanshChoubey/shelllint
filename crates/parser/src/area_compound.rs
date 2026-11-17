@@ -12,6 +12,7 @@ use crate::{alt, choice};
 
 impl<'a> P<'a> {
     pub(crate) fn read_if_clause(&mut self) -> PR<Id> {
+        if self.env.is_zsh() { return self.zsh_read_if_clause(); }
         self.called("if expression", |p| {
             let start = p.start_span();
             let pos = p.get_position();
@@ -169,6 +170,7 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_brace_group(&mut self) -> PR<Id> {
+        if self.env.is_zsh() { return self.zsh_read_brace_group(); }
         self.called("brace group", |p| {
             let start = p.start_span();
             p.char_('{')?;
@@ -256,6 +258,7 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_do_group(&mut self, kw_id: Id) -> PR<Vec<Id>> {
+        if self.env.is_zsh() && let Some(list) = self.zsh_try_brace_body()? { return Ok(list); }
         self.optional(|p| {
             p.try_(|p| p.look_ahead(|p| p.g_done()))?;
             p.parse_problem_at_id(kw_id, ErrorC, 1057, "Did you forget the 'do' for this loop?");
@@ -588,6 +591,7 @@ impl<'a> P<'a> {
             p.alt(read_with_function, read_without_function)
         }
 
+        if self.env.is_zsh() && let Some(id) = self.zsh_function_definition()? { return Ok(id); }
         self.called("function", |p| {
             let start = p.start_span();
             let (kw, parens, name) = p.try_(read_function_signature)?;
@@ -687,7 +691,7 @@ impl<'a> P<'a> {
 
         // If the next word is a keyword, readNormalWord will trigger a warning
         let has_keyword = self.is_followed_by(|p| p.read_keyword())?;
-        let has_word = self.is_followed_by(|p| p.read_normal_word())?;
+        let has_word = !(self.env.is_zsh() && self.zsh_lbrace_ahead()) && self.is_followed_by(|p| p.read_normal_word())?;
 
         if has_word && !(has_keyword || has_dash_ao) {
             // We have other words following, and no error has been emitted.
@@ -705,7 +709,8 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_compound_command(&mut self) -> PR<Id> {
-        let cmd = choice!(
+        let zsh_anonymous = if self.env.is_zsh() { self.zsh_anonymous_function()? } else { None };
+        let cmd = if let Some(anon) = zsh_anonymous { anon } else { choice!(
             self,
             |p| p.read_brace_group(),
             |p| {
@@ -733,7 +738,7 @@ impl<'a> P<'a> {
             |p| p.read_case_clause(),
             |p| p.read_bats_test(),
             |p| p.read_function_definition(),
-        )?;
+        )? };
         let redirs = self.many(|p| p.read_io_redirect())?;
         let mut all = vec![cmd];
         all.extend(redirs.iter().copied());

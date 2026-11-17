@@ -319,6 +319,11 @@ impl<'a> P<'a> {
         self.touch();
     }
 
+    /// DIVERGENCE: zsh extension. The characters already consumed, for look-behind.
+    pub(crate) fn consumed_chars(&self) -> &[char] {
+        &self.input.buf[..self.input.at]
+    }
+
     /// `getInput`
     pub fn get_input(&mut self) -> Input {
         self.touch();
