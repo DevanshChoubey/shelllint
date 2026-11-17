@@ -87,7 +87,10 @@ fn c04_parses_two_groups_in_function() {
 
 #[test]
 fn c04_guard_bash_unchanged_two_groups_in_function() {
-    assert_bash_today("f() { [[ $1 == (foo|bar)(baz|qux) ]] && return 0; return 1; }\n", &[1009, 1073, 1027, 1036, 1072]);
+    assert_bash_today(
+        "f() { [[ $1 == (foo|bar)(baz|qux) ]] && return 0; return 1; }\n",
+        &[1009, 1073, 1027, 1036, 1072],
+    );
 }
 
 #[test]
@@ -352,12 +355,17 @@ fn c07_guard_bash_unchanged_groups_joined_by_bar() {
 
 #[test]
 fn c07_parses_multiline_in_function() {
-    assert_zsh_parses("f() {\n  case $1 in\n    (a|b)*) echo ab ;;\n    <->) echo num ;;\n    *) echo other ;;\n  esac\n}\n");
+    assert_zsh_parses(
+        "f() {\n  case $1 in\n    (a|b)*) echo ab ;;\n    <->) echo num ;;\n    *) echo other ;;\n  esac\n}\n",
+    );
 }
 
 #[test]
 fn c07_guard_bash_unchanged_multiline_in_function() {
-    assert_bash_today("f() {\n  case $1 in\n    (a|b)*) echo ab ;;\n    <->) echo num ;;\n    *) echo other ;;\n  esac\n}\n", &[1009, 1073, 1072, 1074]);
+    assert_bash_today(
+        "f() {\n  case $1 in\n    (a|b)*) echo ab ;;\n    <->) echo num ;;\n    *) echo other ;;\n  esac\n}\n",
+        &[1009, 1073, 1072, 1074],
+    );
 }
 
 #[test]
@@ -381,22 +389,22 @@ fn c07_near_miss_is_rejected_label_without_close_paren() {
 }
 
 #[test]
-fn c17_parses_flag_I() {
+fn c17_parses_flag_i() {
     assert_zsh_parses("echo $a[(I)x]\n");
 }
 
 #[test]
-fn c17_guard_bash_unchanged_flag_I() {
+fn c17_guard_bash_unchanged_flag_i() {
     assert_bash_today("echo $a[(I)x]\n", &[1087, 2154, 2086, 1036, 1088]);
 }
 
 #[test]
-fn c17_parses_flag_Ie_with_expansion() {
+fn c17_parses_flag_ie_with_expansion() {
     assert_zsh_parses("echo $a[(Ie)$w]\n");
 }
 
 #[test]
-fn c17_guard_bash_unchanged_flag_Ie_with_expansion() {
+fn c17_guard_bash_unchanged_flag_ie_with_expansion() {
     assert_bash_today("echo $a[(Ie)$w]\n", &[1087, 2154, 2086, 1036, 1088]);
 }
 
@@ -457,7 +465,10 @@ fn c17_parses_special_param_in_function() {
 
 #[test]
 fn c17_guard_bash_unchanged_special_param_in_function() {
-    assert_bash_today("f() { local i=1; print -r -- $path[$i] $path[(i)/usr/bin]; }\n", &[1009, 1073, 1036, 1056, 1072]);
+    assert_bash_today(
+        "f() { local i=1; print -r -- $path[$i] $path[(i)/usr/bin]; }\n",
+        &[1009, 1073, 1036, 1056, 1072],
+    );
 }
 
 #[test]
@@ -611,22 +622,22 @@ fn c27_guard_bash_unchanged_flag_r_lhs() {
 }
 
 #[test]
-fn c27_parses_flag_I_unary() {
+fn c27_parses_flag_i_unary() {
     assert_zsh_parses("[[ -n $a[(I)x] ]]\n");
 }
 
 #[test]
-fn c27_guard_bash_unchanged_flag_I_unary() {
+fn c27_guard_bash_unchanged_flag_i_unary() {
     assert_bash_today("[[ -n $a[(I)x] ]]\n", &[1073, 1036, 1072]);
 }
 
 #[test]
-fn c27_parses_flag_Ie_numeric_compare() {
+fn c27_parses_flag_ie_numeric_compare() {
     assert_zsh_parses("if [[ $a[(Ie)$w] -gt 0 ]]; then :; fi\n");
 }
 
 #[test]
-fn c27_guard_bash_unchanged_flag_Ie_numeric_compare() {
+fn c27_guard_bash_unchanged_flag_ie_numeric_compare() {
     assert_bash_today("if [[ $a[(Ie)$w] -gt 0 ]]; then :; fi\n", &[1009, 1073, 1036, 1072]);
 }
 
