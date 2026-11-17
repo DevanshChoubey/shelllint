@@ -209,6 +209,10 @@ impl Input {
     }
 }
 
+/// DIVERGENCE: zsh extension. Nodes that copies of function bodies may create
+/// in one parse (`zsh_copy_budget`).
+pub(crate) const ZSH_COPY_BUDGET: usize = 1 << 16;
+
 /// Everything `P` restores when Parsec would continue from an earlier state.
 #[derive(Clone, Debug)]
 pub struct Checkpoint {
@@ -248,6 +252,9 @@ pub struct P<'a> {
     /// stays unique. A failed attempt is a fact about its input, so replaying
     /// its error is equivalent to re-parsing it, without the exponential cost.
     pub(crate) zsh_nested_failed: std::collections::HashMap<(usize, usize), (Input, ParseError)>,
+    /// zsh only: tree nodes that may still be copied for extra function names
+    /// (see `zsh_function_definition`). Not rolled back: copies are never undone.
+    pub(crate) zsh_copy_budget: usize,
 }
 
 impl<'a> P<'a> {
@@ -270,6 +277,7 @@ impl<'a> P<'a> {
             zsh_short_if: false,
             zsh_dquote: false,
             zsh_nested_failed: std::collections::HashMap::new(),
+            zsh_copy_budget: ZSH_COPY_BUDGET,
         }
     }
 

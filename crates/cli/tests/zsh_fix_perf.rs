@@ -55,3 +55,24 @@ fn unclosed_braces_with_quotes_inside_finish_fast() {
     let (_, took) = timed_zsh_codes(&script);
     assert!(took < LIMIT, "quoted unclosed braces took {took:?}");
 }
+
+/// `f g() { ` repeated `d` times, `true`, then `}` `d` times.
+fn nested_multi_name_functions(d: usize) -> String {
+    format!("{}true{}\n", "f g() { ".repeat(d), " }".repeat(d))
+}
+
+#[test]
+fn nested_multi_name_functions_finish_fast_at_depth_forty() {
+    let (codes, took) = timed_zsh_codes(&nested_multi_name_functions(40));
+    assert!(took < LIMIT, "depth 40 took {took:?}");
+    assert_eq!(codes, vec![2329], "depth 40 codes changed");
+}
+
+#[test]
+fn nested_multi_name_functions_small_depth_keeps_per_name_diagnostics() {
+    // Each name carries its own copy of the body, so the innermost
+    // unused-result diagnostic is reported as it was before the fix.
+    assert_eq!(zsh_codes("f g() { echo $x; }\n"), vec![2154]);
+    assert_eq!(zsh_codes("f g() { f g() { echo $x; }; }\n"), vec![2329, 2154]);
+    assert_eq!(zsh_codes(&nested_multi_name_functions(3)), vec![2329]);
+}

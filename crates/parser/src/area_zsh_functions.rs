@@ -248,6 +248,41 @@ impl<'a> P<'a> {
     }
 
     /// `T_Redirecting [] cmd`: how a compound command sits in a command list.
+    /// A fresh copy of the tree under `root`, with new ids and the same spans.
+    /// `None` when it holds a here-document: those are linked to their bodies
+    /// through `here_doc_map`, which a copy does not extend, so the caller
+    /// re-reads the text instead.
+    fn zsh_copy_subtree(&mut self, root: Id) -> Option<Id> {
+        let mut nodes = Vec::new();
+        self.user.ast.analyze(root, &mut |id| nodes.push(id), &mut |_| {});
+        if nodes.iter().any(|&id| matches!(self.user.ast.get(id), Token::T_HereDoc(..))) {
+            return None;
+        }
+        if nodes.len() > self.zsh_copy_budget {
+            return Some(self.node_empty_group_for(root));
+        }
+        self.zsh_copy_budget -= nodes.len();
+        let mut map = std::collections::HashMap::new();
+        for &old in &nodes {
+            let new = self.get_new_id_for(old);
+            map.insert(old, new);
+        }
+        for &old in &nodes {
+            let mut t = self.user.ast.get(old).clone();
+            t.map_children(&mut |c| map[&c]);
+            let new = map[&old];
+            self.node(new, t);
+        }
+        Some(map[&root])
+    }
+
+    /// An empty `{ }` standing in for a body that is not copied (no parse
+    /// problem: the body was already read once).
+    fn node_empty_group_for(&mut self, root: Id) -> Id {
+        let id = self.get_new_id_for(root);
+        self.node(id, Token::T_BraceGroup(Vec::new()))
+    }
+
     fn zsh_wrap_command(&mut self, cmd: Id) -> Id {
         let id = self.get_new_id_for(cmd);
         self.node(id, Token::T_Redirecting(Vec::new(), cmd))
@@ -539,11 +574,18 @@ impl<'a> P<'a> {
         let end = (self.get_input(), self.get_position());
         let mut defs = vec![self.zsh_wrap_command(first)];
         for other in &names[1..] {
-            let again = self.ignore_problems_of(|p| {
-                p.set_input(body_input.clone());
-                p.set_position(body_pos);
-                p.alt(|p| p.read_brace_group(), |p| p.read_subshell())
-            })?;
+            // DIVERGENCE: the body is parsed once and each further name gets a
+            // copy of its tree. Copies of nested multi-name bodies compound (a
+            // body holding two copies of an inner body doubles at each level),
+            // so past a node budget the extra name gets an empty body instead.
+            let again = match self.zsh_copy_subtree(body) {
+                Some(copy) => copy,
+                None => self.ignore_problems_of(|p| {
+                    p.set_input(body_input.clone());
+                    p.set_position(body_pos);
+                    p.alt(|p| p.read_brace_group(), |p| p.read_subshell())
+                })?,
+            };
             let fid = self.get_new_id_for(id);
             let f = self.node(fid, Token::T_Function(kw, pa, other.clone(), again));
             defs.push(self.zsh_wrap_command(f));

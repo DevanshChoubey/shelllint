@@ -560,7 +560,8 @@ impl Token {
     }
 
     /// Haskell's derived `Functor`: apply `g` to every `t` field.
-    fn map_children(&mut self, g: &mut dyn FnMut(Id) -> Id) {
+    // DIVERGENCE: public so the parser can copy a subtree (zsh multi-name functions).
+    pub fn map_children(&mut self, g: &mut dyn FnMut(Id) -> Id) {
         let mut f = |x: &mut Id| *x = g(*x);
         for_each_child!(self, f);
     }
