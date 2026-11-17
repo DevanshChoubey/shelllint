@@ -781,13 +781,15 @@ fn run_zsh(script: &str) -> Option<(String, String)> {
 /// is static on purpose). Skipped, loudly, when there is no zsh.
 #[test]
 fn rows_match_real_zsh() {
+    if !std::path::Path::new("/usr/bin/zsh").exists() {
+        // Not a failure: CI images without zsh still run the rest of the table.
+        eprintln!("SKIPPED rows_match_real_zsh: /usr/bin/zsh is missing, so the zsh option rows were NOT checked");
+        return;
+    }
     let mut ran = 0;
     let mut failures = Vec::new();
     for r in rows() {
-        let Some((stdout, _stderr)) = run_zsh(r.script) else {
-            eprintln!("rows_match_real_zsh: /usr/bin/zsh not found, skipped");
-            return;
-        };
+        let (stdout, _stderr) = run_zsh(r.script).expect("/usr/bin/zsh exists");
         ran += 1;
         let got: BTreeMap<String, String> =
             stdout.lines().filter_map(|l| l.split_once(':')).map(|(k, v)| (k.to_string(), v.to_string())).collect();
