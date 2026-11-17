@@ -6,7 +6,9 @@
 use super::too_new;
 use shelllint_analyzer::analyzerlib::{Comments, Params};
 use shelllint_core::ast::{Id, Token};
-use shelllint_core::astlib::{get_literal_string, is_special_variable_char, is_variable_char, oversimplify};
+use shelllint_core::astlib::{
+    get_associative_arrays, get_literal_string, is_special_variable_char, is_variable_char, oversimplify,
+};
 
 pub fn check(p: &Params<'_>, t: Id, c: &mut Comments) {
     match p.ast.get(t) {
@@ -75,7 +77,9 @@ fn split_braced(s: &str) -> Braced<'_> {
 fn braced(p: &Params<'_>, t: Id, c: &mut Comments, s: &str) {
     let b = split_braced(s);
     if let Some(ix) = b.index {
-        if is_negative_index(ix) {
+        // `${m[-1]}` on an associative array is a string key, valid in every version.
+        // Only looked up when a negative index is seen, which keeps the common path cheap.
+        if is_negative_index(ix) && !is_associative(p, s) {
             too_new(p, c, t, 9117);
         }
     }
@@ -105,6 +109,14 @@ fn braced(p: &Params<'_>, t: Id, c: &mut Comments, s: &str) {
             }
         }
     }
+}
+
+/// Whether the array named at the start of `s` (after a `#`/`!` prefix) is declared
+/// associative anywhere in the script.
+fn is_associative(p: &Params<'_>, s: &str) -> bool {
+    let s = s.strip_prefix(['#', '!']).unwrap_or(s);
+    let name: String = s.chars().take_while(|&ch| is_variable_char(ch)).collect();
+    !name.is_empty() && get_associative_arrays(p.ast, p.root).contains(&name)
 }
 
 /// A literal negative subscript: `-1`, ` -2 `. `$i-1` and `@` are not.

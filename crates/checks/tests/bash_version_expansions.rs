@@ -145,3 +145,11 @@ fn sh_and_unset_target_stay_quiet() {
 fn message_names_feature_and_target() {
     assert_eq!(messages("3.2", "echo \"${v^^}\"\n"), ["case modification in ${..} requires bash 4.0 (target is 3.2)."]);
 }
+
+#[test]
+fn sc9117_skips_associative_arrays() {
+    // `-1` is a string key on an associative array; only `declare -A` itself is reported
+    let s = "declare -A m\necho \"${m[-1]}\" \"${#m[-1]}\"\n";
+    assert_eq!(bash("3.0", s), vec![9102]);
+    assert!(!bash("4.1", "declare -a m\necho \"${m[-1]}\"\n").is_empty());
+}
