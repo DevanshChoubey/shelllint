@@ -50,4 +50,3 @@ fn zsh_word_of_many_braces_finishes_fast() {
     let (_, took) = timed_zsh_codes(&script);
     assert!(took < LIMIT, "4k braces in one zsh word took {took:?}");
 }
-
