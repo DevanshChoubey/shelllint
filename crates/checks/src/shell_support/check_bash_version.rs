@@ -48,7 +48,8 @@ const fn row(code: Code, major: u8, minor: u8, name: &'static str) -> Feature {
     Feature { code, version: BashVersion::release(major, minor), name }
 }
 
-/// Every feature, in code order. Versions are checked against bash's NEWS.
+/// Every feature, in code order. Versions are checked against bash's NEWS. The stepped brace
+/// form `{1..9..2}` is not in NEWS, so SC9108 covers zero-padding only.
 pub const FEATURES: [Feature; 38] = [
     row(9100, 3, 1, "printf -v"),
     row(9101, 3, 1, "+= append"),
@@ -58,7 +59,7 @@ pub const FEATURES: [Feature; 38] = [
     row(9105, 4, 0, ";& and ;;& case terminators"),
     row(9106, 4, 0, "coproc"),
     row(9107, 4, 0, "case modification in ${..}"),
-    row(9108, 4, 0, "zero-padded or stepped brace expansion"),
+    row(9108, 4, 0, "zero-padded brace expansion"),
     row(9109, 4, 0, "&>>"),
     row(9110, 4, 0, "$BASHPID"),
     row(9111, 4, 0, "shopt -s globstar"),

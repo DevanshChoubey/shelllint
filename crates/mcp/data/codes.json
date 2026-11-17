@@ -1955,7 +1955,7 @@
   "code": 9108,
   "check": "checkBashVersion",
   "severity": "warning",
-  "message": "zero-padded or stepped brace expansion requires bash 4.0 (target is older than 4.0).",
+  "message": "zero-padded brace expansion requires bash 4.0 (target is older than 4.0).",
   "bad": "echo {01..10}",
   "good": "echo {1..10}"
  },
