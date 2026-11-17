@@ -34,7 +34,7 @@ impl<'a> P<'a> {
             1086,
             "Don't use $ on the iterator name in for loops.",
         )?;
-        let name = self.then_skip(|p| p.read_variable_name(), |p| p.allspacing())?;
+        let name = self.then_skip(|p| p.zsh_for_name(), |p| p.allspacing())?;
         let extra = self.zsh_for_extra_names()?;
         let values = choice!(
             self,
@@ -57,6 +57,21 @@ impl<'a> P<'a> {
         Ok(self.node(id, Token::T_ForIn(name, values, group)))
     }
 
+    /// A loop variable: an identifier, or digits (`for 1 2 3; do ...` loops
+    /// over the positional parameters).
+    fn zsh_for_name(&mut self) -> PR<String> {
+        self.alt(
+            |p| p.read_variable_name(),
+            |p| {
+                p.try_(|p| {
+                    let ds = p.many1(|p| p.digit())?;
+                    p.not_followed_by2(|p| p.variable_chars())?;
+                    Ok(ds.into_iter().collect())
+                })
+            },
+        )
+    }
+
     /// `k v` of `for k v in ...` / `for k v (...)` / `for k v; do`: more names,
     /// which must be followed by `in`, `do`, `(`, `{`, `;` or a newline.
     #[allow(clippy::type_complexity)]
@@ -72,7 +87,7 @@ impl<'a> P<'a> {
                             p.not_followed_by2(|p| p.g_in())?;
                             p.not_followed_by2(|p| p.g_do())?;
                             let start = p.get_position();
-                            let n = p.read_variable_name()?;
+                            let n = p.zsh_for_name()?;
                             let end = p.get_position();
                             p.allspacing()?;
                             Ok((start, end, n))
