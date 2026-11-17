@@ -121,7 +121,7 @@ pub fn group_with<K: PartialEq>(
 
 /// Realign comments from a tabstop of 8 to 1
 pub fn make_non_virtual(comments: &[PositionedComment], contents: &str) -> Vec<PositionedComment> {
-    let list = haskell_lines(contents);
+    let list = fixer::FileLines::new(haskell_lines(contents));
     comments
         .iter()
         .map(|c| {
@@ -132,7 +132,7 @@ pub fn make_non_virtual(comments: &[PositionedComment], contents: &str) -> Vec<P
         .collect()
 }
 
-fn untabbed_fix(f: &Fix, arr: &[&str]) -> Fix {
+fn untabbed_fix(f: &Fix, arr: &fixer::FileLines) -> Fix {
     Fix { replacements: f.replacements.iter().map(|r| fixer::remove_tab_stops_replacement(r, arr)).collect() }
 }
 
