@@ -1886,5 +1886,309 @@
   "message": "Prefer == over = for string comparisons in Bash tests.",
   "bad": "[[ $@ = $@ ]]",
   "good": "[[ \"$x\" == \"$y\" ]]"
+ },
+ {
+  "code": 9100,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "printf -v requires bash 3.1 (target is older than 3.1).",
+  "bad": "printf -v v \"%s\" x",
+  "good": "printf \"%s\" x"
+ },
+ {
+  "code": 9101,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "+= append requires bash 3.1 (target is older than 3.1).",
+  "bad": "s=a; s+=b",
+  "good": "s=a; s=${s}b"
+ },
+ {
+  "code": 9102,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "declare -A requires bash 4.0 (target is older than 4.0).",
+  "bad": "declare -A m",
+  "good": "declare -a m"
+ },
+ {
+  "code": 9103,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "mapfile requires bash 4.0 (target is older than 4.0).",
+  "bad": "mapfile -t lines < f",
+  "good": "while read -r l; do :; done < f"
+ },
+ {
+  "code": 9104,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "|& requires bash 4.0 (target is older than 4.0).",
+  "bad": "cmd |& tee log",
+  "good": "cmd 2>&1 | tee log"
+ },
+ {
+  "code": 9105,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": ";& and ;;& case terminators requires bash 4.0 (target is older than 4.0).",
+  "bad": "case $x in a) echo a ;& b) echo b ;; esac",
+  "good": "case $x in a) echo a ;; b) echo b ;; esac"
+ },
+ {
+  "code": 9106,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "coproc requires bash 4.0 (target is older than 4.0).",
+  "bad": "coproc cat",
+  "good": "cat"
+ },
+ {
+  "code": 9107,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "case modification in ${..} requires bash 4.0 (target is older than 4.0).",
+  "bad": "echo \"${v,,}\"",
+  "good": "echo \"${v}\""
+ },
+ {
+  "code": 9108,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "zero-padded brace expansion requires bash 4.0 (target is older than 4.0).",
+  "bad": "echo {01..10}",
+  "good": "echo {1..10}"
+ },
+ {
+  "code": 9109,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "&>> requires bash 4.0 (target is older than 4.0).",
+  "bad": "cmd &>> log",
+  "good": "cmd >> log 2>&1"
+ },
+ {
+  "code": 9110,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "$BASHPID requires bash 4.0 (target is older than 4.0).",
+  "bad": "echo \"$BASHPID\"",
+  "good": "echo \"$$\""
+ },
+ {
+  "code": 9111,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "shopt -s globstar requires bash 4.0 (target is older than 4.0).",
+  "bad": "shopt -s globstar",
+  "good": "shopt -s nullglob"
+ },
+ {
+  "code": 9112,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "fractional read -t requires bash 4.0 (target is older than 4.0).",
+  "bad": "read -t 0.5 x",
+  "good": "read -t 1 x"
+ },
+ {
+  "code": 9113,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "{fd}> fd allocation requires bash 4.1 (target is older than 4.1).",
+  "bad": "exec {fd}>f",
+  "good": "exec 3>f"
+ },
+ {
+  "code": 9114,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "read -N requires bash 4.1 (target is older than 4.1).",
+  "bad": "read -N 3 x",
+  "good": "read -n 3 x"
+ },
+ {
+  "code": 9115,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "printf -v with an array element requires bash 4.1 (target is older than 4.1).",
+  "bad": "printf -v 'a[1]' x",
+  "good": "printf -v v x"
+ },
+ {
+  "code": 9116,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "declare -g requires bash 4.2 (target is older than 4.2).",
+  "bad": "declare -g v=1",
+  "good": "declare v=1"
+ },
+ {
+  "code": 9117,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "negative index or length in ${..} requires bash 4.2 (target is older than 4.2).",
+  "bad": "echo \"${a[-1]}\"",
+  "good": "echo \"${a[1]}\""
+ },
+ {
+  "code": 9118,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "-v variable test requires bash 4.2 (target is older than 4.2).",
+  "bad": "[[ -v x ]]",
+  "good": "[[ -n ${x+set} ]]"
+ },
+ {
+  "code": 9119,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "shopt -s lastpipe requires bash 4.2 (target is older than 4.2).",
+  "bad": "shopt -s lastpipe",
+  "good": "shopt -s nullglob"
+ },
+ {
+  "code": 9120,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "printf %(fmt)T requires bash 4.2 (target is older than 4.2).",
+  "bad": "printf '%(%Y)T' -1",
+  "good": "date +%Y"
+ },
+ {
+  "code": 9121,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "negative array index assignment requires bash 4.3 (target is older than 4.3).",
+  "bad": "a[-1]=x",
+  "good": "a[1]=x"
+ },
+ {
+  "code": 9122,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "declare -n requires bash 4.3 (target is older than 4.3).",
+  "bad": "declare -n r=v",
+  "good": "declare r=v"
+ },
+ {
+  "code": 9123,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "[[ -R ]] requires bash 4.3 (target is older than 4.3).",
+  "bad": "[[ -R r ]]",
+  "good": "[[ -n r ]]"
+ },
+ {
+  "code": 9124,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "wait -n requires bash 4.3 (target is older than 4.3).",
+  "bad": "wait -n",
+  "good": "wait"
+ },
+ {
+  "code": 9125,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "${v@Q} style transformation requires bash 4.4 (target is older than 4.4).",
+  "bad": "echo \"${v@Q}\"",
+  "good": "echo \"${v}\""
+ },
+ {
+  "code": 9126,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "local - requires bash 4.4 (target is older than 4.4).",
+  "bad": "f() { local -; }",
+  "good": "f() { local x; }"
+ },
+ {
+  "code": 9127,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "mapfile -d requires bash 4.4 (target is older than 4.4).",
+  "bad": "mapfile -d '' a < f",
+  "good": "mapfile a < f"
+ },
+ {
+  "code": 9128,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "shopt -s inherit_errexit requires bash 4.4 (target is older than 4.4).",
+  "bad": "shopt -s inherit_errexit",
+  "good": "shopt -s nullglob"
+ },
+ {
+  "code": 9129,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "$EPOCHSECONDS, $EPOCHREALTIME or $BASH_ARGV0 requires bash 5.0 (target is older than 5.0).",
+  "bad": "echo \"$EPOCHSECONDS\"",
+  "good": "date +%s"
+ },
+ {
+  "code": 9130,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "wait -f requires bash 5.0 (target is older than 5.0).",
+  "bad": "wait -f",
+  "good": "wait"
+ },
+ {
+  "code": 9131,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "shopt -s localvar_inherit or localvar_unset requires bash 5.0 (target is older than 5.0).",
+  "bad": "shopt -s localvar_inherit",
+  "good": "shopt -s nullglob"
+ },
+ {
+  "code": 9132,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "$SRANDOM requires bash 5.1 (target is older than 5.1).",
+  "bad": "echo \"$SRANDOM\"",
+  "good": "echo \"$RANDOM\""
+ },
+ {
+  "code": 9133,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "wait -p requires bash 5.1 (target is older than 5.1).",
+  "bad": "wait -p pid",
+  "good": "wait"
+ },
+ {
+  "code": 9134,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "${v@U} style transformation requires bash 5.1 (target is older than 5.1).",
+  "bad": "echo \"${v@U}\"",
+  "good": "echo \"${v}\""
+ },
+ {
+  "code": 9135,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "${v@k} requires bash 5.2 (target is older than 5.2).",
+  "bad": "echo \"${v@k}\"",
+  "good": "echo \"${v}\""
+ },
+ {
+  "code": 9136,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "shopt -s patsub_replacement requires bash 5.2 (target is older than 5.2).",
+  "bad": "shopt -s patsub_replacement",
+  "good": "shopt -s nullglob"
+ },
+ {
+  "code": 9137,
+  "check": "checkBashVersion",
+  "severity": "warning",
+  "message": "${ cmd; } command substitution requires bash 5.3 (target is older than 5.3).",
+  "bad": "x=${ date; }",
+  "good": "x=$(date)"
  }
 ]

@@ -96,6 +96,7 @@ const EXTENSION_HELP: &str = concat!(
     "                      --report-unused-disables   Report 'disable=' codes that suppress nothing (SC9006)\n",
     "                      --safe-vars=VAR1,VAR2..    Treat these variables as free of spaces and globs\n",
     "                      --strict-env-vars          Warn about unassigned uppercase variables too\n",
+    "                      --bash-version=X.Y         Warn about bash features newer than this release (3.0-5.3)\n",
 );
 
 /// `--help` as this port prints it: upstream's text (help.txt, verbatim)
@@ -195,6 +196,7 @@ fn every_help_flag_is_accepted() {
         ("--report-unused-disables", &["--report-unused-disables", "-"]),
         ("--safe-vars", &["--safe-vars=FOO,BAR", "-"]),
         ("--strict-env-vars", &["--strict-env-vars", "-"]),
+        ("--bash-version", &["--bash-version=3.2", "-"]),
     ];
     // An empty file list; `/dev/null` does not exist on Windows.
     let empty = tmpdir("empty-list").join("list");

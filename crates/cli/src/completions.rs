@@ -29,6 +29,9 @@ fn values_for(d: &OptDescr) -> Values {
         "color" => Values::Words(vec!["auto", "always", "never"]),
         "extended-analysis" => Values::Words(vec!["true", "false"]),
         "template" => Values::Words(vec!["jinja"]),
+        "bash-version" => {
+            Values::Words(vec!["3.0", "3.1", "3.2", "4.0", "4.1", "4.2", "4.3", "4.4", "5.0", "5.1", "5.2", "5.3"])
+        }
         "completions" => Values::Words(SHELL_NAMES.to_vec()),
         "rcfile" | "files-from" => Values::File,
         "source-path" => Values::Dir,

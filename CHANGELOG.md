@@ -8,6 +8,16 @@ Each release also states which upstream ShellCheck commit it ports.
 
 ## [Unreleased]
 
+### Added
+
+- Bash version targeting: `--bash-version=3.2`, the rc key `bash-version=3.2` or
+  `# shellcheck bash-version=3.2`. Bash scripts then get a warning for each feature
+  newer than the target, such as `declare -A`, `mapfile`, `${v,,}` or `${v@Q}`,
+  with one code per feature (SC9100 to SC9137). Valid targets are the bash releases
+  3.0 to 5.3. The flag wins over the directive, which wins over the rc key. Other
+  shells ignore it, and with no target set output is unchanged. See
+  [docs/extensions.md](docs/extensions.md#bash-version-targeting).
+
 ## [0.3.0] - 2026-11-15
 
 Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same

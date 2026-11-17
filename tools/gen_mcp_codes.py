@@ -62,6 +62,13 @@ for code in sorted(found):
     ])
     entries.append({"code": code, "check": check, "severity": sev, "message": msg, "bad": bad, "good": good})
 
+# SC9100-SC9199 (`--bash-version`, crates/checks/src/shell_support/check_bash_version.rs) are emitted
+# through a table, not literal calls, so the scan above cannot see them. Keep the hand-kept entries.
+if out.exists():
+    for e in json.load(open(out)):
+        if 9100 <= e["code"] <= 9199 and e["code"] not in found:
+            entries.append(e)
+
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text(json.dumps(entries, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 print(f"{len(entries)} codes; with bad example: {sum(e['bad'] is not None for e in entries)}; "

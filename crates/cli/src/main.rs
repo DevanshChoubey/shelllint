@@ -641,6 +641,13 @@ fn parse_option(flag: &Flag, options: &mut Options) -> Result<(), Status> {
         "report-unused-disables" => options.check_spec.report_unused_disables = true,
         "safe-vars" => options.check_spec.safe_vars.extend(split(',', val).into_iter().filter(|s| !s.is_empty())),
         "strict-env-vars" => options.check_spec.strict_env_vars = Some(true),
+        "bash-version" => match val.parse::<shelllint_core::interface::BashVersion>() {
+            Ok(v) => options.check_spec.bash_version = Some(v),
+            Err(e) => {
+                print_err(&format!("Invalid value for --bash-version: {}. {}.", val, e));
+                return Err(Status::SyntaxFailure);
+            }
+        },
         // These flags are handled specially in 'process'
         "format" | "files-from" | "recursive" | "exclude-path" | "changed-since" => {}
         other => print_err(&format!("Internal error for --{}. Please file a bug :(", other)),

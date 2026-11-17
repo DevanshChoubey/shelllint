@@ -39,6 +39,88 @@ pub trait SystemInterface: Sync {
     }
 }
 
+/// DIVERGENCE: not in upstream. A bash release that `--bash-version` can name:
+/// 3.0 3.1 3.2 4.0 4.1 4.2 4.3 4.4 5.0 5.1 5.2 5.3. Ordered by release.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub struct BashVersion {
+    major: u8,
+    minor: u8,
+}
+
+impl BashVersion {
+    /// Every release that can be named, oldest first.
+    pub const RELEASES: [(u8, u8); 12] =
+        [(3, 0), (3, 1), (3, 2), (4, 0), (4, 1), (4, 2), (4, 3), (4, 4), (5, 0), (5, 1), (5, 2), (5, 3)];
+
+    const fn is_release(major: u8, minor: u8) -> bool {
+        let mut i = 0;
+        while i < Self::RELEASES.len() {
+            if Self::RELEASES[i].0 == major && Self::RELEASES[i].1 == minor {
+                return true;
+            }
+            i += 1;
+        }
+        false
+    }
+
+    /// `None` unless `major.minor` is a real bash release.
+    pub const fn new(major: u8, minor: u8) -> Option<BashVersion> {
+        if Self::is_release(major, minor) { Some(BashVersion { major, minor }) } else { None }
+    }
+
+    /// Like [`BashVersion::new`] for constants; panics (at compile time in a `const`) on a non-release.
+    pub const fn release(major: u8, minor: u8) -> BashVersion {
+        assert!(Self::is_release(major, minor), "not a bash release");
+        BashVersion { major, minor }
+    }
+
+    pub const fn major(self) -> u8 {
+        self.major
+    }
+
+    pub const fn minor(self) -> u8 {
+        self.minor
+    }
+}
+
+impl std::fmt::Display for BashVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}", self.major, self.minor)
+    }
+}
+
+/// Why a string is not a [`BashVersion`].
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct ParseBashVersionError;
+
+impl std::fmt::Display for ParseBashVersionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("expected a bash release from 3.0 to 5.3, like 3.2 or 4.4 (a bare 4 means 4.0)")
+    }
+}
+
+impl std::error::Error for ParseBashVersionError {}
+
+impl std::str::FromStr for BashVersion {
+    type Err = ParseBashVersionError;
+
+    /// `MAJOR.MINOR`, or a bare `MAJOR` meaning `MAJOR.0`. Digits only, no leading zeros.
+    fn from_str(s: &str) -> Result<BashVersion, ParseBashVersionError> {
+        fn num(s: &str) -> Option<u8> {
+            let plain = !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit()) && (s == "0" || !s.starts_with('0'));
+            if plain { s.parse().ok() } else { None }
+        }
+        let (major, minor) = match s.split_once('.') {
+            Some((a, b)) => (num(a), num(b)),
+            None => (num(s), Some(0)),
+        };
+        match (major, minor) {
+            (Some(a), Some(b)) => BashVersion::new(a, b).ok_or(ParseBashVersionError),
+            _ => Err(ParseBashVersionError),
+        }
+    }
+}
+
 // ShellCheck input and output
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct CheckSpec {
@@ -67,6 +149,8 @@ pub struct CheckSpec {
     pub safe_vars: Vec<String>,
     /// Not in upstream: `--strict-env-vars`.
     pub strict_env_vars: Option<bool>,
+    /// Not in upstream: `--bash-version`. Warn about bash features newer than this release.
+    pub bash_version: Option<BashVersion>,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -97,6 +181,7 @@ pub fn empty_check_spec() -> CheckSpec {
         report_unused_disables: false,
         safe_vars: vec![],
         strict_env_vars: None,
+        bash_version: None,
     }
 }
 
@@ -151,6 +236,7 @@ pub struct AnalysisSpec {
     pub external_vars: Vec<String>,
     pub safe_vars: Vec<String>,
     pub strict_env_vars: Option<bool>,
+    pub bash_version: Option<BashVersion>,
 }
 
 pub fn new_analysis_spec() -> AnalysisSpec {
@@ -164,6 +250,7 @@ pub fn new_analysis_spec() -> AnalysisSpec {
         external_vars: vec![],
         safe_vars: vec![],
         strict_env_vars: None,
+        bash_version: None,
     }
 }
 

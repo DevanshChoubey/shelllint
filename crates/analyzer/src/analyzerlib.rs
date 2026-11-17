@@ -132,6 +132,8 @@ pub struct Params<'a> {
     pub safe_vars: std::rc::Rc<Vec<String>>,
     /// Not in upstream: `strict-env-vars` (uppercase names get SC2154 too).
     pub strict_env_vars: bool,
+    /// Not in upstream: `--bash-version` / `bash-version=`. Warn about bash features newer than this.
+    pub bash_version: Option<shelllint_core::interface::BashVersion>,
 }
 
 /// `variableFlow :: [StackData]`
@@ -403,6 +405,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             .strict_env_vars
             .or_else(|| shelllint_core::astlib::get_strict_env_vars_directive(ast, root))
             .unwrap_or(false),
+        bash_version: spec.bash_version.or_else(|| shelllint_core::astlib::get_bash_version_directive(ast, root)),
     };
     params.variable_flow = get_variable_flow(&params, root).into();
     // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`

@@ -356,6 +356,23 @@ impl<'a> P<'a> {
                     }
                 }
             }
+            // DIVERGENCE: `bash-version=` is not in upstream.
+            "bash-version" => {
+                let pos = self.get_position();
+                let value = self.annotation_filename()?;
+                match value.parse::<shelllint_core::interface::BashVersion>() {
+                    Ok(v) => vec![Annotation::BashVersion(v)],
+                    Err(_) => {
+                        self.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1146,
+                            "Unknown bash-version value. Expected a bash release from 3.0 to 5.3, like 3.2.",
+                        );
+                        vec![]
+                    }
+                }
+            }
             "external-sources" => {
                 let pos = self.get_position();
                 let value =
