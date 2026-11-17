@@ -46,6 +46,10 @@ commit as 0.4.0.
 - `. ~/x.sh` and `source ~/.bashrc` that cannot be followed (no `-x`, or the file
   is not found) now give SC1090, a warning, like ShellCheck, instead of an SC1091
   note about `./x.sh`. Following with `-x -P` is unchanged.
+- Long lines and many functions took quadratic time. A line of 20000 unquoted `$a`
+  words took 9 s, and 8000 unreachable functions took 21 s in bash (36 s in zsh).
+  Output-producing formats (gcc, json, diff) also copied the whole source line for
+  every finding. These now take time linear in the input, with identical output.
 
 ## [0.4.0] - 2026-11-17
 
