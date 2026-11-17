@@ -297,13 +297,17 @@ impl<'a> P<'a> {
         )?;
         self.allspacing()?;
 
-        self.optional(|p| {
-            p.try_(|p| p.look_ahead(|p| p.g_done()))?;
-            p.parse_problem_at_id(do_kw, ErrorC, 1060, "Can't have empty do clauses (use 'true' as a no-op).");
-            Ok(())
-        })?;
+        // DIVERGENCE: zsh accepts an empty loop body (`for x in a; do done`).
+        let zsh_empty = self.env.is_zsh() && self.is_followed_by(|p| p.g_done())?;
+        if !zsh_empty {
+            self.optional(|p| {
+                p.try_(|p| p.look_ahead(|p| p.g_done()))?;
+                p.parse_problem_at_id(do_kw, ErrorC, 1060, "Can't have empty do clauses (use 'true' as a no-op).");
+                Ok(())
+            })?;
+        }
 
-        let commands = self.read_compound_list()?;
+        let commands = if zsh_empty { Vec::new() } else { self.read_compound_list()? };
         self.or_fail(
             |p| p.g_done(),
             |p| {
@@ -528,6 +532,14 @@ impl<'a> P<'a> {
     pub(crate) fn read_case_separator(&mut self) -> PR<CaseType> {
         choice!(
             self,
+            |p| {
+                // zsh: `;|` resumes testing the following patterns (bash's `;;&`)
+                if !p.env.is_zsh() {
+                    return p.zero();
+                }
+                p.try_token(";|", |_, _| ())?;
+                Ok(CaseType::CaseContinue)
+            },
             |p| {
                 p.try_token(";;&", |_, _| ())?;
                 Ok(CaseType::CaseContinue)
@@ -762,6 +774,7 @@ impl<'a> P<'a> {
             )
                 },
                 |p| p.read_subshell(),
+                |p| p.zsh_repeat_loop(),
                 |p| p.read_while_clause(),
                 |p| p.read_until_clause(),
                 |p| p.read_if_clause(),

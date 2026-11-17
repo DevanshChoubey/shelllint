@@ -73,18 +73,41 @@ impl<'a> P<'a> {
     /// is also disowned, which the analysis does not model).
     pub(crate) fn zsh_disown_separator(&mut self) -> PR<Option<(char, (SourcePos, SourcePos))>> {
         let start = self.get_position();
+        // zsh also takes `&;`, `&|;` and `&!;` (the `;` is redundant, and the
+        // next command may be missing: `{ cat &|; }`)
         let found = self.option_maybe(|p| {
             p.try_(|p| {
                 p.char_('&')?;
-                p.one_of("|!")?;
-                // `a &|| b` is an error in zsh
-                p.not_followed_by2(|p| p.char_('|'))
+                let disown = p.option_maybe(|p| {
+                    p.try_(|p| {
+                        p.one_of("|!")?;
+                        // `a &|| b` is an error in zsh
+                        p.not_followed_by2(|p| p.char_('|'))
+                    })
+                })?;
+                if disown.is_none() {
+                    // plain `&` only when a `;` follows: `foo &; bar`
+                    p.try_(|p| {
+                        p.spacing()?;
+                        p.char_(';')?;
+                        p.not_followed_by2(|p| p.char_(';'))
+                    })?;
+                    return Ok(false);
+                }
+                Ok(true)
             })
         })?;
-        if found.is_none() {
-            return Ok(None);
-        }
+        let Some(disowned) = found else { return Ok(None) };
         let end = self.get_position();
+        self.spacing()?;
+        if disowned || self.is_followed_by(|p| p.char_(';'))? {
+            self.optional(|p| {
+                p.try_(|p| {
+                    p.char_(';')?;
+                    p.not_followed_by2(|p| p.char_(';'))
+                })
+            })?;
+        }
         self.spacing()?;
         Ok(Some(('&', (start, end))))
     }

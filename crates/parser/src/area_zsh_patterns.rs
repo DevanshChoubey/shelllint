@@ -65,7 +65,9 @@ impl<'a> P<'a> {
             // `x=(..)` is an array value and `=(..)` a process substitution:
             // not ours.
             let flag = ahead.get(1) == Some(&'#');
-            let group_ok = if at_start { pattern || flag } else { !after_eq };
+            // in a pattern operand `a=([b]#)` is a group; elsewhere `x=(..)` is an
+            // array value
+            let group_ok = if at_start { pattern || flag } else { pattern || !after_eq };
             if group_ok && let Some(g) = self.option_maybe(|p| p.zsh_group())? {
                 return Ok(g);
             }
@@ -259,6 +261,31 @@ impl<'a> P<'a> {
         }
     }
 
+    /// The index of an associative array under zsh: an optional flag group
+    /// `(e)` or `(I)`, then the key as a word.
+    pub(crate) fn zsh_assoc_index(&mut self) -> PR<Id> {
+        let start = self.start_span();
+        let flags = self.option_maybe(|p| {
+            p.try_(|p| {
+                let fs = p.start_span();
+                p.char_('(')?;
+                let body: String = p.many(|p| p.none_of(")]$`'\"\\ "))?.into_iter().collect();
+                p.char_(')')?;
+                let id = p.end_span(fs);
+                Ok(p.node(id, Token::T_Literal(format!("({body})"))))
+            })
+        })?;
+        let rest = self.read_index_span()?;
+        let mut parts = Vec::new();
+        parts.extend(flags);
+        match self.user.ast.get(rest).clone() {
+            Token::T_NormalWord(ps) => parts.extend(ps),
+            _ => parts.push(rest),
+        }
+        let id = self.end_span(start);
+        Ok(self.node(id, Token::T_NormalWord(parts)))
+    }
+
     /// Turns pending literal text into a `T_Literal` part.
     fn zsh_flush_literal(&mut self, parts: &mut Vec<Id>, text: &mut String, from: IncompleteInterval) {
         if text.is_empty() {
@@ -286,7 +313,7 @@ impl<'a> P<'a> {
         alt!(self, nested, |p: &mut Self| p.zsh_lit_char('{'))
     }
 
-    fn zsh_lit_char(&mut self, c: char) -> PR<Id> {
+    pub(crate) fn zsh_lit_char(&mut self, c: char) -> PR<Id> {
         let start = self.start_span();
         self.char_(c)?;
         let id = self.end_span(start);

@@ -168,7 +168,12 @@ impl<'a> P<'a> {
                         (&["let"], Self::read_let_suffix),
                         (&["eval"], Self::read_eval_suffix),
                     ];
-                    let parser = get_parser(Self::read_cmd_suffix, &chosen, &table);
+                    // DIVERGENCE: zsh `repeat N var=(a b)` runs an assignment N times.
+                    let parser = if p.env.is_zsh() && is_command(&chosen, &["repeat"]) {
+                        Self::read_modifier_suffix
+                    } else {
+                        get_parser(Self::read_cmd_suffix, &chosen, &table)
+                    };
                     let suffix = p.option(Vec::new(), parser)?;
 
                     let mut all = prefix.clone();

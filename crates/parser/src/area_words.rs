@@ -156,7 +156,7 @@ impl<'a> P<'a> {
 
     pub(crate) fn read_dollar_braced_literal(&mut self) -> PR<Id> {
         if self.env.is_zsh() && self.look_ahead(|p| p.char_('{')).is_ok() {
-            return self.zsh_braced_nested();
+            return if self.zsh_dquote { self.zsh_lit_char('{') } else { self.zsh_braced_nested() };
         }
         let start = self.start_span();
         let vars = self.reluctantly_till1(
@@ -391,7 +391,10 @@ impl<'a> P<'a> {
             let start = p.start_span();
             let start_pos = p.get_position();
             p.double_quote()?;
-            let x = p.many(|p| p.double_quoted_part())?;
+            let outer = std::mem::replace(&mut p.zsh_dquote, true);
+            let x = p.many(|p| p.double_quoted_part());
+            p.zsh_dquote = outer;
+            let x = x?;
             let end_pos = p.get_position();
             p.alt(|p| p.double_quote(), |p| p.fail("Expected end of double quoted string"))?;
             let id = p.end_span(start);

@@ -234,6 +234,9 @@ pub struct P<'a> {
     /// one-line short `if` (`if [[ c ]] cmd`), where a word after a compound
     /// condition is the body, not an error (SC1140/SC1141).
     pub(crate) zsh_short_if: bool,
+    /// zsh only: inside a double-quoted string, where a `{` in `${...}` does
+    /// not nest (`"${x:-{a}"` is complete), unlike an unquoted one.
+    pub(crate) zsh_dquote: bool,
 }
 
 impl<'a> P<'a> {
@@ -254,6 +257,7 @@ impl<'a> P<'a> {
             source_expansions: 0,
             expanded_sources: std::collections::HashSet::new(),
             zsh_short_if: false,
+            zsh_dquote: false,
         }
     }
 

@@ -185,7 +185,11 @@ impl<'a> P<'a> {
         self.called("command expansion", |p| {
             let start = p.start_span();
             p.try_(|p| p.string("$("))?;
-            let cmds = p.read_compound_list_or_empty()?;
+            // a command substitution is unquoted inside, even within "..."
+            let outer = std::mem::replace(&mut p.zsh_dquote, false);
+            let cmds = p.read_compound_list_or_empty();
+            p.zsh_dquote = outer;
+            let cmds = cmds?;
             p.alt(|p| p.char_(')'), |p| p.fail("Expected end of $(..) expression"))?;
             let id = p.end_span(start);
             Ok(p.node(id, Token::T_DollarExpansion(cmds)))

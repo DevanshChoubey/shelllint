@@ -148,6 +148,37 @@ impl<'a> P<'a> {
         )
     }
 
+    // ---- repeat -------------------------------------------------------------
+
+    /// `repeat N; do list; done` (and the same with the `do` on the next line).
+    /// The header is read as the ordinary simple command `repeat N`, and the
+    /// loop is modelled as a `while` whose condition is that command. The
+    /// short form `repeat N cmd` is just a simple command (see
+    /// `read_modifier_suffix`). Fails without consuming anything otherwise.
+    pub(crate) fn zsh_repeat_loop(&mut self) -> PR<Id> {
+        if !self.env.is_zsh() {
+            return self.zero();
+        }
+        self.try_(|p| {
+            let start = p.start_span();
+            p.look_ahead(|p| {
+                p.string("repeat")?;
+                p.not_followed_by2(|p| p.variable_chars())?;
+                Ok(())
+            })?;
+            let header = p.read_simple_command()?;
+            p.look_ahead(|p| {
+                p.optional(|p| p.read_sequential_sep())?;
+                p.allspacing()?;
+                p.g_do().map(drop)
+            })?;
+            p.optional(|p| p.read_sequential_sep())?;
+            let body = p.read_do_group(header)?;
+            let id = p.end_span(start);
+            Ok(p.node(id, Token::T_WhileExpression(vec![header], body)))
+        })
+    }
+
     // ---- if without then --------------------------------------------------
 
     /// `if cond` NEWLINE ... closed by `fi`, `}` or `)` instead of `then`.

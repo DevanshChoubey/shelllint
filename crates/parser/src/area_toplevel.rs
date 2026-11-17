@@ -1204,6 +1204,10 @@ impl<'a> P<'a> {
 
     fn parsed(&mut self, associative: &[String], name: &str, pos: SourcePos, src: &str) -> PR<Id> {
         if associative.iter().any(|s| s == name) {
+            if self.env.is_zsh() {
+                // DIVERGENCE: a zsh subscript may open with flags, `h[(e)$k]=v`.
+                return self.sub_parse(pos, |p| p.called("associative array index", |p| p.zsh_assoc_index()), src);
+            }
             self.sub_parse(pos, |p| p.called("associative array index", |p| p.read_index_span()), src)
         } else {
             self.sub_parse(
