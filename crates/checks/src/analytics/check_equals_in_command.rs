@@ -138,6 +138,11 @@ fn msg(params: &Params<'_>, original_token: Id, cmd: Id, leading: &[Id], eq: Id,
 
     // ======Hello======
     if leading.is_empty() && s.starts_with('=') {
+        // DIVERGENCE: `=ls` is zsh's EQUALS expansion (the path of `ls`), a valid
+        // command word, so SC2275 does not apply under zsh. `===` runs still do.
+        if params.shell_type == Shell::Zsh && !s.starts_with("==") && s.len() > 1 {
+            return;
+        }
         let single_word = match ast.get(original_token) {
             Token::T_SimpleCommand(assigns, words) if assigns.is_empty() && words.len() == 1 => Some(words[0]),
             _ => None,
@@ -179,6 +184,11 @@ fn msg(params: &Params<'_>, original_token: Id, cmd: Id, leading: &[Id], eq: Id,
             } else if variable_str.starts_with('#') {
                 // '$#=42' or '${#var}=42'
                 generic_msg(c, cmd);
+            } else if params.shell_type == Shell::Zsh && (variable_str == "0" || is_positional) {
+                // DIVERGENCE: zsh can assign `0=x` and `2=x` directly, so neither the
+                // BASH_ARGV0 advice (SC2277) nor SC2270 applies; `${0}=42` and `$2=2`
+                // are still run as a command whose name contains '='.
+                generic_msg(c, cmd);
             } else if variable_str == "0" {
                 // '${0}=42'
                 assign0_msg(params, id, fix_with(vec![replace_token(id, params, "BASH_ARGV0")]), c);
@@ -205,6 +215,11 @@ fn msg(params: &Params<'_>, original_token: Id, cmd: Id, leading: &[Id], eq: Id,
 
     // 2=42
     if leading.is_empty() && matches(s, &POSITIONAL_ASSIGNMENT_RE) {
+        // DIVERGENCE: `0=x` and `2=x` are real assignments in zsh, so there is
+        // nothing to report (SC2277/SC2270 are off under zsh).
+        if params.shell_type == Shell::Zsh {
+            return;
+        }
         if s.starts_with("0=") {
             assign0_msg(params, lit_id, fix_with(vec![replace_start(lit_id, params, 1, "BASH_ARGV0")]), c);
         } else {
