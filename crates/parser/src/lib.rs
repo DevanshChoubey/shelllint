@@ -24,6 +24,7 @@ mod area_redirect;
 mod area_spacing;
 mod area_toplevel;
 mod area_words;
+mod area_zsh_functions;
 mod rcdir;
 mod source_functions;
 
