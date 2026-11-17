@@ -171,6 +171,9 @@ pub struct Params<'a> {
     pub strict_env_vars: bool,
     /// Not in upstream: `--bash-version` / `bash-version=`. Warn about bash features newer than this.
     pub bash_version: Option<shelllint_core::interface::BashVersion>,
+    /// DIVERGENCE: the zsh option-state map behind [`Params::zsh_option`].
+    /// Built only when the shell is zsh; `None` for every other shell.
+    pub zsh_options: Option<std::rc::Rc<crate::zsh_options::ZshOptionMap>>,
 }
 
 /// `variableFlow :: [StackData]`
@@ -415,8 +418,9 @@ impl Params<'_> {
     /// | `ErrReturn` | off | not applicable |
     /// | `PipeFail` | `has_pipefail` | `set -o pipefail` as already tracked |
     ///
-    /// For zsh it returns the zsh 5.9 defaults until the tracker replaces it.
-    /// Evidence, from `/usr/bin/zsh -fc '[[ -o <opt> ]] && echo on || echo off'`
+    /// For zsh it reads the option-state map built by `crate::zsh_options` (the
+    /// zsh 5.9 defaults, changed by the `setopt`/`emulate` commands in effect at
+    /// `node`). Evidence for the defaults, from `/usr/bin/zsh -fc '[[ -o <opt> ]] && echo on || echo off'`
     /// (zsh 5.9 x86_64-ubuntu-linux-gnu), for every option:
     ///
     /// ```text
@@ -432,9 +436,13 @@ impl Params<'_> {
     /// nomatch off; and `emulate ksh` turns kshglob on. The bash entry for
     /// `KshGlob` follows what the parser reads under bash, not `emulate`.
     pub fn zsh_option(&self, node: Id, opt: ZshOpt) -> bool {
-        let _ = node;
         if self.shell_type == Shell::Zsh {
-            return matches!(opt, ZshOpt::NoMatch);
+            // The tracker (see `crate::zsh_options`) is built for every zsh
+            // analysis; a `Params` without one reads as the zsh defaults.
+            return match &self.zsh_options {
+                Some(map) => map.get(node, opt),
+                None => matches!(opt, ZshOpt::NoMatch),
+            };
         }
         match opt {
             ZshOpt::ShWordSplit | ZshOpt::KshArrays | ZshOpt::GlobSubst | ZshOpt::BsdEcho | ZshOpt::ShGlob => true,
@@ -515,6 +523,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             .or_else(|| shelllint_core::astlib::get_strict_env_vars_directive(ast, root))
             .unwrap_or(false),
         bash_version: spec.bash_version.or_else(|| shelllint_core::astlib::get_bash_version_directive(ast, root)),
+        zsh_options: (shell_type == Shell::Zsh).then(|| std::rc::Rc::new(crate::zsh_options::build(ast, root))),
     };
     params.variable_flow = get_variable_flow(&params, root).into();
     // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`

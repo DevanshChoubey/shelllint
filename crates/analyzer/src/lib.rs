@@ -9,3 +9,4 @@ pub mod api;
 pub mod cfg;
 pub mod cfg_analysis;
 pub mod testing;
+pub mod zsh_options;
