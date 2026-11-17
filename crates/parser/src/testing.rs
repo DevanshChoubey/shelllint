@@ -19,6 +19,8 @@ pub fn test_environment() -> Environment<'static> {
         current_filename: "myscript".to_string(),
         ignore_rc: false,
         shell_type_override: None,
+        fallback_shell: None,
+        dialect: shelllint_core::interface::Shell::Bash,
         ignore_directives: false,
     }
 }

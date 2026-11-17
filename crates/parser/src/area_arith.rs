@@ -18,7 +18,7 @@ impl<'a> P<'a> {
         self.arith_sequence()
     }
 
-    fn arith_spacing(&mut self) -> PR<()> {
+    pub(crate) fn arith_spacing(&mut self) -> PR<()> {
         self.many(|p| {
             alt!(p, |p| p.whitespace(), |p| {
                 p.try_(|p| p.string("\\\n"))?;
@@ -147,10 +147,14 @@ impl<'a> P<'a> {
     }
 
     fn arith_read_arith_term(&mut self) -> PR<Id> {
+        if self.env.is_zsh() {
+            return alt!(self, |p| p.arith_read_group(), |p| p.zsh_arith_call(), |p| p.arith_read_variable(), |p| p
+                .arith_read_expansion());
+        }
         alt!(self, |p| p.arith_read_group(), |p| p.arith_read_variable(), |p| p.arith_read_expansion())
     }
 
-    fn arith_sequence(&mut self) -> PR<Id> {
+    pub(crate) fn arith_sequence(&mut self) -> PR<Id> {
         self.arith_spacing()?;
         let start = self.start_span();
         let l = self.sep_by(
@@ -233,7 +237,11 @@ impl<'a> P<'a> {
         self.arith_split_by(|p| p.arith_read_any_negated(), &["**"])
     }
 
-    fn arith_read_any_negated(&mut self) -> PR<Id> {
+    pub(crate) fn arith_read_any_negated(&mut self) -> PR<Id> {
+        if self.env.is_zsh() {
+            return alt!(self, |p| p.zsh_arith_base_prefix(), |p| p.arith_read_negated(), |p| p
+                .arith_read_any_signed());
+        }
         alt!(self, |p| p.arith_read_negated(), |p| p.arith_read_any_signed())
     }
 

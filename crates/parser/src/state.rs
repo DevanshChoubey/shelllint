@@ -293,8 +293,29 @@ pub struct Environment<'a> {
     pub ignore_rc: bool,
     pub current_filename: String,
     pub shell_type_override: Option<Shell>,
+    /// DIVERGENCE: extension. The shell implied by the file name (see `ParseSpec`).
+    pub fallback_shell: Option<Shell>,
+    /// DIVERGENCE: extension. The shell dialect being parsed. Starts as the
+    /// override, else the file-name shell, else bash. The top-level read
+    /// (`read_script_file`) settles it once the shebang and directives are
+    /// known, by the same rule as the analyzer's `determine_shell`. Sourced
+    /// files keep the root's dialect.
+    pub dialect: Shell,
     /// DIVERGENCE: extension (`--ignore-directives`); in-file `disable=` is dropped.
     pub ignore_directives: bool,
+}
+
+impl Environment<'_> {
+    /// Is the script being parsed zsh? Every zsh parse rule is gated on this.
+    pub fn is_zsh(&self) -> bool {
+        self.dialect == Shell::Zsh
+    }
+
+    /// The dialect before the shebang is known: the override, else the
+    /// file-name shell, else bash.
+    pub fn initial_dialect(shell_type_override: Option<Shell>, fallback_shell: Option<Shell>) -> Shell {
+        shell_type_override.or(fallback_shell).unwrap_or(Shell::Bash)
+    }
 }
 
 /// Does this item on the context stack disable warnings for 'code'?

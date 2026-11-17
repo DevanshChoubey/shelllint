@@ -16,10 +16,10 @@ use crate::options::Options;
 const SKIPPED_DIRS: [&str; 4] = [".git", ".hg", ".svn", "node_modules"];
 
 /// File name extensions that mark a shell script.
-const SCRIPT_EXTENSIONS: [&str; 5] = ["sh", "bash", "dash", "ksh", "bats"];
+const SCRIPT_EXTENSIONS: [&str; 7] = ["sh", "bash", "dash", "ksh", "zsh", "zsh-theme", "bats"];
 
 /// Interpreters a shebang may name.
-const SCRIPT_SHELLS: [&str; 5] = ["sh", "bash", "dash", "ksh", "busybox"];
+const SCRIPT_SHELLS: [&str; 6] = ["sh", "bash", "dash", "ksh", "zsh", "busybox"];
 
 /// How much of a file is read to look for a shebang.
 const SHEBANG_BYTES: u64 = 256;
@@ -390,6 +390,8 @@ mod tests {
             "#! /bin/ksh\n",
             "#!/bin/busybox sh\n",
             "#!/usr/bin/env -u X sh\n",
+            "#!/bin/zsh\n",
+            "#!/usr/bin/env zsh\n",
         ] {
             assert!(shebang_is_shell(yes.as_bytes()), "{yes:?}");
         }

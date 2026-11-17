@@ -224,6 +224,38 @@ pub fn add_double_quotes_around(params: &Params<'_>, token: Id) -> Fix {
     surround_with(token, params, "\"")
 }
 
+/// DIVERGENCE: zsh leaves the result of an unquoted expansion alone unless
+/// `SH_WORD_SPLIT` or `GLOB_SUBST` is on or the script writes `${=x}` / `${~x}`.
+/// For every other shell the option queries answer "on", so this is always
+/// true there.
+fn zsh_may_split_or_glob(params: &Params<'_>, token: Id) -> bool {
+    use crate::zsh_support::{globs, splits};
+    params.shell_type != Shell::Zsh
+        || splits(params, token)
+        || globs(params, token)
+        || zsh_in_single_bracket_test(params, token)
+}
+
+// DIVERGENCE: zsh drops an unquoted expansion that is empty, so `[ $x = y ]` with
+// `x=` is `[ = y ]`, a parse error, even with no splitting or globbing. SC2086
+// therefore still fires for operands of `[ ]` and `test` under zsh (`[[ ]]`
+// keeps its operands as single words and stays quote-free).
+fn zsh_in_single_bracket_test(params: &Params<'_>, token: Id) -> bool {
+    use shelllint_core::astlib::{get_command_name, get_path};
+    for anc in get_path(params.ast, token).into_iter().skip(1) {
+        match params.ast.get(anc) {
+            Token::T_Condition(shelllint_core::ast::ConditionType::SingleBracket, _, _) => return true,
+            Token::T_Condition(..) => return false,
+            Token::T_SimpleCommand(..) => {
+                return matches!(get_command_name(params.ast, anc).as_deref(), Some("test") | Some("["));
+            }
+            Token::T_Function(..) => return false,
+            _ => {}
+        }
+    }
+    false
+}
+
 /// `checkSpacefulnessCfg' dirtyPass`, shared by `checkSpacefulnessCfg`
 /// (`True`) and `checkVerboseSpacefulnessCfg` (`False`).
 pub fn check_spacefulness_cfg_prime(dirty_pass: bool, params: &Params<'_>, token: Id, c: &mut Comments) {
@@ -236,7 +268,8 @@ pub fn check_spacefulness_cfg_prime(dirty_pass: bool, params: &Params<'_>, token
         && !is_counting_reference(params.ast, token)
         && !is_quote_free(params.ast, params.shell_type, token)
         && !is_quoted_alternative_reference(params.ast, token)
-        && !used_as_command_name(params.ast, token);
+        && !used_as_command_name(params.ast, token)
+        && zsh_may_split_or_glob(params, token);
 
     let is_clean_state = |state: &VariableState| {
         state.variable_properties.all_have(CFVariableProp::CFVPInteger)

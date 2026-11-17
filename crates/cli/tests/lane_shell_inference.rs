@@ -81,9 +81,9 @@ fn fallback_does_not_override_shell_flag() {
 #[test]
 fn unknown_fallback_shell_is_rejected() {
     let f = file("plain", BASHISM);
-    let o = run(&["--norc", "--fallback-shell=zsh", &f]);
+    let o = run(&["--norc", "--fallback-shell=tcsh", &f]);
     assert_eq!(o.code, 4);
-    assert!(o.stderr.contains("Unknown shell: zsh"), "{}", o.stderr);
+    assert!(o.stderr.contains("Unknown shell: tcsh"), "{}", o.stderr);
 }
 
 #[test]

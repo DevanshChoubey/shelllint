@@ -192,6 +192,7 @@ pub fn new_parse_spec() -> ParseSpec {
         check_sourced: false,
         ignore_rc: false,
         shell_type_override: None,
+        fallback_shell: None,
         ignore_directives: false,
     }
 }
@@ -214,6 +215,10 @@ pub struct ParseSpec {
     pub check_sourced: bool,
     pub ignore_rc: bool,
     pub shell_type_override: Option<Shell>,
+    /// DIVERGENCE: extension. The shell implied by the file name, used when
+    /// nothing else names one. Gives the parser the same dialect the analyzer
+    /// will pick (`AnalysisSpec::fallback_shell`).
+    pub fallback_shell: Option<Shell>,
     /// DIVERGENCE: extension; drop in-file `disable=` directives while parsing.
     pub ignore_directives: bool,
 }
@@ -305,6 +310,8 @@ pub enum Shell {
     Bash,
     Dash,
     BusyboxSh,
+    // DIVERGENCE: not in upstream. zsh, a shelllint extension.
+    Zsh,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]

@@ -10,6 +10,8 @@ use shelllint_core::ast::Ast;
 use shelllint_core::astlib::{get_command_argv, get_command_name, get_literal_string, get_path};
 
 use crate::support::is_sourced;
+use crate::zsh_support::zsh_registered_functions;
+use shelllint_core::interface::Shell;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -43,12 +45,19 @@ fn check_command_is_unreachable(p: &Params<'_>, t: Id, c: &mut Comments) {
                 // DIVERGENCE: a function named in a `trap` action is invoked when the trap fires, so it is
                 // not reported as never invoked.
                 && !is_trapped_function(p.ast, p.root, t)
+                // DIVERGENCE: zsh calls hook, widget, completion and `TRAPxxx` functions itself.
+                && !is_zsh_registered(p, t)
             {
                 c.info(t, 2329, "This function is never invoked. Check usage (or ignored if invoked indirectly).");
             }
         }
         _ => {}
     }
+}
+
+fn is_zsh_registered(p: &Params<'_>, f: Id) -> bool {
+    let Token::T_Function(_, _, name, _) = p.ast.get(f) else { return false };
+    p.shell_type == Shell::Zsh && zsh_registered_functions(p).contains(name)
 }
 
 fn is_unreachable_function(p: &Params<'_>, f: Id) -> bool {

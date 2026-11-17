@@ -8,8 +8,9 @@ ShellCheck on every change.
 ## Choosing files
 
 **`-r`, `--recursive`** walks directories among FILES. A file is checked if its
-name ends in `.sh`, `.bash`, `.dash`, `.ksh` or `.bats`, or its first line is a
-shebang for sh, bash, dash, ksh or busybox (directly or through `env`). Results
+name ends in `.sh`, `.bash`, `.dash`, `.ksh`, `.zsh`, `.zsh-theme` or `.bats`, or its
+first line is a shebang for sh, bash, dash, ksh, zsh or busybox (directly or through
+`env`). Results
 are sorted. Symlinks are not followed, and `.git`, `.hg`, `.svn` and
 `node_modules` are skipped. Files named explicitly are always checked.
 
@@ -213,6 +214,12 @@ then the rc file. A directive covers the whole file.
   already cover portability.
 - A bad `--bash-version` value exits with status 3. A bad rc value is an error under
   `--strict-rc` and ignored otherwise. A bad directive value gives SC1146.
+- If teammates run the real ShellCheck on the same files, prefer the rc key. ShellCheck
+  ignores an unknown rc key, but it reports the `# shellcheck bash-version=` directive
+  as SC1107 (unknown directive) and exits 1.
+- Version checks in the script aren't understood. A feature used inside
+  `if ((BASH_VERSINFO[0] >= 4)); then ... fi` is still reported. Disable that code
+  where the script already guards it.
 - Each finding is a warning, `declare -A requires bash 4.0 (target is 3.2).`, reported
   at every use. They're not optional checks, so `-o all` and the optional check list are unchanged.
   Each code has its own number so a project can turn off just the feature it polyfills,
@@ -264,6 +271,49 @@ SC9100 to SC9199 are shelllint's own.
 | SC9135 | 5.2 | `${v@k}` |
 | SC9136 | 5.2 | `shopt -s patsub_replacement` |
 | SC9137 | 5.3 | `${ cmd; }` and `${\| cmd; }` |
+
+## zsh
+
+ShellCheck rejects zsh scripts with SC1071. shelllint lints them. A file is zsh when
+its shebang names zsh, when `--shell=zsh`, `shell=zsh` in `.shellcheckrc` or
+`# shellcheck shell=zsh` says so, or when it has no shebang and is named `*.zsh`,
+`*.zsh-theme`, `.zshrc`, `.zshenv`, `.zprofile`, `.zlogin` or `.zlogout`.
+
+This is experimental. There is no upstream zsh mode to compare against, so the
+results are checked against zsh 5.9 itself and against the 567 `.zsh` files of a
+popular plugin framework, which all parse. A construct outside that corpus may still
+get a parse error. Please report it.
+
+**Syntax.** The parser accepts zsh forms such as `for f (a b) cmd`, short
+`if`/`while`/`for` bodies, `repeat N`, `function a b { }`, anonymous functions
+`() { }`, `${(flags)x}`, `${=x}`, `${~x}`, nested `${${x}#a}`, glob qualifiers like
+`*(.N)`, the `;|` and `&|` case terminators, and zsh redirections (`>|`, `>!`).
+
+**Options.** zsh doesn't split or glob an unquoted `$x` unless options say so.
+shelllint follows `setopt`, `unsetopt`, `set -o`/`+o`, `emulate [-L] [-R] zsh|sh|ksh`
+and `options[name]=on|off` along the code, with zsh's spelling rules (case and
+underscores ignored, a `no` prefix negates). A function keeps its option changes local
+only under `localoptions` or `emulate -L`. Each file starts from zsh defaults.
+Options are tracked where code is written, not where it's called from.
+
+**Checks.** No zsh-only checks are added. Existing checks fire when their warning is
+true in zsh:
+
+| Behaviour under zsh | Codes |
+|---|---|
+| Same as for bash | SC2046, SC2155, SC2207 (zsh wording), SC2006, SC2091, SC2164 and most others |
+| Only when `shwordsplit` is on, or on `${=x}` | SC2086 (splitting), SC2206, SC2048, SC2068, SC2223 |
+| Only when `globsubst` is on, or on `${~x}` | SC2086 (globbing), SC2053, SC2295, SC2254 |
+| Only when `ksharrays` is on | SC2128, SC2178, SC1087 |
+| Only when `bsdecho` is on | SC2028 |
+| zsh-aware | SC2154 and SC2034 know zsh's special parameters and hook arrays. SC2016 accepts single-quoted prompts under `promptsubst`. SC2329, SC2119 and SC2120 count `add-zsh-hook`, `zle -N`, `compdef`, `*_functions+=` and `TRAP*` as uses. SC2004 knows `$+name`. SC2162 knows zsh `read` flags |
+| Off, as they have no zsh-true form | SC2296, SC2298, SC2299, SC2300, SC2301, SC2082, SC2190, SC2051, SC2277, SC2270, SC2168, SC2180, SC2338, SC2076, SC2079 |
+
+SC2086 still fires inside `[ ]` and `test` by default. zsh drops an empty unquoted
+word there too, so `x=; [ $x = y ]` fails with "condition expected". `[[ ]]` is safe.
+
+A sourced file is linted in the sourcing script's shell. Completion specs
+(`_arguments`) aren't interpreted.
 
 ## Containers
 

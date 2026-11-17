@@ -185,7 +185,11 @@ impl<'a> P<'a> {
         self.called("command expansion", |p| {
             let start = p.start_span();
             p.try_(|p| p.string("$("))?;
-            let cmds = p.read_compound_list_or_empty()?;
+            // a command substitution is unquoted inside, even within "..."
+            let outer = std::mem::replace(&mut p.zsh_dquote, false);
+            let cmds = p.read_compound_list_or_empty();
+            p.zsh_dquote = outer;
+            let cmds = cmds?;
             p.alt(|p| p.char_(')'), |p| p.fail("Expected end of $(..) expression"))?;
             let id = p.end_span(start);
             Ok(p.node(id, Token::T_DollarExpansion(cmds)))
@@ -222,6 +226,11 @@ impl<'a> P<'a> {
         let special = |p: &mut Self| single_charred(p, |p| p.special_variable());
 
         let regular = |p: &mut Self| -> PR<Id> {
+            if p.env.is_zsh()
+                && let Some(id) = p.zsh_subscripted_variable(start)?
+            {
+                return Ok(id);
+            }
             let value = p.wrap_string(|p| p.read_variable_name())?;
             let id = p.end_span(start);
             let value = p.node(id, Token::T_DollarBraced(false, value));
@@ -229,12 +238,16 @@ impl<'a> P<'a> {
                 |_| Ok(value),
                 |p| {
                     p.look_ahead(|p| p.char_('['))?;
-                    p.parse_note_at(
-                        pos,
-                        Severity::ErrorC,
-                        1087,
-                        "Use braces when expanding arrays, e.g. ${array[idx]} (or ${var}[.. to quiet).",
-                    );
+                    // DIVERGENCE: zsh reads `$a[i]` as a subscript unless KSH_ARRAYS is on,
+                    // which the parser cannot see, so the zsh dialect never reports it here.
+                    if !p.env.is_zsh() {
+                        p.parse_note_at(
+                            pos,
+                            Severity::ErrorC,
+                            1087,
+                            "Use braces when expanding arrays, e.g. ${array[idx]} (or ${var}[.. to quiet).",
+                        );
+                    }
                     Ok(())
                 },
             )

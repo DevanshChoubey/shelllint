@@ -19,8 +19,10 @@ fn check_unsupported(p: &Params<'_>, t: Id, c: &mut Comments) {
     let (name, support) = shell_support(p, t);
     if !(support.is_empty() || support.contains(&p.shell_type)) {
         // report
+        // The message keeps naming the shells it always named; zsh only silences it.
         let shells: Vec<String> = support
             .iter()
+            .filter(|s| **s != Shell::Zsh)
             .map(|s| format!("{:?}", s).to_lowercase())
             .collect();
         c.err(
@@ -36,9 +38,10 @@ fn shell_support(p: &Params<'_>, t: Id) -> (&'static str, Vec<Shell>) {
         Token::T_CaseExpression(_, list) => {
             let seps: Vec<CaseType> = list.iter().map(|(a, _, _)| *a).collect();
             if seps.contains(&CaseType::CaseContinue) {
-                ("cases with ;;&", vec![Shell::Bash])
+                // DIVERGENCE: zsh spells "continue testing" as `;|` and falls through with `;&`.
+                ("cases with ;;&", vec![Shell::Bash, Shell::Zsh])
             } else if seps.contains(&CaseType::CaseFallThrough) {
-                ("cases with ;&", vec![Shell::Bash, Shell::Ksh])
+                ("cases with ;&", vec![Shell::Bash, Shell::Ksh, Shell::Zsh])
             } else {
                 ("", vec![])
             }

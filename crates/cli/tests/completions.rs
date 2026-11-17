@@ -67,7 +67,7 @@ fn bash_has_flags_and_values() {
         assert!(s.contains(f), "missing {}", f);
     }
     assert!(s.contains("-s|--shell)"));
-    assert!(s.contains("sh bash dash ksh busybox"));
+    assert!(s.contains("sh bash dash ksh busybox zsh"));
     assert!(s.contains("checkstyle context diff gcc github json json1 quiet sarif tty"));
     assert!(s.contains("error warning info style"));
     assert!(s.contains("auto always never"));
@@ -77,11 +77,11 @@ fn bash_has_flags_and_values() {
 fn zsh_and_fish_have_values() {
     let z = script("zsh");
     assert!(z.starts_with("#compdef shelllint"));
-    assert!(z.contains("(sh bash dash ksh busybox)"));
+    assert!(z.contains("(sh bash dash ksh busybox zsh)"));
     assert!(z.contains("(error warning info style)"));
     let f = script("fish");
     assert!(f.contains("-l shell"));
-    assert!(f.contains("-x -a 'sh bash dash ksh busybox'"));
+    assert!(f.contains("-x -a 'sh bash dash ksh busybox zsh'"));
     assert!(f.contains("-x -a 'error warning info style'"));
     assert!(f.contains("-a 'auto always never'"));
     assert!(f.contains("-s S -l severity"));

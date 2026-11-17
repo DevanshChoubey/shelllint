@@ -28,10 +28,16 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_pattern_word(&mut self) -> PR<Id> {
+        if self.env.is_zsh() {
+            return self.zsh_normalish_word("", &["esac"], true);
+        }
         self.read_normalish_word("", &["esac"])
     }
 
     pub(crate) fn read_normalish_word(&mut self, end: &str, terms: &[&str]) -> PR<Id> {
+        if self.env.is_zsh() {
+            return self.zsh_normalish_word(end, terms, false);
+        }
         let start = self.start_span();
         let pos = self.get_position();
         let x = self.many1(|p| p.read_normal_word_part(end))?;
@@ -71,6 +77,11 @@ impl<'a> P<'a> {
 
     pub(crate) fn read_normal_word_part(&mut self, end: &str) -> PR<Id> {
         self.not_followed_by2(|p| p.one_of(end))?;
+        if self.env.is_zsh()
+            && let Some(id) = self.zsh_word_part()?
+        {
+            return Ok(id);
+        }
         // checkForParenthesis
         self.attempting(
             |_| Ok(()),
@@ -92,7 +103,9 @@ impl<'a> P<'a> {
                     let pos = p.get_position();
                     let c = p.one_of("{}")?;
                     let msg = format!("This {c} is literal. Check expression (missing ;/\\n?) or quote it.");
-                    p.parse_problem_at(pos, WarningC, 1083, &msg);
+                    if !(p.env.is_zsh() && p.zsh_is_prompt_brace(c)) {
+                        p.parse_problem_at(pos, WarningC, 1083, &msg);
+                    }
                     Ok(c.to_string())
                 },
             )?;
@@ -142,10 +155,13 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_dollar_braced_literal(&mut self) -> PR<Id> {
+        if self.env.is_zsh() && self.look_ahead(|p| p.char_('{')).is_ok() {
+            return if self.zsh_dquote { self.zsh_lit_char('{') } else { self.zsh_braced_nested() };
+        }
         let start = self.start_span();
         let vars = self.reluctantly_till1(
             |p| p.alt(|p| p.read_brace_escaped(), |p| p.any_char().map(String::from)),
-            |p| p.braced_quotable(),
+            |p| if p.env.is_zsh() { p.one_of("}\"$`'{") } else { p.braced_quotable() },
         )?;
         let id = self.end_span(start);
         Ok(self.node(id, Token::T_Literal(vars.concat())))
@@ -375,7 +391,10 @@ impl<'a> P<'a> {
             let start = p.start_span();
             let start_pos = p.get_position();
             p.double_quote()?;
-            let x = p.many(|p| p.double_quoted_part())?;
+            let outer = std::mem::replace(&mut p.zsh_dquote, true);
+            let x = p.many(|p| p.double_quoted_part());
+            p.zsh_dquote = outer;
+            let x = x?;
             let end_pos = p.get_position();
             p.alt(|p| p.double_quote(), |p| p.fail("Expected end of double quoted string"))?;
             let id = p.end_span(start);

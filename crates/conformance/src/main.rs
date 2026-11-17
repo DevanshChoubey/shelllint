@@ -107,6 +107,7 @@ fn main() -> ExitCode {
                 res.total,
                 100.0 * res.matched as f64 / res.total.max(1) as f64
             );
+            println!("(zsh-shebang records skipped as oracle skips: {})", res.zsh_skipped);
             if verbose {
                 for (k, g, o) in &res.mismatches {
                     println!("MISMATCH {k} ours={g:?} oracle={o:?}");
@@ -165,6 +166,7 @@ fn parity_full(
         res.total,
         100.0 * res.matched as f64 / res.total.max(1) as f64
     );
+    println!("(zsh-shebang records skipped as oracle skips: {})", res.zsh_skipped);
     for k in &res.missing_oracle {
         println!("NO-ORACLE {k}");
     }

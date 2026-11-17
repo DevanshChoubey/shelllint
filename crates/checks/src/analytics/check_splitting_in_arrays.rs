@@ -2,7 +2,7 @@
 // Port of ShellCheck src/ShellCheck/Analytics.hs `checkSplittingInArrays`, lines 3766-3794 (e11f964)
 
 use shelllint_analyzer::analyzerlib::{
-    Comments, Params, is_counting_reference, is_quoted_alternative_reference,
+    Comments, Params, ZshOpt, is_counting_reference, is_quoted_alternative_reference,
 };
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Id, Token};
@@ -43,11 +43,15 @@ fn check_part(p: &Params<'_>, part: Id, c: &mut Comments) {
                     .contains(&get_braced_reference(&oversimplify(p.ast, s).concat()).as_str())
                 // DIVERGENCE: `safe-vars` extend the lookup.
                 && !p.safe_vars.contains(&get_braced_reference(&oversimplify(p.ast, s).concat()))
+                && zsh_splits(p, part, s)
             {
                 c.warn(
                     part,
                     2206,
-                    if p.shell_type == Shell::Ksh {
+                    if p.shell_type == Shell::Zsh {
+                        // DIVERGENCE: zsh wording; mapfile and read -a are bash features.
+                        "Quote to prevent word splitting/globbing, or split robustly with ${(s: :)var} or read -rA."
+                    } else if p.shell_type == Shell::Ksh {
                         "Quote to prevent word splitting/globbing, or split robustly with read -A or while read."
                     } else {
                         "Quote to prevent word splitting/globbing, or split robustly with mapfile or read -a."
@@ -63,10 +67,33 @@ fn for_command(p: &Params<'_>, id: Id, c: &mut Comments) {
     c.warn(
         id,
         2207,
-        if p.shell_type == Shell::Ksh {
+        if p.shell_type == Shell::Zsh {
+            // DIVERGENCE: zsh wording; `${(f)"$(cmd)"}` splits on newlines only.
+            "Prefer ${(f)\"$(cmd)\"} or read -rA to split command output (or quote to avoid splitting)."
+        } else if p.shell_type == Shell::Ksh {
             "Prefer read -A or while read to split command output (or quote to avoid splitting)."
         } else {
             "Prefer mapfile or read -a to split command output (or quote to avoid splitting)."
         },
     );
+}
+
+/// DIVERGENCE: zsh does not split an unquoted `$x` unless `shwordsplit` is on,
+/// but `${=x}` always splits. An expansion with an explicit splitting flag
+/// (`${(f)x}`, `${(s:,:)x}`, `${(z)x}`) already does the splitting the
+/// warning asks for, so it is not reported. Other shells: always true.
+fn zsh_splits(p: &Params<'_>, part: Id, braced: Id) -> bool {
+    if p.shell_type != Shell::Zsh {
+        return true;
+    }
+    let text = oversimplify(p.ast, braced).concat();
+    if text.starts_with('=') {
+        return true;
+    }
+    if let Some(flags) = text.strip_prefix('(').and_then(|r| r.split(')').next()) {
+        if flags.contains(['f', 's', 'z']) {
+            return false;
+        }
+    }
+    p.zsh_option(part, ZshOpt::ShWordSplit)
 }

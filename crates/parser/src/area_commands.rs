@@ -45,6 +45,11 @@ impl<'a> P<'a> {
         self.not_followed_by2(|p| p.alt(|p| p.g_and_if().map(drop), |p| p.read_case_separator().map(drop)))?;
         self.not_followed_by2(|p| p.string("&>"))?;
         let start = self.get_position();
+        if self.env.is_zsh()
+            && let Some(r) = self.zsh_disown_separator()?
+        {
+            return Ok(r);
+        }
         let f = alt!(
             self,
             |p: &mut Self| p.try_(|p| {
@@ -163,7 +168,12 @@ impl<'a> P<'a> {
                         (&["let"], Self::read_let_suffix),
                         (&["eval"], Self::read_eval_suffix),
                     ];
-                    let parser = get_parser(Self::read_cmd_suffix, &chosen, &table);
+                    // DIVERGENCE: zsh `repeat N var=(a b)` runs an assignment N times.
+                    let parser = if p.env.is_zsh() && is_command(&chosen, &["repeat"]) {
+                        Self::read_modifier_suffix
+                    } else {
+                        get_parser(Self::read_cmd_suffix, &chosen, &table)
+                    };
                     let suffix = p.option(Vec::new(), parser)?;
 
                     let mut all = prefix.clone();

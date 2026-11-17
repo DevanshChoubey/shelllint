@@ -192,10 +192,26 @@ impl Input {
         self.at >= self.buf.len()
     }
 
+    /// DIVERGENCE: extension (zsh lane P-C). The characters already consumed,
+    /// for the one rule that needs to look behind the cursor.
+    pub fn preceding(&self) -> &[char] {
+        &self.buf[..self.at]
+    }
+
     pub fn as_string(&self) -> String {
         self.as_slice().iter().collect()
     }
+
+    /// DIVERGENCE: zsh extension. Identifies this cursor (buffer and offset)
+    /// for memoising failed attempts; the buffer is kept alive by the memo.
+    pub(crate) fn position_key(&self) -> (usize, usize) {
+        (Rc::as_ptr(&self.buf) as *const u8 as usize, self.at)
+    }
 }
+
+/// DIVERGENCE: zsh extension. Nodes that copies of function bodies may create
+/// in one parse (`zsh_copy_budget`).
+pub(crate) const ZSH_COPY_BUDGET: usize = 1 << 16;
 
 /// Everything `P` restores when Parsec would continue from an earlier state.
 #[derive(Clone, Debug)]
@@ -224,6 +240,21 @@ pub struct P<'a> {
     pub(crate) source_expansions: u32,
     /// Files expanded so far in this script (resolved names); not rolled back.
     pub(crate) expanded_sources: std::collections::HashSet<String>,
+    /// zsh only: set while the condition of an `if` is read as a possible
+    /// one-line short `if` (`if [[ c ]] cmd`), where a word after a compound
+    /// condition is the body, not an error (SC1140/SC1141).
+    pub(crate) zsh_short_if: bool,
+    /// zsh only: inside a double-quoted string, where a `{` in `${...}` does
+    /// not nest (`"${x:-{a}"` is complete), unlike an unquoted one.
+    pub(crate) zsh_dquote: bool,
+    /// zsh only: `${...}` nested-brace attempts that already failed, keyed by
+    /// the cursor (`Input::position_key`). The input is kept alive so the key
+    /// stays unique. A failed attempt is a fact about its input, so replaying
+    /// its error is equivalent to re-parsing it, without the exponential cost.
+    pub(crate) zsh_nested_failed: std::collections::HashMap<(usize, usize), (Input, ParseError)>,
+    /// zsh only: tree nodes that may still be copied for extra function names
+    /// (see `zsh_function_definition`). Not rolled back: copies are never undone.
+    pub(crate) zsh_copy_budget: usize,
 }
 
 impl<'a> P<'a> {
@@ -243,7 +274,17 @@ impl<'a> P<'a> {
             env,
             source_expansions: 0,
             expanded_sources: std::collections::HashSet::new(),
+            zsh_short_if: false,
+            zsh_dquote: false,
+            zsh_nested_failed: std::collections::HashMap::new(),
+            zsh_copy_budget: ZSH_COPY_BUDGET,
         }
+    }
+
+    /// DIVERGENCE: zsh extension. The cursor's memo key and a copy of its input
+    /// (see `zsh_nested_failed`), without the `touch` that `get_input` does.
+    pub(crate) fn cursor_memo_key(&self) -> ((usize, usize), Input) {
+        (self.input.position_key(), self.input.clone())
     }
 
     /// Run a parser to completion: Parsec's `runParserT` result.
@@ -317,6 +358,11 @@ impl<'a> P<'a> {
     pub fn set_position(&mut self, pos: SourcePos) {
         self.pos = pos;
         self.touch();
+    }
+
+    /// DIVERGENCE: zsh extension. The characters already consumed, for look-behind.
+    pub(crate) fn consumed_chars(&self) -> &[char] {
+        &self.input.buf[..self.input.at]
     }
 
     /// `getInput`

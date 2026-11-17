@@ -86,6 +86,43 @@ impl Checker {
 /// `CF.CFGAnalysis`; see `crate::cfg_analysis` for the query API.
 pub use crate::cfg_analysis::CfgAnalysis;
 
+/// DIVERGENCE: zsh options the checks may ask about through
+/// [`Params::zsh_option`]. A shelllint extension, with no ShellCheck counterpart.
+///
+/// The spellings are zsh's, case and underscores ignored (`ShWordSplit` is
+/// `SH_WORD_SPLIT`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ZshOpt {
+    /// `SH_WORD_SPLIT`: unquoted `$x` is split on `$IFS`.
+    ShWordSplit,
+    /// `KSH_ARRAYS`: arrays are 0-based and `$a` is `${a[0]}`.
+    KshArrays,
+    /// `GLOB_SUBST`: the result of an unquoted expansion is used as a glob pattern.
+    GlobSubst,
+    /// `RC_EXPAND_PARAM`: `x${a[@]}y` distributes over the elements, `x$a` too.
+    RcExpandParam,
+    /// `BSD_ECHO`: `echo` does not interpret backslash escapes.
+    BsdEcho,
+    /// `PROMPT_SUBST`: parameter expansion in prompt strings.
+    PromptSubst,
+    /// `EXTENDED_GLOB`: `#`, `^` and `~` are pattern operators.
+    ExtendedGlob,
+    /// `KSH_GLOB`: `@(a|b)`, `*(a)` and friends are patterns.
+    KshGlob,
+    /// `SH_GLOB`: `(`, `|` and `)` are not special in patterns.
+    ShGlob,
+    /// `NULL_GLOB`: a pattern with no match expands to nothing.
+    NullGlob,
+    /// `NOMATCH`: a pattern with no match is an error.
+    NoMatch,
+    /// `LOCAL_OPTIONS`: option changes in a function are undone on return.
+    LocalOptions,
+    /// `ERR_RETURN`: a failing command returns from the function.
+    ErrReturn,
+    /// `PIPE_FAIL`: a pipeline fails if any element fails.
+    PipeFail,
+}
+
 /// `data Parameters`
 #[derive(Clone, Debug)]
 pub struct Params<'a> {
@@ -134,6 +171,9 @@ pub struct Params<'a> {
     pub strict_env_vars: bool,
     /// Not in upstream: `--bash-version` / `bash-version=`. Warn about bash features newer than this.
     pub bash_version: Option<shelllint_core::interface::BashVersion>,
+    /// DIVERGENCE: the zsh option-state map behind [`Params::zsh_option`].
+    /// Built only when the shell is zsh; `None` for every other shell.
+    pub zsh_options: Option<std::rc::Rc<crate::zsh_options::ZshOptionMap>>,
 }
 
 /// `variableFlow :: [StackData]`
@@ -349,6 +389,76 @@ pub fn shebang_names_ash(ast: &Ast, root: Id) -> bool {
     }
 }
 
+impl Params<'_> {
+    /// DIVERGENCE: is zsh option `opt` on at `node`?
+    ///
+    /// `node` is the token the question is about. It is unused for now: the
+    /// option tracker will answer per node, from `setopt`, `unsetopt`,
+    /// `emulate` and friends.
+    ///
+    /// For a shell other than zsh the answer is what the check would have
+    /// assumed before zsh support, so that those shells behave exactly as
+    /// they did (word splitting on, globbing on, 0-based arrays, `echo` not
+    /// interpreting escapes in the warning's sense):
+    ///
+    /// | option | non-zsh | reason |
+    /// |---|---|---|
+    /// | `ShWordSplit` | on | sh-family shells split unquoted expansions |
+    /// | `KshArrays` | on | sh-family arrays are 0-based, `$a` is `${a[0]}` |
+    /// | `GlobSubst` | on | unquoted expansion results are globbed |
+    /// | `RcExpandParam` | off | `x$a` does not distribute over an array |
+    /// | `BsdEcho` | on | the echo-escape warning (SC2028) fires for every non-zsh shell |
+    /// | `PromptSubst` | off | no prompt-string substitution rule exists for them |
+    /// | `ExtendedGlob` | off | `#`, `^` and `~` are not zsh pattern operators there |
+    /// | `KshGlob` | on for ksh and bash, else off | both read `@(...)` patterns (bash's `extglob` shopt is not modelled) |
+    /// | `ShGlob` | on | no zsh `(a|b)` pattern groups |
+    /// | `NullGlob` | off | an unmatched glob stays literal |
+    /// | `NoMatch` | off | an unmatched glob is not an error |
+    /// | `LocalOptions` | off | not applicable |
+    /// | `ErrReturn` | off | not applicable |
+    /// | `PipeFail` | `has_pipefail` | `set -o pipefail` as already tracked |
+    ///
+    /// For zsh it reads the option-state map built by `crate::zsh_options` (the
+    /// zsh 5.9 defaults, changed by the `setopt`/`emulate` commands in effect at
+    /// `node`). Evidence for the defaults, from `/usr/bin/zsh -fc '[[ -o <opt> ]] && echo on || echo off'`
+    /// (zsh 5.9 x86_64-ubuntu-linux-gnu), for every option:
+    ///
+    /// ```text
+    /// shwordsplit off   ksharrays off     globsubst off     rcexpandparam off
+    /// bsdecho off       promptsubst off   extendedglob off  kshglob off
+    /// shglob off        nullglob off      nomatch ON        localoptions off
+    /// errreturn off     pipefail off
+    /// ```
+    ///
+    /// and, for the non-zsh column, `zsh -fc 'emulate sh; [[ -o <opt> ]]'` gives
+    /// shwordsplit on, ksharrays on, globsubst on, rcexpandparam off, bsdecho on,
+    /// promptsubst off, extendedglob off, kshglob off, shglob on, nullglob off,
+    /// nomatch off; and `emulate ksh` turns kshglob on. The bash entry for
+    /// `KshGlob` follows what the parser reads under bash, not `emulate`.
+    pub fn zsh_option(&self, node: Id, opt: ZshOpt) -> bool {
+        if self.shell_type == Shell::Zsh {
+            // The tracker (see `crate::zsh_options`) is built for every zsh
+            // analysis; a `Params` without one reads as the zsh defaults.
+            return match &self.zsh_options {
+                Some(map) => map.get(node, opt),
+                None => matches!(opt, ZshOpt::NoMatch),
+            };
+        }
+        match opt {
+            ZshOpt::ShWordSplit | ZshOpt::KshArrays | ZshOpt::GlobSubst | ZshOpt::BsdEcho | ZshOpt::ShGlob => true,
+            ZshOpt::KshGlob => matches!(self.shell_type, Shell::Ksh | Shell::Bash),
+            ZshOpt::PipeFail => self.has_pipefail,
+            ZshOpt::RcExpandParam
+            | ZshOpt::PromptSubst
+            | ZshOpt::ExtendedGlob
+            | ZshOpt::NullGlob
+            | ZshOpt::NoMatch
+            | ZshOpt::LocalOptions
+            | ZshOpt::ErrReturn => false,
+        }
+    }
+}
+
 /// `makeParameters spec`. `ast` must have had `compute_parents(root)` called.
 // DIVERGENCE: `variableFlow` refers to `params` lazily in Haskell; here the
 // other fields are computed first and the flow is filled in afterwards.
@@ -376,6 +486,9 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::BusyboxSh => false,
             Shell::Sh => false,
             Shell::Ksh => true,
+            // DIVERGENCE: zsh runs the last pipeline element in the current shell
+            // (`echo hi | read x; echo $x` prints hi under `zsh -fc`).
+            Shell::Zsh => true,
         },
         has_inherit_errexit: match shell_type {
             Shell::Bash => is_option_set(ast, "inherit_errexit", root),
@@ -383,6 +496,9 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::BusyboxSh => true,
             Shell::Sh => true,
             Shell::Ksh => false,
+            // DIVERGENCE: zsh subshells inherit `set -e` (`set -e; x=$(false; echo hi)`
+            // exits at the `false` under `zsh -fc`).
+            Shell::Zsh => true,
         },
         has_pipefail: match shell_type {
             Shell::Bash => is_option_set(ast, "pipefail", root),
@@ -390,6 +506,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             Shell::BusyboxSh => is_option_set(ast, "pipefail", root),
             Shell::Sh => is_option_set(ast, "pipefail", root),
             Shell::Ksh => is_option_set(ast, "pipefail", root),
+            Shell::Zsh => is_option_set(ast, "pipefail", root),
         },
         has_execfail: match shell_type {
             Shell::Bash => is_option_set(ast, "execfail", root),
@@ -406,6 +523,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             .or_else(|| shelllint_core::astlib::get_strict_env_vars_directive(ast, root))
             .unwrap_or(false),
         bash_version: spec.bash_version.or_else(|| shelllint_core::astlib::get_bash_version_directive(ast, root)),
+        zsh_options: (shell_type == Shell::Zsh).then(|| std::rc::Rc::new(crate::zsh_options::build(ast, root))),
     };
     params.variable_flow = get_variable_flow(&params, root).into();
     // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`
@@ -724,7 +842,7 @@ pub fn get_variable_flow(params: &Params<'_>, t: Id) -> Vec<StackData> {
         state.borrow_mut().extend(read.into_iter().map(|(a, b, c)| StackData::Reference(a, b, c)));
     };
     let set_written = |t: Id| {
-        let written = get_modified_variables(ast, t);
+        let written = get_modified_variables_in(ast, t, params.shell_type == Shell::Zsh);
         state.borrow_mut().extend(written.into_iter().map(|(a, b, c, d)| StackData::Assignment(a, b, c, d)));
     };
     let start_scope = |t: Id| {
@@ -790,6 +908,12 @@ pub type ModifiedVariable = (Id, Id, String, DataType);
 pub type ReferencedVariable = (Id, Id, String);
 
 pub fn get_modified_variables(ast: &Ast, t: Id) -> Vec<ModifiedVariable> {
+    get_modified_variables_in(ast, t, false)
+}
+
+/// `get_modified_variables`, told whether the script is zsh. DIVERGENCE: only
+/// zsh gives `read name?prompt` a meaning; every other shell is unchanged.
+pub fn get_modified_variables_in(ast: &Ast, t: Id, zsh: bool) -> Vec<ModifiedVariable> {
     use DataSource::*;
     use DataType::*;
     // markAsChecked place token = mapMaybe (f place) $ getWordParts token
@@ -816,7 +940,7 @@ pub fn get_modified_variables(ast: &Ast, t: Id) -> Vec<ModifiedVariable> {
                 _ => None,
             })
             .collect(),
-        Token::T_SimpleCommand(..) => get_modified_variable_command(ast, t),
+        Token::T_SimpleCommand(_, words) => modified_variable_command_words(ast, t, words, zsh),
 
         Token::TA_Unary(op, v) if op.contains("--") || op.contains("++") => match ast.get(*v) {
             Token::TA_Variable(name, _) => vec![(t, *v, name.clone(), DataString(SourceInteger))],
@@ -1017,13 +1141,13 @@ pub fn get_referenced_variable_command(ast: &Ast, base: Id) -> Vec<ReferencedVar
 /// )
 pub fn get_modified_variable_command(ast: &Ast, base: Id) -> Vec<ModifiedVariable> {
     match ast.get(base) {
-        Token::T_SimpleCommand(_, words) => modified_variable_command_words(ast, base, words),
+        Token::T_SimpleCommand(_, words) => modified_variable_command_words(ast, base, words, false),
         _ => vec![],
     }
 }
 
 /// `getModifiedVariableCommand` on `T_SimpleCommand base _ words`.
-fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<ModifiedVariable> {
+fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id], zsh: bool) -> Vec<ModifiedVariable> {
     use DataSource::*;
     use DataType::*;
     let Some((x, rest)) = literal_command(ast, words) else { return vec![] };
@@ -1153,7 +1277,7 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
     };
 
     let result: Vec<ModifiedVariable> = match x.as_str() {
-        "builtin" => modified_variable_command_words(ast, base, rest),
+        "builtin" => modified_variable_command_words(ast, base, rest, zsh),
         "read" => {
             // catMaybes $ takeWhile isJust (reverse $ map getLiteral rest)
             let fallback = || -> Vec<ModifiedVariable> { rest.iter().rev().map_while(|&t| get_literal(t)).collect() };
@@ -1166,7 +1290,22 @@ fn modified_variable_command_words(ast: &Ast, base: Id, words: &[Id]) -> Vec<Mod
                     ),
                 }
             };
-            parsed().unwrap_or_else(fallback)
+            let mut vars = parsed().unwrap_or_else(fallback);
+            if zsh {
+                // DIVERGENCE: zsh `read name?prompt` and `read -q name?prompt` read into
+                // `name`; the `?prompt` is not part of the variable name.
+                vars.retain(|(_, _, n, _)| !n.contains('?'));
+                for &w in rest {
+                    if let Some(lit) = get_literal_string(ast, w) {
+                        if let Some((name, _)) = lit.split_once('?') {
+                            if !lit.starts_with('-') && is_variable_name(name) {
+                                vars.push((base, w, name.to_string(), DataString(SourceExternal)));
+                            }
+                        }
+                    }
+                }
+            }
+            vars
         }
 
         "getopts" => match rest {

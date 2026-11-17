@@ -156,7 +156,7 @@ pub fn options() -> Vec<OptDescr> {
             "SOURCEPATHS",
             "Specify path when looking for sourced files (\"SCRIPTDIR\" for script's dir)",
         ),
-        o("s", &["shell"], Req("shell"), "SHELLNAME", "Specify dialect (sh, bash, dash, ksh, busybox)"),
+        o("s", &["shell"], Req("shell"), "SHELLNAME", "Specify dialect (sh, bash, dash, ksh, busybox, zsh)"),
         o(
             "S",
             &["severity"],

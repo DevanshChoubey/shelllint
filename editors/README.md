@@ -24,7 +24,7 @@ The server reads these settings (from `initializationOptions`, or from
 
 | key        | values                                                | meaning                                   |
 |------------|-------------------------------------------------------|-------------------------------------------|
-| `dialect`  | `auto`, `sh`, `bash`, `dash`, `ksh`, `busybox`        | shell to assume when the script does not say |
+| `dialect`  | `auto`, `sh`, `bash`, `dash`, `ksh`, `busybox`, `zsh` | shell to assume when the script does not say |
 | `enable`   | list of optional check names, or `all`               | optional checks to turn on                |
 | `exclude`  | list of codes, for example `SC2034` or `2034`         | codes never reported                      |
 | `severity` | `error`, `warning`, `info`, `style`                  | minimum severity reported (default `style`) |

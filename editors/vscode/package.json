@@ -53,7 +53,8 @@
             "bash",
             "dash",
             "ksh",
-            "busybox"
+            "busybox",
+            "zsh"
           ],
           "default": "auto",
           "enumDescriptions": [
@@ -62,7 +63,8 @@
             "Bash",
             "Dash",
             "Korn shell",
-            "BusyBox sh"
+            "BusyBox sh",
+            "Zsh"
           ],
           "description": "Shell dialect to check against when the script does not say."
         },

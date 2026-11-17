@@ -40,6 +40,10 @@ fn check(p: &Params<'_>, t: Id, c: &mut Comments) {
 }
 
 fn inform(p: &Params<'_>, t: Id, c: &mut Comments) {
+    // zsh: the expansion is only a pattern under GLOB_SUBST or as `${~x}`.
+    if !crate::zsh_support::globs(p, t) {
+        return;
+    }
     c.info_with_fix(
         t,
         2295,

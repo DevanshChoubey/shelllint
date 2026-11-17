@@ -23,7 +23,7 @@ enum Values {
 
 fn values_for(d: &OptDescr) -> Values {
     match d.longs.first().copied().unwrap_or("") {
-        "shell" => Values::Words(vec!["sh", "bash", "dash", "ksh", "busybox"]),
+        "shell" => Values::Words(vec!["sh", "bash", "dash", "ksh", "busybox", "zsh"]),
         "format" => Values::Words(FORMAT_NAMES.to_vec()),
         "severity" => Values::Words(vec!["error", "warning", "info", "style"]),
         "color" => Values::Words(vec!["auto", "always", "never"]),

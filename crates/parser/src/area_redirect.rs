@@ -49,6 +49,11 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_io_file_op(&mut self) -> PR<Id> {
+        if self.env.is_zsh()
+            && let Ok(op) = self.zsh_forced_redirect_op()
+        {
+            return Ok(op);
+        }
         choice!(
             self,
             |p: &mut Self| p.g_dgreat(),
@@ -85,7 +90,7 @@ impl<'a> P<'a> {
     pub(crate) fn read_io_variable(&mut self) -> PR<String> {
         self.try_(|p| {
             p.char_('{')?;
-            let x = p.read_variable_name()?;
+            let x = if p.env.is_zsh() { p.zsh_io_variable_name()? } else { p.read_variable_name()? };
             p.char_('}')?;
             Ok(format!("{{{x}}}"))
         })

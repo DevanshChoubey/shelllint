@@ -3,7 +3,7 @@
 
 use std::collections::HashSet;
 
-use shelllint_analyzer::analyzerlib::{DataType, Params, make_comment};
+use shelllint_analyzer::analyzerlib::{DataType, Params, ZshOpt, make_comment};
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{AssignmentMode, Id, Token};
 use shelllint_core::astlib::get_literal_string;
@@ -11,6 +11,7 @@ use shelllint_core::data::ARRAY_VARIABLES;
 use shelllint_core::interface::{Severity, Shell, TokenComment};
 
 use crate::support::do_variable_flow_analysis;
+use crate::zsh_support::zsh_ksharrays_unbraced_subscripts;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -22,6 +23,12 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
 };
 
 fn check_array_without_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> {
+    let mut out = zsh_ksharrays_unbraced_subscripts(p);
+    out.extend(check_array_without_index_flow(p));
+    out
+}
+
+fn check_array_without_index_flow(p: &Params<'_>) -> Vec<TokenComment> {
     let default_set: HashSet<String> = if p.shell_type == Shell::Bash {
         ARRAY_VARIABLES.iter().map(|s| s.to_string()).collect()
     } else {
@@ -31,7 +38,8 @@ fn check_array_without_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> {
     let read_f = |s: &mut HashSet<String>, _base: Id, token: Id, _name: &str| -> Vec<TokenComment> {
         if let Token::T_DollarBraced(_, inner) = p.ast.get(token) {
             if let Some(name) = get_literal_string(p.ast, *inner) {
-                if s.contains(&name) {
+                // zsh: `$a` expands every element unless KSH_ARRAYS is on.
+                if s.contains(&name) && p.zsh_option(token, ZshOpt::KshArrays) {
                     return vec![make_comment(
                         Severity::WarningC,
                         token,
@@ -52,6 +60,8 @@ fn check_array_without_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> {
                     vec![]
                 } else {
                     match mode {
+                        // zsh: only a problem under KSH_ARRAYS (`a=str` then sets just `a[0]`).
+                        AssignmentMode::Assign if !p.zsh_option(expr, ZshOpt::KshArrays) => vec![],
                         AssignmentMode::Assign => vec![make_comment(
                             Severity::WarningC,
                             expr,

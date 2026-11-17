@@ -35,7 +35,8 @@ fn check_function_declarations(p: &Params<'_>, t: Id, c: &mut Comments) {
         }
     };
     match p.shell_type {
-        Shell::Bash => {}
+        // DIVERGENCE: zsh accepts the `function` keyword, with or without `()`.
+        Shell::Bash | Shell::Zsh => {}
         Shell::Ksh => {
             if has_keyword && has_parens {
                 c.err(t, 2111, "ksh does not allow 'function' keyword and '()' at the same time.");

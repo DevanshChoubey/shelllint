@@ -4,10 +4,11 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use shelllint_analyzer::analyzerlib::{Comments, Params, get_closest_command};
+use shelllint_analyzer::analyzerlib::{Comments, Params, ZshOpt, get_closest_command};
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Ast, Id, Token};
 use shelllint_core::astlib::{basename, get_command_basename, get_literal_string, get_path};
+use shelllint_core::interface::Shell;
 use shelllint_core::regex::{matches, mk_regex};
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
@@ -50,7 +51,7 @@ fn check_single_quoted_variables(p: &Params<'_>, t: Id, c: &mut Comments) {
             if !matches(s, &SED_CONTRA) {
                 show_message(c, t);
             }
-        } else if !is_probably_ok(ast, t, &command_name) {
+        } else if !is_probably_ok(p, t, &command_name) {
             show_message(c, t);
         }
     }
@@ -60,7 +61,8 @@ fn show_message(c: &mut Comments, id: Id) {
     c.info(id, 2016, "Expressions don't expand in single quotes, use double quotes for that.");
 }
 
-fn is_probably_ok(ast: &Ast, t: Id, command_name: &str) -> bool {
+fn is_probably_ok(p: &Params<'_>, t: Id, command_name: &str) -> bool {
+    let ast = p.ast;
     const OK_COMMANDS: &[&str] = &[
         "trap",
         "sh",
@@ -86,11 +88,38 @@ fn is_probably_ok(ast: &Ast, t: Id, command_name: &str) -> bool {
         "mumps -run %XCMD",
         "mumps -run LOOP%XCMD",
     ];
-    get_path(ast, t).iter().take(3).any(|&x| is_ok_assignment(ast, x))
+    get_path(ast, t).iter().take(3).any(|&x| is_ok_assignment(p, x))
         || OK_COMMANDS.contains(&command_name)
         || command_name.ends_with("awk")
         || command_name.starts_with("perl")
         || is_shell_script_argument(ast, t)
+        || (p.shell_type == Shell::Zsh && is_zsh_code_argument(ast, t, command_name))
+}
+
+// DIVERGENCE: zsh-only. `zstyle -e` evaluates its last argument as code and
+// `bindkey -s` stores its string as a macro, so a `$` inside single quotes is
+// intended in both.
+fn is_zsh_code_argument(ast: &Ast, t: Id, command_name: &str) -> bool {
+    let flag = match command_name {
+        "zstyle" => 'e',
+        "bindkey" => 's',
+        _ => return false,
+    };
+    (|| {
+        let cmd = get_closest_command(ast, t)?;
+        let Token::T_Redirecting(_, inner) = ast.get(cmd) else { return None };
+        let Token::T_SimpleCommand(_, words) = ast.get(*inner) else { return None };
+        let path_ids = get_path(ast, t);
+        Some(
+            words
+                .iter()
+                .skip(1)
+                .take_while(|w| !path_ids.contains(w))
+                .filter_map(|&w| get_literal_string(ast, w))
+                .any(|w| w.starts_with('-') && !w.starts_with("--") && w[1..].contains(flag)),
+        )
+    })()
+    .unwrap_or(false)
 }
 
 // Like `runc exec ctr sh -c 'echo $HOME'`
@@ -132,9 +161,21 @@ fn ends_with_dash_c(opts: &[String]) -> bool {
     }
 }
 
-fn is_ok_assignment(ast: &Ast, t: Id) -> bool {
+fn is_ok_assignment(p: &Params<'_>, t: Id) -> bool {
     const COMMONLY_QUOTED: &[&str] = &["PS1", "PS2", "PS3", "PS4", "PROMPT_COMMAND"];
+    // DIVERGENCE: zsh expands the prompt variables only with `promptsubst`
+    // (checked with `PS1='$x> '; print -P $PS1`), so a single-quoted `$` is fine
+    // exactly when that option is on.
+    const ZSH_PROMPTS: &[&str] = &[
+        "PS1", "PS2", "PS3", "PS4", "PROMPT", "PROMPT2", "PROMPT3", "PROMPT4", "RPROMPT", "RPS1", "RPS2",
+        "SPROMPT",
+    ];
+    let ast = p.ast;
     match ast.get(t) {
+        Token::T_Assignment(_, name, _, _) if p.shell_type == Shell::Zsh => {
+            name == "PROMPT_COMMAND"
+                || (ZSH_PROMPTS.contains(&name.as_str()) && p.zsh_option(t, ZshOpt::PromptSubst))
+        }
         Token::T_Assignment(_, name, _, _) => COMMONLY_QUOTED.contains(&name.as_str()),
         Token::TC_Unary(_, op, _) if op == "-v" => true,
         _ => false,

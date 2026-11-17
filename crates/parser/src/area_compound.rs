@@ -12,6 +12,17 @@ use crate::{alt, choice};
 
 impl<'a> P<'a> {
     pub(crate) fn read_if_clause(&mut self) -> PR<Id> {
+        if self.env.is_zsh() {
+            // `if cond` closed by `fi`/`}`/`)` with no `then` (C28), else the
+            // regular and brace forms.
+            if let Ok(id) = self.zsh_if_without_then() {
+                return Ok(id);
+            }
+            if let Ok(id) = self.zsh_if_one_line() {
+                return Ok(id);
+            }
+            return self.zsh_read_if_clause();
+        }
         self.called("if expression", |p| {
             let start = p.start_span();
             let pos = p.get_position();
@@ -169,6 +180,9 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_brace_group(&mut self) -> PR<Id> {
+        if self.env.is_zsh() {
+            return self.zsh_read_brace_group();
+        }
         self.called("brace group", |p| {
             let start = p.start_span();
             p.char_('{')?;
@@ -256,6 +270,11 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_do_group(&mut self, kw_id: Id) -> PR<Vec<Id>> {
+        if self.env.is_zsh()
+            && let Some(list) = self.zsh_try_brace_body()?
+        {
+            return Ok(list);
+        }
         self.optional(|p| {
             p.try_(|p| p.look_ahead(|p| p.g_done()))?;
             p.parse_problem_at_id(kw_id, ErrorC, 1057, "Did you forget the 'do' for this loop?");
@@ -278,13 +297,17 @@ impl<'a> P<'a> {
         )?;
         self.allspacing()?;
 
-        self.optional(|p| {
-            p.try_(|p| p.look_ahead(|p| p.g_done()))?;
-            p.parse_problem_at_id(do_kw, ErrorC, 1060, "Can't have empty do clauses (use 'true' as a no-op).");
-            Ok(())
-        })?;
+        // DIVERGENCE: zsh accepts an empty loop body (`for x in a; do done`).
+        let zsh_empty = self.env.is_zsh() && self.is_followed_by(|p| p.g_done())?;
+        if !zsh_empty {
+            self.optional(|p| {
+                p.try_(|p| p.look_ahead(|p| p.g_done()))?;
+                p.parse_problem_at_id(do_kw, ErrorC, 1060, "Can't have empty do clauses (use 'true' as a no-op).");
+                Ok(())
+            })?;
+        }
 
-        let commands = self.read_compound_list()?;
+        let commands = if zsh_empty { Vec::new() } else { self.read_compound_list()? };
         self.or_fail(
             |p| p.g_done(),
             |p| {
@@ -364,12 +387,16 @@ impl<'a> P<'a> {
                     p.read_sequential_sep()?;
                     p.spacing()
                 })?;
-                let group = p.alt(read_braced, |p| p.read_do_group(id))?;
+                let group =
+                    if p.env.is_zsh() { p.zsh_loop_body(id)? } else { p.alt(read_braced, |p| p.read_do_group(id))? };
                 Ok(p.node(id, Token::T_ForArithmetic(x, y, z, group)))
             })
         }
 
         fn read_regular(p: &mut P<'_>, id: Id) -> PR<Id> {
+            if p.env.is_zsh() {
+                return p.zsh_for_regular(id);
+            }
             p.accept_but_warn(|p| p.char_('$'), ErrorC, 1086, "Don't use $ on the iterator name in for loops.")?;
             let name = p.then_skip(|p| p.read_variable_name(), |p| p.allspacing())?;
             let values = p.alt(
@@ -470,7 +497,7 @@ impl<'a> P<'a> {
                 );
                 Ok(())
             })?;
-            p.optional(|p| p.g_lparen())?;
+            p.optional(|p| if p.env.is_zsh() { p.zsh_case_lparen() } else { p.g_lparen() })?;
             p.spacing()?;
             let pattern = p.read_pattern()?;
             p.alt(
@@ -506,6 +533,14 @@ impl<'a> P<'a> {
         choice!(
             self,
             |p| {
+                // zsh: `;|` resumes testing the following patterns (bash's `;;&`)
+                if !p.env.is_zsh() {
+                    return p.zero();
+                }
+                p.try_token(";|", |_, _| ())?;
+                Ok(CaseType::CaseContinue)
+            },
+            |p| {
                 p.try_token(";;&", |_, _| ())?;
                 Ok(CaseType::CaseContinue)
             },
@@ -536,6 +571,10 @@ impl<'a> P<'a> {
             p.alt(
                 |p| p.g_rparen(),
                 |p| {
+                    // zsh: `name (#q)*` is a word with a glob flag, not a header.
+                    if p.env.is_zsh() {
+                        return p.zero();
+                    }
                     p.parse_problem(
                         ErrorC,
                         1065,
@@ -588,6 +627,11 @@ impl<'a> P<'a> {
             p.alt(read_with_function, read_without_function)
         }
 
+        if self.env.is_zsh()
+            && let Some(id) = self.zsh_function_definition()?
+        {
+            return Ok(id);
+        }
         self.called("function", |p| {
             let start = p.start_span();
             let (kw, parens, name) = p.try_(read_function_signature)?;
@@ -687,9 +731,10 @@ impl<'a> P<'a> {
 
         // If the next word is a keyword, readNormalWord will trigger a warning
         let has_keyword = self.is_followed_by(|p| p.read_keyword())?;
-        let has_word = self.is_followed_by(|p| p.read_normal_word())?;
+        let has_word =
+            !(self.env.is_zsh() && self.zsh_lbrace_ahead()) && self.is_followed_by(|p| p.read_normal_word())?;
 
-        if has_word && !(has_keyword || has_dash_ao) {
+        if has_word && !(has_keyword || has_dash_ao) && !self.zsh_short_if {
             // We have other words following, and no error has been emitted.
             let pos_end = self.get_position();
             self.parse_problem_at_with_end(
@@ -705,11 +750,15 @@ impl<'a> P<'a> {
     }
 
     pub(crate) fn read_compound_command(&mut self) -> PR<Id> {
-        let cmd = choice!(
-            self,
-            |p| p.read_brace_group(),
-            |p| {
-                p.read_ambiguous(
+        let zsh_anonymous = if self.env.is_zsh() { self.zsh_anonymous_function()? } else { None };
+        let cmd = if let Some(anon) = zsh_anonymous {
+            anon
+        } else {
+            choice!(
+                self,
+                |p| p.read_brace_group(),
+                |p| {
+                    p.read_ambiguous(
                 "((",
                 |p| p.read_arithmetic_expression(),
                 |p| p.read_subshell(),
@@ -723,17 +772,19 @@ impl<'a> P<'a> {
                     Ok(())
                 },
             )
-            },
-            |p| p.read_subshell(),
-            |p| p.read_while_clause(),
-            |p| p.read_until_clause(),
-            |p| p.read_if_clause(),
-            |p| p.read_for_clause(),
-            |p| p.read_select_clause(),
-            |p| p.read_case_clause(),
-            |p| p.read_bats_test(),
-            |p| p.read_function_definition(),
-        )?;
+                },
+                |p| p.read_subshell(),
+                |p| p.zsh_repeat_loop(),
+                |p| p.read_while_clause(),
+                |p| p.read_until_clause(),
+                |p| p.read_if_clause(),
+                |p| p.read_for_clause(),
+                |p| p.read_select_clause(),
+                |p| p.read_case_clause(),
+                |p| p.read_bats_test(),
+                |p| p.read_function_definition(),
+            )?
+        };
         let redirs = self.many(|p| p.read_io_redirect())?;
         let mut all = vec![cmd];
         all.extend(redirs.iter().copied());
@@ -741,6 +792,9 @@ impl<'a> P<'a> {
         self.optional(|p| {
             p.look_ahead(|p| {
                 p.not_followed_by2(|p| choice!(p, |p| p.read_keyword(), |p| p.g_lbrace()))?;
+                if p.zsh_short_if {
+                    return p.fail("a short if body follows");
+                }
                 let pos = p.get_position();
                 p.many1(|p| p.read_normal_word())?;
                 let pos_end = p.get_position();

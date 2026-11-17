@@ -3,7 +3,9 @@
 
 use lsp_types::{DiagnosticSeverity, Position, Range, TextEdit};
 use shelllint_checker::check_script;
-use shelllint_core::interface::{CheckSpec, ParseSpec, PositionedComment, Severity, Shell, empty_check_spec};
+use shelllint_core::interface::{
+    CheckSpec, ParseSpec, PositionedComment, Severity, Shell, empty_check_spec, new_parse_spec,
+};
 
 use crate::config::Settings;
 use crate::position::{split_lines, to_lsp};
@@ -230,7 +232,9 @@ pub fn disable_edits(text: &str, filename: &str, dialect: Option<Shell>, pos: Po
         check_sourced: false,
         ignore_rc: true,
         shell_type_override: dialect,
+        fallback_shell: shelllint_checker::shell_from_filename(filename),
         ignore_directives: false,
+        ..new_parse_spec()
     };
     let Ok(parsed) = std::panic::catch_unwind(|| shelllint_parser::parse_script(&LspSystem, &spec)) else {
         return vec![];

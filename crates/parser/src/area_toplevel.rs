@@ -13,7 +13,7 @@ use shelllint_core::ast::{Annotation, Id};
 use shelllint_core::astlib::{e4m, executable_from_shebang, get_associative_arrays};
 use shelllint_core::interface::Severity::{ErrorC, InfoC, StyleC, WarningC};
 use shelllint_core::interface::{
-    Code, Comment, ParseSpec, Position, PositionedComment, SystemInterface, new_positioned_comment,
+    Code, Comment, ParseSpec, Position, PositionedComment, Shell, SystemInterface, new_positioned_comment,
 };
 use shelllint_core::prelude::please_report;
 
@@ -844,8 +844,8 @@ impl<'a> P<'a> {
 
     pub(crate) fn read_script_file(&mut self, sourced: bool) -> PR<Id> {
         fn is_valid_shell(s: &str) -> Option<bool> {
-            let good_shells = ["sh", "ash", "dash", "busybox sh", "bash", "bats", "ksh", "oksh"];
-            let bad_shells = ["awk", "csh", "expect", "fish", "perl", "python", "python3", "ruby", "tcsh", "zsh"];
+            let good_shells = ["sh", "ash", "dash", "busybox sh", "bash", "bats", "ksh", "oksh", "zsh"];
+            let bad_shells = ["awk", "csh", "expect", "fish", "perl", "python", "python3", "ruby", "tcsh"];
             let good = s.is_empty() || good_shells.iter().any(|g| s.starts_with(g));
             let bad = bad_shells.iter().any(|b| s.starts_with(b));
             if good {
@@ -930,6 +930,28 @@ impl<'a> P<'a> {
                 let ignore_shebang = shell_annotation_specified || shell_flag_specified;
 
                 let executable = executable_from_shebang(&shebang_string);
+                // DIVERGENCE: settle the dialect the way the analyzer's
+                // `determine_shell` will. Sourced files keep the root's.
+                if !sourced {
+                    p.env.dialect = if let Some(s) = p.env.shell_type_override {
+                        s
+                    } else {
+                        let candidate = annotations
+                            .iter()
+                            .find_map(|a| match a {
+                                Annotation::ShellOverride(s) => Some(s.clone()),
+                                _ => None,
+                            })
+                            .or_else(|| {
+                                annotations.iter().find_map(|a| match a {
+                                    Annotation::ShellFromNix(s) => Some(s.clone()),
+                                    _ => None,
+                                })
+                            })
+                            .unwrap_or_else(|| executable.clone());
+                        shell_for_executable(&candidate).or(p.env.fallback_shell).unwrap_or(Shell::Bash)
+                    };
+                }
                 // DIVERGENCE: a nix-shell shebang with a shell (or none, meaning
                 // bash) is not an unrecognized shebang (SC1008).
                 if !ignore_shebang && nix_shell.is_none() {
@@ -1182,6 +1204,10 @@ impl<'a> P<'a> {
 
     fn parsed(&mut self, associative: &[String], name: &str, pos: SourcePos, src: &str) -> PR<Id> {
         if associative.iter().any(|s| s == name) {
+            if self.env.is_zsh() {
+                // DIVERGENCE: a zsh subscript may open with flags, `h[(e)$k]=v`.
+                return self.sub_parse(pos, |p| p.called("associative array index", |p| p.zsh_assoc_index()), src);
+            }
             self.sub_parse(pos, |p| p.called("associative array index", |p| p.read_index_span()), src)
         } else {
             self.sub_parse(
@@ -1248,6 +1274,8 @@ pub(crate) fn parse_script(sys: &dyn SystemInterface, spec: &ParseSpec) -> Parse
         current_filename: spec.filename.clone(),
         ignore_rc: spec.ignore_rc,
         shell_type_override: spec.shell_type_override,
+        fallback_shell: spec.fallback_shell,
+        dialect: Environment::initial_dialect(spec.shell_type_override, spec.fallback_shell),
         ignore_directives: spec.ignore_directives,
     };
     parse_shell(env, &spec.filename, &spec.script)
@@ -1386,5 +1414,49 @@ mod tests {
         assert_eq!(anns, vec![Annotation::DisableComment(1234, 1235)]);
         let mut p = P::new(Environment { ignore_rc: true, ..env }, "script", "");
         assert!(p.run(|p| p.read_config_file("script")).unwrap().is_empty());
+    }
+
+    /// The dialect the parser settles on (`Environment::is_zsh`).
+    fn dialect_of(script: &str, over: Option<Shell>, fallback: Option<Shell>, rc: Option<&str>) -> Shell {
+        let sys = mock_rc_file(rc.unwrap_or(""), mocked_system_interface(vec![]));
+        let env = Environment {
+            system_interface: &sys,
+            shell_type_override: over,
+            fallback_shell: fallback,
+            dialect: Environment::initial_dialect(over, fallback),
+            ignore_rc: rc.is_none(),
+            ..test_environment()
+        };
+        let mut p = P::new(env, "script", script);
+        let _ = p.run(|p| p.read_script());
+        assert_eq!(p.env.is_zsh(), p.env.dialect == Shell::Zsh);
+        p.env.dialect
+    }
+
+    #[test]
+    fn dialect_is_zsh_for_zsh_shebangs_overrides_directives_rc_and_fallback() {
+        let zsh = |script: &str| dialect_of(script, None, None, None);
+        assert_eq!(zsh("#!/bin/zsh\necho hi\n"), Shell::Zsh);
+        assert_eq!(zsh("#!/usr/bin/env zsh\necho hi\n"), Shell::Zsh);
+        assert_eq!(zsh("#!/bin/sh\n# shellcheck shell=zsh\necho hi\n"), Shell::Zsh);
+        assert_eq!(zsh("# shellcheck shell=zsh\necho hi\n"), Shell::Zsh);
+        assert_eq!(dialect_of("echo hi\n", Some(Shell::Zsh), None, None), Shell::Zsh);
+        assert_eq!(dialect_of("#!/bin/bash\necho hi\n", Some(Shell::Zsh), None, None), Shell::Zsh);
+        assert_eq!(dialect_of("echo hi\n", None, Some(Shell::Zsh), None), Shell::Zsh);
+        assert_eq!(dialect_of("echo hi\n", None, None, Some("shell=zsh\n")), Shell::Zsh);
+        assert!(Environment::initial_dialect(Some(Shell::Zsh), None) == Shell::Zsh);
+    }
+
+    #[test]
+    fn dialect_is_not_zsh_for_other_shells() {
+        let d = |script: &str| dialect_of(script, None, None, None);
+        assert_eq!(d("#!/bin/bash\necho hi\n"), Shell::Bash);
+        assert_eq!(d("echo hi\n"), Shell::Bash);
+        assert_eq!(d("#!/bin/sh\necho hi\n"), Shell::Sh);
+        assert_eq!(d("#!/bin/ksh\necho hi\n"), Shell::Ksh);
+        assert_eq!(d("#!/bin/zsh\n# shellcheck shell=bash\necho hi\n"), Shell::Bash);
+        assert_eq!(dialect_of("#!/bin/zsh\necho hi\n", Some(Shell::Bash), None, None), Shell::Bash);
+        assert_eq!(dialect_of("echo hi\n", None, Some(Shell::Dash), None), Shell::Dash);
+        assert_eq!(dialect_of("echo hi\n", None, None, Some("shell=sh\n")), Shell::Sh);
     }
 }

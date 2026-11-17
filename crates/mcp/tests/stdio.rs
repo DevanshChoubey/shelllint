@@ -122,6 +122,16 @@ fn list_checks_filters_and_optional_only() {
 }
 
 #[test]
+fn zsh_is_an_accepted_shell_and_tcsh_is_not() {
+    let replies = session(&[
+        call(1, "check_script", json!({"script": "echo \"hi\"\n", "shell": "zsh"})),
+        call(2, "check_script", json!({"script": "echo \"hi\"\n", "shell": "tcsh"})),
+    ]);
+    assert_eq!(reply(&replies, 1)["result"]["isError"], false, "{}", reply(&replies, 1));
+    assert_eq!(reply(&replies, 2)["result"]["isError"], true);
+}
+
+#[test]
 fn bad_arguments_are_tool_errors_not_protocol_errors() {
     let replies = session(&[
         call(1, "check_script", json!({"script": "echo", "exclude": ["nope"]})),

@@ -7,6 +7,7 @@ use shelllint_analyzer::analyzerlib::{Comments, Params};
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::get_literal_string;
+use shelllint_core::interface::Shell;
 use regex::Regex;
 use shelllint_core::regex::{matches, mk_regex};
 
@@ -25,6 +26,11 @@ static RE: LazyLock<Regex> = LazyLock::new(|| mk_regex(r"[\]\[*.+()|]"));
 fn check_quoted_cond_regex(p: &Params<'_>, t: Id, c: &mut Comments) {
     let Token::TC_Binary(_, op, _, rhs) = p.ast.get(t) else { return };
     if op != "=~" {
+        return;
+    }
+    // DIVERGENCE: zsh treats a quoted right-hand side of `=~` as a regex too
+    // (`[[ axc =~ "a.c" ]]` matches), so there is no zsh form of this warning.
+    if p.shell_type == Shell::Zsh {
         return;
     }
     let rhs = *rhs;

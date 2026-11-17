@@ -51,7 +51,7 @@ impl ToolOutput {
     }
 }
 
-const SHELL_OPTIONS: &[&str] = &["sh", "bash", "dash", "ksh", "busybox"];
+const SHELL_OPTIONS: &[&str] = &["sh", "bash", "dash", "ksh", "busybox", "zsh"];
 const SEVERITY_OPTIONS: &[&str] = &["error", "warning", "info", "style"];
 
 fn lint_props() -> Value {

@@ -58,3 +58,17 @@ pub fn parse_code(v: &Value) -> Option<Code> {
     let digits = s.strip_prefix("SC").or_else(|| s.strip_prefix("sc")).unwrap_or(s);
     digits.parse().ok()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn zsh_is_a_known_dialect() {
+        assert_eq!(Settings::from_json(&json!({"dialect": "zsh"})).dialect, Some(Shell::Zsh));
+        assert_eq!(Settings::from_json(&json!({"shelllint": {"dialect": "zsh"}})).dialect, Some(Shell::Zsh));
+        // An unsupported shell is ignored, not an error.
+        assert_eq!(Settings::from_json(&json!({"dialect": "tcsh"})).dialect, None);
+    }
+}

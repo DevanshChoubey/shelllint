@@ -11,3 +11,4 @@ pub mod prelude;
 pub mod regex;
 pub mod unicode;
 mod unicode_tables;
+pub mod zsh_data;
