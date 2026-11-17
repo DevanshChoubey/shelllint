@@ -103,7 +103,9 @@ impl<'a> P<'a> {
                     let pos = p.get_position();
                     let c = p.one_of("{}")?;
                     let msg = format!("This {c} is literal. Check expression (missing ;/\\n?) or quote it.");
-                    p.parse_problem_at(pos, WarningC, 1083, &msg);
+                    if !(p.env.is_zsh() && p.zsh_is_prompt_brace(c)) {
+                        p.parse_problem_at(pos, WarningC, 1083, &msg);
+                    }
                     Ok(c.to_string())
                 },
             )?;

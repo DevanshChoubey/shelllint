@@ -192,6 +192,12 @@ impl Input {
         self.at >= self.buf.len()
     }
 
+    /// DIVERGENCE: extension (zsh lane P-C). The characters already consumed,
+    /// for the one rule that needs to look behind the cursor.
+    pub fn preceding(&self) -> &[char] {
+        &self.buf[..self.at]
+    }
+
     pub fn as_string(&self) -> String {
         self.as_slice().iter().collect()
     }
