@@ -116,7 +116,11 @@ fn unquoted_tilde_source_is_sc1090_warning_like_the_oracle() {
             // With -x a file that exists next to the script is followed (the 0.3.0 feature), so
             // the -x run names a file that does not exist: the oracle never follows `~/`.
             for (k, extra) in [vec![], vec!["-x"]].into_iter().enumerate() {
-                let script = if k == 1 { script.replace("x.sh", "gone.sh").replace("f.sh", "gone.sh") } else { script.to_string() };
+                let script = if k == 1 {
+                    script.replace("x.sh", "gone.sh").replace("f.sh", "gone.sh")
+                } else {
+                    script.to_string()
+                };
                 let o = gcc(&format!("u{i}{j}{k}"), sh, &script, &extra);
                 let want = format!("-:1:{col}: warning: {SC1090}");
                 assert!(o.lines().any(|l| l == want), "{sh} {extra:?} {script}: {o}");
