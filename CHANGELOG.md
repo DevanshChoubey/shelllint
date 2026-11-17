@@ -18,6 +18,13 @@ Each release also states which upstream ShellCheck commit it ports.
   `.zsh` and `.zsh-theme` files and zsh shebangs. See
   [docs/extensions.md](docs/extensions.md#zsh).
 
+### Fixed
+
+- `--bash-version` no longer reports features that a version test in the script
+  guards. `if ((BASH_VERSINFO[0] >= 4)); then declare -A m; fi` is silent at 3.2, and
+  so are the early-exit and `&&` / `||` forms. A feature newer than the guard still
+  warns. See [Bash version targeting](docs/extensions.md#bash-version-targeting).
+
 ## [0.4.0] - 2026-11-17
 
 Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same

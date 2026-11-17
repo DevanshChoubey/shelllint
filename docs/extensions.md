@@ -217,9 +217,32 @@ then the rc file. A directive covers the whole file.
 - If teammates run the real ShellCheck on the same files, prefer the rc key. ShellCheck
   ignores an unknown rc key, but it reports the `# shellcheck bash-version=` directive
   as SC1107 (unknown directive) and exits 1.
-- Version checks in the script aren't understood. A feature used inside
-  `if ((BASH_VERSINFO[0] >= 4)); then ... fi` is still reported. Disable that code
-  where the script already guards it.
+- A version test in the script protects the code it guards, so the features it
+  proves are not reported there. Inside `if ((BASH_VERSINFO[0] >= 4)); then ... fi`
+  the target is 4.0, and `declare -A` is silent at `--bash-version=3.2`. Only the
+  guard's region is affected, and only the features newer than the guard still warn.
+  - Operands: `BASH_VERSINFO[0]`, `${BASH_VERSINFO[0]}`, `$BASH_VERSINFO`, a bare
+    `BASH_VERSINFO` in `(( ))` and `[[ ]]`, `${BASH_VERSION%%.*}` and
+    `${BASH_VERSION:0:1}` (one digit, so it is right up to bash 9). `BASH_VERSINFO[1]`
+    is the minor version.
+  - Comparisons with an integer literal, on either side: `>= > == < <=` in `(( ))`,
+    `-ge -gt -eq -lt -le` and `==` in `[[ ]]`, and `-ge -gt -eq -lt -le` in `[ ]` and
+    `test`. `[ BASH_VERSINFO -ge 4 ]` is not a guard, since bash reads the word
+    `BASH_VERSINFO` there, not the version.
+  - Combined major and minor: `(( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) ))`
+    proves 4.3.
+  - Regions: the body of `if G; then`, each `elif`, the `else` of a negated guard,
+    the right side of `G && cmd` and of `NOT_G || cmd`, and every later statement
+    in the same list after an early exit. The early exits are
+    `if NOT_G; then ...; exit; fi` (or `return`), `NOT_G && { ...; exit; }` and
+    `G || exit`. The exit must be the last command of its body. Guards nest, and a
+    function defined inside a region is covered by it.
+  - Not recognised, so still reported: a guard held in a variable
+    (`v=${BASH_VERSINFO[0]}; ((v >= 4))`), `case` on `BASH_VERSION`, a non-literal
+    bound, `!=`, an exit in a subshell or one followed by more statements in its
+    body, and `>=` in `[[ ]]`, which bash rejects as a syntax error.
+  - A guard only lowers what is reported. A 4.0 guard does not cover a 4.3 feature,
+    which still warns with `(target is 3.2)`.
 - Each finding is a warning, `declare -A requires bash 4.0 (target is 3.2).`, reported
   at every use. They're not optional checks, so `-o all` and the optional check list are unchanged.
   Each code has its own number so a project can turn off just the feature it polyfills,
