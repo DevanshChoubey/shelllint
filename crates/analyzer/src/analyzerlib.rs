@@ -174,6 +174,23 @@ pub struct Params<'a> {
     /// DIVERGENCE: the zsh option-state map behind [`Params::zsh_option`].
     /// Built only when the shell is zsh; `None` for every other shell.
     pub zsh_options: Option<std::rc::Rc<crate::zsh_options::ZshOptionMap>>,
+    /// DIVERGENCE (performance only): sets the checks derive from the whole
+    /// tree, filled on first use, so a check run per token does not walk the
+    /// tree per token. See [`TreeCache`].
+    pub tree_cache: std::rc::Rc<TreeCache>,
+}
+
+/// DIVERGENCE (performance only): name sets the checks derive from the whole
+/// tree, each computed on first use. They describe `Params::ast`, so every
+/// place that replaces `ast` in a copy of `Params` gives the copy a fresh one.
+#[derive(Debug, Default)]
+pub struct TreeCache {
+    /// `zsh_registered_functions` (zsh only).
+    pub zsh_registered: std::cell::OnceCell<std::collections::HashSet<String>>,
+    /// The commands named by the literal actions of `trap` anywhere in the tree.
+    pub trap_action_commands: std::cell::OnceCell<std::collections::HashSet<String>>,
+    /// The arrays declared with `-A` anywhere in the tree.
+    pub associative_arrays: std::cell::OnceCell<std::collections::HashSet<String>>,
 }
 
 /// `variableFlow :: [StackData]`
@@ -524,6 +541,7 @@ pub fn make_parameters<'a>(spec: &AnalysisSpec, ast: &'a Ast, root: Id) -> Param
             .unwrap_or(false),
         bash_version: spec.bash_version.or_else(|| shelllint_core::astlib::get_bash_version_directive(ast, root)),
         zsh_options: (shell_type == Shell::Zsh).then(|| std::rc::Rc::new(crate::zsh_options::build(ast, root))),
+        tree_cache: Default::default(),
     };
     params.variable_flow = get_variable_flow(&params, root).into();
     // `cfgAnalysis = do guard extendedAnalysis; return $ CF.analyzeControlFlow cfParams root`

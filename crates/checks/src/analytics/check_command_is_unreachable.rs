@@ -8,6 +8,7 @@ use shelllint_core::ast::{Id, Token};
 use shelllint_analyzer::analyzerlib::p_script;
 use shelllint_core::ast::Ast;
 use shelllint_core::astlib::{get_command_argv, get_command_name, get_literal_string, get_path};
+use std::collections::HashSet;
 
 use crate::support::is_sourced;
 use crate::zsh_support::zsh_registered_functions;
@@ -44,7 +45,7 @@ fn check_command_is_unreachable(p: &Params<'_>, t: Id, c: &mut Comments) {
                 && !is_sourced(p, t)
                 // DIVERGENCE: a function named in a `trap` action is invoked when the trap fires, so it is
                 // not reported as never invoked.
-                && !is_trapped_function(p.ast, p.root, t)
+                && !is_trapped_function(p, t)
                 // DIVERGENCE: zsh calls hook, widget, completion and `TRAPxxx` functions itself.
                 && !is_zsh_registered(p, t)
             {
@@ -74,9 +75,15 @@ fn is_unreachable(p: &Params<'_>, t: Id) -> bool {
 }
 
 /// Whether the name of function `f` appears as a command in the first argument of some `trap`.
-fn is_trapped_function(ast: &Ast, root: Id, f: Id) -> bool {
-    let Token::T_Function(_, _, name, _) = ast.get(f) else { return false };
-    reachable_ids(ast, root).into_iter().any(|t| trap_action_commands(ast, t).iter().any(|c| c == name))
+fn is_trapped_function(p: &Params<'_>, f: Id) -> bool {
+    let Token::T_Function(_, _, name, _) = p.ast.get(f) else { return false };
+    p.tree_cache.trap_action_commands.get_or_init(|| trapped_commands(p.ast, p.root)).contains(name)
+}
+
+/// The commands named by the literal `trap` actions in the tree. Built once per
+/// script: a check per function that walked the tree would be quadratic.
+fn trapped_commands(ast: &Ast, root: Id) -> HashSet<String> {
+    reachable_ids(ast, root).into_iter().flat_map(|t| trap_action_commands(ast, t)).collect()
 }
 
 /// For a `trap` command, the names of the commands in its action when that is a literal; else empty.

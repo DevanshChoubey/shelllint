@@ -116,7 +116,9 @@ fn braced(p: &Params<'_>, t: Id, c: &mut Comments, s: &str) {
 fn is_associative(p: &Params<'_>, s: &str) -> bool {
     let s = s.strip_prefix(['#', '!']).unwrap_or(s);
     let name: String = s.chars().take_while(|&ch| is_variable_char(ch)).collect();
-    !name.is_empty() && get_associative_arrays(p.ast, p.root).contains(&name)
+    // The tree is walked once per script, not once per negative index.
+    let arrays = p.tree_cache.associative_arrays.get_or_init(|| get_associative_arrays(p.ast, p.root).into_iter().collect());
+    !name.is_empty() && arrays.contains(&name)
 }
 
 /// A literal negative subscript: `-1`, ` -2 `. `$i-1` and `@` are not.

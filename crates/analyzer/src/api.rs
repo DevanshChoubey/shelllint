@@ -266,7 +266,7 @@ fn check_command(map: &CommandMap, p: &Params<'_>, t: Id, c: &mut Comments) {
         {
             let scratch = cell.borrow();
             let Some(ast) = scratch.as_ref() else { unreachable!() };
-            let p2 = Params { ast, ..p.clone() };
+            let p2 = Params { ast, tree_cache: Default::default(), ..p.clone() };
             run_all(Some(fs), &p2, t, c);
         }
         if let Some(a) = cell.borrow_mut().as_mut() {

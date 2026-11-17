@@ -500,7 +500,7 @@ impl Scratch {
 
     /// `params` with `ast` replaced by this copy.
     pub fn params<'s>(&'s self, p: &Params<'_>) -> Params<'s> {
-        Params { ast: &self.ast, ..p.clone() }
+        Params { ast: &self.ast, tree_cache: Default::default(), ..p.clone() }
     }
 }
 
