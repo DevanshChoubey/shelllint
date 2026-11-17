@@ -125,6 +125,14 @@ pub fn shell_from_filename(filename: &str) -> Option<Shell> {
         (".bats", Shell::Bash),
         (".dash", Shell::Dash),
         (".envrc", Shell::Bash),
+        // DIVERGENCE: zsh names are a shelllint extension.
+        (".zsh", Shell::Zsh),
+        (".zsh-theme", Shell::Zsh),
+        (".zshrc", Shell::Zsh),
+        (".zshenv", Shell::Zsh),
+        (".zprofile", Shell::Zsh),
+        (".zlogin", Shell::Zsh),
+        (".zlogout", Shell::Zsh),
     ];
     // The `.sh` is too generic to determine the shell:
     // We fallback to Bash in this case and emit SC2148 if there is no shebang
@@ -325,6 +333,7 @@ fn collect_messages(
             check_sourced: spec.check_sourced,
             ignore_rc: spec.ignore_rc,
             shell_type_override: spec.shell_type_override,
+            fallback_shell: shell_from_filename(&spec.filename),
             ignore_directives,
             ..new_parse_spec()
         },
@@ -552,6 +561,10 @@ mod tests {
         assert_eq!(shell_from_filename("x/.envrc"), Some(Shell::Bash));
         assert_eq!(shell_from_filename("a.bats"), Some(Shell::Bash));
         assert_eq!(shell_from_filename("a.dash"), Some(Shell::Dash));
+        for n in ["a.zsh", "a.zsh-theme", ".zshrc", ".zshenv", ".zprofile", ".zlogin", ".zlogout", "/h/x/.zshrc.j2"] {
+            assert_eq!(shell_from_filename(n), Some(Shell::Zsh), "{n}");
+        }
+        assert_eq!(shell_from_filename("a.fish"), None);
         assert_eq!(shell_from_filename("a.sh"), None);
     }
 }

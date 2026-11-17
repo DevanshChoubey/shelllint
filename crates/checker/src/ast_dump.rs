@@ -49,6 +49,7 @@ pub fn dump_ast(sys: &dyn SystemInterface, mut spec: CheckSpec, out: &mut dyn Wr
                 check_sourced: spec.check_sourced,
                 ignore_rc: spec.ignore_rc,
                 shell_type_override: spec.shell_type_override,
+                fallback_shell: crate::shell_from_filename(&spec.filename),
                 ..new_parse_spec()
             },
         )
