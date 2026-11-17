@@ -159,12 +159,41 @@ impl<'a> P<'a> {
             let start = p.start_span();
             p.g_if()?;
             p.allspacing()?;
-            let condition = p.read_term()?;
+            // notes from an abandoned attempt are kept, so the condition is read
+            // without the "words after a compound command" notes (SC1140/SC1141)
+            p.zsh_short_if = true;
+            let condition = p.read_term();
+            p.zsh_short_if = false;
+            let condition = condition?;
             p.allspacing()?;
             p.not_followed_by2(|p| p.g_then())?;
             p.look_ahead(|p| alt!(p, |p| p.g_fi().map(drop), |p| p.g_rbrace().map(drop), |p| p.char_(')').map(drop)))?;
             let id = p.end_span(start);
             Ok(p.node(id, Token::T_IfExpression(vec![(condition, vec![])], vec![])))
+        })
+    }
+
+    /// `if [[ c ]] cmd`: the condition is a compound command and the body
+    /// follows it on the same line with no separator (SHORT_LOOPS). The body
+    /// is one command (an and-or list); `if [[ c ]] cmd; fi` is rejected by
+    /// zsh, so the `fi` is left for the caller to report. Fails without
+    /// consuming anything when the shape is not that.
+    pub(crate) fn zsh_if_one_line(&mut self) -> PR<Id> {
+        self.try_(|p| {
+            let start = p.start_span();
+            p.g_if()?;
+            p.allspacing()?;
+            p.zsh_short_if = true;
+            let condition = p.read_term();
+            p.zsh_short_if = false;
+            let condition = condition?;
+            // a body must follow directly: a keyword or a separator means this is
+            // some other shape
+            p.not_followed_by2(|p| p.read_keyword())?;
+            p.not_followed_by2(|p| p.g_lbrace())?;
+            let body = p.read_and_or()?;
+            let id = p.end_span(start);
+            Ok(p.node(id, Token::T_IfExpression(vec![(condition, vec![body])], vec![])))
         })
     }
 

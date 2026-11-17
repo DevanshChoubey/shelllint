@@ -13,14 +13,17 @@ use crate::{alt, choice};
 impl<'a> P<'a> {
     pub(crate) fn read_if_clause(&mut self) -> PR<Id> {
         if self.env.is_zsh() {
+            // `if cond` closed by `fi`/`}`/`)` with no `then` (C28), else the
+            // regular and brace forms.
+            if let Ok(id) = self.zsh_if_without_then() {
+                return Ok(id);
+            }
+            if let Ok(id) = self.zsh_if_one_line() {
+                return Ok(id);
+            }
             return self.zsh_read_if_clause();
         }
         self.called("if expression", |p| {
-            if p.env.is_zsh()
-                && let Ok(id) = p.zsh_if_without_then()
-            {
-                return Ok(id);
-            }
             let start = p.start_span();
             let pos = p.get_position();
             let (condition, action) = p.read_if_part()?;
@@ -719,7 +722,7 @@ impl<'a> P<'a> {
         let has_word =
             !(self.env.is_zsh() && self.zsh_lbrace_ahead()) && self.is_followed_by(|p| p.read_normal_word())?;
 
-        if has_word && !(has_keyword || has_dash_ao) {
+        if has_word && !(has_keyword || has_dash_ao) && !self.zsh_short_if {
             // We have other words following, and no error has been emitted.
             let pos_end = self.get_position();
             self.parse_problem_at_with_end(
@@ -776,6 +779,9 @@ impl<'a> P<'a> {
         self.optional(|p| {
             p.look_ahead(|p| {
                 p.not_followed_by2(|p| choice!(p, |p| p.read_keyword(), |p| p.g_lbrace()))?;
+                if p.zsh_short_if {
+                    return p.fail("a short if body follows");
+                }
                 let pos = p.get_position();
                 p.many1(|p| p.read_normal_word())?;
                 let pos_end = p.get_position();

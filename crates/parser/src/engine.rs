@@ -230,6 +230,10 @@ pub struct P<'a> {
     pub(crate) source_expansions: u32,
     /// Files expanded so far in this script (resolved names); not rolled back.
     pub(crate) expanded_sources: std::collections::HashSet<String>,
+    /// zsh only: set while the condition of an `if` is read as a possible
+    /// one-line short `if` (`if [[ c ]] cmd`), where a word after a compound
+    /// condition is the body, not an error (SC1140/SC1141).
+    pub(crate) zsh_short_if: bool,
 }
 
 impl<'a> P<'a> {
@@ -249,6 +253,7 @@ impl<'a> P<'a> {
             env,
             source_expansions: 0,
             expanded_sources: std::collections::HashSet::new(),
+            zsh_short_if: false,
         }
     }
 
