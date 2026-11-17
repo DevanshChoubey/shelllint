@@ -9,9 +9,13 @@ use shelllint_analyzer::analyzerlib::{
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::{e4m, get_braced_modifier, get_literal_string, get_path, oversimplify};
-use shelllint_core::interface::TokenComment;
+use shelllint_core::interface::{Shell, TokenComment};
 
 use crate::zsh_support::zsh_registered_functions;
+
+/// The name the zsh parser gives an anonymous function (`ANON_FUNCTION_NAME`
+/// in the parser crate, which this crate does not depend on).
+const ANON_FUNCTION_NAME: &str = "zsh-anonymous-function";
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -71,8 +75,9 @@ fn check_unpassed_in_functions(params: &Params<'_>, root: Id) -> Vec<TokenCommen
 fn find_function(params: &Params<'_>, t: Id) -> Option<(String, Id)> {
     let Token::T_Function(_, _, name, body) = params.ast.get(t) else { return None };
     // DIVERGENCE: a zsh anonymous function is called where it is written, with
-    // the arguments following its body, so it has no callers to pair up.
-    if name == "zsh-anonymous-function" {
+    // the arguments following its body, so it has no callers to pair up. Only
+    // zsh's parser makes this name; in other shells it is an ordinary name.
+    if params.shell_type == Shell::Zsh && name == ANON_FUNCTION_NAME {
         return None;
     }
     // DIVERGENCE: a function defined in a sourced file may have callers we
