@@ -758,7 +758,7 @@ impl<'a> P<'a> {
 
     pub fn called<T>(&mut self, s: &'static str, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
         let pos = self.get_position();
-        self.with_context(Context::ContextName(pos, s), p)
+        self.nested(|q| q.with_context(Context::ContextName(pos, s), p))
     }
 
     pub fn with_annotations<T>(&mut self, anns: Vec<Annotation>, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {

@@ -1070,6 +1070,12 @@ pub(crate) fn parse_shell(env: Environment<'_>, name: &str, contents: &str) -> P
     }
 
     let (result, p) = run_parser(env, |p| p.parse_with_notes(|p| p.read_script()), name, contents);
+    // A nesting error may have been swallowed by a combinator that let the
+    // parse finish; the tree is then incomplete, so report the error.
+    let result = match &p.too_deep {
+        Some(e) => Err(e.clone()),
+        None => result,
+    };
     // The Haskell note lists are newest first; ours are oldest first.
     let parse_problems: Vec<ParseNote> = p.sys.parse_problems.iter().rev().cloned().collect();
     match result {

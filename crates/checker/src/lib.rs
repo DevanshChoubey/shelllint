@@ -141,19 +141,20 @@ pub fn shell_from_filename(filename: &str) -> Option<Shell> {
 
 /// Stack size of the thread `check_script` parses and analyses on.
 // Measured on 5000 nested `$(`: one nesting level costs roughly 45 KB of
-// stack in a debug build and 15-25 KB in release, so 64 MB overflows at
-// about 1500 (debug) / 3000-5000 (release) levels. 512 MB is address space
-// reserved for the thread, not memory: only the pages actually used are
-// committed.
+// stack in a debug build and 15-25 KB in release. The parser stops at
+// `engine::MAX_NESTING` frames (SC1072), so this stack is a backstop for
+// the readers and analysis: 1000 levels need about 25-45 MB. 512 MB is
+// address space reserved for the thread, not memory: only the pages
+// actually used are committed.
 pub const CHECK_STACK_BYTES: usize = 512 * 1024 * 1024;
 
 /// `checkScript`
 // DIVERGENCE: the parser's readers recurse once per nesting level, like the
 // Haskell (whose stack lives on the heap and grows to most of RAM). Parsing
-// and analysis run on a fresh thread with a `CHECK_STACK_BYTES` stack, so
-// deeply nested input (5000 nested `$(` needs ~225 MB in a debug build)
-// cannot overflow; nesting beyond ~10000 levels still aborts the process.
-// This is why `SystemInterface` requires `Sync`.
+// and analysis run on a fresh thread with a `CHECK_STACK_BYTES` stack. Input
+// nested deeper than `engine::MAX_NESTING` is a parse error (SC1072), so the
+// recursion is bounded and the thread cannot overflow. This is why
+// `SystemInterface` requires `Sync`.
 pub fn check_script(sys: &dyn SystemInterface, spec: &CheckSpec) -> CheckResult {
     check_script_owned(sys, spec.clone())
 }
