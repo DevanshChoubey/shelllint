@@ -345,6 +345,7 @@ fn collect_messages(
             extended_analysis: spec.extended_analysis,
             safe_vars: spec.safe_vars.clone(),
             strict_env_vars: spec.strict_env_vars,
+            bash_version: spec.bash_version,
             optional_checks,
             ..new_analysis_spec()
         }

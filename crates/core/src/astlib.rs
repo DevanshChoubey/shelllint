@@ -1362,3 +1362,14 @@ pub fn get_strict_env_vars_directive(ast: &Ast, root: Id) -> Option<bool> {
         _ => None,
     }
 }
+
+/// Not in upstream: `bash-version=` on the root.
+pub fn get_bash_version_directive(ast: &Ast, root: Id) -> Option<crate::interface::BashVersion> {
+    match ast.get(root) {
+        Token::T_Annotation(list, _) => list.iter().find_map(|a| match a {
+            Annotation::BashVersion(v) => Some(*v),
+            _ => None,
+        }),
+        _ => None,
+    }
+}

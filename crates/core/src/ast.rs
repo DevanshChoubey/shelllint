@@ -199,6 +199,8 @@ pub enum Annotation {
     SafeVars(String),
     /// Not in upstream: `strict-env-vars=`.
     StrictEnvVars(bool),
+    /// Not in upstream: `bash-version=`.
+    BashVersion(crate::interface::BashVersion),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
