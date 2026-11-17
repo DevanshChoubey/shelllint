@@ -48,7 +48,7 @@ impl<'a> P<'a> {
         let x = self.many1(|p| {
             let at_start = count == 0;
             let after_eq = last.is_some_and(|l| matches!(p.user.ast.get(l), Token::T_Literal(s) if s.ends_with('=')));
-            let id = p.zsh_word_part(end, at_start, pattern, after_eq)?;
+            let id = p.zsh_pattern_word_part(end, at_start, pattern, after_eq)?;
             count += 1;
             last = Some(id);
             Ok(id)
@@ -58,7 +58,7 @@ impl<'a> P<'a> {
         Ok(self.node(id, Token::T_NormalWord(x)))
     }
 
-    fn zsh_word_part(&mut self, end: &str, at_start: bool, pattern: bool, after_eq: bool) -> PR<Id> {
+    fn zsh_pattern_word_part(&mut self, end: &str, at_start: bool, pattern: bool, after_eq: bool) -> PR<Id> {
         let ahead = self.zsh_peek(2);
         let c0 = ahead.first().copied();
         if c0 == Some('(') && !end.contains('(') {
