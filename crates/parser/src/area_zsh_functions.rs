@@ -124,9 +124,10 @@ impl<'a> P<'a> {
     }
 
     /// Whether the `}` at the front of `rest` closes a group rather than
-    /// being part of a word. zsh ends a word at an unquoted `}` unless the
-    /// word opened a `{` of its own (`{a}`, `%{x%}`), and treats a `}` that
-    /// starts a word and is glued to a word character (`}x`) as literal.
+    /// being part of a word. zsh ends a word at an unquoted `}` only when the
+    /// `}` is the last character of the word (followed by a space, newline,
+    /// `;`, `&`, `|`, a paren, a redirect or the end of input) and the word
+    /// did not open a `{` of its own (`{a}`, `%{x%}`).
     fn zsh_closes_group(&self, rest: &[char]) -> bool {
         let before = self.consumed_chars();
         let mut i = before.len();
@@ -146,8 +147,17 @@ impl<'a> P<'a> {
         if open > close {
             return false;
         }
+        // zsh only treats a `}` as the closer when it is the last character
+        // of its word: `echo a}b` and `{ echo a}b }` keep the brace literal.
+        // At the start of a word `}}` closes two groups (`{ { echo hi }}`),
+        // while inside a word the last `}` of a run is the closer
+        // (`{ echo a}}` prints `a}`).
         let word_start = i == before.len();
-        !(word_start && rest.get(1).is_some_and(|c| c.is_alphanumeric() || *c == '_'))
+        match rest.get(1) {
+            None => true,
+            Some('}') => word_start,
+            Some(c) => c.is_whitespace() || ";&|()<>".contains(*c),
+        }
     }
 
     // ---- C10, C11, C12: brace groups ------------------------------------
