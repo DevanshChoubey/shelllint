@@ -117,6 +117,7 @@ const KNOWN_KEYS: &[&str] = &[
     "template",
     "safe-vars",
     "strict-env-vars",
+    "bash-version",
 ];
 
 /// Problems `--strict-rc` rejects: (line, column, description).
@@ -137,6 +138,12 @@ fn find_problems(text: &str) -> Vec<(usize, usize, String)> {
                 continue;
             }
             format!("invalid template value '{}'", v)
+        } else if key == "bash-version" {
+            let v = value.trim_matches(|c| c == '"' || c == '\'');
+            if v.parse::<shelllint_core::interface::BashVersion>().is_ok() {
+                continue;
+            }
+            format!("invalid bash-version value '{}'", v)
         } else if key == "shell" {
             let v = value.trim_matches(|c| c == '"' || c == '\'');
             if shell_for_executable(v).is_some() {

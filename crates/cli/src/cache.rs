@@ -449,6 +449,14 @@ fn key_bytes(options: &Options, spec: &CheckSpec) -> Vec<u8> {
         w.str(v);
     }
     w.opt_bool(spec.strict_env_vars);
+    match spec.bash_version {
+        None => w.u8(0),
+        Some(v) => {
+            w.u8(1);
+            w.u8(v.major());
+            w.u8(v.minor());
+        }
+    }
     w.u8(spec.min_severity_explicit as u8);
     w.u8(spec.ignore_directives as u8);
     w.u8(spec.report_unused_disables as u8);
