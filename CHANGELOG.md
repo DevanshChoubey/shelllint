@@ -8,6 +8,16 @@ Each release also states which upstream ShellCheck commit it ports.
 
 ## [Unreleased]
 
+### Added
+
+- zsh support (experimental). zsh scripts are parsed and checked instead of getting
+  SC1071. The analysis follows `setopt`, `unsetopt`, `emulate` and `options[]`, and
+  existing checks fire only when their warning is true in zsh. For example, SC2086 is
+  quiet for `$x` unless `shwordsplit` is on or the script writes `${=x}`. No zsh-only
+  checks are added, and output for other shells is unchanged. `-r` now also picks up
+  `.zsh` and `.zsh-theme` files and zsh shebangs. See
+  [docs/extensions.md](docs/extensions.md#zsh).
+
 ## [0.4.0] - 2026-11-17
 
 Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same

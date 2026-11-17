@@ -35,10 +35,11 @@ the upstream project and does not replace it.
 
 ## Status
 
-Pre-release. Every registered check is ported. On warning codes, the port
-agrees with the real ShellCheck binary on all of ShellCheck's own test
-scripts (see [Compatibility](#compatibility)). There is no tagged release yet,
-and the crates are not published.
+Every registered check is ported. On warning codes, the port agrees with the
+real ShellCheck binary on all of ShellCheck's own test scripts (see
+[Compatibility](#compatibility)). Binaries are on the
+[releases page](https://github.com/DevanshChoubey/shelllint/releases). The
+crates are not published.
 
 ## Install
 
@@ -113,8 +114,8 @@ ln -s "$(command -v shelllint)" ~/.local/bin/shellcheck
 ### More options
 
 shelllint also has `-r`, `--exclude-path`, `--changed-since`, `-f sarif`,
-`-f github`, `--cache-dir`, range directives, shell completions and five extra
-optional checks. [docs/extensions.md](docs/extensions.md) covers them all.
+`-f github`, `--cache-dir`, range directives, shell completions, bash version
+targeting, experimental zsh support and five extra optional checks. [docs/extensions.md](docs/extensions.md) covers them all.
 
 ## Compatibility
 

@@ -28,6 +28,12 @@ would make the port worse without making it more correct.
 These differ from ShellCheck even in a run that uses no shelllint option. The
 parity corpus doesn't exercise them.
 
+- **zsh scripts are linted.** ShellCheck reports SC1071 for a zsh shebang and stops.
+  shelllint parses and checks the script. See [extensions.md](extensions.md#zsh).
+  The parity runner skips scripts with a zsh shebang and no forced shell, as the
+  oracle does.
+- **`-r` picks up zsh files**: `.zsh`, `.zsh-theme` and zsh shebangs.
+
 - **`nix-shell` shebangs.** `#!/usr/bin/env nix-shell` no longer gives SC1008.
   The shell comes from the `#! nix-shell -i <shell>` lines directly after the
   shebang, or bash if there is no `-i`. Non-shell interpreters keep SC1008.
