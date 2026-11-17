@@ -24,6 +24,9 @@ Each release also states which upstream ShellCheck commit it ports.
   guards. `if ((BASH_VERSINFO[0] >= 4)); then declare -A m; fi` is silent at 3.2, and
   so are the early-exit and `&&` / `||` forms. A feature newer than the guard still
   warns. See [Bash version targeting](docs/extensions.md#bash-version-targeting).
+- `. ~/x.sh` and `source ~/.bashrc` that cannot be followed (no `-x`, or the file
+  is not found) now give SC1090, a warning, like ShellCheck, instead of an SC1091
+  note about `./x.sh`. Following with `-x -P` is unchanged.
 
 ## [0.4.0] - 2026-11-17
 

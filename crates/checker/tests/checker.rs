@@ -305,9 +305,9 @@ fn prop_cant_source_dynamic() {
 
 #[test]
 fn prop_cant_source_dynamic2() {
-    // DIVERGENCE: `~/foo` is treated like `$HOME/foo` (prefix dropped), so it is
-    // no longer SC1090: found when `./foo` exists, SC1091 otherwise.
-    assert_eq!(check_with_includes(&[("lib", "")], "source ~/foo"), vec![1091]);
+    // DIVERGENCE: `~/foo` is treated like `$HOME/foo` (prefix dropped) when it can
+    // be found (`./foo` exists); otherwise it is SC1090 like upstream.
+    assert_eq!(check_with_includes(&[("lib", "")], "source ~/foo"), vec![1090]);
     assert_eq!(check_with_includes(&[("./foo", "")], "source ~/foo"), none());
 }
 
