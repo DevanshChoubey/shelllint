@@ -217,12 +217,13 @@ fn source_path_flag_expands_home() {
 }
 
 #[test]
-fn unannotated_tilde_source_searches_source_paths() {
+fn unannotated_tilde_source_is_not_read_from_home() {
     let d = Dir::new();
     d.write_home(".bashrc", "foo=1\n");
     d.write("a.sh", "#!/bin/bash\nsource ~/.bashrc\n");
     let o = d.run(&["-x", "a.sh"], true);
-    assert!(!has(&o, 1090), "{}", o.stdout);
+    // The real HOME is never read; not found via the script dir or -P, so SC1090 like the oracle.
+    assert!(has(&o, 1090) && !has(&o, 1091), "{}", o.stdout);
 }
 
 #[test]

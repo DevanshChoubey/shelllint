@@ -329,8 +329,12 @@ impl<'a> P<'a> {
                 _ => false,
             });
         // Any other `~/` path is not followed (SC1090), as upstream does.
+        let mut tilde_rewritten = false;
         let literal_file = literal_file.and_then(|name| match name.strip_prefix("~/") {
-            Some(rest) if unquoted_tilde => Some(format!("./{rest}")),
+            Some(rest) if unquoted_tilde => {
+                tilde_rewritten = true;
+                Some(format!("./{rest}"))
+            }
             Some(_) => None,
             None => Some(name),
         });
@@ -389,6 +393,18 @@ impl<'a> P<'a> {
             other => other,
         };
         match input {
+            Err(_) if tilde_rewritten => {
+                // DIVERGENCE: a `~/` file that cannot be followed (no -x, or not
+                // found) is reported exactly like upstream: SC1090, not SC1091
+                // about the rewritten `./` name.
+                self.parse_note_at_id(
+                    file_id,
+                    WarningC,
+                    1090,
+                    "ShellCheck can't follow non-constant source. Use a directive to specify location.",
+                );
+                Ok(t)
+            }
             Err(err) => {
                 self.parse_note_at_id(file_id, InfoC, 1091, &format!("Not following: {err}"));
                 Ok(t)
