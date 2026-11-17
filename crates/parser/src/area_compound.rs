@@ -470,7 +470,7 @@ impl<'a> P<'a> {
                 );
                 Ok(())
             })?;
-            p.optional(|p| p.g_lparen())?;
+            p.optional(|p| if p.env.is_zsh() { p.zsh_case_lparen() } else { p.g_lparen() })?;
             p.spacing()?;
             let pattern = p.read_pattern()?;
             p.alt(
@@ -536,6 +536,10 @@ impl<'a> P<'a> {
             p.alt(
                 |p| p.g_rparen(),
                 |p| {
+                    // zsh: `name (#q)*` is a word with a glob flag, not a header.
+                    if p.env.is_zsh() {
+                        return p.zero();
+                    }
                     p.parse_problem(
                         ErrorC,
                         1065,

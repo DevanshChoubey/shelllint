@@ -222,6 +222,11 @@ impl<'a> P<'a> {
         let special = |p: &mut Self| single_charred(p, |p| p.special_variable());
 
         let regular = |p: &mut Self| -> PR<Id> {
+            if p.env.is_zsh()
+                && let Some(id) = p.zsh_subscripted_variable(start)?
+            {
+                return Ok(id);
+            }
             let value = p.wrap_string(|p| p.read_variable_name())?;
             let id = p.end_span(start);
             let value = p.node(id, Token::T_DollarBraced(false, value));
