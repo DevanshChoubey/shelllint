@@ -137,13 +137,15 @@ impl<'a> P<'a> {
     }
 
     fn arith_read_group(&mut self) -> PR<Id> {
-        let start = self.start_span();
-        self.char_('(')?;
-        let s = self.arith_sequence()?;
-        self.char_(')')?;
-        let id = self.end_span(start);
-        self.arith_spacing()?;
-        Ok(self.node(id, Token::TA_Parenthesis(s)))
+        self.nested(|p| {
+            let start = p.start_span();
+            p.char_('(')?;
+            let s = p.arith_sequence()?;
+            p.char_(')')?;
+            let id = p.end_span(start);
+            p.arith_spacing()?;
+            Ok(p.node(id, Token::TA_Parenthesis(s)))
+        })
     }
 
     fn arith_read_arith_term(&mut self) -> PR<Id> {

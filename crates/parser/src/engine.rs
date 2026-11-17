@@ -255,7 +255,22 @@ pub struct P<'a> {
     /// zsh only: tree nodes that may still be copied for extra function names
     /// (see `zsh_function_definition`). Not rolled back: copies are never undone.
     pub(crate) zsh_copy_budget: usize,
+    /// Number of `called` frames open now (see `MAX_NESTING`). Balanced on
+    /// every return path, so it is not part of any checkpoint.
+    pub(crate) nesting: u32,
+    /// Set once `nesting` would exceed `MAX_NESTING`: the error every
+    /// combinator that could retry an alternative returns from then on, so the
+    /// rest of the parse fails at once instead of trying each alternative.
+    pub(crate) too_deep: Option<ParseError>,
 }
+
+/// DIVERGENCE: the most nested reader frames (`called` contexts, arithmetic
+/// groups) a parse may open. Input nested deeper stops with SC1072 instead of
+/// overflowing the parser's stack or backtracking without end. Real scripts
+/// nest a few levels. Measured: 998 nested `{` groups or 499 nested `$(` are
+/// accepted. `bash -n` accepts about 4000 `{` and 1000 `$(`, so a script that
+/// bash accepts can still be rejected here.
+pub const MAX_NESTING: u32 = 1000;
 
 impl<'a> P<'a> {
     /// A parser at `initialPos filename` with `initialUserState` and
@@ -278,6 +293,8 @@ impl<'a> P<'a> {
             zsh_dquote: false,
             zsh_nested_failed: std::collections::HashMap::new(),
             zsh_copy_budget: ZSH_COPY_BUDGET,
+            nesting: 0,
+            too_deep: None,
         }
     }
 
@@ -625,6 +642,9 @@ impl<'a> P<'a> {
         p: impl FnOnce(&mut Self, &mut S) -> PR<T>,
         q: impl FnOnce(&mut Self, &mut S) -> PR<T>,
     ) -> PR<T> {
+        if let Some(e) = &self.too_deep {
+            return Err(Fail::Consumed(e.clone()));
+        }
         let (prev, cp) = self.begin();
         let (c1, r1) = self.sub(cp.consumed, |s| p(s, st));
         let e1 = match r1 {
@@ -632,6 +652,10 @@ impl<'a> P<'a> {
             Ok(v) => return self.finish(prev, false, Ok(v)),
             Err(e1) => e1,
         };
+        // DIVERGENCE: after a nesting error, no alternative runs (see `too_deep`).
+        if let Some(e) = self.too_deep.clone() {
+            return Err(Fail::Consumed(e));
+        }
         self.restore(&cp);
         let (c2, r2) = self.sub(cp.consumed, |s| q(s, st));
         match r2 {
@@ -708,6 +732,9 @@ impl<'a> P<'a> {
         let start = self.consumed;
         let mut acc = Vec::new();
         loop {
+            if let Some(e) = &self.too_deep {
+                return Err(Fail::Consumed(e.clone()));
+            }
             self.err = ParseError::unknown(self.pos);
             let cp = self.checkpoint();
             let (c, r) = self.sub(cp.consumed, &mut p);
@@ -833,6 +860,25 @@ impl<'a> P<'a> {
                 Some((f, y)) => x = combine(self, f, x, y),
             }
         }
+    }
+
+    /// Runs `p` one nesting level deeper, failing once `MAX_NESTING` levels
+    /// are open (see `too_deep`). Each reader that can recurse into itself
+    /// runs through here, with or without a context frame.
+    pub fn nested<T>(&mut self, p: impl FnOnce(&mut Self) -> PR<T>) -> PR<T> {
+        if let Some(e) = &self.too_deep {
+            return Err(Fail::Consumed(e.clone()));
+        }
+        if self.nesting >= MAX_NESTING {
+            // DIVERGENCE: SC1072 for nesting beyond `MAX_NESTING`; Parsec has no limit.
+            let e = ParseError::message(self.pos, &format!("Nesting is deeper than {MAX_NESTING} levels"));
+            self.too_deep = Some(e.clone());
+            return Err(Fail::Consumed(e));
+        }
+        self.nesting += 1;
+        let r = p(self);
+        self.nesting -= 1;
+        r
     }
 
     /// `chainr1 p op`, combining right to left.
