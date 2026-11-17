@@ -23,7 +23,7 @@
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::interface::Severity::ErrorC;
 
-use crate::engine::{Fail, P, ParseError, PR};
+use crate::engine::{Fail, P, PR, ParseError};
 use crate::state::IncompleteInterval;
 use crate::{alt, choice};
 

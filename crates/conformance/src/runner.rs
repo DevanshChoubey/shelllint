@@ -617,16 +617,24 @@ mod tests {
 echo hi
 ";
         assert!(oracle_skips_zsh(zsh, None));
-        assert!(oracle_skips_zsh("#!/usr/bin/env zsh
+        assert!(oracle_skips_zsh(
+            "#!/usr/bin/env zsh
 echo hi
-", None));
+",
+            None
+        ));
         assert!(!oracle_skips_zsh(zsh, Some("dash")));
         assert!(!oracle_skips_zsh(zsh, Some("ksh")));
         assert!(!oracle_skips_zsh(zsh, Some("bash")));
-        assert!(!oracle_skips_zsh("#!/bin/bash
+        assert!(!oracle_skips_zsh(
+            "#!/bin/bash
 echo hi
-", None));
-        assert!(!oracle_skips_zsh("echo hi
-", None));
+",
+            None
+        ));
+        assert!(!oracle_skips_zsh(
+            "echo hi
+", None
+        ));
     }
 }
