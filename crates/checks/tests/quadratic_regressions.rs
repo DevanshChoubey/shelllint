@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Timing regression tests for checks that used to cost quadratic time; no
-// Haskell counterpart.
+// Haskell counterpart. Long-line and fix-path tests live in crates/shelllint.
 //
 // Each test runs one registered check in this process on a generated script
 // and requires it, parse included, to finish within `BOUND` in the debug
@@ -22,17 +22,6 @@ fn timed_codes(module: &str, name: &str, script: &str) -> Vec<i64> {
     let elapsed = start.elapsed();
     assert!(elapsed < BOUND, "{module}:{name} took {elapsed:?} on {} bytes", script.len());
     codes.into_iter().collect()
-}
-
-/// 20000 unquoted `$a` on one line, `a` unknown to the flow analysis: SC2086
-/// fires once per word. The cost used to grow with the square of the line
-/// length; the check must stay linear.
-#[test]
-fn twenty_thousand_unquoted_expansions_on_one_line() {
-    let script = "#!/bin/bash\na=$1; echo".to_string() + &" $a".repeat(20_000) + "\n";
-    let codes = timed_codes("Analytics.hs", "checkSpacefulnessCfg", &script);
-    assert_eq!(codes.len(), 20_000);
-    assert!(codes.iter().all(|&c| c == 2086), "unexpected codes");
 }
 
 /// 8000 functions after a top-level `exit`, so every function is never
