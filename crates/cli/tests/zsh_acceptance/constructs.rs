@@ -875,7 +875,8 @@ fn near_miss_reported(construct: &str) {
             .filter(|c| {
                 // C28's near-miss is a stray `fi`, which zsh -n reports as a parse error and
                 // shelllint reports as SC1089 ("Parsing stopped here").
-                let ignored: &[u32] = if construct == "C28" { &[1083, 1087, 1090, 1091] } else { &[1083, 1087, 1089, 1090, 1091] };
+                let ignored: &[u32] =
+                    if construct == "C28" { &[1083, 1087, 1090, 1091] } else { &[1083, 1087, 1089, 1090, 1091] };
                 (1000..2000).contains(c) && !ignored.contains(c)
             })
             .collect();
@@ -968,9 +969,7 @@ case!(now, c06_glob_qualifiers__near_miss_is_still_reported, { near_miss_reporte
 
 case!(now, c07_case_pattern_groups__group_label_parses_under_zsh, { parses("C07", "group_label") });
 case!(now, c07_case_pattern_groups__number_and_group_parses_under_zsh, { parses("C07", "number_and_group") });
-case!(now, c07_case_pattern_groups__multiline_in_function_parses_under_zsh, {
-    parses("C07", "multiline_in_function")
-});
+case!(now, c07_case_pattern_groups__multiline_in_function_parses_under_zsh, { parses("C07", "multiline_in_function") });
 case!(now, c07_case_pattern_groups__bash_sh_ksh_output_unchanged, { bash_unchanged("C07") });
 case!(now, c07_case_pattern_groups__near_miss_is_still_reported, { near_miss_reported("C07") });
 

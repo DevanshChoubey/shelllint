@@ -206,13 +206,7 @@ split_case!(
     true
 );
 split_case!(now, scope__emulate_L_sh_in_function, "f() { emulate -L sh; echo $1; }\nf \"a b\"\necho $1\n", [1], true);
-split_case!(
-    now,
-    scope__emulate_L_ksh_in_function,
-    "f() { emulate -L ksh; echo $1; }\nf \"a b\"\necho $1\n",
-    [1],
-    true
-);
+split_case!(now, scope__emulate_L_ksh_in_function, "f() { emulate -L ksh; echo $1; }\nf \"a b\"\necho $1\n", [1], true);
 split_case!(now, scope__top_level_emulate_L_zsh_resets, "setopt shwordsplit\nemulate -L zsh\necho $1\n", [], true);
 split_case!(now, scope__top_level_emulate_L_sh_applies, "emulate -L sh\necho $1\n", [2], true);
 split_case!(
@@ -327,13 +321,7 @@ code_case!(now, globsubst_on__sc2086_glob_part__without_shwordsplit, 2086, "seto
 code_case!(now, globsubst_off__sc2053__default, 2053, "[[ $1 == $2 ]]\n", []);
 code_case!(now, globsubst_off__sc2295__default, 2295, "x=\"${1#$2}\"\n", []);
 code_case!(now, globsubst_off__sc2254__default, 2254, "case $1 in $2) :;; esac\n", []);
-code_case!(
-    now,
-    globsubst_off__on_then_noglobsubst,
-    2053,
-    "setopt globsubst\nsetopt noglobsubst\n[[ $1 == $2 ]]\n",
-    []
-);
+code_case!(now, globsubst_off__on_then_noglobsubst, 2053, "setopt globsubst\nsetopt noglobsubst\n[[ $1 == $2 ]]\n", []);
 code_case!(now, globsubst_off__on_then_emulate_L_zsh, 2053, "setopt globsubst\nemulate -L zsh\n[[ $1 == $2 ]]\n", []);
 code_case!(
     now,

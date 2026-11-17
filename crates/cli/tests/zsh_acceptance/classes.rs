@@ -52,7 +52,13 @@ code_case!(now, b_sc2086_fires_with_shwordsplit, 2086, "setopt shwordsplit\necho
 code_case!(now, b_sc2086_fires_on_explicit_equals_flag_by_default, 2086, "echo ${=1}\n", [1]);
 // A `for` list is where splitting is wanted, so (as for `$x` in bash) it stays silent even with the
 // explicit flag; the same word as a command argument fires (previous test).
-code_case!(now, b_sc2086_explicit_equals_flag_in_a_for_list_stays_silent_as_in_bash, 2086, "for w in ${=1}; do :; done\n", []);
+code_case!(
+    now,
+    b_sc2086_explicit_equals_flag_in_a_for_list_stays_silent_as_in_bash,
+    2086,
+    "for w in ${=1}; do :; done\n",
+    []
+);
 code_case!(now, b_sc2086_fires_on_explicit_tilde_flag_by_default, 2086, "echo ${~1}\n", [1]);
 code_case!(now, b_sc2086_quoted_stays_silent_with_shwordsplit, 2086, "setopt shwordsplit\necho \"$1\"\n", []);
 code_case!(now, b_sc2086_assignment_stays_silent_with_shwordsplit, 2086, "setopt shwordsplit\nx=$1\n", []);
