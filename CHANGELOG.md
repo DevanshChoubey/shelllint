@@ -18,6 +18,12 @@ Each release also states which upstream ShellCheck commit it ports.
   `.zsh` and `.zsh-theme` files and zsh shebangs. See
   [docs/extensions.md](docs/extensions.md#zsh).
 
+### Fixed
+
+- Input nested more than 1000 levels deep (for example 100k nested `{` groups, `$(`
+  or `${`) aborted with a stack overflow, or ran for minutes. It now reports SC1072
+  and exits 1. See [docs/divergences.md](docs/divergences.md#where-the-oracle-crashes-and-we-do-not).
+
 ## [0.4.0] - 2026-11-17
 
 Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same

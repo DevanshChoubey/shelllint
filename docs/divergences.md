@@ -23,6 +23,15 @@ would make the port worse without making it more correct.
   starting from 255)`, exit 1. We decode the list leniently, report the
   undecodable name as missing (exit 2) and still check the other files.
 
+- **Deep nesting.** Upstream has no nesting limit. On input nested about
+  100k deep it times out, runs out of memory, or (in the Rust port before this
+  limit) overflowed the stack. We stop at `MAX_NESTING` (1000) nested reader
+  frames and report SC1072 `Nesting is deeper than 1000 levels. Fix any
+  mentioned problems and try again.` with exit 1. Measured: 998 nested `{`
+  groups and 499 nested `$(` are accepted. `bash -n` accepts about 4000 `{`
+  and 1000 `$(`, so a bash-valid script can hit this limit. The limit is in
+  `crates/parser/src/engine.rs`; the tests are `crates/cli/tests/deep_nesting.rs`.
+
 ## Behaviour that changes without a flag
 
 These differ from ShellCheck even in a run that uses no shelllint option. The
