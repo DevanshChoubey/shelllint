@@ -201,6 +201,12 @@ impl Input {
     pub fn as_string(&self) -> String {
         self.as_slice().iter().collect()
     }
+
+    /// DIVERGENCE: zsh extension. Identifies this cursor (buffer and offset)
+    /// for memoising failed attempts; the buffer is kept alive by the memo.
+    pub(crate) fn position_key(&self) -> (usize, usize) {
+        (Rc::as_ptr(&self.buf) as *const u8 as usize, self.at)
+    }
 }
 
 /// Everything `P` restores when Parsec would continue from an earlier state.
@@ -237,6 +243,11 @@ pub struct P<'a> {
     /// zsh only: inside a double-quoted string, where a `{` in `${...}` does
     /// not nest (`"${x:-{a}"` is complete), unlike an unquoted one.
     pub(crate) zsh_dquote: bool,
+    /// zsh only: `${...}` nested-brace attempts that already failed, keyed by
+    /// the cursor (`Input::position_key`). The input is kept alive so the key
+    /// stays unique. A failed attempt is a fact about its input, so replaying
+    /// its error is equivalent to re-parsing it, without the exponential cost.
+    pub(crate) zsh_nested_failed: std::collections::HashMap<(usize, usize), (Input, ParseError)>,
 }
 
 impl<'a> P<'a> {
@@ -258,7 +269,14 @@ impl<'a> P<'a> {
             expanded_sources: std::collections::HashSet::new(),
             zsh_short_if: false,
             zsh_dquote: false,
+            zsh_nested_failed: std::collections::HashMap::new(),
         }
+    }
+
+    /// DIVERGENCE: zsh extension. The cursor's memo key and a copy of its input
+    /// (see `zsh_nested_failed`), without the `touch` that `get_input` does.
+    pub(crate) fn cursor_memo_key(&self) -> ((usize, usize), Input) {
+        (self.input.position_key(), self.input.clone())
     }
 
     /// Run a parser to completion: Parsec's `runParserT` result.

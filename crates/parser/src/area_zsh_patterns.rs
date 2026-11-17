@@ -23,7 +23,7 @@
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::interface::Severity::ErrorC;
 
-use crate::engine::{P, PR};
+use crate::engine::{Fail, P, ParseError, PR};
 use crate::state::IncompleteInterval;
 use crate::{alt, choice};
 
@@ -298,17 +298,37 @@ impl<'a> P<'a> {
 
     /// A balanced `{ ... }` inside `${ }`: `${:-{$#p..1}}`. Falls back to a
     /// lone `{` literal when the group does not close.
+    // DIVERGENCE: a failed nested attempt is memoised per cursor. Without it,
+    // each unclosed `{` re-parses everything after it, so n of them cost 2^n.
+    // A replay stores the attempt's own error and fails the same way `try_`
+    // does, so the error merged with the carried one is the same as a re-parse.
     pub(crate) fn zsh_braced_nested(&mut self) -> PR<Id> {
+        let (key, input) = self.cursor_memo_key();
         let nested = |p: &mut Self| {
-            p.try_(|p| {
-                let start = p.start_span();
-                let open = p.zsh_lit_char('{')?;
-                let mut parts = vec![open];
-                parts.extend(p.many(|p| p.read_dollar_braced_part())?);
-                parts.push(p.zsh_lit_char('}')?);
-                let id = p.end_span(start);
-                Ok(p.node(id, Token::T_NormalWord(parts)))
-            })
+            if let Some((_, e)) = p.zsh_nested_failed.get(&key) {
+                let e = e.clone();
+                return p.try_(|_| Err(Fail::Empty(e)));
+            }
+            let mut inner: Option<ParseError> = None;
+            let r = p.try_(|p| {
+                let res: PR<Id> = (|p: &mut Self| {
+                    let start = p.start_span();
+                    let open = p.zsh_lit_char('{')?;
+                    let mut parts = vec![open];
+                    parts.extend(p.many(|p| p.read_dollar_braced_part())?);
+                    parts.push(p.zsh_lit_char('}')?);
+                    let id = p.end_span(start);
+                    Ok(p.node(id, Token::T_NormalWord(parts)))
+                })(p);
+                if let Err(f) = &res {
+                    inner = Some(f.error().clone());
+                }
+                res
+            });
+            if let Some(e) = inner {
+                p.zsh_nested_failed.insert(key, (input.clone(), e));
+            }
+            r
         };
         alt!(self, nested, |p: &mut Self| p.zsh_lit_char('{'))
     }
