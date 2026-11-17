@@ -224,6 +224,15 @@ pub fn add_double_quotes_around(params: &Params<'_>, token: Id) -> Fix {
     surround_with(token, params, "\"")
 }
 
+/// DIVERGENCE: zsh leaves the result of an unquoted expansion alone unless
+/// `SH_WORD_SPLIT` or `GLOB_SUBST` is on or the script writes `${=x}` / `${~x}`.
+/// For every other shell the option queries answer "on", so this is always
+/// true there.
+fn zsh_may_split_or_glob(params: &Params<'_>, token: Id) -> bool {
+    use crate::zsh_support::{globs, splits};
+    params.shell_type != Shell::Zsh || splits(params, token) || globs(params, token)
+}
+
 /// `checkSpacefulnessCfg' dirtyPass`, shared by `checkSpacefulnessCfg`
 /// (`True`) and `checkVerboseSpacefulnessCfg` (`False`).
 pub fn check_spacefulness_cfg_prime(dirty_pass: bool, params: &Params<'_>, token: Id, c: &mut Comments) {
@@ -236,7 +245,8 @@ pub fn check_spacefulness_cfg_prime(dirty_pass: bool, params: &Params<'_>, token
         && !is_counting_reference(params.ast, token)
         && !is_quote_free(params.ast, params.shell_type, token)
         && !is_quoted_alternative_reference(params.ast, token)
-        && !used_as_command_name(params.ast, token);
+        && !used_as_command_name(params.ast, token)
+        && zsh_may_split_or_glob(params, token);
 
     let is_clean_state = |state: &VariableState| {
         state.variable_properties.all_have(CFVariableProp::CFVPInteger)

@@ -25,7 +25,10 @@ fn check_array_assignment_indices(params: &Params<'_>, root: Id) -> Vec<TokenCom
             if idx.is_empty() {
                 if let Token::T_Array(list) = p.ast.get(*arr) {
                     // DIVERGENCE: bash 5.1 accepts `assoc=(k v k v)` with --modern-dialects.
+                    // DIVERGENCE: zsh has always initialised an associative array from flat
+                    // `(key value ...)` pairs, so there is no zsh form of this warning.
                     let is_assoc = assocs.contains(name)
+                        && p.shell_type != Shell::Zsh
                         && !(p.modern_dialects && p.shell_type == Shell::Bash && list.len() % 2 == 0);
                     for &e in list {
                         check_element(p, is_assoc, e, c);

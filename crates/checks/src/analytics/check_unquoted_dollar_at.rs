@@ -8,6 +8,8 @@ use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::is_array_expansion;
 
+use crate::zsh_support::splits;
+
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
     name: "checkUnquotedDollarAt",
@@ -21,7 +23,8 @@ fn check_unquoted_dollar_at(p: &Params<'_>, word: Id, c: &mut Comments) {
     let Token::T_NormalWord(parts) = p.ast.get(word) else { return };
     if !is_strictly_quote_free(p.ast, p.shell_type, word) {
         if let Some(&x) = parts.iter().find(|&&x| is_array_expansion(p.ast, x)) {
-            if !is_quoted_alternative_reference(p.ast, x) {
+            // zsh: array elements are only re-split under SH_WORD_SPLIT or as `${=a}`.
+            if !is_quoted_alternative_reference(p.ast, x) && splits(p, x) {
                 c.err(x, 2068, "Double quote array expansions to avoid re-splitting elements.");
             }
         }

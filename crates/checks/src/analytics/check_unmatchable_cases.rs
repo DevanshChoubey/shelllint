@@ -5,9 +5,10 @@ use shelllint_analyzer::analyzerlib::{Comments, Params};
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{CaseType, Id, Token};
 use shelllint_core::astlib::{
-    is_constant, pseudo_glob_is_superset_of, pseudo_globs_can_overlap, word_to_exact_pseudo_glob,
-    word_to_pseudo_glob,
+    PseudoGlob, is_constant, oversimplify, pseudo_glob_is_superset_of, pseudo_globs_can_overlap,
+    word_to_exact_pseudo_glob, word_to_pseudo_glob,
 };
+use shelllint_core::interface::Shell;
 
 pub(crate) static ENTRY: CheckEntry = CheckEntry {
     module: "Analytics.hs",
@@ -17,6 +18,23 @@ pub(crate) static ENTRY: CheckEntry = CheckEntry {
     optional: None,
     kind: CheckKind::Node(check_unmatchable_cases),
 };
+
+/// DIVERGENCE: zsh patterns have operators the pseudo-glob model does not know:
+/// `(a|b)` groups, `<1-9>` ranges, `#`/`##` repeats, `^` and `~` exclusion, and
+/// `(#i)` flags. A pattern that uses any of them can match anything, so it is
+/// modelled as `*` (and has no exact form), which keeps SC2195, SC2221 and
+/// SC2222 from firing on it.
+fn has_zsh_pattern_syntax(p: &Params<'_>, word: Id) -> bool {
+    p.shell_type == Shell::Zsh && oversimplify(p.ast, word).concat().chars().any(|c| "<>()|#^~".contains(c))
+}
+
+fn pseudo_glob(p: &Params<'_>, word: Id) -> Vec<PseudoGlob> {
+    if has_zsh_pattern_syntax(p, word) { vec![PseudoGlob::PGMany] } else { word_to_pseudo_glob(p.ast, word) }
+}
+
+fn exact_pseudo_glob(p: &Params<'_>, word: Id) -> Option<Vec<PseudoGlob>> {
+    if has_zsh_pattern_syntax(p, word) { None } else { word_to_exact_pseudo_glob(p.ast, word) }
+}
 
 fn check_unmatchable_cases(p: &Params<'_>, t: Id, c: &mut Comments) {
     let Token::T_CaseExpression(word, list) = p.ast.get(t) else { return };
@@ -33,9 +51,9 @@ fn check_unmatchable_cases(p: &Params<'_>, t: Id, c: &mut Comments) {
     if is_constant(p.ast, word) {
         c.warn(word, 2194, "This word is constant. Did you forget the $ on a variable?");
     } else {
-        let target = word_to_pseudo_glob(p.ast, word);
+        let target = pseudo_glob(p, word);
         for &candidate in &allpatterns {
-            if !pseudo_globs_can_overlap(&target, &word_to_pseudo_glob(p.ast, candidate)) {
+            if !pseudo_globs_can_overlap(&target, &pseudo_glob(p, candidate)) {
                 c.warn(
                     candidate,
                     2195,
@@ -46,9 +64,9 @@ fn check_unmatchable_cases(p: &Params<'_>, t: Id, c: &mut Comments) {
     }
 
     let exact_globs: Vec<_> =
-        breakpatterns.iter().map(|&x| (x, word_to_exact_pseudo_glob(p.ast, x))).collect();
+        breakpatterns.iter().map(|&x| (x, exact_pseudo_glob(p, x))).collect();
     let fuzzy_globs: Vec<_> =
-        breakpatterns.iter().map(|&x| (x, word_to_pseudo_glob(p.ast, x))).collect();
+        breakpatterns.iter().map(|&x| (x, pseudo_glob(p, x))).collect();
 
     let pattern_context = |id: Id| -> String {
         let (start, _) = p.ast.span(id);

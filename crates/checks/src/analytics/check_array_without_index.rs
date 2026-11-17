@@ -3,7 +3,7 @@
 
 use std::collections::HashSet;
 
-use shelllint_analyzer::analyzerlib::{DataType, Params, make_comment};
+use shelllint_analyzer::analyzerlib::{DataType, Params, ZshOpt, make_comment};
 use shelllint_analyzer::api::{CheckEntry, CheckKind};
 use shelllint_core::ast::{AssignmentMode, Id, Token};
 use shelllint_core::astlib::get_literal_string;
@@ -31,7 +31,8 @@ fn check_array_without_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> {
     let read_f = |s: &mut HashSet<String>, _base: Id, token: Id, _name: &str| -> Vec<TokenComment> {
         if let Token::T_DollarBraced(_, inner) = p.ast.get(token) {
             if let Some(name) = get_literal_string(p.ast, *inner) {
-                if s.contains(&name) {
+                // zsh: `$a` expands every element unless KSH_ARRAYS is on.
+                if s.contains(&name) && p.zsh_option(token, ZshOpt::KshArrays) {
                     return vec![make_comment(
                         Severity::WarningC,
                         token,
@@ -52,6 +53,8 @@ fn check_array_without_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> {
                     vec![]
                 } else {
                     match mode {
+                        // zsh: only a problem under KSH_ARRAYS (`a=str` then sets just `a[0]`).
+                        AssignmentMode::Assign if !p.zsh_option(expr, ZshOpt::KshArrays) => vec![],
                         AssignmentMode::Assign => vec![make_comment(
                             Severity::WarningC,
                             expr,

@@ -23,7 +23,8 @@ fn check_comparison_against_glob(p: &Params<'_>, t: Id, c: &mut Comments) {
     if *typ == ConditionType::DoubleBracket && op_ok {
         if let Token::T_NormalWord(parts) = p.ast.get(word) {
             if let [only] = &parts[..] {
-                if matches!(p.ast.get(*only), Token::T_DollarBraced(..)) {
+                // zsh: the right-hand side is only a pattern under GLOB_SUBST or as `${~x}`.
+                if matches!(p.ast.get(*only), Token::T_DollarBraced(..)) && crate::zsh_support::globs(p, *only) {
                     c.warn(
                         word,
                         2053,
