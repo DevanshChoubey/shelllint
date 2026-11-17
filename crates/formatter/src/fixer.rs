@@ -13,11 +13,11 @@ fn overlap(xs: &Position, xe: &Position, ys: &Position, ye: &Position) -> bool {
     xe > ys && ye > xs
 }
 
-fn real(line: &[char], target: i64) -> i64 {
+fn real(line: impl Iterator<Item = char>, target: i64) -> i64 {
     // real _ r v target | target <= v = r
     // real [] r v target = r + (target - v)
     let (mut r, mut v) = (0i64, 0i64);
-    let mut it = line.iter();
+    let mut it = line;
     loop {
         if target <= v {
             return r;
@@ -36,29 +36,49 @@ fn real(line: &[char], target: i64) -> i64 {
     }
 }
 
-fn realign_column(ls: &[&str], line: i64, col: i64) -> i64 {
-    if line > 0 && line <= ls.len() as i64 {
-        let chars: Vec<char> = ls[(line - 1) as usize].chars().collect();
-        real(&chars, col)
+/// The lines of a file, each with a flag for whether it holds a tab. A column
+/// is only moved by a tab before it, so a line without one is never walked.
+/// Build it once per file: the flags cost one scan of the file.
+pub struct FileLines<'a> {
+    pub lines: Vec<&'a str>,
+    tabbed: Vec<bool>,
+}
+
+impl<'a> FileLines<'a> {
+    pub fn new(lines: Vec<&'a str>) -> Self {
+        let tabbed = lines.iter().map(|l| l.contains('\t')).collect();
+        FileLines { lines, tabbed }
+    }
+}
+
+fn realign_column(ls: &FileLines, line: i64, col: i64) -> i64 {
+    if line > 0 && line <= ls.lines.len() as i64 {
+        let index = (line - 1) as usize;
+        if ls.tabbed[index] {
+            real(ls.lines[index].chars(), col)
+        } else {
+            // With no tabs `real` gives `col` when it is positive, and 0 otherwise.
+            col.max(0)
+        }
     } else {
         col
     }
 }
 
-fn realigned(ls: &[&str], start: &Position, end: &Position) -> (Position, Position) {
+fn realigned(ls: &FileLines, start: &Position, end: &Position) -> (Position, Position) {
     let sc = realign_column(ls, start.line, start.column);
     let ec = realign_column(ls, end.line, end.column);
     (Position { column: sc, ..start.clone() }, Position { column: ec, ..end.clone() })
 }
 
 /// Rewrite a comment from a tabstop of 8 to 1
-pub fn remove_tab_stops_comment(c: &PositionedComment, ls: &[&str]) -> PositionedComment {
+pub fn remove_tab_stops_comment(c: &PositionedComment, ls: &FileLines) -> PositionedComment {
     let (s, e) = realigned(ls, &c.start_pos, &c.end_pos);
     PositionedComment { start_pos: s, end_pos: e, ..c.clone() }
 }
 
 /// Rewrite a replacement from a tabstop of 8 to 1
-pub fn remove_tab_stops_replacement(r: &Replacement, ls: &[&str]) -> Replacement {
+pub fn remove_tab_stops_replacement(r: &Replacement, ls: &FileLines) -> Replacement {
     let (s, e) = realigned(ls, &r.start_pos, &r.end_pos);
     Replacement { start_pos: s, end_pos: e, ..r.clone() }
 }
@@ -118,8 +138,9 @@ fn do_replace(start: i64, end: i64, o: &[char], r: &str) -> Vec<char> {
 
 /// Apply a fix and return resulting lines.
 pub fn apply_fix(fix: &Fix, file_lines: &[&str]) -> Vec<String> {
+    let tab_lines = FileLines::new(file_lines.to_vec());
     let untabbed: Vec<Replacement> =
-        fix.replacements.iter().map(|r| remove_tab_stops_replacement(r, file_lines)).collect();
+        fix.replacements.iter().map(|r| remove_tab_stops_replacement(r, &tab_lines)).collect();
 
     // multiToSingleLine
     let mut shift_tree: Vec<(i64, i64)> = vec![];
@@ -161,4 +182,70 @@ pub fn apply_fix(fix: &Fix, file_lines: &[&str]) -> Vec<String> {
     }
     let result: String = string.into_iter().collect();
     crate::haskell_lines(&result).into_iter().map(String::from).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use shelllint_core::interface::new_positioned_comment;
+
+    fn pos(line: i64, column: i64) -> Position {
+        Position { file: "f".into(), line, column }
+    }
+
+    #[test]
+    fn tab_free_line_realigns_to_the_column_itself() {
+        // The walk `real` gives the column back once it is positive, and 0 otherwise.
+        let lines = FileLines::new(vec!["echo $a $b", ""]);
+        for col in [-3, 0, 1, 5, 10, 11, 12, 40] {
+            let walked = real("echo $a $b".chars(), col);
+            assert_eq!(realign_column(&lines, 1, col), walked, "column {col} on a tab-free line");
+            assert_eq!(realign_column(&lines, 2, col), real("".chars(), col), "column {col} on an empty line");
+        }
+    }
+
+    #[test]
+    fn tabbed_line_still_walks_tab_stops() {
+        // A tab at column 1 jumps to 8, so column 9 is character 2 after the tab.
+        let lines = FileLines::new(vec!["\tx y"]);
+        assert_eq!(realign_column(&lines, 1, 9), 2);
+        assert_eq!(realign_column(&lines, 1, 2), 1);
+        assert_eq!(realign_column(&lines, 1, 0), 0);
+    }
+
+    #[test]
+    fn lines_outside_the_file_keep_their_column() {
+        let lines = FileLines::new(vec!["a"]);
+        assert_eq!(realign_column(&lines, 0, 7), 7);
+        assert_eq!(realign_column(&lines, 2, 7), 7);
+    }
+
+    #[test]
+    fn remove_tab_stops_comment_realigns_both_ends() {
+        let lines = FileLines::new(vec!["\tab"]);
+        let c = PositionedComment { start_pos: pos(1, 9), end_pos: pos(1, 10), ..new_positioned_comment() };
+        let out = remove_tab_stops_comment(&c, &lines);
+        assert_eq!((out.start_pos.column, out.end_pos.column), (2, 3));
+    }
+
+    /// 20000 comments on one 60 KB line (a long SC2086 line): realigning each
+    /// used to copy the line into a `Vec<char>`, which made the whole run
+    /// quadratic in the line length.
+    #[test]
+    fn many_comments_on_one_long_line_realign_in_time() {
+        let line = "a=1; echo ".to_string() + &"$a ".repeat(20_000);
+        let lines = FileLines::new(vec![line.as_str()]);
+        let start = std::time::Instant::now();
+        for i in 0..20_000i64 {
+            let c = PositionedComment {
+                start_pos: pos(1, 10 + 3 * i),
+                end_pos: pos(1, 12 + 3 * i),
+                ..new_positioned_comment()
+            };
+            let out = remove_tab_stops_comment(&c, &lines);
+            assert_eq!(out.start_pos.column, 10 + 3 * i);
+        }
+        let elapsed = start.elapsed();
+        assert!(elapsed < std::time::Duration::from_secs(5), "took {elapsed:?}");
+    }
 }
