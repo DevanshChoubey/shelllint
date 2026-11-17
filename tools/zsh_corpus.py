@@ -47,6 +47,9 @@ CLASS_B = {2086, 2206, 2048, 2068, 2223, 2053, 2295, 2254, 2128, 1087, 2178, 202
 ENABLING = ("shwordsplit", "globsubst", "ksharrays", "bsdecho")
 EMULATE = re.compile(r"\bemulate\b(?:\s+-\w+)*\s+(?:sh|ksh)\b")
 EXPLICIT = re.compile(r"\$\{[=~]|\$[=~]\w")
+# An SC2086 on a `[ ... ]` / `test ...` line is expected under zsh (a ruling, not a
+# bug): zsh drops an empty unquoted word, so `[ $x = y ]` can be `[ = y ]`.
+SINGLE_BRACKET = re.compile(r"(?:^|[\s;&|(!])(?:\[|test)\s")
 
 
 def mentions_enabling(text):
@@ -118,6 +121,7 @@ def main(argv):
 
     hard, crash, timeout, class_d, class_b = {}, {}, {}, {}, {}
     explicit_only = {}
+    sc2086_bracket = {}
     parsed_ok = 0
     for f, (status, codes, detail) in zip(files, results):
         if status == "timeout":
@@ -138,6 +142,15 @@ def main(argv):
         if b:
             with open(f, "rb") as fh:
                 text = fh.read().decode("utf-8", "replace")
+            lines = text.splitlines()
+            bracket = [
+                (c, l) for c, l in b
+                if c == 2086 and 0 < l <= len(lines) and SINGLE_BRACKET.search(lines[l - 1])
+            ]
+            if bracket:
+                sc2086_bracket[f] = bracket
+                b = [x for x in b if x not in bracket]
+        if b:
             if not mentions_enabling(text):
                 class_b[f] = b
                 if EXPLICIT.search(text):
@@ -161,6 +174,8 @@ def main(argv):
     print("files with class (d) codes:     %d  %s" % (len(class_d), counts(class_d)))
     print("files with class (b) codes but no enabling option mentioned: %d  %s" % (len(class_b), counts(class_b)))
 
+    print("SC2086 in [ ] / test (ruling, informational, not a failure): %d files, %d lines"
+          % (len(sc2086_bracket), sum(len(v) for v in sc2086_bracket.values())))
     print("  of which use an explicit ${=}/${~} form (informational): %d" % len(explicit_only))
 
     def section(title, d, fmt):
@@ -177,7 +192,7 @@ def main(argv):
     section("class (d) codes", class_d, pl)
     section("class (b) codes without the enabling option", class_b, pl)
 
-    bad = bool(hard or crash or timeout or class_d or class_b)
+    bad = bool(hard or crash or timeout or class_d or (set(class_b) - set(explicit_only)))
     print("\nresult: %s" % ("FAIL" if bad else "ok"))
     return 1 if bad else 0
 
