@@ -8,6 +8,7 @@
 #![forbid(unsafe_code)]
 
 pub mod support;
+pub mod zsh_support;
 
 include!(concat!(env!("OUT_DIR"), "/registry.rs"));
 
