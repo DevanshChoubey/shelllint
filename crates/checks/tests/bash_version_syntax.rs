@@ -29,8 +29,14 @@ fn case_terminators_sc9105() {
     assert_pair(9105, "4.0", "case $x in a) echo a ;& b) echo b ;; esac\n");
     assert_pair(9105, "4.0", "case $x in a) echo a ;;& b) echo b ;; esac\n");
     // The message names the terminator that is used.
-    assert_eq!(messages("3.2", "case $x in a) echo a ;& b) echo b ;; esac\n"), [";& requires bash 4.0 (target is 3.2)."]);
-    assert_eq!(messages("3.2", "case $x in a) echo a ;;& b) echo b ;; esac\n"), [";;& requires bash 4.0 (target is 3.2)."]);
+    assert_eq!(
+        messages("3.2", "case $x in a) echo a ;& b) echo b ;; esac\n"),
+        [";& requires bash 4.0 (target is 3.2)."]
+    );
+    assert_eq!(
+        messages("3.2", "case $x in a) echo a ;;& b) echo b ;; esac\n"),
+        [";;& requires bash 4.0 (target is 3.2)."]
+    );
     // One finding per clause.
     assert_eq!(bash("3.2", "case $x in a) :;& b) :;& c) :;; esac\n"), [9105, 9105]);
 }
@@ -107,7 +113,10 @@ fn command_substitution_false_positives() {
 fn message_names_feature_version_and_target() {
     assert_eq!(messages("3.2", "ls |& cat\n"), ["|& requires bash 4.0 (target is 3.2)."]);
     assert_eq!(messages("4.0", "exec {fd}>f\n"), ["{fd}> fd allocation requires bash 4.1 (target is 4.0)."]);
-    assert_eq!(messages("5.2", "x=${ date; }\n"), ["${ cmd; } command substitution requires bash 5.3 (target is 5.2)."]);
+    assert_eq!(
+        messages("5.2", "x=${ date; }\n"),
+        ["${ cmd; } command substitution requires bash 5.3 (target is 5.2)."]
+    );
 }
 
 #[test]

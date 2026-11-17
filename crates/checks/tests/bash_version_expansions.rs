@@ -9,9 +9,7 @@ fn sc9107_case_modification() {
     for s in ["echo \"${v,}\"\n", "echo \"${v,,}\"\n", "echo \"${v^}\"\n", "echo \"${v^^}\"\n"] {
         assert_pair(9107, "4.0", s);
     }
-    for s in ["echo \"${a[@]^^}\"\n"] {
-        assert_pair(9107, "4.0", s);
-    }
+    assert_pair(9107, "4.0", "echo \"${a[@]^^}\"\n");
     assert_pair(9107, "4.0", "echo \"${v^^[aeiou]}\"\n");
 }
 

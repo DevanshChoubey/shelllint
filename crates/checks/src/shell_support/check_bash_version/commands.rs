@@ -38,8 +38,7 @@ fn options<'a>(p: &Params<'_>, args: &'a [Id], with_arg: &str) -> (Vec<Opt>, &'a
         let Some(cluster) = s.strip_prefix('-').filter(|c| !c.is_empty()) else { break };
         let word = args[i];
         i += 1;
-        let mut chars = cluster.char_indices();
-        while let Some((at, flag)) = chars.next() {
+        for (at, flag) in cluster.char_indices() {
             if !with_arg.contains(flag) {
                 out.push(Opt { word, flag, arg: None });
                 continue;

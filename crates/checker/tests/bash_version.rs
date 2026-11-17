@@ -4,7 +4,9 @@
 // crates/checks/tests/bash_version_*.rs.
 
 use shelllint_checker::check_script;
-use shelllint_core::interface::{BashVersion, CheckSpec, Code, empty_check_spec, mock_rc_file, mocked_system_interface};
+use shelllint_core::interface::{
+    BashVersion, CheckSpec, Code, empty_check_spec, mock_rc_file, mocked_system_interface,
+};
 
 fn codes(rc: Option<&str>, spec: CheckSpec) -> Vec<Code> {
     let sys = match rc {
@@ -72,7 +74,10 @@ fn precedence_flag_over_directive_over_rc() {
     // The flag beats both.
     let s = CheckSpec { bash_version: target("5.0"), ..spec(dir) };
     assert_eq!(codes(Some("bash-version=3.0"), s), Vec::<Code>::new());
-    let s = CheckSpec { bash_version: target("3.2"), ..spec("#!/bin/bash\n# shellcheck bash-version=5.0\ndate |& tee out\n") };
+    let s = CheckSpec {
+        bash_version: target("3.2"),
+        ..spec("#!/bin/bash\n# shellcheck bash-version=5.0\ndate |& tee out\n")
+    };
     assert_eq!(codes(Some("bash-version=5.0"), s), vec![9104]);
 }
 
@@ -108,7 +113,10 @@ fn ignored_for_other_shells() {
 fn can_be_excluded() {
     let s = CheckSpec { bash_version: target("3.2"), excluded_warnings: vec![9104], ..spec(PIPE) };
     assert_eq!(codes(None, s), Vec::<Code>::new());
-    let s = CheckSpec { bash_version: target("3.2"), ..spec("#!/bin/bash\n# shellcheck disable=SC9104\ndate |& tee out\n") };
+    let s = CheckSpec {
+        bash_version: target("3.2"),
+        ..spec("#!/bin/bash\n# shellcheck disable=SC9104\ndate |& tee out\n")
+    };
     assert_eq!(codes(None, s), Vec::<Code>::new());
 }
 

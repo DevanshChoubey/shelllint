@@ -259,7 +259,13 @@ pub fn options() -> Vec<OptDescr> {
         ),
         o("", &["safe-vars"], Req("safe-vars"), "VAR1,VAR2..", "Treat these variables as free of spaces and globs"),
         o("", &["strict-env-vars"], No("strict-env-vars"), "", "Warn about unassigned uppercase variables too"),
-        o("", &["bash-version"], Req("bash-version"), "X.Y", "Warn about bash features newer than this release (3.0-5.3)"),
+        o(
+            "",
+            &["bash-version"],
+            Req("bash-version"),
+            "X.Y",
+            "Warn about bash features newer than this release (3.0-5.3)",
+        ),
     ]
 }
 

@@ -63,11 +63,11 @@ use std::sync::OnceLock;
 use shelllint_analyzer::api::CheckEntry;
 use shelllint_checker::{check_script, decode_string};
 use shelllint_checks::CHECKS;
+pub use shelllint_core::interface::{BashVersion, ParseBashVersionError};
 use shelllint_core::interface::{
     CheckSpec, Fix as CoreFix, InsertionPoint as CoreInsertionPoint, NewSystemInterface, PositionedComment,
     Severity as CoreSeverity, Shell as CoreShell, empty_check_spec,
 };
-pub use shelllint_core::interface::{BashVersion, ParseBashVersionError};
 use shelllint_formatter::fixer::{apply_fix, merge_fixes};
 use shelllint_formatter::{haskell_lines, make_non_virtual};
 
