@@ -34,8 +34,27 @@ pub(crate) const ANON_FUNCTION_NAME: &str = "zsh-anonymous-function";
 /// Words that start another compound command: never the first name of a
 /// `name() { }` definition.
 const RESERVED: &[&str] = &[
-    "if", "then", "elif", "else", "fi", "while", "until", "do", "done", "for", "select", "case", "esac", "time",
-    "coproc", "function", "repeat", "foreach", "end", "nocorrect", "!",
+    "if",
+    "then",
+    "elif",
+    "else",
+    "fi",
+    "while",
+    "until",
+    "do",
+    "done",
+    "for",
+    "select",
+    "case",
+    "esac",
+    "time",
+    "coproc",
+    "function",
+    "repeat",
+    "foreach",
+    "end",
+    "nocorrect",
+    "!",
 ];
 
 /// The characters that end a word (so end the look-behind for `}`).
@@ -456,7 +475,11 @@ impl<'a> P<'a> {
             // without `function`, a brace expansion is not a name
             self.guard(keyword_form || !name.starts_with('{'))?;
             names.push(name);
-            if keyword_form { self.allspacing()? } else { self.spacing()? };
+            if keyword_form {
+                self.allspacing()?
+            } else {
+                self.spacing()?
+            };
         }
         let parens = self.option(false, |p| {
             p.char_('(')?;
@@ -475,7 +498,7 @@ impl<'a> P<'a> {
 
         let kw = FunctionKeyword(keyword_form);
         let pa = FunctionParentheses(parens);
-        let first = self.node(id, Token::T_Function(kw.clone(), pa.clone(), names[0].clone(), body));
+        let first = self.node(id, Token::T_Function(kw, pa, names[0].clone(), body));
         if names.len() == 1 {
             return Ok(first);
         }
@@ -489,7 +512,7 @@ impl<'a> P<'a> {
                 p.alt(|p| p.read_brace_group(), |p| p.read_subshell())
             })?;
             let fid = self.get_new_id_for(id);
-            let f = self.node(fid, Token::T_Function(kw.clone(), pa.clone(), other.clone(), again));
+            let f = self.node(fid, Token::T_Function(kw, pa, other.clone(), again));
             defs.push(self.zsh_wrap_command(f));
         }
         self.set_input(end.0);

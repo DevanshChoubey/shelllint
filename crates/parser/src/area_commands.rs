@@ -45,7 +45,11 @@ impl<'a> P<'a> {
         self.not_followed_by2(|p| p.alt(|p| p.g_and_if().map(drop), |p| p.read_case_separator().map(drop)))?;
         self.not_followed_by2(|p| p.string("&>"))?;
         let start = self.get_position();
-        if self.env.is_zsh() && let Some(r) = self.zsh_disown_separator()? { return Ok(r); }
+        if self.env.is_zsh()
+            && let Some(r) = self.zsh_disown_separator()?
+        {
+            return Ok(r);
+        }
         let f = alt!(
             self,
             |p: &mut Self| p.try_(|p| {
