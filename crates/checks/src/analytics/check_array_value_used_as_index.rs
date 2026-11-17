@@ -9,7 +9,7 @@ use shelllint_core::ast::{Id, Token};
 use shelllint_core::astlib::{
     e4m, get_braced_modifier, get_braced_reference, get_path, get_word_parts, oversimplify,
 };
-use shelllint_core::interface::{Severity, TokenComment};
+use shelllint_core::interface::{Severity, Shell, TokenComment};
 
 use crate::support::do_variable_flow_analysis;
 
@@ -62,7 +62,13 @@ fn check_array_value_used_as_index(p: &Params<'_>, _t: Id) -> Vec<TokenComment> 
                 Severity::WarningC,
                 *loop_word,
                 2302,
-                "This loops over values. To loop over keys, use \"${!array[@]}\".",
+                if p.shell_type == Shell::Zsh {
+                    // DIVERGENCE: `${!array[@]}` is a bad substitution in zsh;
+                    // `${(@k)array}` gives the keys of an associative array.
+                    "This loops over values. To loop over keys, use \"${(@k)array}\" (associative) or {1..$#array}."
+                } else {
+                    "This loops over values. To loop over keys, use \"${!array[@]}\"."
+                },
             ),
             make_comment(
                 Severity::WarningC,
