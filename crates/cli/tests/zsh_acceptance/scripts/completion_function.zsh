@@ -1,4 +1,5 @@
 #compdef mytool
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 # Completion for a made-up command (own code, written for these tests).
 

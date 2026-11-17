@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Library functions that run under `emulate -L zsh` with extended globbing
 # (own code, written for these tests).
 emulate -L zsh

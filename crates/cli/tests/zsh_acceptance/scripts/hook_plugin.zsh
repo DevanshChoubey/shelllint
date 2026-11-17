@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 # A hook-registering plugin: report slow commands (own code, written for these tests).
 autoload -Uz add-zsh-hook
 

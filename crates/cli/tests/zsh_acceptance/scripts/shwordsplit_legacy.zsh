@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 # A legacy script that switches on sh-style word splitting and has real splitting bugs
 # (own code, written for these tests).
 setopt shwordsplit

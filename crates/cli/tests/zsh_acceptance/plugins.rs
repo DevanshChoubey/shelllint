@@ -37,62 +37,62 @@ static SCRIPTS: &[Script] = &[
         name: "completion_function",
         file_name: "completion_function.zsh",
         text: include_str!("scripts/completion_function.zsh"),
-        // (13, SC2207): `envs=($(cmd))` splits the command output in zsh (class a).
+        // (14, SC2207): `envs=($(cmd))` splits the command output in zsh (class a).
         // Silent on purpose:
         //   line 1 `#compdef` and the zsh shell: no SC2148;
-        //   line 7 `profiles=(${(f)"$(cmd)"})`: the zsh idiom; SC2206 needs shwordsplit (b),
+        //   line 8 `profiles=(${(f)"$(cmd)"})`: the zsh idiom; SC2206 needs shwordsplit (b),
         //     SC2296 is off (d), and it is not SC2207;
-        //   line 34 `$line[1]`: element 1 in zsh, SC1087 needs ksharrays (b);
+        //   line 35 `$line[1]`: element 1 in zsh, SC1087 needs ksharrays (b);
         //   `state`/`line` are declared by `local` and read, no SC2154;
         //   `(build|deploy)` / `(clean)` case labels parse, no SC2221/2222 between them;
         //   `$ret` in `return $ret` is not split (b).
-        expect: &[(13, 2207)],
+        expect: &[(14, 2207)],
     },
     Script {
         name: "hook_plugin",
         file_name: "hook_plugin.zsh",
         text: include_str!("scripts/hook_plugin.zsh"),
-        // (9, SC2034): `local started=$EPOCHSECONDS` is never read (class a).
+        // (10, SC2034): `local started=$EPOCHSECONDS` is never read (class a).
         // Silent on purpose:
-        //   `zshexit_functions+=(...)` (line 34): a hook array is special, no SC2034 (c);
-        //   functions registered via `add-zsh-hook` (31, 33), `precmd_functions+=` (32), `zle -N` and `*_functions+=` are used;
-        //   `{ cmd }` bodies on lines 28/29 (no `;` before `}`): parse, no SC1083;
+        //   `zshexit_functions+=(...)` (line 35): a hook array is special, no SC2034 (c);
+        //   functions registered via `add-zsh-hook` (32, 34), `precmd_functions+=` (33), `zle -N` and `*_functions+=` are used;
+        //   `{ cmd }` bodies on lines 29/30 (no `;` before `}`): parse, no SC1083;
         //   `%F{yellow}` inside the double-quoted `print -P` string: no SC1083;
         //   EPOCHSECONDS and SLOW_CMD_THRESHOLD are upper case: no SC2154.
-        expect: &[(9, 2034)],
+        expect: &[(10, 2034)],
     },
     Script {
         name: "emulate_library",
         file_name: "emulate_library.zsh",
         text: include_str!("scripts/emulate_library.zsh"),
-        // (20, SC2164): `cd $dir` without `|| return` (class a). It is also unquoted, but
+        // (21, SC2164): `cd $dir` without `|| return` (class a). It is also unquoted, but
         //   `emulate -L zsh` means no shwordsplit, so no SC2086 on it.
         // Silent on purpose:
-        //   `hits=( $dir/*(.Nom[1]) )` (line 11): glob qualifiers parse; no SC2206 without
+        //   `hits=( $dir/*(.Nom[1]) )` (line 12): glob qualifiers parse; no SC2206 without
         //     shwordsplit/globsubst;
         //   `$hits[1]` / `$match[1]`: subscripts, no SC1087 or SC2128 without ksharrays;
         //     `match` is a special parameter, no SC2154;
-        //   `*(.m+$days)` uses `days`, so no SC2034 on line 18;
+        //   `*(.m+$days)` uses `days`, so no SC2034 on line 19;
         //   `(#i)`, `(#b)`, `<->`, `(a|b)` patterns parse; the case labels do not shadow
         //     each other (SC2221/2222) and nothing is "never matched" (SC2195).
-        expect: &[(20, 2164)],
+        expect: &[(21, 2164)],
     },
     Script {
         name: "shwordsplit_legacy",
         file_name: "shwordsplit_legacy.zsh",
         text: include_str!("scripts/shwordsplit_legacy.zsh"),
-        // Line 4 `setopt shwordsplit` turns splitting on for everything after it, so:
-        // (11, SC2086) x2: `cp $f $backup_dir/` splits both words (b, shwordsplit).
-        // (17, SC2068): `rm -- $@` re-splits the arguments (b).
-        // (22, SC2048): `for a in $*` (b).
-        // (29, SC2206): `parts=($1)` splits (b).
-        // (39, SC2086): `ls $1` in `list_dir`, defined after `safe_copy` whose
+        // Line 5 `setopt shwordsplit` turns splitting on for everything after it, so:
+        // (12, SC2086) x2: `cp $f $backup_dir/` splits both words (b, shwordsplit).
+        // (18, SC2068): `rm -- $@` re-splits the arguments (b).
+        // (23, SC2048): `for a in $*` (b).
+        // (30, SC2206): `parts=($1)` splits (b).
+        // (40, SC2086): `ls $1` in `list_dir`, defined after `safe_copy` whose
         //     `setopt localoptions` did not leak (scope rule).
-        // (42, SC2223): `: ${cache_dir:=$HOME/.cache}` (b).
+        // (43, SC2223): `: ${cache_dir:=$HOME/.cache}` (b).
         // Silent on purpose:
-        //   line 35 `cp $1 $2` is inside `safe_copy`, which turns splitting off locally;
-        //   line 10 `for f in $files_dir` and the quoted copies on line 13 and 23/30.
-        expect: &[(11, 2086), (11, 2086), (17, 2068), (22, 2048), (29, 2206), (39, 2086), (42, 2223)],
+        //   line 36 `cp $1 $2` is inside `safe_copy`, which turns splitting off locally;
+        //   line 11 `for f in $files_dir` and the quoted copies on line 14 and 24/31.
+        expect: &[(12, 2086), (12, 2086), (18, 2068), (23, 2048), (30, 2206), (40, 2086), (43, 2223)],
     },
 ];
 
