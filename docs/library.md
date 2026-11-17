@@ -6,7 +6,7 @@ internal crates (parser, analyzer, formatter) private.
 
 ```toml
 [dependencies]
-shelllint-lib = "0.4.0"              # add features = ["serde"] for JSON
+shelllint-lib = "0.5.0"              # add features = ["serde"] for JSON
 ```
 
 ## Quick start

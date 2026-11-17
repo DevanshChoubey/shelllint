@@ -8,6 +8,11 @@ Each release also states which upstream ShellCheck commit it ports.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-17
+
+Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`), the same
+commit as 0.4.0.
+
 ### Added
 
 - zsh support (experimental). zsh scripts are parsed and checked instead of getting
@@ -149,7 +154,8 @@ Ports ShellCheck at upstream commit `e11f964` (`v0.11.0-171-ge11f964`).
   security policy, issue and pull request templates, and CI and release
   workflows.
 
-[Unreleased]: https://github.com/DevanshChoubey/shelllint/compare/v0.4.0...main
+[Unreleased]: https://github.com/DevanshChoubey/shelllint/compare/v0.5.0...main
+[0.5.0]: https://github.com/DevanshChoubey/shelllint/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/DevanshChoubey/shelllint/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/DevanshChoubey/shelllint/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/DevanshChoubey/shelllint/compare/v0.2.0...v0.2.1
