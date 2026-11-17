@@ -46,7 +46,10 @@ fn guard_early_return_silences_later_statements_in_function() {
 
 #[test]
 fn guard_elif_body_is_guarded_by_its_own_condition() {
-    assert_silent("3.2", "if ((BASH_VERSINFO[0] < 4)); then echo old\nelif ((BASH_VERSINFO[0] >= 4)); then declare -A m\nfi\n");
+    assert_silent(
+        "3.2",
+        "if ((BASH_VERSINFO[0] < 4)); then echo old\nelif ((BASH_VERSINFO[0] >= 4)); then declare -A m\nfi\n",
+    );
 }
 
 #[test]
@@ -150,7 +153,10 @@ fn guard_test_negated_with_bang() {
 #[test]
 fn guard_combined_major_and_minor_gives_four_three() {
     // `4.3` is the release the second disjunct proves, so the 4.3 feature is silent.
-    assert_silent("3.2", "(( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) )) && declare -n r=x\n");
+    assert_silent(
+        "3.2",
+        "(( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) )) && declare -n r=x\n",
+    );
 }
 
 #[test]
@@ -199,10 +205,7 @@ fn guard_nested_guards_take_the_maximum() {
         "if ((BASH_VERSINFO[0] >= 4)); then\n  if ((BASH_VERSINFO[0] >= 5)); then echo $EPOCHSECONDS; fi\nfi\n",
     );
     assert_eq!(
-        bash(
-            "3.2",
-            "if ((BASH_VERSINFO[0] >= 4)); then\n  if ((BASH_VERSINFO[0] >= 5)); then echo $SRANDOM; fi\nfi\n"
-        ),
+        bash("3.2", "if ((BASH_VERSINFO[0] >= 4)); then\n  if ((BASH_VERSINFO[0] >= 5)); then echo $SRANDOM; fi\nfi\n"),
         [9132]
     );
 }
@@ -242,7 +245,10 @@ fn near_miss_guard_for_five_does_not_silence_five_one_feature() {
 #[test]
 fn near_miss_guard_for_four_three_does_not_silence_four_four_feature() {
     assert_eq!(
-        bash("3.2", "if (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) )); then echo ${v@Q}; fi\n"),
+        bash(
+            "3.2",
+            "if (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 3) )); then echo ${v@Q}; fi\n"
+        ),
         [9125]
     );
 }
@@ -262,10 +268,7 @@ fn near_miss_code_after_if_guard_without_exit_still_warns() {
 
 #[test]
 fn near_miss_early_exit_not_at_the_end_of_its_body_does_not_count() {
-    assert_eq!(
-        bash("3.2", "if ((BASH_VERSINFO[0] < 4)); then exit 1; echo old; fi\ndeclare -A m\n"),
-        [9102]
-    );
+    assert_eq!(bash("3.2", "if ((BASH_VERSINFO[0] < 4)); then exit 1; echo old; fi\ndeclare -A m\n"), [9102]);
 }
 
 #[test]
@@ -299,10 +302,7 @@ fn near_miss_and_or_mixup_negated_guard_and_runs_when_new() {
 #[test]
 fn near_miss_early_exit_in_if_body_does_not_leak_out_of_it() {
     assert_eq!(
-        bash(
-            "3.2",
-            "if true; then\n  if ((BASH_VERSINFO[0] < 4)); then exit 1; fi\nfi\ndeclare -A m\n"
-        ),
+        bash("3.2", "if true; then\n  if ((BASH_VERSINFO[0] < 4)); then exit 1; fi\nfi\ndeclare -A m\n"),
         [9102]
     );
 }
@@ -318,7 +318,10 @@ fn near_miss_guard_in_one_function_does_not_leak_into_another() {
 #[test]
 fn near_miss_early_return_in_one_function_does_not_leak_into_another() {
     assert_eq!(
-        bash("3.2", "f() {\n  if ((BASH_VERSINFO[0] < 4)); then return 1; fi\n  declare -A m\n}\ng() { declare -A n; }\n"),
+        bash(
+            "3.2",
+            "f() {\n  if ((BASH_VERSINFO[0] < 4)); then return 1; fi\n  declare -A m\n}\ng() { declare -A n; }\n"
+        ),
         [9102]
     );
 }
@@ -337,10 +340,7 @@ fn near_miss_non_literal_comparison_is_not_a_guard() {
 
 #[test]
 fn near_miss_guard_through_a_variable_is_not_recognised() {
-    assert_eq!(
-        bash("3.2", "v=${BASH_VERSINFO[0]}\nif ((v >= 4)); then declare -A m; fi\n"),
-        [9102]
-    );
+    assert_eq!(bash("3.2", "v=${BASH_VERSINFO[0]}\nif ((v >= 4)); then declare -A m; fi\n"), [9102]);
 }
 
 #[test]
@@ -363,7 +363,10 @@ fn near_miss_lexical_greater_than_in_double_bracket_is_not_numeric() {
 #[test]
 fn near_miss_unrecognised_operand_is_not_a_guard() {
     assert_eq!(bash("3.2", "if [ \"${BASH_VERSINFO[2]}\" -ge 4 ]; then declare -A m; fi\n"), [9102]);
-    assert_eq!(bash("3.2", "if ((BASH_VERSINFO[0] >= 4)); then :; fi; if ((BASH_SUBSHELL >= 4)); then declare -A m; fi\n"), [9102]);
+    assert_eq!(
+        bash("3.2", "if ((BASH_VERSINFO[0] >= 4)); then :; fi; if ((BASH_SUBSHELL >= 4)); then declare -A m; fi\n"),
+        [9102]
+    );
 }
 
 #[test]
@@ -398,7 +401,11 @@ fn no_target_output_is_unchanged_by_guards() {
 fn non_bash_shells_are_unchanged_by_guards() {
     for shell in [Shell::Sh, Shell::Dash, Shell::Ksh] {
         assert_eq!(
-            codes(shell, Some("3.2"), "if ((BASH_VERSINFO[0] >= 4)); then declare -A m; fi\nif ((BASH_VERSINFO[0] < 4)); then declare -A n; fi\n"),
+            codes(
+                shell,
+                Some("3.2"),
+                "if ((BASH_VERSINFO[0] >= 4)); then declare -A m; fi\nif ((BASH_VERSINFO[0] < 4)); then declare -A n; fi\n"
+            ),
             Vec::<Code>::new(),
             "{shell:?} is not checked for bash versions"
         );
