@@ -8,6 +8,14 @@ Each release also states which upstream ShellCheck commit it ports.
 
 ## [Unreleased]
 
+### Changed
+
+- Checking a script is about 5-8% faster. Tree walks in the analysis no longer allocate
+  for every node, parse errors with a single literal message no longer allocate, and the
+  parser's backtracking bookkeeping is kept out of line. Output is unchanged. For
+  example, `long_case.sh` from `bench/handwritten` (2811 lines) goes from 136 ms to
+  126 ms with `-o all` (release build).
+
 ### Fixed
 
 - zsh: a long line of commands no longer rescans the rest of the line for `()` at every
