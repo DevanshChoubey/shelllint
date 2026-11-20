@@ -797,7 +797,7 @@ impl<'a> P<'a> {
     pub(crate) fn read_config_file(&mut self, filename: &str) -> PR<Vec<Annotation>> {
         fn error_for(filename: &str, err: &ParseError) -> String {
             let line = format!("line {}", err.pos.line);
-            let suggestion = get_string_from_parsec(&err.messages);
+            let suggestion = get_string_from_parsec(err.messages.as_slice());
             format!("Failed to process {}, {}: {}", e4m(filename), line, suggestion)
         }
 
@@ -1024,7 +1024,7 @@ impl<'a> P<'a> {
 
 pub(crate) fn make_error_for(parsec_error: &ParseError) -> ParseNote {
     let pos = parsec_error.pos;
-    ParseNote::new(pos, pos, ErrorC, 1072, &get_string_from_parsec(&parsec_error.messages))
+    ParseNote::new(pos, pos, ErrorC, 1072, &get_string_from_parsec(parsec_error.messages.as_slice()))
 }
 
 /// `errors` are the `Message` texts of the Parsec error (`ParseError::messages`).
@@ -1032,8 +1032,14 @@ pub(crate) fn make_error_for(parsec_error: &ParseError) -> ParseNote {
 /// `engine::ParseError`): due to not knowing Parsec, none of these are
 /// actually helpful. <?> has been hidden and we only show explicit fail
 /// statements.
-pub(crate) fn get_string_from_parsec(errors: &[String]) -> String {
-    let first = errors.iter().rev().find(|s| !s.is_empty()).map(|s| format!("{s}.")).unwrap_or_default();
+pub(crate) fn get_string_from_parsec<S: AsRef<str>>(errors: &[S]) -> String {
+    let first = errors
+        .iter()
+        .map(AsRef::as_ref)
+        .rev()
+        .find(|s: &&str| !s.is_empty())
+        .map(|s| format!("{s}."))
+        .unwrap_or_default();
     first + " Fix any mentioned problems and try again."
 }
 
@@ -1355,7 +1361,7 @@ mod tests {
     fn get_string_from_parsec_uses_last_nonempty_message() {
         let msgs = vec!["Expected 'fi'".to_string(), "".to_string()];
         assert_eq!(get_string_from_parsec(&msgs), "Expected 'fi'. Fix any mentioned problems and try again.");
-        assert_eq!(get_string_from_parsec(&[]), " Fix any mentioned problems and try again.");
+        assert_eq!(get_string_from_parsec::<String>(&[]), " Fix any mentioned problems and try again.");
     }
 
     #[test]

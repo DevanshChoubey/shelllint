@@ -42,6 +42,7 @@
 // `String`, because `subParse` and `tryWithErrors` switch to inputs created at
 // parse time.
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::rc::Rc;
 
@@ -122,24 +123,84 @@ pub fn update_pos_string(pos: SourcePos, s: &str) -> SourcePos {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct ParseError {
     pub pos: SourcePos,
-    pub messages: Vec<String>,
+    pub messages: Messages,
     pub hidden: bool,
 }
+
+/// The `Message` texts of a `ParseError`, in order.
+// DIVERGENCE: Parsec keeps a `[Message]`. Almost every error has zero or one
+// message, usually a literal, so those cases are stored without allocating.
+// The order and contents are the same as the Haskell list.
+#[derive(Clone, Debug, Default)]
+pub enum Messages {
+    #[default]
+    Zero,
+    One(Cow<'static, str>),
+    Many(Vec<Cow<'static, str>>),
+}
+
+impl Messages {
+    pub fn is_empty(&self) -> bool {
+        self.as_slice().is_empty()
+    }
+
+    pub fn as_slice(&self) -> &[Cow<'static, str>] {
+        match self {
+            Messages::Zero => &[],
+            Messages::One(m) => std::slice::from_ref(m),
+            Messages::Many(v) => v,
+        }
+    }
+
+    /// `self ++ other`
+    pub fn append(self, other: Messages) -> Messages {
+        match (self, other) {
+            (Messages::Zero, o) => o,
+            (s, Messages::Zero) => s,
+            (Messages::One(a), Messages::One(b)) => Messages::Many(vec![a, b]),
+            (Messages::One(a), Messages::Many(mut v)) => {
+                v.insert(0, a);
+                Messages::Many(v)
+            }
+            (Messages::Many(mut v), Messages::One(b)) => {
+                v.push(b);
+                Messages::Many(v)
+            }
+            (Messages::Many(mut v), Messages::Many(w)) => {
+                v.extend(w);
+                Messages::Many(v)
+            }
+        }
+    }
+
+    /// The messages as owned strings (for tests and diagnostics).
+    pub fn to_vec(&self) -> Vec<String> {
+        self.as_slice().iter().map(|m| m.to_string()).collect()
+    }
+}
+
+impl PartialEq for Messages {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for Messages {}
 
 impl ParseError {
     /// `newErrorUnknown pos`
     pub fn unknown(pos: SourcePos) -> Self {
-        ParseError { pos, messages: Vec::new(), hidden: false }
+        ParseError { pos, messages: Messages::Zero, hidden: false }
     }
 
     /// An error holding only a (Sys)UnExpect/Expect message.
     pub fn hidden(pos: SourcePos) -> Self {
-        ParseError { pos, messages: Vec::new(), hidden: true }
+        ParseError { pos, messages: Messages::Zero, hidden: true }
     }
 
     /// `newErrorMessage (Message msg) pos`
-    pub fn message(pos: SourcePos, msg: &str) -> Self {
-        ParseError { pos, messages: vec![msg.to_string()], hidden: false }
+    pub fn message(pos: SourcePos, msg: impl Into<Cow<'static, str>>) -> Self {
+        ParseError { pos, messages: Messages::One(msg.into()), hidden: false }
     }
 
     /// `errorIsUnknown`
@@ -416,9 +477,7 @@ impl<'a> P<'a> {
         }
         match self.compare_pos(e1.pos, e2.pos) {
             Ordering::Equal => {
-                let mut messages = e1.messages;
-                messages.extend(e2.messages);
-                ParseError { pos: e1.pos, messages, hidden: e1.hidden || e2.hidden }
+                ParseError { pos: e1.pos, messages: e1.messages.append(e2.messages), hidden: e1.hidden || e2.hidden }
             }
             Ordering::Greater => e1,
             Ordering::Less => e2,
@@ -613,7 +672,7 @@ impl<'a> P<'a> {
     }
 
     /// `fail msg`
-    pub fn fail<T>(&mut self, msg: &str) -> PR<T> {
+    pub fn fail<T>(&mut self, msg: impl Into<Cow<'static, str>>) -> PR<T> {
         Err(self.empty_fail(ParseError::message(self.pos, msg)))
     }
 
@@ -881,7 +940,7 @@ impl<'a> P<'a> {
         }
         if self.nesting >= MAX_NESTING {
             // DIVERGENCE: SC1072 for nesting beyond `MAX_NESTING`; Parsec has no limit.
-            let e = ParseError::message(self.pos, &format!("Nesting is deeper than {MAX_NESTING} levels"));
+            let e = ParseError::message(self.pos, format!("Nesting is deeper than {MAX_NESTING} levels"));
             self.too_deep = Some(e.clone());
             return Err(Fail::Consumed(e));
         }

@@ -79,14 +79,64 @@ fn unicode_column() {
 fn fail_message_is_kept() {
     let (r, ..) = run("", |p| p.fail::<()>("Expected thing"));
     let Err(Fail::Empty(ParseError { messages, .. })) = r else { panic!("{r:?}") };
-    assert_eq!(messages, vec!["Expected thing".to_string()]);
+    assert_eq!(messages.to_vec(), vec!["Expected thing".to_string()]);
 }
 
 #[test]
 fn errors_merge_at_same_pos() {
     let (r, ..) = run("x", |p| p.alt(|p| p.fail::<()>("one"), |p| p.fail("two")));
     let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
-    assert_eq!(e.messages, vec!["one".to_string(), "two".to_string()]);
+    assert_eq!(e.messages.to_vec(), vec!["one".to_string(), "two".to_string()]);
+}
+
+#[test]
+fn errors_merge_many_at_same_pos_in_order() {
+    // Three and four messages merged at one position keep Parsec's list order.
+    let (r, ..) = run("x", |p| choice!(p, |p| p.fail::<()>("a"), |p| p.fail("b"), |p| p.fail(String::from("c"))));
+    let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
+    assert_eq!(e.messages.to_vec(), vec!["a", "b", "c"]);
+
+    let (r, ..) = run("x", |p| {
+        alt!(p, |p| p.alt(|p| p.fail::<()>("a"), |p| p.fail("b")), |p| p.alt(|p| p.fail::<()>("c"), |p| p.fail("d")),)
+    });
+    let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
+    assert_eq!(e.messages.to_vec(), vec!["a", "b", "c", "d"]);
+}
+
+#[test]
+fn messages_append_keeps_order() {
+    use shelllint_parser::engine::Messages::{self, Many, One, Zero};
+    let one = |s: &'static str| One(s.into());
+    let many = |v: &[&'static str]| Many(v.iter().map(|s| (*s).into()).collect());
+    let cases: Vec<(Messages, Messages, Vec<&str>)> = vec![
+        (Zero, Zero, vec![]),
+        (Zero, one("a"), vec!["a"]),
+        (one("a"), Zero, vec!["a"]),
+        (one("a"), one("b"), vec!["a", "b"]),
+        (one("a"), many(&["b", "c"]), vec!["a", "b", "c"]),
+        (many(&["a", "b"]), one("c"), vec!["a", "b", "c"]),
+        (many(&["a", "b"]), many(&["c", "d"]), vec!["a", "b", "c", "d"]),
+        (many(&["a", "b"]), Zero, vec!["a", "b"]),
+    ];
+    for (x, y, want) in cases {
+        let got = x.clone().append(y.clone());
+        assert_eq!(got.to_vec(), want, "{x:?} ++ {y:?}");
+        assert_eq!(got.is_empty(), want.is_empty());
+    }
+    // Equality compares the list, not the representation.
+    assert_eq!(one("a"), many(&["a"]));
+    assert_eq!(Zero, many(&[]));
+    assert!(many(&[]).is_empty());
+    assert_ne!(one("a"), one("b"));
+}
+
+#[test]
+fn empty_message_is_kept_and_not_unknown() {
+    // `fail ""` makes a known error; the empty text is kept in the list.
+    let (r, ..) = run("x", |p| p.alt(|p| p.fail::<()>("a"), |p| p.fail("")));
+    let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
+    assert_eq!(e.messages.to_vec(), vec!["a", ""]);
+    assert!(!ParseError::message(e.pos, "").is_unknown());
 }
 
 #[test]
@@ -104,7 +154,7 @@ fn later_error_position_wins() {
         )
     });
     let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
-    assert_eq!(e.messages, vec!["late".to_string()]);
+    assert_eq!(e.messages.to_vec(), vec!["late".to_string()]);
 }
 
 #[test]
@@ -115,7 +165,7 @@ fn empty_ok_error_is_merged_into_later_failure() {
         p.fail::<()>("b")
     });
     let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
-    assert_eq!(e.messages, vec!["a".to_string(), "b".to_string()]);
+    assert_eq!(e.messages.to_vec(), vec!["a".to_string(), "b".to_string()]);
 }
 
 #[test]
@@ -126,7 +176,7 @@ fn consumed_input_drops_earlier_errors() {
         p.char_('x')?;
         p.fail::<()>("b")
     });
-    assert_eq!(r.map_err(Fail::into_error).unwrap_err().messages, vec!["b".to_string()]);
+    assert_eq!(r.map_err(Fail::into_error).unwrap_err().messages.to_vec(), vec!["b".to_string()]);
 }
 
 #[test]
@@ -249,7 +299,7 @@ fn alt_and_choice_macros() {
     assert_eq!(r, Ok('c'));
     let (r, ..) = run("d", |p| choice!(p, |p| p.char_('a'), |p| p.fail("not b")));
     let Err(Fail::Empty(e)) = r else { panic!("{r:?}") };
-    assert_eq!(e.messages, vec!["not b".to_string()]);
+    assert_eq!(e.messages.to_vec(), vec!["not b".to_string()]);
     let (r, ..) = run("ab", |p| p.choice(["ab", "a"], |p, s| p.try_(|p| p.string(s))));
     assert_eq!(r, Ok("ab".to_string()));
 }
