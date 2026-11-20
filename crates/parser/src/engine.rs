@@ -466,8 +466,16 @@ impl<'a> P<'a> {
     }
 
     // ---- error bookkeeping ---------------------------------------------
+    //
+    // `#[inline(never)]` on `merge_error`, `bind_merge`, `empty_fail`,
+    // `restore` and `begin`: every combinator instantiation (one per parser
+    // closure) would otherwise carry its own copy of them. The parser is bound
+    // by instruction-cache misses, and keeping these out of line makes a full
+    // check about 3-6% faster. `checkpoint` and `finish` are on the success
+    // path and are faster inlined.
 
     /// Parsec's `mergeError`.
+    #[inline(never)]
     pub fn merge_error(&self, e1: ParseError, e2: ParseError) -> ParseError {
         if e2.is_unknown() && !e1.is_unknown() {
             return e1;
@@ -486,6 +494,7 @@ impl<'a> P<'a> {
 
     /// The merge `parserBind` does when its second half is empty: skipped
     /// when the first half's error is unknown.
+    #[inline(never)]
     fn bind_merge(&self, prev: ParseError, own: ParseError) -> ParseError {
         if prev.is_unknown() { own } else { self.merge_error(prev, own) }
     }
@@ -503,6 +512,7 @@ impl<'a> P<'a> {
     }
 
     /// An empty failure with error `own`, merged with the carried error.
+    #[inline(never)]
     fn empty_fail(&mut self, own: ParseError) -> Fail {
         let prev = self.take_err();
         Fail::Empty(self.bind_merge(prev, own))
@@ -516,6 +526,7 @@ impl<'a> P<'a> {
 
     /// Return to a checkpoint. The carried error becomes unknown, as for a
     /// parser that is just starting.
+    #[inline(never)]
     pub fn restore(&mut self, cp: &Checkpoint) {
         self.input = cp.input.clone();
         self.pos = cp.pos;
@@ -525,6 +536,7 @@ impl<'a> P<'a> {
     }
 
     /// Start a combinator: stash the carried error and take a checkpoint.
+    #[inline(never)]
     fn begin(&mut self) -> (ParseError, Checkpoint) {
         let prev = self.take_err();
         (prev, self.checkpoint())
