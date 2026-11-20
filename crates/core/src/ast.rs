@@ -559,6 +559,12 @@ impl Token {
         out
     }
 
+    /// Append `children()` to `out`, without allocating a new vector.
+    pub fn push_children(&self, out: &mut Vec<Id>) {
+        let mut f = |x: &Id| out.push(*x);
+        for_each_child!(self, f);
+    }
+
     /// Haskell's derived `Functor`: apply `g` to every `t` field.
     // DIVERGENCE: public so the parser can copy a subtree (zsh multi-name functions).
     pub fn map_children(&mut self, g: &mut dyn FnMut(Id) -> Id) {
@@ -630,9 +636,10 @@ impl Ast {
         self.parents.iter_mut().for_each(|p| *p = None);
         let mut stack = vec![root];
         while let Some(id) = stack.pop() {
-            for child in self.get(id).children() {
+            let start = stack.len();
+            self.get(id).push_children(&mut stack);
+            for child in &stack[start..] {
                 self.parents[child.0 as usize] = Some(id);
-                stack.push(child);
             }
         }
     }
@@ -647,19 +654,26 @@ impl Ast {
     // overflow the Rust stack; the visiting order is identical.
     pub fn analyze(&self, root: Id, pre: &mut dyn FnMut(Id), post: &mut dyn FnMut(Id)) {
         pre(root);
-        let mut stack: Vec<(Id, std::vec::IntoIter<Id>)> = vec![(root, self.get(root).children().into_iter())];
-        while let Some((id, iter)) = stack.last_mut() {
-            match iter.next() {
-                Some(child) => {
-                    pre(child);
-                    let it = self.get(child).children().into_iter();
-                    stack.push((child, it));
-                }
-                None => {
-                    let id = *id;
-                    stack.pop();
-                    post(id);
-                }
+        // Children of every open token live in one shared buffer: frame
+        // `(id, start, next, end)` owns `kids[start..end]` and has visited
+        // up to `next`. Frames close in LIFO order, so a closing frame's
+        // children are always the tail of `kids`.
+        let mut kids: Vec<Id> = Vec::new();
+        self.get(root).push_children(&mut kids);
+        let mut stack: Vec<(Id, usize, usize, usize)> = vec![(root, 0, 0, kids.len())];
+        while let Some((id, start, next, end)) = stack.last_mut() {
+            if *next < *end {
+                let child = kids[*next];
+                *next += 1;
+                pre(child);
+                let child_start = kids.len();
+                self.get(child).push_children(&mut kids);
+                stack.push((child, child_start, child_start, kids.len()));
+            } else {
+                let (id, start) = (*id, *start);
+                kids.truncate(start);
+                stack.pop();
+                post(id);
             }
         }
     }
