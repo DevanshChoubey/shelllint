@@ -573,7 +573,7 @@ impl<'a> P<'a> {
             q.alt(
                 |q| {
                     q.try_(p)?;
-                    q.fail(&format!("Unexpected {s}"))
+                    q.fail(format!("Unexpected {s}"))
                 },
                 |_| Ok(()),
             )
@@ -660,7 +660,7 @@ impl<'a> P<'a> {
             |q| q.try_(parser),
             |q| {
                 let msg = error_action(q)?;
-                q.fail(&msg)
+                q.fail(msg)
             },
         )
     }
