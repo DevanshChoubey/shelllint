@@ -121,7 +121,9 @@ pub(crate) struct StateData {
     /// `patchState` is their left-biased union). `variablesInScope` is the
     /// left-biased union of all six, censored.
     pub(crate) scopes: [Layer; 6],
-    pub(crate) exit_codes: Rc<BTreeSet<Id>>,
+    pub(crate) exit_codes: Rc<crate::cfg_analysis::dfa::ExitSet>,
+    /// `exit_codes` as a sorted set, built on first use by `exit_codes()`.
+    pub(crate) exit_codes_sorted: std::cell::OnceCell<BTreeSet<Id>>,
     pub(crate) state_is_reachable: bool,
 }
 
@@ -143,7 +145,7 @@ impl ProgramState {
     }
     /// `exitCodes`: the set of commands that could have provided `$?`.
     pub fn exit_codes(&self) -> &BTreeSet<Id> {
-        &self.0.exit_codes
+        self.0.exit_codes_sorted.get_or_init(|| self.0.exit_codes.iter().copied().collect())
     }
     /// `stateIsReachable`
     pub fn state_is_reachable(&self) -> bool {

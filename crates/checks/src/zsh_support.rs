@@ -8,6 +8,7 @@
 // through these helpers is unchanged for them.
 
 use std::collections::HashSet;
+use std::sync::LazyLock;
 
 use shelllint_analyzer::analyzerlib::{Params, ZshOpt, make_comment};
 use shelllint_core::ast::{Id, Token};
@@ -83,11 +84,18 @@ pub fn is_zsh_assoc_key(p: &Params<'_>, place: Id) -> bool {
 /// Empty unless the shell is zsh. `trap` is left to the check that already
 /// knows it, but a name given to `trap` is included here too so SC2119/SC2120
 /// see it.
-pub fn zsh_registered_functions(p: &Params<'_>) -> HashSet<String> {
-    let mut out = HashSet::new();
+// DIVERGENCE (performance only): the set is found by one walk of the tree, kept
+// in `Params::tree_cache`, so the per-function callers do not walk it again.
+pub fn zsh_registered_functions<'p>(p: &'p Params<'_>) -> &'p HashSet<String> {
+    static NONE: LazyLock<HashSet<String>> = LazyLock::new(HashSet::new);
     if p.shell_type != Shell::Zsh {
-        return out;
+        return &NONE;
     }
+    p.tree_cache.zsh_registered.get_or_init(|| collect_zsh_registered(p))
+}
+
+fn collect_zsh_registered(p: &Params<'_>) -> HashSet<String> {
+    let mut out = HashSet::new();
     let ast = p.ast;
     ast.analyze(
         p.root,

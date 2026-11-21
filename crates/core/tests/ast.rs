@@ -69,6 +69,75 @@ fn analyze_pre_post_order() {
     assert_eq!(log.into_inner(), vec![("pre", 2), ("pre", 0), ("post", 0), ("pre", 1), ("post", 1), ("post", 2)]);
 }
 
+/// A tree several levels deep with uneven fan-out (including leaves next to
+/// subtrees), for checking `analyze` and `compute_parents` against a direct
+/// recursive walk over `Token::children`.
+fn deep_tree(ast: &mut Ast) -> Id {
+    let lit = |ast: &mut Ast, s: &str| leaf(ast, Token::T_Literal(s.into()));
+    let (a, b, c, d, e) = (lit(ast, "a"), lit(ast, "b"), lit(ast, "c"), lit(ast, "d"), lit(ast, "e"));
+    let w1 = leaf(ast, Token::T_NormalWord(vec![a, b]));
+    let w2 = leaf(ast, Token::T_NormalWord(vec![c]));
+    let empty = leaf(ast, Token::T_NormalWord(vec![]));
+    let sc1 = leaf(ast, Token::T_SimpleCommand(vec![w1], vec![w2, empty, d]));
+    let w3 = leaf(ast, Token::T_NormalWord(vec![e]));
+    let sc2 = leaf(ast, Token::T_SimpleCommand(vec![], vec![w3]));
+    let f = lit(ast, "f");
+    let w4 = leaf(ast, Token::T_NormalWord(vec![f]));
+    let ife = leaf(ast, Token::T_IfExpression(vec![(vec![sc1], vec![sc2])], vec![w4]));
+    let g = lit(ast, "g");
+    let shebang = lit(ast, "#!/bin/sh");
+    leaf(ast, Token::T_Script(shebang, vec![ife, g]))
+}
+
+fn reference_walk(ast: &Ast, id: Id, log: &mut Vec<(&'static str, u32)>) {
+    log.push(("pre", id.0));
+    for child in ast.get(id).children() {
+        reference_walk(ast, child, log);
+    }
+    log.push(("post", id.0));
+}
+
+#[test]
+fn analyze_matches_recursive_walk_on_deep_tree() {
+    let mut ast = Ast::new();
+    let root = deep_tree(&mut ast);
+    let mut expected = Vec::new();
+    reference_walk(&ast, root, &mut expected);
+    let log = std::cell::RefCell::new(Vec::new());
+    ast.analyze(root, &mut |id| log.borrow_mut().push(("pre", id.0)), &mut |id| log.borrow_mut().push(("post", id.0)));
+    assert_eq!(log.into_inner(), expected);
+}
+
+#[test]
+fn push_children_appends_children() {
+    let mut ast = Ast::new();
+    let root = deep_tree(&mut ast);
+    for id in (0..=root.0).map(Id) {
+        let mut out = vec![Id(999)];
+        ast.get(id).push_children(&mut out);
+        assert_eq!(out[0], Id(999));
+        assert_eq!(out[1..], ast.get(id).children()[..], "token {id:?}");
+    }
+}
+
+#[test]
+fn parents_computed_on_deep_tree() {
+    let mut ast = Ast::new();
+    let root = deep_tree(&mut ast);
+    ast.compute_parents(root);
+    let mut expected = vec![None; ast.len() as usize];
+    let mut stack = vec![root];
+    while let Some(id) = stack.pop() {
+        for child in ast.get(id).children() {
+            expected[child.0 as usize] = Some(id);
+            stack.push(child);
+        }
+    }
+    for id in (0..ast.len()).map(Id) {
+        assert_eq!(ast.parent(id), expected[id.0 as usize], "token {id:?}");
+    }
+}
+
 #[test]
 fn parents_computed_from_root() {
     let mut ast = Ast::new();
